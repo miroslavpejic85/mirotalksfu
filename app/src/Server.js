@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.65
+ * @version 2.4.70
  *
  */
 
@@ -3926,6 +3926,46 @@ function startServer() {
             // log.debug('Send Whiteboard canvas JSON', { length: objLength });
 
             room.broadCast(socket.id, 'wbCanvasToJson', sanitized);
+        });
+
+        socket.on('whiteboardObject', (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const room = getRoom(socket);
+            const peer = room.getPeer(socket.id);
+            if (!peer || !dataObject || typeof dataObject !== 'object') return;
+
+            let rawSize;
+            try {
+                rawSize = JSON.stringify(dataObject).length;
+            } catch (_) {
+                return;
+            }
+            if (rawSize > 2_000_000) return;
+
+            const isPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer.peer_info?.peer_name,
+                peer.peer_info?.peer_uuid
+            );
+            if (!isPresenter && room.getWhiteboardLock()) return;
+
+            const data = checkXSS(dataObject);
+            if (!['upsert', 'remove'].includes(data.action)) return;
+            if (typeof data.object_id !== 'string' || data.object_id.length > 200) return;
+
+            if (data.action === 'upsert') {
+                if (!data.object || typeof data.object !== 'object') return;
+                const sanitized = Validator.sanitizeWbCanvasJson({ objects: [data.object] });
+                if (sanitized.objects.length !== 1) return;
+                data.object = sanitized.objects[0];
+                data.object.wbId = data.object_id;
+            } else {
+                delete data.object;
+            }
+
+            room.broadCast(socket.id, 'whiteboardObject', data);
         });
 
         socket.on('whiteboardAction', (dataObject) => {

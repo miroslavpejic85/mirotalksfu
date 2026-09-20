@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.65
+ * @version 2.4.70
  *
  */
 
@@ -343,6 +343,9 @@ let wbIsEraser = false;
 let wbIsPencil = false;
 let wbIsVanishing = false;
 let wbIsBgTransparent = false;
+let wbIsApplyingRemote = false;
+let wbObjectIdCounter = 0;
+const wbTextSyncTimers = new Map();
 let wbPop = [];
 let wbVanishingObjects = [];
 let coords = {};
@@ -5922,10 +5925,12 @@ function createGridLine(x1, y1, x2, y2) {
 }
 
 function removeCanvasGrid() {
+    const gridGroup = wbGridLines[0]?.group;
     wbGridLines.forEach((line) => {
         line.set({ stroke: wbGridVisible ? wbStroke : 'rgba(255, 255, 255, 0)' });
         wbCanvas.remove(line);
     });
+    if (gridGroup) wbEmitObjectUpsert(gridGroup);
     wbGridLines = [];
     wbCanvas.renderAll();
     setWhiteboardControlState(whiteboardGridBtn, false);
@@ -5934,7 +5939,6 @@ function removeCanvasGrid() {
 function toggleCanvasGrid() {
     wbGridVisible = !wbGridVisible;
     wbGridVisible ? drawCanvasGrid() : removeCanvasGrid();
-    wbCanvasToJson();
 }
 
 function setWhiteboardBgColor(color) {
@@ -6163,7 +6167,6 @@ function whiteboardEraseObject() {
             });
             wbCanvas.discardActiveObject();
             wbCanvas.requestRenderAll();
-            wbCanvasToJson();
         }
     }
 }
@@ -6182,7 +6185,6 @@ function whiteboardCloneObject() {
                     });
                     wbCanvas.add(cloned);
                     wbCanvas.setActiveObject(cloned);
-                    wbCanvasToJson();
                 });
             });
             wbCanvas.requestRenderAll();
@@ -6198,7 +6200,6 @@ function whiteboardGroupSelection() {
     const group = selection.toGroup();
     wbCanvas.setActiveObject(group);
     wbCanvas.requestRenderAll();
-    wbCanvasToJson();
 }
 
 function whiteboardUngroupSelection() {
@@ -6208,7 +6209,6 @@ function whiteboardUngroupSelection() {
     }
     group.toActiveSelection();
     wbCanvas.requestRenderAll();
-    wbCanvasToJson();
 }
 
 function wbHandleVanishingObjects() {
@@ -6231,7 +6231,6 @@ function wbHandleVanishingObjects() {
             setTimeout(() => {
                 wbCanvas.remove(obj);
                 wbCanvas.renderAll();
-                wbCanvasToJson();
                 wbVanishingObjects.splice(wbVanishingObjects.indexOf(obj), 1);
             }, vanishTimeout);
         }
@@ -6416,7 +6415,6 @@ async function renderPdfToCanvas(wbCanvasPdf) {
             await pdfToImage(event.target.result, wbCanvas);
             whiteboardResetAllMode();
             whiteboardIsObjectMode(true);
-            wbCanvasToJson();
         };
         reader.readAsDataURL(wbCanvasPdf);
     }
@@ -6487,7 +6485,6 @@ function addWbCanvasObj(obj) {
         wbCanvas.add(obj).setActiveObject(obj);
         whiteboardResetAllMode();
         whiteboardIsObjectMode(true);
-        wbCanvasToJson();
     } else {
         console.error('Invalid input. Expected an obj of canvas elements');
     }
@@ -6523,8 +6520,17 @@ function setupWhiteboardLocalListeners() {
     wbCanvas.on('mouse:move', function () {
         mouseMove();
     });
-    wbCanvas.on('object:added', function () {
-        objectAdded();
+    wbCanvas.on('object:added', function (event) {
+        objectAdded(event.target);
+    });
+    wbCanvas.on('object:modified', function (event) {
+        wbEmitObjectUpsert(event.target);
+    });
+    wbCanvas.on('object:removed', function (event) {
+        wbEmitObjectRemove(event.target);
+    });
+    wbCanvas.on('text:changed', function (event) {
+        wbScheduleTextSync(event.target);
     });
 }
 
@@ -6554,7 +6560,7 @@ async function editWhiteboardGroupedText(e) {
     group.addWithUpdate();
     group.setCoords();
     wbCanvas.requestRenderAll();
-    wbCanvasToJson();
+    wbEmitObjectUpsert(group);
 }
 
 function mouseDown(e) {
@@ -6570,7 +6576,6 @@ function mouseDown(e) {
 
 function mouseUp() {
     wbIsDrawing = false;
-    wbCanvasToJson();
 }
 
 function mouseMove() {
@@ -6583,10 +6588,94 @@ function mouseMove() {
     if (!wbIsDrawing) return;
 }
 
-function objectAdded() {
+function objectAdded(obj) {
+    if (wbIsApplyingRemote) return;
     if (!wbIsRedoing) wbPop = [];
     wbIsRedoing = false;
     wbHandleVanishingObjects();
+    const duplicateId =
+        obj?.wbId && wbCanvas.getObjects().some((candidate) => candidate !== obj && candidate.wbId === obj.wbId);
+    if (duplicateId) obj.set('wbId', null);
+    wbEmitObjectUpsert(obj);
+}
+
+function wbGetObjectId(obj) {
+    if (!obj) return null;
+    if (!obj.wbId) {
+        const randomId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${++wbObjectIdCounter}`;
+        obj.set('wbId', `${rc.peer_id}-${randomId}`);
+    }
+    return obj.wbId;
+}
+
+function wbCanSyncObjects() {
+    return !wbIsApplyingRemote && (!wbIsLock || isPresenter) && rc.thereAreParticipants();
+}
+
+function wbEmitObjectUpsert(obj) {
+    if (!obj || !wbCanSyncObjects()) return;
+    rc.socket.emit('whiteboardObject', {
+        action: 'upsert',
+        object_id: wbGetObjectId(obj),
+        object: obj.toObject(['wbId']),
+    });
+}
+
+function wbEmitObjectRemove(obj) {
+    if (!obj || !wbCanSyncObjects()) return;
+    rc.socket.emit('whiteboardObject', {
+        action: 'remove',
+        object_id: wbGetObjectId(obj),
+    });
+}
+
+function wbScheduleTextSync(obj) {
+    if (!obj || wbIsApplyingRemote) return;
+    const objectId = wbGetObjectId(obj);
+    clearTimeout(wbTextSyncTimers.get(objectId));
+    wbTextSyncTimers.set(
+        objectId,
+        setTimeout(() => {
+            wbTextSyncTimers.delete(objectId);
+            wbEmitObjectUpsert(obj);
+        }, 100)
+    );
+}
+
+function handleWhiteboardObject(data) {
+    if (!data || !wbCanvas) return;
+    if (!wbIsOpen) toggleWhiteboard();
+
+    if (data.action === 'remove') {
+        const existing = wbCanvas.getObjects().find((obj) => obj.wbId === data.object_id);
+        wbIsApplyingRemote = true;
+        if (existing) wbCanvas.remove(existing);
+        wbCanvas.requestRenderAll();
+        wbIsApplyingRemote = false;
+        return;
+    }
+
+    if (data.action !== 'upsert' || !data.object) {
+        return;
+    }
+
+    fabric.util.enlivenObjects([data.object], (objects) => {
+        const updated = objects[0];
+        if (updated) {
+            const existing = wbCanvas.getObjects().find((obj) => obj.wbId === data.object_id);
+            wbIsApplyingRemote = true;
+            updated.set('wbId', data.object_id);
+            if (existing) {
+                const index = wbCanvas.getObjects().indexOf(existing);
+                wbCanvas.remove(existing);
+                wbCanvas.insertAt(updated, index, false);
+            } else {
+                wbCanvas.add(updated);
+            }
+            wbCanvas.requestRenderAll();
+            wbIsApplyingRemote = false;
+        }
+    });
 }
 
 function wbCanvasBackgroundColor(color) {
@@ -6649,7 +6738,8 @@ function wbCanvasToJson() {
         console.log('No participants. Exiting');
         return;
     }
-    let wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
+    wbCanvas.getObjects().forEach(wbGetObjectId);
+    let wbCanvasJson = JSON.stringify(wbCanvas.toJSON(['wbId']));
     console.log('Emitting wbCanvasToJson');
     rc.socket.emit('wbCanvasToJson', wbCanvasJson);
 }
@@ -6657,9 +6747,11 @@ function wbCanvasToJson() {
 function JsonToWbCanvas(json) {
     if (!wbIsOpen) toggleWhiteboard();
     wbIsRedoing = true;
+    wbIsApplyingRemote = true;
     wbCanvas.loadFromJSON(json, function () {
         setupWhiteboardCanvasSize();
         wbIsRedoing = false;
+        wbIsApplyingRemote = false;
     });
     if (!isPresenter && !wbCanvas.isDrawingMode && wbIsLock) {
         wbDrawing(false);
@@ -8567,7 +8659,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.65',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.70',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.65
+ * @version 2.4.70
  *
  */
 
@@ -1326,6 +1326,7 @@ class RoomClient {
         this.socket.on('fileAbort', this.handleFileAbortData);
         this.socket.on('receiveFileAbort', this.handleReceiveFileAbortData);
         this.socket.on('wbCanvasToJson', this.handleWbCanvasToJson);
+        this.socket.on('whiteboardObject', this.handleWhiteboardObject);
         this.socket.on('whiteboardAction', this.handleWhiteboardAction);
         this.socket.on('videoDrawing', this.handleVideoDrawingData);
         this.socket.on('audioVolume', this.handleAudioVolumeData);
@@ -1571,6 +1572,10 @@ class RoomClient {
     handleWbCanvasToJson = (data) => {
         console.log('SocketOn Received whiteboard canvas JSON');
         JsonToWbCanvas(data);
+    };
+
+    handleWhiteboardObject = (data) => {
+        handleWhiteboardObject(data);
     };
 
     handleWhiteboardAction = (data) => {
