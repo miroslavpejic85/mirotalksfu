@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.70
+ * @version 2.4.71
  *
  */
 
@@ -3961,11 +3961,46 @@ function startServer() {
                 if (sanitized.objects.length !== 1) return;
                 data.object = sanitized.objects[0];
                 data.object.wbId = data.object_id;
+                data.object.wbAuthor = String(peer.peer_info?.peer_name || 'Participant').slice(0, 40);
+                data.object.wbAuthorId = socket.id;
             } else {
                 delete data.object;
             }
 
             room.broadCast(socket.id, 'whiteboardObject', data);
+        });
+
+        socket.on('whiteboardPointer', (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const room = getRoom(socket);
+            if (!room.getWhiteboardParticipantNames()) return;
+            const peer = room.getPeer(socket.id);
+            if (!peer || !dataObject || typeof dataObject !== 'object') return;
+
+            const now = Date.now();
+            if (dataObject.active && now - (socket.lastWhiteboardPointerAt || 0) < 25) return;
+            socket.lastWhiteboardPointerAt = now;
+
+            const x = Number(dataObject.x);
+            const y = Number(dataObject.y);
+            if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 100_000 || Math.abs(y) > 100_000) return;
+
+            const isPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer.peer_info?.peer_name,
+                peer.peer_info?.peer_uuid
+            );
+            if (!isPresenter && room.getWhiteboardLock()) return;
+
+            room.broadCast(socket.id, 'whiteboardPointer', {
+                peer_id: socket.id,
+                peer_name: String(peer.peer_info?.peer_name || 'Participant').slice(0, 40),
+                x,
+                y,
+                active: Boolean(dataObject.active),
+            });
         });
 
         socket.on('whiteboardAction', (dataObject) => {
@@ -4015,6 +4050,10 @@ function startServer() {
             // gated even if the presenter never re-toggles the button.
             if (data.action === 'lock') room.setWhiteboardLock(true);
             if (data.action === 'unlock') room.setWhiteboardLock(false);
+            if (data.action === 'participantNames') {
+                data.status = Boolean(data.status);
+                room.setWhiteboardParticipantNames(data.status);
+            }
 
             log.debug('Whiteboard', data);
             room.broadCast(socket.id, 'whiteboardAction', data);

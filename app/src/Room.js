@@ -37,6 +37,7 @@ module.exports = class Room {
         // Server-side whiteboard lock state. Authoritative — does not depend on the client
         // clicking the lock button. Used to drop non-presenter whiteboard writes when set.
         this._wbIsLock = false;
+        this._wbShowParticipantNames = false;
         // ##########################
         this.recording = {
             recSyncServerToS3: (config?.integrations?.s3?.enabled && config?.media?.recording?.uploadToS3) || false,
@@ -110,6 +111,7 @@ module.exports = class Room {
                 isLobbyEnabled: this._isLobbyEnabled,
                 isJoinLocked: this._isJoinLocked,
                 hostOnlyRecording: this._hostOnlyRecording,
+                whiteboardParticipantNames: this._wbShowParticipantNames,
             },
             rtmp: {
                 enabled: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.enabled,
@@ -1202,6 +1204,12 @@ module.exports = class Room {
     }
     setWhiteboardLock(status) {
         this._wbIsLock = Boolean(status);
+    }
+    getWhiteboardParticipantNames() {
+        return this._wbShowParticipantNames;
+    }
+    setWhiteboardParticipantNames(status) {
+        this._wbShowParticipantNames = Boolean(status);
     }
 
     // ####################################################

@@ -295,6 +295,7 @@ function handleRules(isPresenter, roomSetup = true) {
     }
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
     BUTTONS.whiteboard.whiteboardLockButton ? show(whiteboardUnlockBtn) : hide(whiteboardUnlockBtn);
+    isPresenter ? show(whiteboardParticipantNamesControl, 'flex') : hide(whiteboardParticipantNamesControl);
     refreshExitButtonTooltip();
     //...
 }

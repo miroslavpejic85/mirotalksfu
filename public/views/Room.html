@@ -2178,6 +2178,18 @@
                             <i class="fas fa-bars"></i>
                         </button>
                         <div class="dropdown-menu text-start" aria-labelledby="whiteboardDropDownMenu">
+                            <label id="whiteboardParticipantNamesControl" class="whiteboard-menu-switch hidden">
+                                <span><i class="fas fa-user-tag"></i> Participant names</span>
+                                <span class="form-check form-switch form-switch-md">
+                                    <input
+                                        id="whiteboardParticipantNamesSwitch"
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        role="switch"
+                                        aria-label="Show participant names on the whiteboard"
+                                    />
+                                </span>
+                            </label>
                             <button class="whiteboard-narrow-action" data-panel-action-target="whiteboardGhostButton">
                                 <i class="fas fa-circle-half-stroke"></i> Toggle background
                             </button>
@@ -2234,8 +2246,10 @@
                     ></button>
                 </div>
             </header>
-            <main>
+            <main class="whiteboard-canvas-area">
                 <canvas id="wbCanvas"></canvas>
+                <div id="whiteboardParticipantLabels" class="whiteboard-participant-labels" aria-live="polite"></div>
+                <div id="whiteboardAuthorLabel" class="whiteboard-author-label hidden" aria-live="polite"></div>
                 <div id="whiteboardShortcutsContent">
                     <div class="wb-shortcuts-container">
                         <h3 class="wb-shortcuts-title"><i class="fas fa-keyboard"></i> General Shortcuts</h3>
