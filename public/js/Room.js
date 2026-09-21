@@ -487,6 +487,7 @@ async function initClient() {
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
         setTippy('whiteboardLockBtn', 'Toggle Lock whiteboard', 'right');
         setTippy('whiteboardUnlockBtn', 'Toggle Lock whiteboard', 'right');
+        setTippy('whiteboardParticipantNamesSwitch', 'Show participant names on the whiteboard', 'left');
         setTippy('whiteboardCloseBtn', 'Close', 'bottom');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
