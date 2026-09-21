@@ -1,5 +1,14 @@
 'use strict';
 
+function isConfiguredPresenter(authenticatedUsername, presenterList) {
+    return (
+        typeof authenticatedUsername === 'string' &&
+        authenticatedUsername.length > 0 &&
+        Array.isArray(presenterList) &&
+        presenterList.includes(authenticatedUsername)
+    );
+}
+
 function assignFallbackPresenter(roomId, room, presenters, joinFirst) {
     if (!joinFirst || !room || roomId.includes('_breakout_') || room.getPeersCount() === 0) return null;
 
@@ -27,4 +36,4 @@ function assignFallbackPresenter(roomId, room, presenters, joinFirst) {
     return peer;
 }
 
-module.exports = { assignFallbackPresenter };
+module.exports = { assignFallbackPresenter, isConfiguredPresenter };

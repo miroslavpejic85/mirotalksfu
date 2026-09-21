@@ -3,7 +3,7 @@
 require('should');
 
 const sinon = require('sinon');
-const { assignFallbackPresenter } = require('../app/src/PresenterManager');
+const { assignFallbackPresenter, isConfiguredPresenter } = require('../app/src/PresenterManager');
 
 describe('PresenterManager', () => {
     function createPeer(id, name, lobby = false) {
@@ -67,5 +67,16 @@ describe('PresenterManager', () => {
         (promotedPeer === null).should.be.true();
         peer.updatePeerInfo.notCalled.should.be.true();
         room.sendToAll.notCalled.should.be.true();
+    });
+
+    it('requires an authenticated username for configured presenter status', () => {
+        isConfiguredPresenter('HostAccount', ['HostAccount']).should.be.true();
+        isConfiguredPresenter(null, ['HostAccount']).should.be.false();
+        isConfiguredPresenter('', ['HostAccount']).should.be.false();
+    });
+
+    it('does not grant configured presenter status from a display name', () => {
+        isConfiguredPresenter(null, ['AllowlistedDisplayName']).should.be.false();
+        isConfiguredPresenter('ParticipantAccount', ['AllowlistedDisplayName']).should.be.false();
     });
 });

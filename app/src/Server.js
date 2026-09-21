@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.71
+ * @version 2.4.72
  *
  */
 
@@ -94,7 +94,7 @@ const mime = require('mime-types');
 const Host = require('./Host');
 const Room = require('./Room');
 const Peer = require('./Peer');
-const { assignFallbackPresenter } = require('./PresenterManager');
+const { assignFallbackPresenter, isConfiguredPresenter } = require('./PresenterManager');
 const ServerApi = require('./ServerApi');
 const Logger = require('./Logger');
 const Validator = require('./Validator');
@@ -2432,6 +2432,7 @@ function startServer() {
             } = data.peer_info;
 
             let is_presenter = peer_presenter;
+            let authenticatedUsername = null;
 
             // User Auth required or detect token, we check if peer valid
             if (hostCfg.user_auth || peer_token) {
@@ -2455,6 +2456,8 @@ function startServer() {
                             return cb('unauthorized');
                         }
 
+                        authenticatedUsername = username;
+
                         const tokenPresenter = presenter === '1' || presenter === 'true';
 
                         /*
@@ -2462,7 +2465,7 @@ function startServer() {
                             join_first and token-based presenter flags are ignored
                         */
                         if (socket.room_id.includes('_breakout_')) {
-                            is_presenter = hostCfg?.presenters?.list?.includes(peer_name) || false;
+                            is_presenter = isConfiguredPresenter(authenticatedUsername, hostCfg?.presenters?.list);
                         } else {
                             is_presenter =
                                 tokenPresenter || (hostCfg?.presenters?.join_first && room?.getPeersCount() === 0);
@@ -2534,12 +2537,15 @@ function startServer() {
 
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
+            const configuredPresenter = isConfiguredPresenter(authenticatedUsername, hostCfg?.presenters?.list);
+
             // Set the presenters
             const presenter = {
                 peer_ip: peer_ip,
                 peer_name: peer_name,
                 peer_uuid: peer_uuid,
                 is_presenter: is_presenter,
+                is_configured_presenter: configuredPresenter,
             };
 
             /**
@@ -2548,7 +2554,7 @@ function startServer() {
              */
             const isBreakoutRoom = socket.room_id.includes('_breakout_');
             if (
-                hostCfg?.presenters?.list?.includes(peer_name) ||
+                configuredPresenter ||
                 (!isBreakoutRoom &&
                     hostCfg?.presenters?.join_first &&
                     Object.keys(presenters[socket.room_id]).length === 0) ||
@@ -3593,8 +3599,9 @@ function startServer() {
 
             const grant = data.action === 'grant';
 
-            // A presenter defined in the host configuration cannot be demoted at runtime
-            if (!grant && hostCfg?.presenters?.list?.includes(targetPeer.peer_name)) {
+            // A presenter authenticated from the host configuration cannot be demoted at runtime.
+            const targetPresenter = presenters[socket.room_id]?.[data.peer_id];
+            if (!grant && targetPresenter?.is_configured_presenter === true) {
                 log.debug('setPresenterRole - cannot revoke a configured presenter', {
                     peer_name: targetPeer.peer_name,
                 });
@@ -5367,20 +5374,8 @@ function startServer() {
                 return isPresenter;
             }
 
-            // 2. Static presenter list — verify against server-side registered name, not user input
-            const room = roomList.get(room_id);
-            const peer = room?.getPeer(peer_id);
-            if (peer && hostCfg?.presenters?.list?.includes(peer.peer_info.peer_name)) {
-                log.debug('isPeerPresenter Check (static list)', {
-                    room_id: room_id,
-                    peer_id: peer_id,
-                    peer_name: peer.peer_info.peer_name,
-                    isPresenter: true,
-                });
-                return true;
-            }
-
-            // 3. Not a presenter
+            // 2. Not a presenter. Configured presenter names are only trusted during
+            // join after authentication and are stored in the socket-bound map above.
             log.debug('isPeerPresenter Check (denied)', {
                 room_id: room_id,
                 peer_id: peer_id,
