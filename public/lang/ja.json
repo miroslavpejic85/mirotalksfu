@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "ホワイトボードに参加者名を表示"
+        "Show participant names on the whiteboard": "ホワイトボードに参加者名を表示",
+        "Enable screen text": "画面テキストを有効化"
     },
     "buttons": {
         "Add arrow": "矢印を追加",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "注釈者",
+        "Screen text annotation": "画面テキスト注釈",
+        "Type annotation": "注釈を入力",
+        "Delete text annotation": "テキスト注釈を削除",
+        "Text annotation": "テキスト注釈"
     },
     "dialogs": {
         "Edit frame title": "フレームタイトルを編集",
@@ -945,14 +951,15 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",
         "You are banned from this room!": "あなたはこのルームから追放されています！",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "プライベートノートはファイルに保存しない限り失われます。",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "保存された設定により、カメラをオフにしている参加者はすべてのルームでグリッドから非表示になります。ここでも維持しますか？"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "保存された設定により、カメラをオフにしている参加者はすべてのルームでグリッドから非表示になります。ここでも維持しますか？",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "グループ化を解除するオブジェクトを選択してください。",

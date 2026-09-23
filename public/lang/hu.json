@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "Résztvevők nevének megjelenítése a táblán"
+        "Show participant names on the whiteboard": "Résztvevők nevének megjelenítése a táblán",
+        "Enable screen text": "Képernyőszöveg engedélyezése"
     },
     "buttons": {
         "Add arrow": "Nyíl hozzáadása",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "Jegyzet készítője",
+        "Screen text annotation": "Képernyős szöveges jegyzet",
+        "Type annotation": "Írjon be jegyzetet",
+        "Delete text annotation": "Szöveges jegyzet törlése",
+        "Text annotation": "Szöveges jegyzet"
     },
     "dialogs": {
         "Edit frame title": "Keret címének szerkesztése",
@@ -945,14 +951,15 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",
         "You are banned from this room!": "Ki vagy tiltva ebből a szobából!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "A privát jegyzeted elveszik, hacsak nem mented fájlba.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "A mentett beállításod minden szobában elrejti a rácsból a kikapcsolt kamerájú résztvevőket. Megtartod itt is?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "A mentett beállításod minden szobában elrejti a rácsból a kikapcsolt kamerájú résztvevőket. Megtartod itt is?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "Jelöljön ki egy csoportosított objektumot a csoportbontáshoz.",

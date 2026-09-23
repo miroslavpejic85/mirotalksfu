@@ -6,6 +6,52 @@ const { EventEmitter } = require('events');
 const Room = require('../app/src/Room');
 
 describe('test-Room', () => {
+    it('includes persistent text annotations with an existing screen producer', () => {
+        const room = Object.create(Room.prototype);
+        const annotation = {
+            type: 'text',
+            action: 'create',
+            producerId: 'screen-producer-id',
+            annotationId: 'annotation-id',
+            text: 'Review this',
+            x: 0.25,
+            y: 0.5,
+        };
+        room.videoTextAnnotations = new Map([['screen-producer-id', new Map([[annotation.annotationId, annotation]])]]);
+        room.peers = new Map([
+            [
+                'screen-owner-id',
+                {
+                    peer_name: 'Owner',
+                    peer_info: { peer_id: 'screen-owner-id' },
+                    producers: new Map([
+                        ['screen-producer-id', { id: 'screen-producer-id', appData: { mediaType: 'screenType' } }],
+                    ]),
+                },
+            ],
+            ['joining-peer-id', { producers: new Map() }],
+        ]);
+
+        const producers = room.getProducerListForPeer('joining-peer-id');
+
+        producers.should.have.length(1);
+        producers[0].text_annotations.should.deepEqual([annotation]);
+    });
+
+    it('recognizes only active screenType producers as screen shares', () => {
+        const room = Object.create(Room.prototype);
+        const producer = { appData: { mediaType: 'screenType' } };
+
+        room.getProducerById = () => producer;
+        room.isScreenProducer('screen-producer-id').should.equal(true);
+
+        producer.appData.mediaType = 'videoType';
+        room.isScreenProducer('video-producer-id').should.equal(false);
+
+        room.getProducerById = () => null;
+        room.isScreenProducer('missing-producer-id').should.equal(false);
+    });
+
     it('classifies a stale producer without asking the router to consume it', async () => {
         const room = Object.create(Room.prototype);
         let canConsumeCalled = false;

@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "Katılımcı adlarını beyaz tahtada göster"
+        "Show participant names on the whiteboard": "Katılımcı adlarını beyaz tahtada göster",
+        "Enable screen text": "Ekran metnini etkinleştir"
     },
     "buttons": {
         "Add arrow": "Ok ekle",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "Ekleyen",
+        "Screen text annotation": "Ekran metni açıklaması",
+        "Type annotation": "Açıklama yazın",
+        "Delete text annotation": "Metin açıklamasını sil",
+        "Text annotation": "Metin açıklaması"
     },
     "dialogs": {
         "Edit frame title": "Çerçeve başlığını düzenle",
@@ -945,14 +951,15 @@
         "Unmute": "Sesini aç",
         "Unmute Video": "Videonun sesini aç",
         "Username already in use": "Kullanıcı adı zaten kullanımda",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Would you like to continue the room broadcast?": "Oda yayınını sürdürmek ister misiniz?",
         "Yes": "Evet",
         "You are banned from this room!": "Bu odadan yasaklandınız!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "Bir dosyaya kaydetmezseniz özel notunuz kaybolacak.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Kaydettiğiniz tercih, kamerası kapalı katılımcıları her odada ızgaradan gizli tutar. Burada da korunsun mu?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Kaydettiğiniz tercih, kamerası kapalı katılımcıları her odada ızgaradan gizli tutar. Burada da korunsun mu?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "Grubunu çözmek için gruplanmış bir nesne seçin.",

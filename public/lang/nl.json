@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "Namen van deelnemers op het whiteboard tonen"
+        "Show participant names on the whiteboard": "Namen van deelnemers op het whiteboard tonen",
+        "Enable screen text": "Schermtekst inschakelen"
     },
     "buttons": {
         "Add arrow": "Pijl toevoegen",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "Geannoteerd door",
+        "Screen text annotation": "Tekstannotatie op scherm",
+        "Type annotation": "Typ een annotatie",
+        "Delete text annotation": "Tekstannotatie verwijderen",
+        "Text annotation": "Tekstannotatie"
     },
     "dialogs": {
         "Edit frame title": "Kadertitel bewerken",
@@ -945,14 +951,15 @@
         "Unmute": "Dempen opheffen",
         "Unmute Video": "Geluid van de video aanzetten",
         "Username already in use": "Deze gebruikersnaam is al bezet",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "Sneltoetsen voor het whiteboard",
         "Would you like to continue the room broadcast?": "Wil je de uitzending van deze ruimte voortzetten?",
         "Yes": "Ja",
         "You are banned from this room!": "Je bent verbannen uit deze ruimte.",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "Je prive-notitie gaat verloren als je hem niet opslaat als bestand.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Je opgeslagen voorkeur houdt deelnemers met de camera uit in elke ruimte buiten het raster. Hier ook?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Je opgeslagen voorkeur houdt deelnemers met de camera uit in elke ruimte buiten het raster. Hier ook?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "Selecteer een gegroepeerd object om de groepering op te heffen.",

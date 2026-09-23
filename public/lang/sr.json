@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "Prikaži imena učesnika na tabli"
+        "Show participant names on the whiteboard": "Prikaži imena učesnika na tabli",
+        "Enable screen text": "Omogući tekst na ekranu"
     },
     "buttons": {
         "Add arrow": "Dodaj strelicu",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "Autor napomene",
+        "Screen text annotation": "Tekstualna napomena na ekranu",
+        "Type annotation": "Unesite napomenu",
+        "Delete text annotation": "Obriši tekstualnu napomenu",
+        "Text annotation": "Tekstualna napomena"
     },
     "dialogs": {
         "Edit frame title": "Izmeni naslov okvira",
@@ -945,14 +951,15 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",
         "You are banned from this room!": "Zabranjen vam je pristup ovoj sobi!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "Vaša privatna beleška će biti izgubljena osim ako je ne sačuvate u datoteku.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Vaše sačuvano podešavanje drži učesnike sa isključenom kamerom sakrivene iz mreže u svakoj sobi. Zadržati ovde?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Vaše sačuvano podešavanje drži učesnike sa isključenom kamerom sakrivene iz mreže u svakoj sobi. Zadržati ovde?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "Izaberite grupisani objekat za razgrupisavanje.",

@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "Показывать имена участников на доске"
+        "Show participant names on the whiteboard": "Показывать имена участников на доске",
+        "Enable screen text": "Включить текст на экране"
     },
     "buttons": {
         "Add arrow": "Добавить стрелку",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "Автор аннотации",
+        "Screen text annotation": "Текстовая аннотация на экране",
+        "Type annotation": "Введите аннотацию",
+        "Delete text annotation": "Удалить текстовую аннотацию",
+        "Text annotation": "Текстовая аннотация"
     },
     "dialogs": {
         "Edit frame title": "Изменить заголовок рамки",
@@ -945,14 +951,15 @@
         "Unmute": "Включить звук",
         "Unmute Video": "Включить звук видео",
         "Username already in use": "Имя пользователя уже используется",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "Горячие клавиши доски",
         "Would you like to continue the room broadcast?": "Хотите продолжить трансляцию комнаты?",
         "Yes": "Да",
         "You are banned from this room!": "Вы заблокированы в этой комнате!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "Ваша личная заметка будет потеряна, если вы не сохраните её в файл.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Ваша сохранённая настройка скрывает участников с выключенной камерой из сетки в каждой комнате. Оставить её здесь?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Ваша сохранённая настройка скрывает участников с выключенной камерой из сетки в каждой комнате. Оставить её здесь?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "Выберите сгруппированный объект для разгруппировки.",

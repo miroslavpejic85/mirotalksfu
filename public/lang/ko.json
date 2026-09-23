@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "화이트보드에 참가자 이름 표시"
+        "Show participant names on the whiteboard": "화이트보드에 참가자 이름 표시",
+        "Enable screen text": "화면 텍스트 활성화"
     },
     "buttons": {
         "Add arrow": "화살표 추가",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "작성자",
+        "Screen text annotation": "화면 텍스트 주석",
+        "Type annotation": "주석 입력",
+        "Delete text annotation": "텍스트 주석 삭제",
+        "Text annotation": "텍스트 주석"
     },
     "dialogs": {
         "Edit frame title": "프레임 제목 편집",
@@ -945,14 +951,15 @@
         "Unmute": "음소거 해제",
         "Unmute Video": "비디오 음소거 해제",
         "Username already in use": "사용자 이름이 이미 사용 중입니다",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "화이트보드 단축키",
         "Would you like to continue the room broadcast?": "방 방송을 계속하시겠습니까?",
         "Yes": "예",
         "You are banned from this room!": "이 방에서 차단되었습니다!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "파일로 저장하지 않으면 개인 메모가 손실됩니다.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "저장된 기본 설정은 모든 방에서 카메라를 끈 참가자를 그리드에서 숨깁니다. 여기서도 유지하시겠습니까?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "저장된 기본 설정은 모든 방에서 카메라를 끈 참가자를 그리드에서 숨깁니다. 여기서도 유지하시겠습니까?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "그룹을 해제할 그룹 개체를 선택하세요.",

@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "إظهار أسماء المشاركين على السبورة البيضاء"
+        "Show participant names on the whiteboard": "إظهار أسماء المشاركين على السبورة البيضاء",
+        "Enable screen text": "تفعيل النص على الشاشة"
     },
     "buttons": {
         "Add arrow": "إضافة سهم",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "أضيف بواسطة",
+        "Screen text annotation": "تعليق نصي على الشاشة",
+        "Type annotation": "اكتب تعليقًا",
+        "Delete text annotation": "حذف التعليق النصي",
+        "Text annotation": "تعليق نصي"
     },
     "dialogs": {
         "Edit frame title": "تعديل عنوان الإطار",
@@ -945,14 +951,15 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",
         "You are banned from this room!": "أنت محظور من هذه الغرفة!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "ستُفقد ملاحظتك الخاصة ما لم تحفظها في ملف.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "يُبقي إعدادك المحفوظ المشاركين ذوي الكاميرا المغلقة مخفيين من الشبكة في كل غرفة. هل تريد الإبقاء عليه هنا؟"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "يُبقي إعدادك المحفوظ المشاركين ذوي الكاميرا المغلقة مخفيين من الشبكة في كل غرفة. هل تريد الإبقاء عليه هنا؟",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "حدد كائنًا مجمعًا لفك تجميعه.",

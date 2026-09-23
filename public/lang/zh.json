@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "在白板上显示参与者姓名"
+        "Show participant names on the whiteboard": "在白板上显示参与者姓名",
+        "Enable screen text": "启用屏幕文本"
     },
     "buttons": {
         "Add arrow": "添加箭头",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "注释者",
+        "Screen text annotation": "屏幕文本注释",
+        "Type annotation": "输入注释",
+        "Delete text annotation": "删除文本注释",
+        "Text annotation": "文本注释"
     },
     "dialogs": {
         "Edit frame title": "编辑框架标题",
@@ -945,14 +951,15 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",
         "You are banned from this room!": "您已被此房间封禁！",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "除非您将私人笔记保存到文件，否则它将丢失。",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "您保存的偏好会在每个房间中将关闭摄像头的参与者从网格中隐藏。在此处保留吗？"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "您保存的偏好会在每个房间中将关闭摄像头的参与者从网格中隐藏。在此处保留吗？",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "请选择一个已组合的对象以取消组合。",

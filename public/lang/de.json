@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "Teilnehmernamen auf dem Whiteboard anzeigen"
+        "Show participant names on the whiteboard": "Teilnehmernamen auf dem Whiteboard anzeigen",
+        "Enable screen text": "Bildschirmtext aktivieren"
     },
     "buttons": {
         "Add arrow": "Pfeil hinzufügen",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "Kommentiert von",
+        "Screen text annotation": "Bildschirm-Textanmerkung",
+        "Type annotation": "Anmerkung eingeben",
+        "Delete text annotation": "Textanmerkung löschen",
+        "Text annotation": "Textanmerkung"
     },
     "dialogs": {
         "Edit frame title": "Rahmentitel bearbeiten",
@@ -945,14 +951,15 @@
         "Unmute": "Stummschaltung aufheben",
         "Unmute Video": "Ton des Videos aktivieren",
         "Username already in use": "Benutzername bereits vergeben",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "Whiteboard-Tastenkürzel",
         "Would you like to continue the room broadcast?": "Möchten Sie die Raumübertragung fortsetzen?",
         "Yes": "Ja",
         "You are banned from this room!": "Sie sind aus diesem Raum gesperrt!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "Ihre private Notiz geht verloren, sofern Sie sie nicht in einer Datei speichern.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Deine gespeicherte Einstellung blendet Teilnehmer mit ausgeschalteter Kamera in jedem Raum aus dem Raster aus. Hier beibehalten?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Deine gespeicherte Einstellung blendet Teilnehmer mit ausgeschalteter Kamera in jedem Raum aus dem Raster aus. Hier beibehalten?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "Wählen Sie ein gruppiertes Objekt aus, um die Gruppierung aufzuheben.",

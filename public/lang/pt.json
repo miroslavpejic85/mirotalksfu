@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "Mostrar os nomes dos participantes no quadro branco"
+        "Show participant names on the whiteboard": "Mostrar os nomes dos participantes no quadro branco",
+        "Enable screen text": "Ativar texto na tela"
     },
     "buttons": {
         "Add arrow": "Adicionar seta",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "Anotado por",
+        "Screen text annotation": "Anotação de texto na tela",
+        "Type annotation": "Digite uma anotação",
+        "Delete text annotation": "Excluir anotação de texto",
+        "Text annotation": "Anotação de texto"
     },
     "dialogs": {
         "Edit frame title": "Editar título da moldura",
@@ -945,14 +951,15 @@
         "Unmute": "Tirar o silêncio",
         "Unmute Video": "Ativar o som do vídeo",
         "Username already in use": "Nome de usuário já em uso",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "Atalhos do quadro branco",
         "Would you like to continue the room broadcast?": "Deseja continuar a transmissão da sala?",
         "Yes": "Sim",
         "You are banned from this room!": "Você está banido desta sala!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "Sua nota privada será perdida, a menos que você a salve em um arquivo.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Sua preferência salva mantém os participantes com a câmera desligada ocultos da grade em todas as salas. Manter aqui?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Sua preferência salva mantém os participantes com a câmera desligada ocultos da grade em todas as salas. Manter aqui?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "Selecione um objeto agrupado para desagrupar.",

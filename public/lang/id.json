@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "Tampilkan nama peserta di papan tulis"
+        "Show participant names on the whiteboard": "Tampilkan nama peserta di papan tulis",
+        "Enable screen text": "Aktifkan teks layar"
     },
     "buttons": {
         "Add arrow": "Tambah panah",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "Dianotasi oleh",
+        "Screen text annotation": "Anotasi teks layar",
+        "Type annotation": "Ketik anotasi",
+        "Delete text annotation": "Hapus anotasi teks",
+        "Text annotation": "Anotasi teks"
     },
     "dialogs": {
         "Edit frame title": "Edit judul bingkai",
@@ -945,14 +951,15 @@
         "Unmute": "Suarakan",
         "Unmute Video": "Suarakan Video",
         "Username already in use": "Nama pengguna sudah digunakan",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "Pintasan Papan Tulis",
         "Would you like to continue the room broadcast?": "Apakah Anda ingin melanjutkan siaran ruangan?",
         "Yes": "Ya",
         "You are banned from this room!": "Anda diblokir dari ruangan ini!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "Catatan pribadi Anda akan hilang kecuali Anda menyimpannya ke file.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Preferensi tersimpan Anda menyembunyikan peserta dengan kamera mati dari kisi di setiap ruangan. Pertahankan di sini?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Preferensi tersimpan Anda menyembunyikan peserta dengan kamera mati dari kisi di setiap ruangan. Pertahankan di sini?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "Pilih objek yang dikelompokkan untuk dipisahkan.",

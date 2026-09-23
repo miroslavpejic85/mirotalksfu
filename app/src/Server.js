@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.74
+ * @version 2.4.80
  *
  */
 
@@ -4066,15 +4066,79 @@ function startServer() {
             room.broadCast(socket.id, 'whiteboardAction', data);
         });
 
-        // Video drawing overlay: relay batched drawing strokes to all peers in the room
+        // Video drawing overlay: relay pen strokes and persist screen text annotations.
         socket.on('videoDrawing', (dataObject) => {
             if (!roomExists(socket)) return;
             const data = checkXSS(dataObject);
             const room = getRoom(socket);
             const peer = room.getPeer(socket.id);
             if (!peer) return;
+
+            if (!room.isScreenProducer(data.producerId)) return;
+
             data.drawerId = socket.id;
             data.peer_name = peer.peer_info?.peer_name || peer.peer_name;
+
+            if (data.type === 'text') {
+                const { action, annotationId, producerId } = data;
+                const annotations = room.getVideoTextAnnotations(producerId);
+                const producerOwnerId = room.getProducerOwnerId(producerId);
+                const validAnnotationId =
+                    typeof annotationId === 'string' && annotationId.length > 0 && annotationId.length <= 100;
+                const validPosition =
+                    Number.isFinite(data.x) &&
+                    Number.isFinite(data.y) &&
+                    data.x >= 0 &&
+                    data.x <= 1 &&
+                    data.y >= 0 &&
+                    data.y <= 1;
+
+                if (action === 'create') {
+                    if (
+                        !validAnnotationId ||
+                        typeof data.text !== 'string' ||
+                        data.text.length === 0 ||
+                        data.text.length > 80 ||
+                        !validPosition ||
+                        annotations.has(annotationId) ||
+                        annotations.size >= 200
+                    ) {
+                        return;
+                    }
+                    annotations.set(annotationId, {
+                        type: 'text',
+                        action: 'create',
+                        producerId,
+                        annotationId,
+                        drawerId: socket.id,
+                        peer_name: data.peer_name,
+                        text: data.text,
+                        x: data.x,
+                        y: data.y,
+                    });
+                } else if (action === 'clear') {
+                    if (socket.id !== producerOwnerId) return;
+                    room.clearVideoTextAnnotations(producerId);
+                } else {
+                    if (!validAnnotationId) return;
+                    const annotation = annotations.get(annotationId);
+                    if (!annotation || (socket.id !== annotation.drawerId && socket.id !== producerOwnerId)) return;
+                    if (action === 'move') {
+                        if (!validPosition) return;
+                        annotation.x = data.x;
+                        annotation.y = data.y;
+                    } else if (action === 'delete') {
+                        annotations.delete(annotationId);
+                    } else {
+                        return;
+                    }
+                }
+                room.broadCast(socket.id, 'videoDrawing', data);
+                return;
+            }
+
+            if (data.type !== undefined && data.type !== 'pen') return;
+            if (!Array.isArray(data.paths) || data.paths.length === 0 || data.paths.length > 128) return;
             // log.debug('Video drawing', data);
             room.broadCast(socket.id, 'videoDrawing', data);
         });

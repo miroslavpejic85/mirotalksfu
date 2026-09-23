@@ -137,7 +137,8 @@
         "Refresh rooms": "Refresh rooms",
         "Room name": "Room name",
         "Share room link": "Share room link",
-        "Show participant names on the whiteboard": "व्हाइटबोर्ड पर प्रतिभागियों के नाम दिखाएँ"
+        "Show participant names on the whiteboard": "व्हाइटबोर्ड पर प्रतिभागियों के नाम दिखाएँ",
+        "Enable screen text": "स्क्रीन टेक्स्ट सक्षम करें"
     },
     "buttons": {
         "Add arrow": "तीर जोड़ें",
@@ -807,7 +808,12 @@
         "Transcription language": "Transcription language",
         "Transmitting...": "Transmitting...",
         "What would you like to ask?": "What would you like to ask?",
-        "Whiteboard": "Whiteboard"
+        "Whiteboard": "Whiteboard",
+        "Annotated by": "टिप्पणीकार",
+        "Screen text annotation": "स्क्रीन टेक्स्ट टिप्पणी",
+        "Type annotation": "टिप्पणी लिखें",
+        "Delete text annotation": "टेक्स्ट टिप्पणी हटाएं",
+        "Text annotation": "टेक्स्ट टिप्पणी"
     },
     "dialogs": {
         "Edit frame title": "फ़्रेम शीर्षक संपादित करें",
@@ -945,14 +951,15 @@
         "Unmute": "अनम्यूट करें",
         "Unmute Video": "वीडियो की ध्वनि चालू करें",
         "Username already in use": "उपयोगकर्ता नाम पहले से उपयोग में है",
-        "WebRTC SFU v2.4.74": "WebRTC SFU v2.4.74",
+        "WebRTC SFU v2.4.80": "WebRTC SFU v2.4.80",
         "Whiteboard Shortcuts": "व्हाइटबोर्ड शॉर्टकट",
         "Would you like to continue the room broadcast?": "क्या आप रूम प्रसारण जारी रखना चाहते हैं?",
         "Yes": "हाँ",
         "You are banned from this room!": "आप इस रूम से प्रतिबंधित हैं!",
         "Your microphone is off": "Your microphone is off",
         "Your private note will be lost unless you save it to a file.": "जब तक आप इसे किसी फ़ाइल में नहीं सहेजते, आपका निजी नोट खो जाएगा।",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "आपकी सहेजी गई प्राथमिकता हर कमरे में कैमरा बंद करने वाले प्रतिभागियों को ग्रिड से छिपाए रखती है। इसे यहाँ रखें?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "आपकी सहेजी गई प्राथमिकता हर कमरे में कैमरा बंद करने वाले प्रतिभागियों को ग्रिड से छिपाए रखती है। इसे यहाँ रखें?",
+        "fas fa-font": "fas fa-font"
     },
     "toasts": {
         "Select a grouped object to ungroup.": "समूह हटाने के लिए समूहित ऑब्जेक्ट चुनें।",
