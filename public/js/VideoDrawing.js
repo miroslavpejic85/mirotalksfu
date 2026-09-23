@@ -498,7 +498,7 @@ class VideoDrawingOverlay {
         const wrapper = this.fabricCanvas.wrapperEl;
         const width = wrapper.clientWidth;
         const height = wrapper.clientHeight;
-        const annotationScale = Math.max(0.8, Math.min(1, width / 640));
+        const annotationScale = Math.max(0.5, Math.min(1, width / 640, height / 360));
         annotation.element.style.setProperty('--video-drawing-annotation-scale', annotationScale);
         annotation.element.style.maxWidth = `${Math.max(1, Math.min(280 * annotationScale, width - 16))}px`;
         const x = Math.min(annotation.x * width, Math.max(0, width - annotation.element.offsetWidth));
