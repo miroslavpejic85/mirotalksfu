@@ -299,6 +299,19 @@
     flex: 0 0 auto;
 }
 
+#videoPinMediaContainer .videoMenuBar {
+    padding: 5px 10px 5px 5px;
+    gap: 3px;
+}
+
+#videoPinMediaContainer .videoMenuBar button {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 8px;
+    margin: 2px;
+    font-size: 0.8rem;
+}
+
 @container camera (max-width: 500px) {
     .videoMenuBar > .navbar-session-time,
     .videoMenuBar > .navbar-secondary-action {
