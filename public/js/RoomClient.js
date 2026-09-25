@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.84
+ * @version 2.4.90
  *
  */
 
@@ -1428,6 +1428,7 @@ class RoomClient {
     handleRefreshParticipantsCount = (data) => {
         console.log('SocketOn Participants Count:', data);
         participantsCount = data.peer_counts;
+        this.autoPinLocalScreenShare();
         if (isBroadcastingEnabled) {
             if (isParticipantsListOpen) getRoomParticipants();
             wbUpdate();
@@ -3412,6 +3413,7 @@ class RoomClient {
                 this.handleHA(ha.id, d.id);
                 BUTTONS.producerVideo.drawingButton && isScreen && this.handleDW(dw.id, tx.id, d.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
+                isScreen && this.autoPinLocalScreenShare(id);
                 this.handleZV(elem.id, d.id, this.peer_id);
                 this.handlePV(id, pv.id);
 
@@ -3425,8 +3427,6 @@ class RoomClient {
 
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
-
-                if (isScreen && this.videoMediaContainer.childElementCount > 1) pn.click();
 
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
@@ -5758,6 +5758,19 @@ class RoomClient {
             if (isAvatar && !this.isMobileDevice && this.videoMediaContainer.childElementCount > 1) btnPn.click();
             this.scheduleParticipantViewRestore();
         }
+    }
+
+    autoPinLocalScreenShare(screenProducerId = this.screenProducerId) {
+        if (this.isMobileDevice || this.isVideoPinned || !screenProducerId) return false;
+        if (this.producerLabel.has(mediaType.video)) return false;
+        if (participantsCount <= 1) return false;
+
+        const screenElement = this.getId(screenProducerId);
+        const pinButton = this.getId(`${screenProducerId}__pin`);
+        if (!screenElement || !pinButton) return false;
+
+        pinButton.click();
+        return this.isVideoPinned && this.pinnedVideoPlayerId === screenElement.id;
     }
 
     scheduleParticipantViewRestore() {

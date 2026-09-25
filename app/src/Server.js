@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.84
+ * @version 2.4.90
  *
  */
 
@@ -4076,6 +4076,7 @@ function startServer() {
 
             if (!room.isScreenProducer(data.producerId)) return;
 
+            const requestedDrawerId = data.drawerId;
             data.drawerId = socket.id;
             data.peer_name = peer.peer_info?.peer_name || peer.peer_name;
 
@@ -4155,11 +4156,17 @@ function startServer() {
                     return;
                 }
 
-                const validTool = ['pencil', 'highlighter', 'circle'].includes(data.tool);
+                const validTool = ['pencil', 'highlighter', 'circle', 'rectangle', 'arrow'].includes(data.tool);
                 const validColor = typeof data.color === 'string' && /^#[0-9a-f]{6}$/i.test(data.color);
                 const validWidth = Number.isFinite(data.width) && data.width >= 0.001 && data.width <= 0.05;
+                const restoring = action === 'restore';
+                const validRequestedDrawerId =
+                    typeof requestedDrawerId === 'string' &&
+                    requestedDrawerId.length > 0 &&
+                    requestedDrawerId.length <= 100;
                 if (
-                    action !== 'create' ||
+                    (action !== 'create' && !restoring) ||
+                    (restoring && (socket.id !== producerOwnerId || !validRequestedDrawerId)) ||
                     !validAnnotationId ||
                     !validTool ||
                     !validColor ||
@@ -4176,7 +4183,7 @@ function startServer() {
                     action: 'create',
                     producerId,
                     annotationId,
-                    drawerId: socket.id,
+                    drawerId: restoring ? requestedDrawerId : socket.id,
                     peer_name: data.peer_name,
                     tool: data.tool,
                     color: data.color,

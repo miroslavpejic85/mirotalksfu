@@ -710,6 +710,13 @@ input[type='range'] {
     border-radius: 3px;
 }
 
+.video-drawing-width {
+    flex: 0 0 64px;
+    width: 64px;
+    accent-color: #4caf50;
+    cursor: pointer;
+}
+
 @media (max-width: 768px) {
     .video-drawing-toolbar {
         top: 48px !important;
@@ -732,7 +739,8 @@ input[type='range'] {
     }
 
     .video-drawing-toolbar button,
-    .video-drawing-toolbar .video-drawing-color {
+    .video-drawing-toolbar .video-drawing-color,
+    .video-drawing-toolbar .video-drawing-width {
         flex-basis: 40px;
         width: 40px;
         height: 40px;

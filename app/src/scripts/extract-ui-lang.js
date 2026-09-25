@@ -202,6 +202,19 @@ function scanJs(file) {
     const translateRe = /\bt\(\s*(['"])((?:\\.|(?!\1).)*)\1\s*\)/g;
     while ((m = translateRe.exec(src))) add('labels', unescapeJs(m[2]));
 
+    // Namespace-aware runtime translations for dynamically-built controls.
+    const namespacedTranslateRe =
+        /(?:window\.i18n\?\.)?t\(\s*(['"])((?:\\.|(?!\1).)*)\1\s*,\s*(['"])(tooltips|buttons|labels|dialogs|toasts)\3\s*\)/g;
+    while ((m = namespacedTranslateRe.exec(src))) add(m[4], unescapeJs(m[2]));
+
+    // Declarative tooltip keys used by dynamically-built control lists.
+    const tooltipListRe = /(?:annotationTooltipLabels|tooltipLabels)\s*=\s*\[([\s\S]*?)\]/g;
+    let tooltipList;
+    while ((tooltipList = tooltipListRe.exec(src))) {
+        const stringRe = /(['"])((?:\\.|(?!\1).)*)\1/g;
+        while ((m = stringRe.exec(tooltipList[1]))) add('tooltips', unescapeJs(m[2]));
+    }
+
     // Dynamically-built UI text: device menu headers/options, text nodes, textContent assignments.
     const helperRe = /(?:appendMenuHeader|appendSelectOptions)\([^,]*,[^,]*,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
     while ((m = helperRe.exec(src))) add('labels', unescapeJs(m[2]));
