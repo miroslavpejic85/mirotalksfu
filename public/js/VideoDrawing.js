@@ -464,12 +464,17 @@ class VideoDrawingOverlay {
 
         drawingButton.addEventListener('click', () => {
             const drawingActive = this.isActive && this.activeTool !== 'text';
-            if (drawingActive && this.isToolbarCollapsed) this.setToolbarCollapsed(false);
+            if (drawingActive && this.isToolbarCollapsed) {
+                this.setToolbarCollapsed(false);
+                return;
+            }
+            if (!drawingActive) this.setToolbarCollapsed(false);
             this.setTool(drawingActive ? null : this.lastDrawingTool);
         });
         textButton.addEventListener('click', () => {
             this.setTool(this.isActive && this.activeTool === 'text' ? null : 'text');
         });
+        this.refreshPermissions();
     }
 
     _createToolbarButton(className, label) {
@@ -531,6 +536,7 @@ class VideoDrawingOverlay {
     }
 
     setTool(tool) {
+        if (tool && !this._canDraw()) return;
         this.isActive = Boolean(tool);
         this.activeTool = tool;
         const drawingMode = ['pencil', 'highlighter', 'vanishing'].includes(tool);
@@ -564,6 +570,26 @@ class VideoDrawingOverlay {
         this.textButton?.setAttribute('aria-pressed', String(this.isActive && tool === 'text'));
         if (tool !== 'text') this.textInput?.remove();
         this.fabricCanvas.requestRenderAll();
+    }
+
+    refreshPermissions() {
+        const canDraw = this._canDraw();
+        if (this.drawingButton) {
+            this.drawingButton.hidden = !canDraw;
+            this.drawingButton.disabled = !canDraw;
+        }
+        if (this.textButton) {
+            this.textButton.hidden = !canDraw;
+            this.textButton.disabled = !canDraw;
+        }
+        if (!canDraw) {
+            if (this.isActive) this.setTool(null);
+            this.setToolbarCollapsed(true);
+        }
+    }
+
+    _canDraw() {
+        return VideoDrawingOverlay.canDraw?.(this.producerId) !== false;
     }
 
     /**
@@ -1480,6 +1506,12 @@ class VideoDrawingOverlay {
             if (el) {
                 overlay._resizeTo(el.offsetWidth, el.offsetHeight);
             }
+        }
+    }
+
+    static refreshPermissions() {
+        for (const [, overlay] of VideoDrawingOverlay.overlays) {
+            overlay.refreshPermissions();
         }
     }
 

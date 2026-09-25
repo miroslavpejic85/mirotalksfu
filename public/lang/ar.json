@@ -830,7 +830,8 @@
         "Screen text annotation": "تعليق نصي على الشاشة",
         "Type annotation": "اكتب تعليقًا",
         "Delete text annotation": "حذف التعليق النصي",
-        "Text annotation": "تعليق نصي"
+        "Text annotation": "تعليق نصي",
+        "Presenter-only Screen Annotations": "تعليقات الشاشة التوضيحية لمقدم العرض فقط"
     },
     "dialogs": {
         "Edit frame title": "تعديل عنوان الإطار",
@@ -968,7 +969,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.4.90": "WebRTC SFU v2.4.90",
+        "WebRTC SFU v2.4.91": "WebRTC SFU v2.4.91",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",

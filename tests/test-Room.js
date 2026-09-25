@@ -6,6 +6,15 @@ const { EventEmitter } = require('events');
 const Room = require('../app/src/Room');
 
 describe('test-Room', () => {
+    it('persists presenter-only screen annotation moderation', () => {
+        const room = Object.create(Room.prototype);
+        room._moderator = { screen_annotations_cant_draw: false };
+
+        room.updateRoomModerator({ type: 'screen_annotations_cant_draw', status: true });
+
+        room._moderator.screen_annotations_cant_draw.should.equal(true);
+    });
+
     it('includes persistent annotations with an existing screen producer', () => {
         const room = Object.create(Room.prototype);
         const textAnnotation = {

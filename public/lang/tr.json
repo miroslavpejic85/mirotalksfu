@@ -830,7 +830,8 @@
         "Screen text annotation": "Ekran metni açıklaması",
         "Type annotation": "Açıklama yazın",
         "Delete text annotation": "Metin açıklamasını sil",
-        "Text annotation": "Metin açıklaması"
+        "Text annotation": "Metin açıklaması",
+        "Presenter-only Screen Annotations": "Yalnızca sunucuya özel ekran ek açıklamaları"
     },
     "dialogs": {
         "Edit frame title": "Çerçeve başlığını düzenle",
@@ -968,7 +969,7 @@
         "Unmute": "Sesini aç",
         "Unmute Video": "Videonun sesini aç",
         "Username already in use": "Kullanıcı adı zaten kullanımda",
-        "WebRTC SFU v2.4.90": "WebRTC SFU v2.4.90",
+        "WebRTC SFU v2.4.91": "WebRTC SFU v2.4.91",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Would you like to continue the room broadcast?": "Oda yayınını sürdürmek ister misiniz?",
         "Yes": "Evet",

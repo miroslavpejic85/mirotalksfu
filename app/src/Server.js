@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.90
+ * @version 2.4.91
  *
  */
 
@@ -3707,6 +3707,7 @@ function startServer() {
                 case 'audio_cant_unmute':
                 case 'video_cant_unhide':
                 case 'screen_cant_share':
+                case 'screen_annotations_cant_draw':
                 case 'chat_cant_privately':
                 case 'chat_cant_publicly':
                 case 'chat_cant_chatgpt':
@@ -4076,6 +4077,14 @@ function startServer() {
 
             if (!room.isScreenProducer(data.producerId)) return;
 
+            const producerOwnerId = room.getProducerOwnerId(data.producerId);
+            if (
+                room._moderator.screen_annotations_cant_draw &&
+                !isPeerPresenter(socket.room_id, socket.id, peer.peer_name, peer.peer_uuid)
+            ) {
+                return;
+            }
+
             const requestedDrawerId = data.drawerId;
             data.drawerId = socket.id;
             data.peer_name = peer.peer_info?.peer_name || peer.peer_name;
@@ -4083,7 +4092,6 @@ function startServer() {
             if (data.type === 'annotation') {
                 const { action, annotationId, producerId } = data;
                 const annotations = room.getVideoDrawingAnnotations(producerId);
-                const producerOwnerId = room.getProducerOwnerId(producerId);
 
                 if (action === 'clear') {
                     const clearAll = socket.id === producerOwnerId;
@@ -4198,7 +4206,6 @@ function startServer() {
             if (data.type === 'text') {
                 const { action, annotationId, producerId } = data;
                 const annotations = room.getVideoTextAnnotations(producerId);
-                const producerOwnerId = room.getProducerOwnerId(producerId);
                 const validAnnotationId =
                     typeof annotationId === 'string' && annotationId.length > 0 && annotationId.length <= 100;
                 const validPosition =

@@ -830,7 +830,8 @@
         "Screen text annotation": "Anotación de texto en pantalla",
         "Type annotation": "Escribe una anotación",
         "Delete text annotation": "Eliminar anotación de texto",
-        "Text annotation": "Anotación de texto"
+        "Text annotation": "Anotación de texto",
+        "Presenter-only Screen Annotations": "Anotaciones de pantalla solo para el presentador"
     },
     "dialogs": {
         "Edit frame title": "Editar título del marco",
@@ -968,7 +969,7 @@
         "Unmute": "Quitar silencio",
         "Unmute Video": "Activar el sonido del vídeo",
         "Username already in use": "El nombre de usuario ya está en uso",
-        "WebRTC SFU v2.4.90": "WebRTC SFU v2.4.90",
+        "WebRTC SFU v2.4.91": "WebRTC SFU v2.4.91",
         "Whiteboard Shortcuts": "Atajos de la pizarra",
         "Would you like to continue the room broadcast?": "¿Quieres continuar con la difusión de la sala?",
         "Yes": "Sí",

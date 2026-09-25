@@ -62,6 +62,7 @@ module.exports = class Room {
             audio_cant_unmute: false,
             video_cant_unhide: false,
             screen_cant_share: false,
+            screen_annotations_cant_draw: false,
             chat_cant_privately: false,
             chat_cant_publicly: false,
             chat_cant_chatgpt: false,
@@ -458,6 +459,9 @@ module.exports = class Room {
                 break;
             case 'screen_cant_share':
                 this._moderator.screen_cant_share = data.status;
+                break;
+            case 'screen_annotations_cant_draw':
+                this._moderator.screen_annotations_cant_draw = data.status;
                 break;
             case 'chat_cant_privately':
                 this._moderator.chat_cant_privately = data.status;

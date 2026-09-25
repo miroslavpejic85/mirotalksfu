@@ -314,6 +314,7 @@ function loadModeratorData() {
     switchEveryoneCantUnmute.checked = localStorageSettings.moderator_audio_cant_unmute;
     switchEveryoneCantUnhide.checked = localStorageSettings.moderator_video_cant_unhide;
     switchEveryoneCantShareScreen.checked = localStorageSettings.moderator_screen_cant_share;
+    switchEveryoneCantDrawScreenAnnotations.checked = localStorageSettings.moderator_screen_annotations_cant_draw;
     switchEveryoneCantChatPrivately.checked = localStorageSettings.moderator_chat_cant_privately;
     switchEveryoneCantChatPublicly.checked = localStorageSettings.moderator_chat_cant_publicly;
     switchEveryoneCantChatChatGPT.checked = localStorageSettings.moderator_chat_cant_chatgpt;
@@ -337,6 +338,7 @@ function loadModeratorDataFromRoom() {
     switchEveryoneCantUnmute.checked = !!moderator.audio_cant_unmute;
     switchEveryoneCantUnhide.checked = !!moderator.video_cant_unhide;
     switchEveryoneCantShareScreen.checked = !!moderator.screen_cant_share;
+    switchEveryoneCantDrawScreenAnnotations.checked = !!moderator.screen_annotations_cant_draw;
     switchEveryoneCantChatPrivately.checked = !!moderator.chat_cant_privately;
     switchEveryoneCantChatPublicly.checked = !!moderator.chat_cant_publicly;
     switchEveryoneCantChatChatGPT.checked = !!moderator.chat_cant_chatgpt;
@@ -356,6 +358,7 @@ function updateModeratorSwitchUI(type, status) {
         audio_cant_unmute: switchEveryoneCantUnmute,
         video_cant_unhide: switchEveryoneCantUnhide,
         screen_cant_share: switchEveryoneCantShareScreen,
+        screen_annotations_cant_draw: switchEveryoneCantDrawScreenAnnotations,
         chat_cant_privately: switchEveryoneCantChatPrivately,
         chat_cant_publicly: switchEveryoneCantChatPublicly,
         chat_cant_chatgpt: switchEveryoneCantChatChatGPT,
@@ -375,6 +378,7 @@ function getModeratorData() {
         audio_cant_unmute: switchEveryoneCantUnmute.checked,
         video_cant_unhide: switchEveryoneCantUnhide.checked,
         screen_cant_share: switchEveryoneCantShareScreen.checked,
+        screen_annotations_cant_draw: switchEveryoneCantDrawScreenAnnotations.checked,
         chat_cant_privately: switchEveryoneCantChatPrivately.checked,
         chat_cant_publicly: switchEveryoneCantChatPublicly.checked,
         chat_cant_chatgpt: switchEveryoneCantChatChatGPT.checked,

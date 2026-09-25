@@ -830,7 +830,8 @@
         "Screen text annotation": "屏幕文本注释",
         "Type annotation": "输入注释",
         "Delete text annotation": "删除文本注释",
-        "Text annotation": "文本注释"
+        "Text annotation": "文本注释",
+        "Presenter-only Screen Annotations": "仅演示者可用的屏幕批注"
     },
     "dialogs": {
         "Edit frame title": "编辑框架标题",
@@ -968,7 +969,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.4.90": "WebRTC SFU v2.4.90",
+        "WebRTC SFU v2.4.91": "WebRTC SFU v2.4.91",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",

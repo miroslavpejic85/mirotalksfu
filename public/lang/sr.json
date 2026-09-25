@@ -830,7 +830,8 @@
         "Screen text annotation": "Tekstualna napomena na ekranu",
         "Type annotation": "Unesite napomenu",
         "Delete text annotation": "Obriši tekstualnu napomenu",
-        "Text annotation": "Tekstualna napomena"
+        "Text annotation": "Tekstualna napomena",
+        "Presenter-only Screen Annotations": "Напомене на екрану само за водитеља"
     },
     "dialogs": {
         "Edit frame title": "Izmeni naslov okvira",
@@ -968,7 +969,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.4.90": "WebRTC SFU v2.4.90",
+        "WebRTC SFU v2.4.91": "WebRTC SFU v2.4.91",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",

@@ -830,7 +830,8 @@
         "Screen text annotation": "Anotasi teks layar",
         "Type annotation": "Ketik anotasi",
         "Delete text annotation": "Hapus anotasi teks",
-        "Text annotation": "Anotasi teks"
+        "Text annotation": "Anotasi teks",
+        "Presenter-only Screen Annotations": "Anotasi layar khusus presenter"
     },
     "dialogs": {
         "Edit frame title": "Edit judul bingkai",
@@ -968,7 +969,7 @@
         "Unmute": "Suarakan",
         "Unmute Video": "Suarakan Video",
         "Username already in use": "Nama pengguna sudah digunakan",
-        "WebRTC SFU v2.4.90": "WebRTC SFU v2.4.90",
+        "WebRTC SFU v2.4.91": "WebRTC SFU v2.4.91",
         "Whiteboard Shortcuts": "Pintasan Papan Tulis",
         "Would you like to continue the room broadcast?": "Apakah Anda ingin melanjutkan siaran ruangan?",
         "Yes": "Ya",

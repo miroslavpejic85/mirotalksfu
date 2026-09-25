@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.90
+ * @version 2.4.91
  *
  */
 
@@ -307,6 +307,7 @@ class RoomClient {
             audio_cant_unmute: false,
             video_cant_unhide: false,
             screen_cant_share: false,
+            screen_annotations_cant_draw: false,
             chat_cant_privately: false,
             chat_cant_publicly: false,
             chat_cant_chatgpt: false,
@@ -6214,6 +6215,7 @@ class RoomClient {
         const btnText = this.getId(textBtnId);
         const camDiv = this.getId(camDivId);
         if (!btnDw || !btnText || !camDiv) return;
+        VideoDrawingOverlay.canDraw = () => !this._moderator.screen_annotations_cant_draw || isPresenter;
         // Wire up the global emit callback (once) so VideoDrawingOverlay
         // can send batched strokes through the signaling server.
         // Translates the local cameraId to a canonical producerId so remote
@@ -10553,6 +10555,13 @@ class RoomClient {
                     'top-end'
                 );
                 break;
+            case 'screen_annotations_cant_draw':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: only presenters can draw screen annotations ${status}`,
+                    'top-end'
+                );
+                break;
             case 'chat_cant_privately':
                 this.userLog(
                     'info',
@@ -12781,6 +12790,10 @@ class RoomClient {
 
     updateRoomModerator(data) {
         if (!isRulesActive || isPresenter) {
+            if (data.type === 'screen_annotations_cant_draw') {
+                this._moderator.screen_annotations_cant_draw = data.status;
+                if (typeof VideoDrawingOverlay !== 'undefined') VideoDrawingOverlay.refreshPermissions();
+            }
             const moderator = this.getModeratorData(data);
             this.socket.emit('updateRoomModerator', moderator);
         }
@@ -12831,6 +12844,11 @@ class RoomClient {
                 this._moderator.screen_cant_share = data.status;
                 rc.roomMessage('screen_cant_share', data.status);
                 break;
+            case 'screen_annotations_cant_draw':
+                this._moderator.screen_annotations_cant_draw = data.status;
+                if (typeof VideoDrawingOverlay !== 'undefined') VideoDrawingOverlay.refreshPermissions();
+                rc.roomMessage('screen_annotations_cant_draw', data.status);
+                break;
             case 'chat_cant_privately':
                 this._moderator.chat_cant_privately = data.status;
                 rc.roomMessage('chat_cant_privately', data.status);
@@ -12860,6 +12878,7 @@ class RoomClient {
 
     handleUpdateRoomModeratorALL(data) {
         this._moderator = data;
+        if (typeof VideoDrawingOverlay !== 'undefined') VideoDrawingOverlay.refreshPermissions();
         console.log('Update Room Moderator data all', this._moderator);
         // Reflect the full moderator state on the switches so every presenter stays aligned
         if (typeof loadModeratorDataFromRoom === 'function') loadModeratorDataFromRoom();
