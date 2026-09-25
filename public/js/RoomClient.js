@@ -5762,13 +5762,20 @@ class RoomClient {
     }
 
     autoPinLocalScreenShare(screenProducerId = this.screenProducerId) {
-        if (this.isMobileDevice || this.isVideoPinned || !screenProducerId) return false;
-        if (this.producerLabel.has(mediaType.video)) return false;
-        if (participantsCount <= 1) return false;
+        if (this.isMobileDevice || !screenProducerId) return false;
+        if (participantsCount <= 1 && !this.producerLabel.has(mediaType.video)) return false;
 
         const screenElement = this.getId(screenProducerId);
         const pinButton = this.getId(`${screenProducerId}__pin`);
         if (!screenElement || !pinButton) return false;
+        if (this.isVideoPinned && this.pinnedVideoPlayerId === screenElement.id) return true;
+
+        if (this.isVideoPinned && this.pinnedVideoPlayerId) {
+            const pinnedButton = this.getId(`${this.pinnedVideoPlayerId}__pin`);
+            if (!pinnedButton) return false;
+            pinnedButton.click();
+            if (this.isVideoPinned) return false;
+        }
 
         pinButton.click();
         return this.isVideoPinned && this.pinnedVideoPlayerId === screenElement.id;
