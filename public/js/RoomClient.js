@@ -3367,8 +3367,8 @@ class RoomClient {
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
-                BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
                 BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(tx);
+                BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
                 BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
                 if (BUTTONS.producerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
 
@@ -4179,8 +4179,8 @@ class RoomClient {
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
-                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(dw);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(tx);
+                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(dw);
                 BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
 
                 if (BUTTONS.consumerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
