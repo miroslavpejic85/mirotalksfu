@@ -333,6 +333,7 @@ class VideoDrawingOverlay {
 
         this.fabricCanvas.requestRenderAll();
         this._positionTextAnnotations();
+        this._constrainToolbarPosition();
 
         this._prevWidth = newWidth;
         this._prevHeight = newHeight;
@@ -368,7 +369,9 @@ class VideoDrawingOverlay {
 
         const toolbar = document.createElement('div');
         toolbar.className = 'video-drawing-toolbar';
-        toolbar.setAttribute('aria-label', 'Screen annotation tools');
+        toolbar.setAttribute('role', 'toolbar');
+        toolbar.setAttribute('aria-orientation', 'horizontal');
+        this._setTranslatedAttribute(toolbar, 'aria-label', 'Screen annotation tools', 'labels');
 
         const dragHandle = this._createToolbarButton(
             'video-drawing-drag-handle fas fa-arrows-alt',
@@ -376,6 +379,7 @@ class VideoDrawingOverlay {
         );
         toolbar.appendChild(dragHandle);
 
+        const drawingTools = this._createToolbarGroup('Drawing tools');
         const tools = [
             ['pencil', 'fas fa-pencil-alt', 'Pencil'],
             ['highlighter', 'fas fa-highlighter', 'Highlighter'],
@@ -393,10 +397,12 @@ class VideoDrawingOverlay {
                 this.lastDrawingTool = tool;
                 this.setTool(tool);
             });
-            toolbar.appendChild(button);
+            drawingTools.appendChild(button);
             this.toolButtons[tool] = button;
         }
+        toolbar.appendChild(drawingTools);
 
+        const appearanceTools = this._createToolbarGroup('Annotation appearance');
         const colorInput = document.createElement('input');
         colorInput.type = 'color';
         colorInput.value = this.annotationColor;
@@ -406,7 +412,7 @@ class VideoDrawingOverlay {
             this.annotationColor = colorInput.value;
             this._setupBrush();
         });
-        toolbar.appendChild(colorInput);
+        appearanceTools.appendChild(colorInput);
 
         const widthInput = document.createElement('input');
         widthInput.type = 'range';
@@ -420,17 +426,19 @@ class VideoDrawingOverlay {
             this.annotationWidth = Number(widthInput.value);
             this._setupBrush();
         });
-        toolbar.appendChild(widthInput);
+        appearanceTools.appendChild(widthInput);
+        toolbar.appendChild(appearanceTools);
 
+        const historyTools = this._createToolbarGroup('Annotation history');
         this.undoButton = this._createToolbarButton('fas fa-undo', 'Undo annotation');
         this.undoButton.disabled = true;
         this.undoButton.addEventListener('click', () => this.undo());
-        toolbar.appendChild(this.undoButton);
+        historyTools.appendChild(this.undoButton);
 
         this.redoButton = this._createToolbarButton('fas fa-redo', 'Redo annotation');
         this.redoButton.disabled = true;
         this.redoButton.addEventListener('click', () => this.redo());
-        toolbar.appendChild(this.redoButton);
+        historyTools.appendChild(this.redoButton);
 
         this.deleteButton = this._createToolbarButton(
             'video-drawing-delete fas fa-trash-alt',
@@ -438,7 +446,8 @@ class VideoDrawingOverlay {
         );
         this.deleteButton.disabled = true;
         this.deleteButton.addEventListener('click', () => this.deleteSelectedAnnotation());
-        toolbar.appendChild(this.deleteButton);
+        historyTools.appendChild(this.deleteButton);
+        toolbar.appendChild(historyTools);
 
         const clearLabel =
             VideoDrawingOverlay.getLocalDrawerId?.() === VideoDrawingOverlay.getProducerOwnerId?.(this.producerId)
@@ -451,6 +460,7 @@ class VideoDrawingOverlay {
         const closeButton = this._createToolbarButton('video-drawing-close fas fa-times', 'Hide annotation toolbar');
         closeButton.addEventListener('click', () => this.setToolbarCollapsed(true));
         toolbar.appendChild(closeButton);
+        toolbar.addEventListener('keydown', (event) => this._handleToolbarKeyDown(event));
 
         this.toolbar = toolbar;
         this.cameraDivEl.appendChild(toolbar);
@@ -485,6 +495,33 @@ class VideoDrawingOverlay {
         return button;
     }
 
+    _createToolbarGroup(label) {
+        const group = document.createElement('div');
+        group.className = 'video-drawing-toolbar-group';
+        group.setAttribute('role', 'group');
+        this._setTranslatedAttribute(group, 'aria-label', label, 'labels');
+        return group;
+    }
+
+    _handleToolbarKeyDown(event) {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key) || event.target.tagName !== 'BUTTON') {
+            return;
+        }
+        const buttons = [...this.toolbar.querySelectorAll('button:not(:disabled)')].filter(
+            (button) => button.offsetParent !== null
+        );
+        const currentIndex = buttons.indexOf(event.target);
+        if (currentIndex === -1) return;
+        event.preventDefault();
+        const nextIndex =
+            event.key === 'Home'
+                ? 0
+                : event.key === 'End'
+                  ? buttons.length - 1
+                  : (currentIndex + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length;
+        buttons[nextIndex].focus();
+    }
+
     _setTranslatedAttribute(element, attribute, source, namespace) {
         const property = `__i18nAttr_${attribute}`;
         element[property] = source;
@@ -493,6 +530,7 @@ class VideoDrawingOverlay {
 
     _bindToolbarDrag(toolbar, dragHandle) {
         let drag = null;
+        const moveToolbar = (left, top) => this._setToolbarPosition(left, top);
         dragHandle.addEventListener('pointerdown', (event) => {
             if (event.button > 0) return;
             event.preventDefault();
@@ -503,9 +541,7 @@ class VideoDrawingOverlay {
             const left = (toolbarRect.left - parentRect.left) / scaleX;
             const top = (toolbarRect.top - parentRect.top) / scaleY;
 
-            toolbar.style.left = `${left}px`;
-            toolbar.style.top = `${top}px`;
-            toolbar.style.transform = 'none';
+            moveToolbar(left, top);
             drag = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, left, top };
             dragHandle.setPointerCapture(event.pointerId);
         });
@@ -514,13 +550,10 @@ class VideoDrawingOverlay {
             const parentRect = this.cameraDivEl.getBoundingClientRect();
             const scaleX = this.cameraDivEl.offsetWidth ? parentRect.width / this.cameraDivEl.offsetWidth : 1;
             const scaleY = this.cameraDivEl.offsetHeight ? parentRect.height / this.cameraDivEl.offsetHeight : 1;
-            const maxLeft = Math.max(0, this.cameraDivEl.clientWidth - toolbar.offsetWidth);
-            const maxTop = Math.max(0, this.cameraDivEl.clientHeight - toolbar.offsetHeight);
             const left = drag.left + (event.clientX - drag.clientX) / scaleX;
             const top = drag.top + (event.clientY - drag.clientY) / scaleY;
 
-            toolbar.style.left = `${Math.max(0, Math.min(maxLeft, left))}px`;
-            toolbar.style.top = `${Math.max(0, Math.min(maxTop, top))}px`;
+            moveToolbar(left, top);
         });
         const finishDrag = (event) => {
             if (!drag || drag.pointerId !== event.pointerId) return;
@@ -528,11 +561,43 @@ class VideoDrawingOverlay {
         };
         dragHandle.addEventListener('pointerup', finishDrag);
         dragHandle.addEventListener('pointercancel', finishDrag);
+        dragHandle.addEventListener('keydown', (event) => {
+            if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const step = event.shiftKey ? 24 : 8;
+            const left = Number.parseFloat(toolbar.style.left) || toolbar.offsetLeft;
+            const top = Number.parseFloat(toolbar.style.top) || toolbar.offsetTop;
+            moveToolbar(
+                left + (event.key === 'ArrowRight' ? step : event.key === 'ArrowLeft' ? -step : 0),
+                top + (event.key === 'ArrowDown' ? step : event.key === 'ArrowUp' ? -step : 0)
+            );
+        });
+    }
+
+    _setToolbarPosition(left, top) {
+        if (!this.toolbar) return;
+        const maxLeft = Math.max(0, this.cameraDivEl.clientWidth - this.toolbar.offsetWidth);
+        const maxTop = Math.max(0, this.cameraDivEl.clientHeight - this.toolbar.offsetHeight);
+        this.toolbar.style.left = `${Math.max(0, Math.min(maxLeft, left))}px`;
+        this.toolbar.style.top = `${Math.max(0, Math.min(maxTop, top))}px`;
+        this.toolbar.style.transform = 'none';
+    }
+
+    _constrainToolbarPosition() {
+        if (!this.toolbar || this.toolbar.style.transform !== 'none') return;
+        this._setToolbarPosition(
+            Number.parseFloat(this.toolbar.style.left) || 0,
+            Number.parseFloat(this.toolbar.style.top) || 0
+        );
     }
 
     setToolbarCollapsed(collapsed) {
         this.isToolbarCollapsed = collapsed;
         this.toolbar?.classList.toggle('video-drawing-toolbar-collapsed', collapsed);
+        if (collapsed && this.toolbar?.contains(document.activeElement) && !this.drawingButton?.hidden) {
+            this.drawingButton?.focus();
+        }
     }
 
     setTool(tool) {

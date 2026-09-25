@@ -79,6 +79,8 @@
 .pinned-video-container {
     position: relative;
     overflow: hidden;
+    container-type: inline-size;
+    container-name: camera;
 }
 
 .pinned-video-container .user-hand {
@@ -635,17 +637,33 @@ input[type='range'] {
     left: 50%;
     display: none !important;
     align-items: center;
-    justify-content: center;
-    gap: 4px;
+    justify-content: flex-start;
+    gap: 3px;
     box-sizing: border-box;
     width: max-content;
     max-width: calc(100% - 16px);
-    padding: 5px;
+    padding: 4px;
     border: var(--border);
     border-radius: 8px;
     background: rgba(18, 18, 18, 0.92);
     box-shadow: var(--box-shadow);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
     transform: translateX(-50%);
+}
+
+.video-drawing-toolbar::-webkit-scrollbar {
+    display: none;
+}
+
+.video-drawing-toolbar-group {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 3px;
+    padding-right: 3px;
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .video-drawing-toolbar.video-drawing-toolbar-active {
@@ -658,11 +676,11 @@ input[type='range'] {
 
 .video-drawing-toolbar button {
     display: inline-flex;
-    flex: 0 0 34px;
+    flex: 0 0 36px;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     padding: 0;
     border: 0;
     border-radius: 5px;
@@ -695,9 +713,9 @@ input[type='range'] {
 }
 
 .video-drawing-color {
-    flex: 0 0 34px;
-    width: 34px;
-    height: 34px;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
     padding: 3px;
     border: 0;
     border-radius: 5px;
@@ -717,21 +735,13 @@ input[type='range'] {
     cursor: pointer;
 }
 
-@media (max-width: 768px) {
+@container camera (max-width: 720px) {
     .video-drawing-toolbar {
         top: 48px !important;
         left: 50% !important;
-        justify-content: flex-start;
         width: calc(100% - 16px);
-        overflow-x: auto;
-        overscroll-behavior-x: contain;
-        scrollbar-width: none;
         touch-action: pan-x;
         transform: translateX(-50%);
-    }
-
-    .video-drawing-toolbar::-webkit-scrollbar {
-        display: none;
     }
 
     .video-drawing-toolbar .video-drawing-drag-handle {
