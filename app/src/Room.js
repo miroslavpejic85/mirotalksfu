@@ -76,6 +76,7 @@ module.exports = class Room {
         this.videoAISessionTimeLimit = config?.integrations?.videoAI?.sessionTimeLimit || 0;
         this.peers = new Map();
         this.videoTextAnnotations = new Map();
+        this.videoDrawingAnnotations = new Map();
         this.bannedPeers = new Map(); // uuid -> timestamp, with TTL-based expiration
         this.webRtcTransport = config.mediasoup.webRtcTransport;
         this.router = null;
@@ -529,6 +530,10 @@ module.exports = class Room {
                     producer.appData.mediaType === 'screenType'
                         ? Array.from(this.videoTextAnnotations.get(producer.id)?.values() || [])
                         : [];
+                const drawingAnnotations =
+                    producer.appData.mediaType === 'screenType'
+                        ? Array.from(this.videoDrawingAnnotations.get(producer.id)?.values() || [])
+                        : [];
                 producerList.push({
                     producer_id: producer.id,
                     producer_socket_id: peerId,
@@ -536,6 +541,7 @@ module.exports = class Room {
                     peer_info: peer_info,
                     type: producer.appData.mediaType,
                     text_annotations: textAnnotations,
+                    drawing_annotations: drawingAnnotations,
                 });
             });
         });
@@ -572,6 +578,17 @@ module.exports = class Room {
         this.videoTextAnnotations.delete(producerId);
     }
 
+    getVideoDrawingAnnotations(producerId) {
+        if (!this.videoDrawingAnnotations.has(producerId)) {
+            this.videoDrawingAnnotations.set(producerId, new Map());
+        }
+        return this.videoDrawingAnnotations.get(producerId);
+    }
+
+    clearVideoDrawingAnnotations(producerId) {
+        this.videoDrawingAnnotations.delete(producerId);
+    }
+
     removePeer(socket_id) {
         if (!this.peers.has(socket_id)) return;
 
@@ -579,6 +596,7 @@ module.exports = class Room {
 
         for (const producerId of peer.producers.keys()) {
             this.clearVideoTextAnnotations(producerId);
+            this.clearVideoDrawingAnnotations(producerId);
         }
 
         peer.close();
@@ -897,6 +915,7 @@ module.exports = class Room {
         try {
             peer.closeProducer(producer_id);
             this.clearVideoTextAnnotations(producer_id);
+            this.clearVideoDrawingAnnotations(producer_id);
         } catch (error) {
             log.error(`Error closing producer for peer ${socket_id}`, error);
             throw new Error(`Error closing producer with ID ${producer_id} for peer ${socket_id}`);

@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.83
+ * @version 2.4.84
  *
  */
 
@@ -4066,7 +4066,7 @@ function startServer() {
             room.broadCast(socket.id, 'whiteboardAction', data);
         });
 
-        // Video drawing overlay: relay pen strokes and persist screen text annotations.
+        // Video drawing overlay: relay temporary strokes and persist screen annotations.
         socket.on('videoDrawing', (dataObject) => {
             if (!roomExists(socket)) return;
             const data = checkXSS(dataObject);
@@ -4078,6 +4078,115 @@ function startServer() {
 
             data.drawerId = socket.id;
             data.peer_name = peer.peer_info?.peer_name || peer.peer_name;
+
+            if (data.type === 'annotation') {
+                const { action, annotationId, producerId } = data;
+                const annotations = room.getVideoDrawingAnnotations(producerId);
+                const producerOwnerId = room.getProducerOwnerId(producerId);
+
+                if (action === 'clear') {
+                    const clearAll = socket.id === producerOwnerId;
+                    for (const [id, annotation] of annotations) {
+                        if (clearAll || annotation.drawerId === socket.id) annotations.delete(id);
+                    }
+                    room.broadCast(socket.id, 'videoDrawing', {
+                        type: 'annotation',
+                        action,
+                        producerId,
+                        drawerId: socket.id,
+                        clearAll,
+                    });
+                    return;
+                }
+
+                const validAnnotationId =
+                    typeof annotationId === 'string' && annotationId.length > 0 && annotationId.length <= 100;
+                const validPoints =
+                    Array.isArray(data.points) &&
+                    data.points.length >= 2 &&
+                    data.points.length <= 2048 &&
+                    data.points.every(
+                        (point) =>
+                            point &&
+                            Number.isFinite(point.x) &&
+                            Number.isFinite(point.y) &&
+                            point.x >= 0 &&
+                            point.x <= 1 &&
+                            point.y >= 0 &&
+                            point.y <= 1
+                    );
+                const annotation = annotations.get(annotationId);
+
+                if (action === 'move') {
+                    if (
+                        !validAnnotationId ||
+                        !validPoints ||
+                        !annotation ||
+                        (socket.id !== annotation.drawerId && socket.id !== producerOwnerId)
+                    ) {
+                        return;
+                    }
+                    annotation.points = data.points;
+                    room.broadCast(socket.id, 'videoDrawing', {
+                        type: 'annotation',
+                        action,
+                        producerId,
+                        annotationId,
+                        points: data.points,
+                    });
+                    return;
+                }
+
+                if (action === 'delete') {
+                    if (
+                        !validAnnotationId ||
+                        !annotation ||
+                        (socket.id !== annotation.drawerId && socket.id !== producerOwnerId)
+                    ) {
+                        return;
+                    }
+                    annotations.delete(annotationId);
+                    room.broadCast(socket.id, 'videoDrawing', {
+                        type: 'annotation',
+                        action,
+                        producerId,
+                        annotationId,
+                    });
+                    return;
+                }
+
+                const validTool = ['pencil', 'highlighter', 'circle'].includes(data.tool);
+                const validColor = typeof data.color === 'string' && /^#[0-9a-f]{6}$/i.test(data.color);
+                const validWidth = Number.isFinite(data.width) && data.width >= 0.001 && data.width <= 0.05;
+                if (
+                    action !== 'create' ||
+                    !validAnnotationId ||
+                    !validTool ||
+                    !validColor ||
+                    !validWidth ||
+                    !validPoints ||
+                    annotations.has(annotationId) ||
+                    annotations.size >= 500
+                ) {
+                    return;
+                }
+
+                const newAnnotation = {
+                    type: 'annotation',
+                    action: 'create',
+                    producerId,
+                    annotationId,
+                    drawerId: socket.id,
+                    peer_name: data.peer_name,
+                    tool: data.tool,
+                    color: data.color,
+                    width: data.width,
+                    points: data.points,
+                };
+                annotations.set(annotationId, newAnnotation);
+                room.broadCast(socket.id, 'videoDrawing', newAnnotation);
+                return;
+            }
 
             if (data.type === 'text') {
                 const { action, annotationId, producerId } = data;

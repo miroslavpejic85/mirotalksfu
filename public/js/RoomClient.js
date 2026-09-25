@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.83
+ * @version 2.4.84
  *
  */
 
@@ -1464,7 +1464,14 @@ class RoomClient {
                 return;
             }
 
-            for (let { producer_id, peer_name, peer_info, type, text_annotations = [] } of data) {
+            for (let {
+                producer_id,
+                peer_name,
+                peer_info,
+                type,
+                text_annotations = [],
+                drawing_annotations = [],
+            } of data) {
                 // Skip own producers to prevent echo from self-consumption
                 if (peer_info.peer_id === this.peer_id) {
                     console.warn('Skipping own producer to prevent echo', { producer_id, type });
@@ -1472,6 +1479,9 @@ class RoomClient {
                 }
                 await this.consume(producer_id, peer_name, peer_info, type);
                 for (const annotation of text_annotations) {
+                    this.handleVideoDrawing(annotation);
+                }
+                for (const annotation of drawing_annotations) {
                     this.handleVideoDrawing(annotation);
                 }
             }
@@ -6154,7 +6164,7 @@ class RoomClient {
 
     handleVideoDrawing(data) {
         if (typeof VideoDrawingOverlay === 'undefined') return;
-        if (!data || !data.producerId || (data.type !== 'text' && !data.paths)) return;
+        if (!data || !data.producerId || (data.type !== 'text' && data.type !== 'annotation' && !data.paths)) return;
         // Translate the canonical producerId to our local camera div ID.
         // If we are the producer, the div is {producerId}__video.
         // If we are a consumer of that producer, the div is {consumerId}__video.
@@ -6178,6 +6188,11 @@ class RoomClient {
             text: data.text,
             x: data.x,
             y: data.y,
+            tool: data.tool,
+            color: data.color,
+            width: data.width,
+            points: data.points,
+            clearAll: data.clearAll,
         });
     }
 
@@ -6197,8 +6212,8 @@ class RoomClient {
             VideoDrawingOverlay.getProducerOwnerId = (producerId) =>
                 this.producerLabel.get(mediaType.screen) === producerId ? this.socket.id : null;
             VideoDrawingOverlay.onEmitDrawing = (data) => {
-                // Text annotations must reach the server even while alone so late joiners can replay them.
-                if (data.type !== 'text' && !this.thereAreParticipants()) return;
+                // Persistent annotations must reach the server even while alone so late joiners can replay them.
+                if (!['text', 'annotation'].includes(data.type) && !this.thereAreParticipants()) return;
 
                 // cameraId format: "{id}__video" — extract the base ID
                 const baseId = data.cameraId?.replace('__video', '');
@@ -6223,20 +6238,7 @@ class RoomClient {
         const baseId = camDiv.id.replace('__video', '');
         const producerId = this.getProducerIdByConsumerId(baseId) || baseId;
         const overlay = VideoDrawingOverlay.getOrCreate(camDiv, producerId);
-
-        const toggleTool = (tool) => {
-            if (typeof VideoDrawingOverlay === 'undefined') {
-                return console.warn('[handleDW] VideoDrawingOverlay not loaded');
-            }
-            // Privacy mode check
-            const video = camDiv.querySelector('video');
-            if (video && video.classList.contains('videoCircle')) {
-                return this.userLog('info', 'Drawing not allowed in privacy mode', 'top-end');
-            }
-            overlay.toggle(tool, { pen: btnDw, text: btnText });
-        };
-        btnDw.addEventListener('click', () => toggleTool('pen'));
-        btnText.addEventListener('click', () => toggleTool('text'));
+        overlay.bindControls(btnDw, btnText);
     }
 
     // ####################################################

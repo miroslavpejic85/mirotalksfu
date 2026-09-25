@@ -6,9 +6,9 @@ const { EventEmitter } = require('events');
 const Room = require('../app/src/Room');
 
 describe('test-Room', () => {
-    it('includes persistent text annotations with an existing screen producer', () => {
+    it('includes persistent annotations with an existing screen producer', () => {
         const room = Object.create(Room.prototype);
-        const annotation = {
+        const textAnnotation = {
             type: 'text',
             action: 'create',
             producerId: 'screen-producer-id',
@@ -17,7 +17,26 @@ describe('test-Room', () => {
             x: 0.25,
             y: 0.5,
         };
-        room.videoTextAnnotations = new Map([['screen-producer-id', new Map([[annotation.annotationId, annotation]])]]);
+        const drawingAnnotation = {
+            type: 'annotation',
+            action: 'create',
+            producerId: 'screen-producer-id',
+            annotationId: 'drawing-id',
+            drawerId: 'drawer-id',
+            tool: 'circle',
+            color: '#ff0000',
+            width: 0.004,
+            points: [
+                { x: 0.25, y: 0.5 },
+                { x: 0.4, y: 0.5 },
+            ],
+        };
+        room.videoTextAnnotations = new Map([
+            ['screen-producer-id', new Map([[textAnnotation.annotationId, textAnnotation]])],
+        ]);
+        room.videoDrawingAnnotations = new Map([
+            ['screen-producer-id', new Map([[drawingAnnotation.annotationId, drawingAnnotation]])],
+        ]);
         room.peers = new Map([
             [
                 'screen-owner-id',
@@ -35,7 +54,8 @@ describe('test-Room', () => {
         const producers = room.getProducerListForPeer('joining-peer-id');
 
         producers.should.have.length(1);
-        producers[0].text_annotations.should.deepEqual([annotation]);
+        producers[0].text_annotations.should.deepEqual([textAnnotation]);
+        producers[0].drawing_annotations.should.deepEqual([drawingAnnotation]);
     });
 
     it('recognizes only active screenType producers as screen shares', () => {
