@@ -2522,7 +2522,7 @@ function handleButtons() {
         rc.toggleParticipants();
     };
     participantsInviteBtn.onclick = () => {
-        shareRoom();
+        shareRoom(true);
     };
     participantsCopyInviteLinkBtn.onclick = () => {
         copyRoomURL();
