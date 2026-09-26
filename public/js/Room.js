@@ -5478,14 +5478,20 @@ function setupQuickDeviceSwitchDropdowns() {
         menuEl.appendChild(divider);
     }
 
-    function appendMenuToggle(menuEl, id, labelText, sourceControl, changeHandler = null) {
+    function appendMenuToggle(menuEl, id, labelText, sourceControl, changeHandler = null, iconClass = null) {
         const toggleRow = document.createElement('div');
         toggleRow.className = 'device-menu-toggle-row';
 
         const label = document.createElement('label');
         label.className = 'title';
         label.htmlFor = id;
-        label.textContent = labelText;
+        if (iconClass) {
+            const icon = document.createElement('i');
+            icon.className = iconClass;
+            icon.setAttribute('aria-hidden', 'true');
+            label.appendChild(icon);
+        }
+        label.appendChild(document.createTextNode(labelText));
 
         const switchDiv = document.createElement('div');
         switchDiv.className = 'form-check form-switch form-switch-md title';
@@ -5590,7 +5596,8 @@ function setupQuickDeviceSwitchDropdowns() {
                         .forEach((imageElement) => imageElement.classList.remove('vb-selected'));
                     const selectedControl = getId(checked ? 'highBlurImg' : 'cleanVbImg');
                     if (selectedControl) selectedControl.classList.add('vb-selected');
-                }
+                },
+                'fa-solid fa-wand-magic-sparkles'
             );
 
             const virtualBgBtn = document.createElement('button');

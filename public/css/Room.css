@@ -1262,6 +1262,17 @@ body {
     margin: 0;
 }
 
+.device-menu-toggle-row label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.device-menu-toggle-row label i {
+    width: 18px;
+    text-align: center;
+}
+
 /* Live audio input level meter inside the audio device menu */
 #bottomButtons #startAudioDeviceMenu button .device-menu-label {
     flex: 1 1 auto;
