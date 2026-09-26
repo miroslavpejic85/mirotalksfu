@@ -2378,7 +2378,7 @@ class RoomClient {
                     codecs: codec,
                 });
                 params.encodings = encodings;
-                params.codecs = codec;
+                params.codec = codec;
                 params.codecOptions = {
                     videoGoogleStartBitrate: 1000,
                 };
@@ -2391,7 +2391,7 @@ class RoomClient {
                     codecs: codec,
                 });
                 params.encodings = encodings;
-                params.codecs = codec;
+                params.codec = codec;
                 params.codecOptions = {
                     videoGoogleStartBitrate: 1000,
                 };
@@ -3029,6 +3029,12 @@ class RoomClient {
                 }
             }
         }
+
+        if (this.device.handlerName === 'Safari12' && encodings?.length > 1) {
+            console.warn('Safari legacy simulcast disabled: using browser-default single-stream encoding');
+            encodings = undefined;
+        }
+
         return { encodings, codec };
     }
 
