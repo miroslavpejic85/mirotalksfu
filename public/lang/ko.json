@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "화살표 추가",
-        "Clear my screen annotations": "내 화면 주석 지우기",
         "Add frame": "프레임 추가",
         "Group selection": "선택 항목 그룹화",
         "Ungroup selection": "선택 항목 그룹 해제",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "초대 링크 복사",
+        "Invite...": "초대...",
+        "Participant actions": "참가자 작업"
     },
     "labels": {
         "= Arrow": "= 화살표",

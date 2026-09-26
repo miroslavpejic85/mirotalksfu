@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Добавить стрелку",
-        "Clear my screen annotations": "Очистить мои аннотации на экране",
         "Add frame": "Добавить рамку",
         "Group selection": "Сгруппировать выбранное",
         "Ungroup selection": "Разгруппировать выбранное",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Копировать ссылку-приглашение",
+        "Invite...": "Пригласить...",
+        "Participant actions": "Действия участников"
     },
     "labels": {
         "= Arrow": "= Стрелка",

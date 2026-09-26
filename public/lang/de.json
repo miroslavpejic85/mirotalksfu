@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Pfeil hinzufügen",
-        "Clear my screen annotations": "Meine Bildschirmanmerkungen löschen",
         "Add frame": "Rahmen hinzufügen",
         "Group selection": "Auswahl gruppieren",
         "Ungroup selection": "Gruppierung der Auswahl aufheben",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Einladungslink kopieren",
+        "Invite...": "Einladen...",
+        "Participant actions": "Teilnehmeraktionen"
     },
     "labels": {
         "= Arrow": "= Pfeil",

@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "矢印を追加",
-        "Clear my screen annotations": "自分の画面注釈を消去",
         "Add frame": "フレームを追加",
         "Group selection": "選択項目をグループ化",
         "Ungroup selection": "選択項目のグループ化を解除",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "招待リンクをコピー",
+        "Invite...": "招待...",
+        "Participant actions": "参加者の操作"
     },
     "labels": {
         "= Arrow": "= 矢印",

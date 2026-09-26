@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Ajouter une flèche",
-        "Clear my screen annotations": "Effacer mes annotations d’écran",
         "Add frame": "Ajouter un cadre",
         "Group selection": "Grouper la sélection",
         "Ungroup selection": "Dissocier la sélection",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Copier le lien d’invitation",
+        "Invite...": "Inviter...",
+        "Participant actions": "Actions des participants"
     },
     "labels": {
         "= Arrow": "= Flèche",

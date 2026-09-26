@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "तीर जोड़ें",
-        "Clear my screen annotations": "मेरे स्क्रीन एनोटेशन साफ़ करें",
         "Add frame": "फ़्रेम जोड़ें",
         "Group selection": "चयन को समूहित करें",
         "Ungroup selection": "चयन का समूह हटाएँ",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "आमंत्रण लिंक कॉपी करें",
+        "Invite...": "आमंत्रित करें...",
+        "Participant actions": "प्रतिभागी कार्रवाइयाँ"
     },
     "labels": {
         "= Arrow": "= तीर",

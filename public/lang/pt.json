@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Adicionar seta",
-        "Clear my screen annotations": "Limpar minhas anotações da tela",
         "Add frame": "Adicionar moldura",
         "Group selection": "Agrupar seleção",
         "Ungroup selection": "Desagrupar seleção",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Copiar link do convite",
+        "Invite...": "Convidar...",
+        "Participant actions": "Ações dos participantes"
     },
     "labels": {
         "= Arrow": "= Seta",

@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Ok ekle",
-        "Clear my screen annotations": "Ekran ek açıklamalarımı temizle",
         "Add frame": "Çerçeve ekle",
         "Group selection": "Seçimi grupla",
         "Ungroup selection": "Seçimin grubunu çöz",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Davet bağlantısını kopyala",
+        "Invite...": "Davet et...",
+        "Participant actions": "Katılımcı işlemleri"
     },
     "labels": {
         "= Arrow": "= Ok",

@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Nyíl hozzáadása",
-        "Clear my screen annotations": "Saját képernyőjegyzetek törlése",
         "Add frame": "Keret hozzáadása",
         "Group selection": "Kijelölés csoportosítása",
         "Ungroup selection": "Kijelölés csoportbontása",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Meghívó hivatkozás másolása",
+        "Invite...": "Meghívás...",
+        "Participant actions": "Résztvevői műveletek"
     },
     "labels": {
         "= Arrow": "= Nyíl",

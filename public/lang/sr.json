@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Dodaj strelicu",
-        "Clear my screen annotations": "Обриши моје напомене на екрану",
         "Add frame": "Dodaj okvir",
         "Group selection": "Grupiši izbor",
         "Ungroup selection": "Razgrupiši izbor",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Kopiraj link pozivnice",
+        "Invite...": "Pozovi...",
+        "Participant actions": "Radnje učesnika"
     },
     "labels": {
         "= Arrow": "= Strelica",

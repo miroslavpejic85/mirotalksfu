@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Tambah panah",
-        "Clear my screen annotations": "Hapus anotasi layar saya",
         "Add frame": "Tambah bingkai",
         "Group selection": "Kelompokkan pilihan",
         "Ungroup selection": "Pisahkan pilihan",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Salin tautan undangan",
+        "Invite...": "Undang...",
+        "Participant actions": "Tindakan peserta"
     },
     "labels": {
         "= Arrow": "= Panah",

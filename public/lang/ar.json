@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "إضافة سهم",
-        "Clear my screen annotations": "مسح تعليقاتي التوضيحية على الشاشة",
         "Add frame": "إضافة إطار",
         "Group selection": "تجميع التحديد",
         "Ungroup selection": "فك تجميع التحديد",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "نسخ رابط الدعوة",
+        "Invite...": "دعوة...",
+        "Participant actions": "إجراءات المشاركين"
     },
     "labels": {
         "= Arrow": "= سهم",

@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "添加箭头",
-        "Clear my screen annotations": "清除我的屏幕批注",
         "Add frame": "添加框架",
         "Group selection": "组合所选对象",
         "Ungroup selection": "取消组合所选对象",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "复制邀请链接",
+        "Invite...": "邀请...",
+        "Participant actions": "参会者操作"
     },
     "labels": {
         "= Arrow": "= 箭头",

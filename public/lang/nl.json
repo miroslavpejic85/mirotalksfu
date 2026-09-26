@@ -159,7 +159,6 @@
     },
     "buttons": {
         "Add arrow": "Pijl toevoegen",
-        "Clear my screen annotations": "Mijn schermaantekeningen wissen",
         "Add frame": "Kader toevoegen",
         "Group selection": "Selectie groeperen",
         "Ungroup selection": "Selectie degroeperen",
@@ -360,7 +359,11 @@
         "Transcription status": "Transcription status",
         "Transparency": "Transparency",
         "Unlock editor": "Unlock editor",
-        "Unlock whiteboard": "Unlock whiteboard"
+        "Unlock whiteboard": "Unlock whiteboard",
+        "Add diamond": "Add diamond",
+        "Copy invite link": "Uitnodigingslink kopiëren",
+        "Invite...": "Uitnodigen...",
+        "Participant actions": "Deelnemersacties"
     },
     "labels": {
         "= Arrow": "= Pijl",
