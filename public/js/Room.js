@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.93
+ * @version 2.4.94
  *
  */
 
@@ -236,6 +236,9 @@ const settingsExtraToggle = getId('settingsExtraToggle');
 const settingsExtraMenu = getId('settingsExtraMenu');
 const noExtraButtons = getId('noExtraButtons');
 const copyRoomUrlBtn = getId('copyRoomUrlBtn');
+const participantsSplit = getId('participantsSplit');
+const participantsInviteBtn = getId('participantsInviteBtn');
+const participantsCopyInviteLinkBtn = getId('participantsCopyInviteLinkBtn');
 
 const exitDropdown = getId('exitDropdown');
 const exitMenu = getId('exitMenu');
@@ -1841,7 +1844,7 @@ function roomIsReady() {
         hide(tabRecordingBtn);
     }
     BUTTONS.main.chatButton && show(chatButton);
-    BUTTONS.main.participantsButton && show(participantsButton);
+    BUTTONS.main.participantsButton && show(participantsSplit);
     BUTTONS.main.pollButton && show(pollButton);
     BUTTONS.main.editorButton && show(editorButton);
     BUTTONS.main.raiseHandButton && show(raiseHandButton);
@@ -2517,6 +2520,12 @@ function handleButtons() {
     };
     participantsButton.onclick = async () => {
         rc.toggleParticipants();
+    };
+    participantsInviteBtn.onclick = () => {
+        shareRoom();
+    };
+    participantsCopyInviteLinkBtn.onclick = () => {
+        copyRoomURL();
     };
     // Voice Commands
     speechRecButton.onclick = () => {
@@ -8866,7 +8875,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.93',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.94',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
