@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.94
+ * @version 2.4.95
  *
  */
 
@@ -5478,7 +5478,7 @@ function setupQuickDeviceSwitchDropdowns() {
         menuEl.appendChild(divider);
     }
 
-    function appendMenuToggle(menuEl, id, labelText, settingsSwitch) {
+    function appendMenuToggle(menuEl, id, labelText, sourceControl, changeHandler = null) {
         const toggleRow = document.createElement('div');
         toggleRow.className = 'device-menu-toggle-row';
 
@@ -5494,10 +5494,14 @@ function setupQuickDeviceSwitchDropdowns() {
         checkbox.id = id;
         checkbox.type = 'checkbox';
         checkbox.className = 'form-check-input';
-        checkbox.checked = settingsSwitch.checked;
-        checkbox.addEventListener('change', () => {
-            settingsSwitch.checked = checkbox.checked;
-            settingsSwitch.dispatchEvent(new Event('change'));
+        checkbox.checked = typeof sourceControl === 'boolean' ? sourceControl : sourceControl.checked;
+        checkbox.addEventListener('change', async () => {
+            if (changeHandler) {
+                await changeHandler(checkbox.checked);
+                return;
+            }
+            sourceControl.checked = checkbox.checked;
+            sourceControl.dispatchEvent(new Event('change'));
         });
 
         switchDiv.appendChild(checkbox);
@@ -5567,8 +5571,45 @@ function setupQuickDeviceSwitchDropdowns() {
         appendMenuHeader(videoMenu, 'fas fa-video', 'Cameras');
         appendSelectOptions(videoMenu, videoSelect, 'No cameras found', buildVideoMenu);
 
-        // Add settings button
         appendMenuDivider(videoMenu);
+
+        const virtualBackgroundEnabled =
+            isMediaStreamTrackAndTransformerSupported &&
+            (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true);
+
+        if (virtualBackgroundEnabled) {
+            appendMenuToggle(
+                videoMenu,
+                'deviceMenuVirtualBackgroundBlur',
+                'Blur my background',
+                Boolean(virtualBackgroundBlurLevel),
+                async (checked) => {
+                    await rc.applyVirtualBackground(checked ? 20 : null, null, null);
+                    document
+                        .querySelectorAll('#imageGridVideoControls img.vb-selected, #imageGridVideo img.vb-selected')
+                        .forEach((imageElement) => imageElement.classList.remove('vb-selected'));
+                    const selectedControl = getId(checked ? 'highBlurImg' : 'cleanVbImg');
+                    if (selectedControl) selectedControl.classList.add('vb-selected');
+                }
+            );
+
+            const virtualBgBtn = document.createElement('button');
+            virtualBgBtn.type = 'button';
+            virtualBgBtn.className = 'device-menu-action-btn';
+            const virtualBgIcon = document.createElement('i');
+            virtualBgIcon.className = 'fas fa-image';
+            virtualBgBtn.appendChild(virtualBgIcon);
+            virtualBgBtn.appendChild(document.createTextNode(' Choose Background...'));
+            virtualBgBtn.addEventListener('click', () => {
+                rc.toggleMySettings();
+                setTimeout(() => {
+                    tabVirtualBackgroundBtn.click();
+                }, 100);
+            });
+            videoMenu.appendChild(virtualBgBtn);
+        }
+
+        // Add settings button
         const settingsBtn = document.createElement('button');
         settingsBtn.type = 'button';
         settingsBtn.className = 'device-menu-action-btn';
@@ -5584,28 +5625,6 @@ function setupQuickDeviceSwitchDropdowns() {
             }, 100);
         });
         videoMenu.appendChild(settingsBtn);
-
-        // Virtual background button (only when the virtual background feature is enabled)
-        if (
-            isMediaStreamTrackAndTransformerSupported &&
-            (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
-        ) {
-            const virtualBgBtn = document.createElement('button');
-            virtualBgBtn.type = 'button';
-            virtualBgBtn.className = 'device-menu-action-btn';
-            const virtualBgIcon = document.createElement('i');
-            virtualBgIcon.className = 'fas fa-image';
-            virtualBgBtn.appendChild(virtualBgIcon);
-            virtualBgBtn.appendChild(document.createTextNode(' Open Virtual Background'));
-            virtualBgBtn.addEventListener('click', () => {
-                rc.toggleMySettings();
-                // Simulate tab click to open virtual background tab
-                setTimeout(() => {
-                    tabVirtualBackgroundBtn.click();
-                }, 100);
-            });
-            videoMenu.appendChild(virtualBgBtn);
-        }
 
         // Video AI button (mirror the Video AI settings tab: show only when that tab is visible)
         const videoAITabBtn = getId('tabVideoAIBtn');
@@ -8875,7 +8894,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.94',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.95',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

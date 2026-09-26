@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.94
+ * @version 2.4.95
  *
  */
 
@@ -2542,6 +2542,10 @@ class RoomClient {
                 virtualBackgroundTransparent = null;
             }
             await rc.applyVirtualBackground(blurLevel, imgSrc, transparentBg);
+            const menuBlurSwitch = document.getElementById('deviceMenuVirtualBackgroundBlur');
+            if (menuBlurSwitch) {
+                menuBlurSwitch.checked = Boolean(virtualBackgroundBlurLevel);
+            }
         }
 
         // Create clean virtual bg Image
