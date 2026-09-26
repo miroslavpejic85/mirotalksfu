@@ -162,7 +162,12 @@ class VideoDrawingOverlay {
      */
     _setupBrush() {
         const brush = this.fabricCanvas.freeDrawingBrush;
-        brush.color = this.activeTool === 'vanishing' ? VideoDrawingOverlay.BRUSH_COLOR : this.annotationColor;
+        brush.color =
+            this.activeTool === 'vanishing'
+                ? VideoDrawingOverlay.BRUSH_COLOR
+                : this.activeTool === 'highlighter'
+                  ? `${this.annotationColor}59`
+                  : this.annotationColor;
         const width = this.fabricCanvas.getWidth() || this._prevWidth;
         brush.width =
             this.activeTool === 'highlighter'
@@ -832,11 +837,10 @@ class VideoDrawingOverlay {
                 annotation.points.map((point) => ({ x: point.x * width, y: point.y * height })),
                 {
                     fill: null,
-                    stroke: annotation.color,
+                    stroke: annotation.tool === 'highlighter' ? `${annotation.color}59` : annotation.color,
                     strokeWidth: Math.max(2, annotation.width * width),
                     strokeLineCap: 'round',
                     strokeLineJoin: 'round',
-                    opacity: annotation.tool === 'highlighter' ? 0.35 : 1,
                     selectable: false,
                     evented: false,
                     objectCaching: false,
