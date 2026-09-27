@@ -3243,6 +3243,10 @@ body {
     border-radius: 12px;
 }
 
+#mySettings .volume-container {
+    width: min(100%, calc(75% + 74px));
+}
+
 .volume-bar {
     flex: 1;
     height: 5px;
@@ -3269,6 +3273,25 @@ body {
     align-items: center;
     gap: 10px;
     width: 100%;
+}
+
+#mySettings .output-volume-row {
+    display: grid;
+    grid-template-columns: minmax(0, 75%) minmax(0, 25%);
+    gap: 0;
+}
+
+#mySettings .output-volume-slider {
+    width: 100%;
+    margin: 0;
+}
+
+#mySettings .output-volume-value {
+    justify-self: start;
+    width: 64px;
+    min-width: 64px;
+    margin-left: 10px;
+    text-align: center;
 }
 
 .speaker-select-row {
@@ -6695,6 +6718,24 @@ hr {
 .container-flex {
     display: flex;
     flex-direction: column;
+}
+
+.avatar-config-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+#mySettings .avatar-config-row select {
+    width: 100%;
+    max-width: none;
+    margin-top: 0;
+}
+
+@media screen and (max-width: 830px) {
+    .avatar-config-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 #avatarVoicePreview {

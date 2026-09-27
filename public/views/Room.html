@@ -1431,19 +1431,21 @@
                                 </div>
                                 <div id="avatarVideoAIcontainer"></div>
                                 <hr />
-                                <select id="avatarQuality" class="form-select text-light bg-dark">
-                                    <option value="low">Avatar Quality - Low (360p)</option>
-                                    <option value="medium">Avatar Quality - Medium (480p)</option>
-                                    <option value="high" selected>Avatar Quality - High (720p)</option>
-                                    <option value="very_high">Avatar Quality - Very High (1080p)</option>
-                                </select>
-                                <select
-                                    id="avatarVoiceIDs"
-                                    name="avatarVoiceIDs"
-                                    class="form-select text-light bg-dark"
-                                >
-                                    <option value="">Select Avatar Voice</option>
-                                </select>
+                                <div class="avatar-config-row">
+                                    <select id="avatarQuality" class="form-select text-light bg-dark">
+                                        <option value="low">Avatar Quality - Low (360p)</option>
+                                        <option value="medium">Avatar Quality - Medium (480p)</option>
+                                        <option value="high" selected>Avatar Quality - High (720p)</option>
+                                        <option value="very_high">Avatar Quality - Very High (1080p)</option>
+                                    </select>
+                                    <select
+                                        id="avatarVoiceIDs"
+                                        name="avatarVoiceIDs"
+                                        class="form-select text-light bg-dark"
+                                    >
+                                        <option value="">Select Avatar Voice</option>
+                                    </select>
+                                </div>
                                 <audio id="avatarVoicePreview"></audio>
                                 <button id="avatarVideoAIStart" class="btn-custom">
                                     <i class="fas fa-play"></i> Start Avatar Session
