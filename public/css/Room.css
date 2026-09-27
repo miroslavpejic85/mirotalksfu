@@ -1000,6 +1000,11 @@ body {
     bottom: 14px !important;
 }
 
+/* Popper anchors split menus to the chevron; align them with the main button. */
+#bottomButtons:not([data-position='horizontal']) .split-btn .dropdown-menu {
+    translate: -48px 0;
+}
+
 #bottomButtons #participantViewDropdown {
     position: relative;
 }
@@ -1129,11 +1134,12 @@ body {
     margin: 6px 12px;
 }
 
-/* Mobile: keep settingsExtraMenu inside viewport and scrollable */
+/* Mobile: keep toolbar dropdowns inside the viewport and scrollable. */
 @media (max-width: 600px) {
     #bottomButtons #startAudioDeviceMenu,
     #bottomButtons #startVideoDeviceMenu,
-    #bottomButtons #settingsExtraMenu {
+    #bottomButtons #settingsExtraMenu,
+    #bottomButtons #participantsActionsMenu {
         min-width: unset;
         width: auto !important;
         max-width: 90vw !important;
@@ -1143,9 +1149,21 @@ body {
         bottom: 70px !important;
         z-index: 9999;
         overflow-y: auto;
-        max-height: 60vh;
+        max-height: calc(100vh - 100px);
+        max-height: calc(100dvh - 100px);
         border-radius: var(--border-radius);
         box-shadow: var(--box-shadow);
+    }
+
+    #bottomButtons #startAudioDeviceMenu,
+    #bottomButtons #startVideoDeviceMenu,
+    #bottomButtons #settingsExtraMenu,
+    #bottomButtons #participantsActionsMenu {
+        width: max-content !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        translate: 0;
     }
 }
 
@@ -1518,6 +1536,7 @@ body {
     border: var(--border);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
+    pointer-events: none;
 }
 
 #qrText {
