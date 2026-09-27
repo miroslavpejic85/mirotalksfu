@@ -645,7 +645,7 @@ input[type='range'] {
     padding: 4px;
     border: var(--border);
     border-radius: 8px;
-    background: rgba(18, 18, 18, 0.92);
+    background: var(--body-bg);
     box-shadow: var(--box-shadow);
     overflow-x: auto;
     overscroll-behavior-x: contain;
