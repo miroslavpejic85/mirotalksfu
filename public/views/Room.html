@@ -591,34 +591,36 @@
                             </tr>
                         </table>
                         <hr />
-                        <button id="activeRoomsButton" class="hidden btn-custom">
-                            <i class="fa-solid fa-circle-dot"></i>
-                            <p>Active rooms</p>
-                        </button>
-                        <button id="joinLockButton" class="hidden btn-custom">
-                            <i class="fas fa-door-closed orange"></i>
-                            <p class="orange">Lock room</p>
-                        </button>
-                        <button id="joinUnlockButton" class="hidden btn-custom">
-                            <i class="fas fa-door-open red"></i>
-                            <p class="red">Unlock room</p>
-                        </button>
-                        <button id="lockRoomButton" class="hidden btn-custom">
-                            <i class="fas fa-lock-open orange"></i>
-                            <p class="orange">Set room password</p>
-                        </button>
-                        <button id="unlockRoomButton" class="hidden btn-custom">
-                            <i class="fas fa-lock red"></i>
-                            <p class="red">Remove room password</p>
-                        </button>
-                        <button id="fileShareButton" class="hidden btn-custom">
-                            <i class="fas fa-folder-open"></i>
-                            <p>File sharing</p>
-                        </button>
-                        <button id="sendEmailInvitation" class="hidden btn-custom">
-                            <i class="fas fa-envelope-circle-check"></i>
-                            <p id="roomSendEmail" class="cp">Send email invitation</p>
-                        </button>
+                        <div class="room-action-grid">
+                            <button id="activeRoomsButton" class="hidden btn-custom room-action-card">
+                                <i class="fa-solid fa-circle-dot"></i>
+                                <p>Active rooms</p>
+                            </button>
+                            <button id="joinLockButton" class="hidden btn-custom room-action-card">
+                                <i class="fas fa-door-closed orange"></i>
+                                <p class="orange">Lock room</p>
+                            </button>
+                            <button id="joinUnlockButton" class="hidden btn-custom room-action-card">
+                                <i class="fas fa-door-open red"></i>
+                                <p class="red">Unlock room</p>
+                            </button>
+                            <button id="lockRoomButton" class="hidden btn-custom room-action-card">
+                                <i class="fas fa-lock-open orange"></i>
+                                <p class="orange">Set room password</p>
+                            </button>
+                            <button id="unlockRoomButton" class="hidden btn-custom room-action-card">
+                                <i class="fas fa-lock red"></i>
+                                <p class="red">Remove room password</p>
+                            </button>
+                            <button id="fileShareButton" class="hidden btn-custom room-action-card">
+                                <i class="fas fa-folder-open"></i>
+                                <p>File sharing</p>
+                            </button>
+                            <button id="sendEmailInvitation" class="hidden btn-custom room-action-card">
+                                <i class="fas fa-envelope-circle-check"></i>
+                                <p id="roomSendEmail" class="cp">Send email invitation</p>
+                            </button>
+                        </div>
                         <hr />
                         <table class="settingsTable">
                             <tr id="broadcastingButton" class="hidden">
