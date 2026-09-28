@@ -1045,7 +1045,8 @@ input[type='text'] {
         white-space: nowrap;
     }
 
-    .people-list {
+    .chat-app .people-list {
+        z-index: 8;
         width: 100% !important;
         height: 100% !important;
     }
