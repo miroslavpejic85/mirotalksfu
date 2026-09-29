@@ -6,6 +6,7 @@
 set -Eeuo pipefail
 
 readonly NODE_MAJOR=24
+readonly DOCKER_IMAGE='mirotalk/sfu:latest'
 readonly CONFIG_FILE='app/src/config.js'
 readonly CONFIG_TEMPLATE='app/src/config.template.js'
 readonly ENV_FILE='.env'
@@ -179,10 +180,10 @@ if confirm 'Use Docker?' y; then
 
     if confirm 'Use the official Docker image?' y; then
         log info 'Pulling the latest official image'
-        docker pull mirotalk/sfu:latest
+        docker pull "$DOCKER_IMAGE"
     else
         log info 'Building the image from this checkout'
-        docker build --tag mirotalk/sfu:latest .
+        docker build --tag "$DOCKER_IMAGE" .
     fi
 
     log info 'Starting MiroTalk SFU in the background'
