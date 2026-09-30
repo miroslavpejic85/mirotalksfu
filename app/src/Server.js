@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.21
+ * @version 2.5.22
  *
  */
 
@@ -2490,7 +2490,7 @@ function startServer() {
                 }
 
                 if (!hostCfg.users_from_db) {
-                    const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
+                    const roomAllowedForUser = await isRoomAllowedForUser('[Join]', authenticatedUsername, room.id);
                     if (!roomAllowedForUser) {
                         log.warn('[Join] - Room not allowed for this peer', { peer_name, room_id: room.id });
                         return cb('notAllowed');
@@ -2519,6 +2519,26 @@ function startServer() {
             );
             if (usernameExists) return cb('isNameInUse');
 
+            const configuredPresenter = isConfiguredPresenter(authenticatedUsername, hostCfg?.presenters?.list);
+            const isBreakoutRoom = socket.room_id.includes('_breakout_');
+            const shouldRegisterPresenter =
+                configuredPresenter ||
+                (!isBreakoutRoom &&
+                    hostCfg?.presenters?.join_first &&
+                    Object.keys(presenters[socket.room_id] || {}).length === 0) ||
+                (peer_token && is_presenter);
+            const isPresenter = peer_token
+                ? is_presenter
+                : shouldRegisterPresenter || isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+
+            if ((hostCfg.protected || hostCfg.user_auth) && isPresenter && !hostCfg.users_from_db) {
+                const roomAllowedForUser = await isRoomAllowedForUser('[Join]', authenticatedUsername, room.id);
+                if (!roomAllowedForUser) {
+                    log.warn('[Join] - Room not allowed for this peer', { peer_name, room_id: room.id });
+                    return cb('notAllowed');
+                }
+            }
+
             // Remove old peer with same socket.id before adding new one
             const existingPeer = room.getPeer(socket.id);
             if (existingPeer) {
@@ -2537,8 +2557,6 @@ function startServer() {
 
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
-            const configuredPresenter = isConfiguredPresenter(authenticatedUsername, hostCfg?.presenters?.list);
-
             // Set the presenters
             const presenter = {
                 peer_ip: peer_ip,
@@ -2552,23 +2570,12 @@ function startServer() {
              * first we check if the username match the presenters username else if join_first enabled
              * For breakout rooms, skip join_first rule - only presenters.list or token-based presenters are valid
              */
-            const isBreakoutRoom = socket.room_id.includes('_breakout_');
-            if (
-                configuredPresenter ||
-                (!isBreakoutRoom &&
-                    hostCfg?.presenters?.join_first &&
-                    Object.keys(presenters[socket.room_id]).length === 0) ||
-                (peer_token && is_presenter)
-            ) {
+            if (shouldRegisterPresenter) {
                 presenter.is_presenter = true;
                 presenters[socket.room_id][socket.id] = presenter;
             }
 
             log.debug('[Join] - Connected presenters grp by roomId', presenters);
-
-            const isPresenter = peer_token
-                ? is_presenter
-                : isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
             const peer = room.getPeer(socket.id);
 
@@ -2607,14 +2614,6 @@ function startServer() {
                     lobby_status: 'waiting',
                 });
                 return cb('isLobby');
-            }
-
-            if ((hostCfg.protected || hostCfg.user_auth) && isPresenter && !hostCfg.users_from_db) {
-                const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
-                if (!roomAllowedForUser) {
-                    log.warn('[Join] - Room not allowed for this peer', { peer_name, room_id: room.id });
-                    return cb('notAllowed');
-                }
             }
 
             // Email body payload
