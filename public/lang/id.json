@@ -155,7 +155,22 @@
         "Rectangle": "Persegi panjang",
         "Redo annotation": "Ulangi anotasi",
         "Undo annotation": "Urungkan anotasi",
-        "Clear my screen annotations": "Hapus anotasi layar saya"
+        "Clear my screen annotations": "Hapus anotasi layar saya",
+        "Bold text": "Teks tebal",
+        "Italic text": "Teks miring",
+        "Underline text": "Teks garis bawah",
+        "Strikethrough text": "Teks coretan",
+        "Text color": "Warna teks",
+        "Text size": "Ukuran teks",
+        "Text alignment: left. Click to cycle": "Penyelarasan teks: kiri. Klik untuk bersepeda",
+        "Text alignment: center. Click to cycle": "Penyelarasan teks: tengah. Klik untuk bersepeda",
+        "Text alignment: right. Click to cycle": "Penyelarasan teks: benar. Klik untuk bersepeda",
+        "More text options": "Opsi teks lainnya",
+        "Text background": "Latar belakang teks",
+        "Text background color": "Warna latar belakang teks",
+        "Text rotation": "Rotasi teks",
+        "Cancel text annotation": "Batalkan anotasi teks",
+        "Save text annotation": "Simpan anotasi teks"
     },
     "buttons": {
         "Add arrow": "Tambah panah",
@@ -363,7 +378,8 @@
         "Add diamond": "Tambah berlian",
         "Copy invite link": "Salin tautan undangan",
         "Invite...": "Undang...",
-        "Participant actions": "Tindakan peserta"
+        "Participant actions": "Tindakan peserta",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= Panah",
@@ -834,7 +850,12 @@
         "Type annotation": "Ketik anotasi",
         "Delete text annotation": "Hapus anotasi teks",
         "Text annotation": "Anotasi teks",
-        "Presenter-only Screen Annotations": "Anotasi layar khusus presenter"
+        "Presenter-only Screen Annotations": "Anotasi layar khusus presenter",
+        "Edit screen text annotation": "Edit anotasi teks layar",
+        "More text options": "Opsi teks lainnya",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "Pemformatan teks",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "Edit judul bingkai",
@@ -972,7 +993,7 @@
         "Unmute": "Suarakan",
         "Unmute Video": "Suarakan Video",
         "Username already in use": "Nama pengguna sudah digunakan",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "Pintasan Papan Tulis",
         "Would you like to continue the room broadcast?": "Apakah Anda ingin melanjutkan siaran ruangan?",
         "Yes": "Ya",

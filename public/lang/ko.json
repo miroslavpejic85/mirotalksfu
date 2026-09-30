@@ -155,7 +155,22 @@
         "Rectangle": "사각형",
         "Redo annotation": "주석 다시 실행",
         "Undo annotation": "주석 실행 취소",
-        "Clear my screen annotations": "내 화면 주석 지우기"
+        "Clear my screen annotations": "내 화면 주석 지우기",
+        "Bold text": "굵은 글씨",
+        "Italic text": "기울임꼴",
+        "Underline text": "밑줄 텍스트",
+        "Strikethrough text": "취소선 텍스트",
+        "Text color": "텍스트 색상",
+        "Text size": "텍스트 크기",
+        "Text alignment: left. Click to cycle": "텍스트 정렬: 왼쪽. 클릭하여 순환",
+        "Text alignment: center. Click to cycle": "텍스트 정렬: 중앙. 클릭하여 순환",
+        "Text alignment: right. Click to cycle": "텍스트 정렬: 오른쪽. 클릭하여 순환",
+        "More text options": "텍스트 옵션 더 보기",
+        "Text background": "텍스트 배경",
+        "Text background color": "텍스트 배경 색상",
+        "Text rotation": "텍스트 회전",
+        "Cancel text annotation": "텍스트 주석 취소",
+        "Save text annotation": "텍스트 주석 저장"
     },
     "buttons": {
         "Add arrow": "화살표 추가",
@@ -363,7 +378,8 @@
         "Add diamond": "마름모 추가",
         "Copy invite link": "초대 링크 복사",
         "Invite...": "초대...",
-        "Participant actions": "참가자 작업"
+        "Participant actions": "참가자 작업",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= 화살표",
@@ -834,7 +850,12 @@
         "Type annotation": "주석 입력",
         "Delete text annotation": "텍스트 주석 삭제",
         "Text annotation": "텍스트 주석",
-        "Presenter-only Screen Annotations": "발표자 전용 화면 주석"
+        "Presenter-only Screen Annotations": "발표자 전용 화면 주석",
+        "Edit screen text annotation": "화면 텍스트 주석 편집",
+        "More text options": "텍스트 옵션 더 보기",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "텍스트 서식",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "프레임 제목 편집",
@@ -972,7 +993,7 @@
         "Unmute": "음소거 해제",
         "Unmute Video": "비디오 음소거 해제",
         "Username already in use": "사용자 이름이 이미 사용 중입니다",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "화이트보드 단축키",
         "Would you like to continue the room broadcast?": "방 방송을 계속하시겠습니까?",
         "Yes": "예",

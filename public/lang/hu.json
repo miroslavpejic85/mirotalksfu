@@ -155,7 +155,22 @@
         "Rectangle": "Téglalap",
         "Redo annotation": "Jegyzet újra alkalmazása",
         "Undo annotation": "Jegyzet visszavonása",
-        "Clear my screen annotations": "Saját képernyőjegyzeteim törlése"
+        "Clear my screen annotations": "Saját képernyőjegyzeteim törlése",
+        "Bold text": "Félkövér szöveg",
+        "Italic text": "Dőlt szöveg",
+        "Underline text": "Szöveg aláhúzása",
+        "Strikethrough text": "Áthúzott szöveg",
+        "Text color": "Szövegszín",
+        "Text size": "Szövegméret",
+        "Text alignment: left. Click to cycle": "Szöveg igazítása: balra. Kattintson a ciklushoz",
+        "Text alignment: center. Click to cycle": "Szöveg igazítása: középre. Kattints a ciklushoz",
+        "Text alignment: right. Click to cycle": "Szöveg igazítása: jobbra. Kattintson a ciklushoz",
+        "More text options": "További szövegbeállítások",
+        "Text background": "Szövegháttér",
+        "Text background color": "Szöveg háttérszíne",
+        "Text rotation": "Szöveg forgatása",
+        "Cancel text annotation": "Szöveges kommentár törlése",
+        "Save text annotation": "Szöveges megjegyzések mentése"
     },
     "buttons": {
         "Add arrow": "Nyíl hozzáadása",
@@ -363,7 +378,8 @@
         "Add diamond": "Rombusz hozzáadása",
         "Copy invite link": "Meghívó hivatkozás másolása",
         "Invite...": "Meghívás...",
-        "Participant actions": "Résztvevői műveletek"
+        "Participant actions": "Résztvevői műveletek",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= Nyíl",
@@ -834,7 +850,12 @@
         "Type annotation": "Írjon be jegyzetet",
         "Delete text annotation": "Szöveges jegyzet törlése",
         "Text annotation": "Szöveges jegyzet",
-        "Presenter-only Screen Annotations": "Képernyőjegyzetek csak előadóknak"
+        "Presenter-only Screen Annotations": "Képernyőjegyzetek csak előadóknak",
+        "Edit screen text annotation": "Képernyőszöveg megjegyzéseinek szerkesztése",
+        "More text options": "További szövegbeállítások",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "Szövegformázás",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "Keret címének szerkesztése",
@@ -972,7 +993,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",

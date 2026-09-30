@@ -207,8 +207,12 @@ function scanJs(file) {
         /(?:window\.i18n\?\.)?t\(\s*(['"])((?:\\.|(?!\1).)*)\1\s*,\s*(['"])(tooltips|buttons|labels|dialogs|toasts)\3\s*\)/g;
     while ((m = namespacedTranslateRe.exec(src))) add(m[4], unescapeJs(m[2]));
 
+    const translatedAttributeRe =
+        /_?setTranslatedAttribute\(\s*[^,]+,\s*(['"])[^'"]+\1,\s*(['"])((?:\\.|(?!\2).)*)\2,\s*(['"])(tooltips|buttons|labels|dialogs|toasts)\4\s*\)/g;
+    while ((m = translatedAttributeRe.exec(src))) add(m[5], unescapeJs(m[3]));
+
     // Declarative tooltip keys used by dynamically-built control lists.
-    const tooltipListRe = /(?:annotationTooltipLabels|tooltipLabels)\s*=\s*\[([\s\S]*?)\]/g;
+    const tooltipListRe = /\bconst\s+\w*[Tt]ooltipLabels\s*=\s*\[([\s\S]*?)\];/g;
     let tooltipList;
     while ((tooltipList = tooltipListRe.exec(src))) {
         const stringRe = /(['"])((?:\\.|(?!\1).)*)\1/g;

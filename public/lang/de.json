@@ -155,7 +155,22 @@
         "Rectangle": "Rechteck",
         "Redo annotation": "Anmerkung wiederholen",
         "Undo annotation": "Anmerkung rückgängig machen",
-        "Clear my screen annotations": "Meine Bildschirmmarkierungen löschen"
+        "Clear my screen annotations": "Meine Bildschirmmarkierungen löschen",
+        "Bold text": "Fettgedruckter Text",
+        "Italic text": "Kursiver Text",
+        "Underline text": "Unterstrichener Text",
+        "Strikethrough text": "Durchgestrichener Text",
+        "Text color": "Textfarbe",
+        "Text size": "Textgröße",
+        "Text alignment: left. Click to cycle": "Textausrichtung: links. Zum Zyklus klicken",
+        "Text alignment: center. Click to cycle": "Textausrichtung: Mitte. Klicken, um zu takten",
+        "Text alignment: right. Click to cycle": "Textausrichtung: rechts. Zum Zyklus klicken",
+        "More text options": "Weitere Textoptionen",
+        "Text background": "Texthintergrund",
+        "Text background color": "Texthintergrundfarbe",
+        "Text rotation": "Textrotation",
+        "Cancel text annotation": "Textanmerkung abbrechen",
+        "Save text annotation": "Textanmerkung speichern"
     },
     "buttons": {
         "Add arrow": "Pfeil hinzufügen",
@@ -363,7 +378,8 @@
         "Add diamond": "Raute hinzufügen",
         "Copy invite link": "Einladungslink kopieren",
         "Invite...": "Einladen...",
-        "Participant actions": "Teilnehmeraktionen"
+        "Participant actions": "Teilnehmeraktionen",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= Pfeil",
@@ -834,7 +850,12 @@
         "Type annotation": "Anmerkung eingeben",
         "Delete text annotation": "Textanmerkung löschen",
         "Text annotation": "Textanmerkung",
-        "Presenter-only Screen Annotations": "Bildschirmanmerkungen nur für Präsentatoren"
+        "Presenter-only Screen Annotations": "Bildschirmanmerkungen nur für Präsentatoren",
+        "Edit screen text annotation": "Textanmerkung für Bildschirm bearbeiten",
+        "More text options": "Weitere Textoptionen",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "Textformatierung",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "Rahmentitel bearbeiten",
@@ -972,7 +993,7 @@
         "Unmute": "Stummschaltung aufheben",
         "Unmute Video": "Ton des Videos aktivieren",
         "Username already in use": "Benutzername bereits vergeben",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "Whiteboard-Tastenkürzel",
         "Would you like to continue the room broadcast?": "Möchten Sie die Raumübertragung fortsetzen?",
         "Yes": "Ja",

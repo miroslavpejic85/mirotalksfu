@@ -155,7 +155,22 @@
         "Rectangle": "長方形",
         "Redo annotation": "注釈をやり直す",
         "Undo annotation": "注釈を元に戻す",
-        "Clear my screen annotations": "自分の画面注釈をクリア"
+        "Clear my screen annotations": "自分の画面注釈をクリア",
+        "Bold text": "太字のテキスト",
+        "Italic text": "イタリック体のテキスト",
+        "Underline text": "テキストに下線を引く",
+        "Strikethrough text": "取り消し線テキスト",
+        "Text color": "テキストの色",
+        "Text size": "文字サイズ",
+        "Text alignment: left. Click to cycle": "テキストの配置：左。クリックしてサイクル",
+        "Text alignment: center. Click to cycle": "テキストの配置：中央。クリックしてサイクル",
+        "Text alignment: right. Click to cycle": "テキストの配置：右クリックしてサイクル",
+        "More text options": "その他のテキストオプション",
+        "Text background": "テキストの背景",
+        "Text background color": "テキストの背景色",
+        "Text rotation": "テキストの回転",
+        "Cancel text annotation": "テキストアノテーションをキャンセル",
+        "Save text annotation": "テキスト注釈を保存"
     },
     "buttons": {
         "Add arrow": "矢印を追加",
@@ -363,7 +378,8 @@
         "Add diamond": "ひし形を追加",
         "Copy invite link": "招待リンクをコピー",
         "Invite...": "招待...",
-        "Participant actions": "参加者の操作"
+        "Participant actions": "参加者の操作",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= 矢印",
@@ -834,7 +850,12 @@
         "Type annotation": "注釈を入力",
         "Delete text annotation": "テキスト注釈を削除",
         "Text annotation": "テキスト注釈",
-        "Presenter-only Screen Annotations": "発表者のみの画面注釈"
+        "Presenter-only Screen Annotations": "発表者のみの画面注釈",
+        "Edit screen text annotation": "画面テキストの注釈を編集",
+        "More text options": "その他のテキストオプション",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "テキストの書式設定",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "フレームタイトルを編集",
@@ -972,7 +993,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",

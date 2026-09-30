@@ -155,7 +155,22 @@
         "Rectangle": "矩形",
         "Redo annotation": "重做批注",
         "Undo annotation": "撤销批注",
-        "Clear my screen annotations": "清除我的屏幕标注"
+        "Clear my screen annotations": "清除我的屏幕标注",
+        "Bold text": "粗体文本",
+        "Italic text": "斜体文本",
+        "Underline text": "下划线文字",
+        "Strikethrough text": "删除线文本",
+        "Text color": "文字颜色",
+        "Text size": "文字大小",
+        "Text alignment: left. Click to cycle": "文本对齐方式：左。点击循环",
+        "Text alignment: center. Click to cycle": "文本对齐方式：居中。点击循环",
+        "Text alignment: right. Click to cycle": "文本对齐方式：右。点击循环",
+        "More text options": "更多文本选项",
+        "Text background": "文字背景",
+        "Text background color": "文本背景颜色",
+        "Text rotation": "文本旋转",
+        "Cancel text annotation": "取消文本注释",
+        "Save text annotation": "保存文本注释"
     },
     "buttons": {
         "Add arrow": "添加箭头",
@@ -363,7 +378,8 @@
         "Add diamond": "Add diamond",
         "Copy invite link": "复制邀请链接",
         "Invite...": "邀请...",
-        "Participant actions": "参会者操作"
+        "Participant actions": "参会者操作",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= 箭头",
@@ -834,7 +850,12 @@
         "Type annotation": "输入注释",
         "Delete text annotation": "删除文本注释",
         "Text annotation": "文本注释",
-        "Presenter-only Screen Annotations": "仅演示者可用的屏幕批注"
+        "Presenter-only Screen Annotations": "仅演示者可用的屏幕批注",
+        "Edit screen text annotation": "编辑屏幕文本注释",
+        "More text options": "更多文本选项",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "文本格式",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "编辑框架标题",
@@ -972,7 +993,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",

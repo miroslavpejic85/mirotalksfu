@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.17
+ * @version 2.5.20
  *
  */
 
@@ -4222,6 +4222,11 @@ function startServer() {
                         bold: data.bold ?? fallback.bold ?? false,
                         italic: data.italic ?? fallback.italic ?? false,
                         boxWidth: data.boxWidth ?? fallback.boxWidth ?? 0.35,
+                        underline: data.underline ?? fallback.underline ?? false,
+                        strikethrough: data.strikethrough ?? fallback.strikethrough ?? false,
+                        textAlign: data.textAlign ?? fallback.textAlign ?? 'left',
+                        backgroundColor: data.backgroundColor ?? fallback.backgroundColor ?? 'transparent',
+                        rotation: data.rotation ?? fallback.rotation ?? 0,
                     };
                     return typeof style.color === 'string' &&
                         /^#[0-9a-f]{6}$/i.test(style.color) &&
@@ -4230,7 +4235,13 @@ function startServer() {
                         typeof style.italic === 'boolean' &&
                         Number.isFinite(style.boxWidth) &&
                         style.boxWidth >= 0.15 &&
-                        style.boxWidth <= 0.8
+                        style.boxWidth <= 0.8 &&
+                        typeof style.underline === 'boolean' &&
+                        typeof style.strikethrough === 'boolean' &&
+                        ['left', 'center', 'right'].includes(style.textAlign) &&
+                        typeof style.backgroundColor === 'string' &&
+                        (style.backgroundColor === 'transparent' || /^#[0-9a-f]{6}$/i.test(style.backgroundColor)) &&
+                        [-45, -30, -15, 0, 15, 30, 45].includes(style.rotation)
                         ? style
                         : null;
                 };

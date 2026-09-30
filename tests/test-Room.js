@@ -30,6 +30,11 @@ describe('test-Room', () => {
             bold: true,
             italic: true,
             boxWidth: 0.5,
+            underline: true,
+            strikethrough: true,
+            textAlign: 'center',
+            backgroundColor: '#1a237e',
+            rotation: 15,
         };
         const drawingAnnotation = {
             type: 'annotation',

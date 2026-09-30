@@ -155,7 +155,22 @@
         "Rectangle": "مستطيل",
         "Redo annotation": "إعادة إجراء التعليق التوضيحي",
         "Undo annotation": "التراجع عن التعليق التوضيحي",
-        "Clear my screen annotations": "مسح تعليقاتي على الشاشة"
+        "Clear my screen annotations": "مسح تعليقاتي على الشاشة",
+        "Bold text": "نص غامق",
+        "Italic text": "نص مائل",
+        "Underline text": "نص تحته خط",
+        "Strikethrough text": "نص خطي",
+        "Text color": "لون النص",
+        "Text size": "حجم النص",
+        "Text alignment: left. Click to cycle": "محاذاة النص: إلى اليسار. انقر للتبديل",
+        "Text alignment: center. Click to cycle": "محاذاة النص: في المنتصف. انقر للتبديل",
+        "Text alignment: right. Click to cycle": "محاذاة النص: يمين. انقر للتبديل",
+        "More text options": "المزيد من خيارات النص",
+        "Text background": "خلفية النص",
+        "Text background color": "لون خلفية النص",
+        "Text rotation": "دوران النص",
+        "Cancel text annotation": "إلغاء التعليق التوضيحي النصي",
+        "Save text annotation": "حفظ التعليق التوضيحي النصي"
     },
     "buttons": {
         "Add arrow": "إضافة سهم",
@@ -363,7 +378,8 @@
         "Add diamond": "إضافة شكل ماسي",
         "Copy invite link": "نسخ رابط الدعوة",
         "Invite...": "دعوة...",
-        "Participant actions": "إجراءات المشاركين"
+        "Participant actions": "إجراءات المشاركين",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= سهم",
@@ -834,7 +850,12 @@
         "Type annotation": "اكتب تعليقًا",
         "Delete text annotation": "حذف التعليق النصي",
         "Text annotation": "تعليق نصي",
-        "Presenter-only Screen Annotations": "تعليقات الشاشة التوضيحية لمقدم العرض فقط"
+        "Presenter-only Screen Annotations": "تعليقات الشاشة التوضيحية لمقدم العرض فقط",
+        "Edit screen text annotation": "تعديل نص التعليق التوضيحي للشاشة",
+        "More text options": "المزيد من خيارات النص",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "تنسيق النص",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "تعديل عنوان الإطار",
@@ -972,7 +993,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",

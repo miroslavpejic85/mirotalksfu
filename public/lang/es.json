@@ -155,7 +155,22 @@
         "Rectangle": "Rectángulo",
         "Redo annotation": "Rehacer anotación",
         "Undo annotation": "Deshacer anotación",
-        "Clear my screen annotations": "Borrar mis anotaciones en pantalla"
+        "Clear my screen annotations": "Borrar mis anotaciones en pantalla",
+        "Bold text": "Texto en negrita",
+        "Italic text": "Texto en cursiva\n__mt2__ Texto subrayado",
+        "Underline text": "Texto subrayado",
+        "Strikethrough text": "Texto tachado",
+        "Text color": "Color del texto",
+        "Text size": "Tamaño del texto",
+        "Text alignment: left. Click to cycle": "Alineación del texto: izquierda. Haz clic para pedalear",
+        "Text alignment: center. Click to cycle": "Alineación del texto: centro. Haz clic para pedalear",
+        "Text alignment: right. Click to cycle": "Alineación del texto: derecha. Haz clic para pedalear",
+        "More text options": "Más opciones de texto",
+        "Text background": "Fondo del texto",
+        "Text background color": "Color de fondo del texto",
+        "Text rotation": "Rotación de texto",
+        "Cancel text annotation": "Cancelar anotación de texto",
+        "Save text annotation": "Guardar anotación de texto"
     },
     "buttons": {
         "Add arrow": "Añadir flecha",
@@ -363,7 +378,8 @@
         "Add diamond": "Añadir rombo",
         "Copy invite link": "Copiar enlace de invitación",
         "Invite...": "Invitar...",
-        "Participant actions": "Acciones de participantes"
+        "Participant actions": "Acciones de participantes",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= Flecha",
@@ -834,7 +850,12 @@
         "Type annotation": "Escribe una anotación",
         "Delete text annotation": "Eliminar anotación de texto",
         "Text annotation": "Anotación de texto",
-        "Presenter-only Screen Annotations": "Anotaciones de pantalla solo para el presentador"
+        "Presenter-only Screen Annotations": "Anotaciones de pantalla solo para el presentador",
+        "Edit screen text annotation": "Editar anotación de texto de pantalla",
+        "More text options": "Más opciones de texto",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "Formato de texto",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "Editar título del marco",
@@ -972,7 +993,7 @@
         "Unmute": "Quitar silencio",
         "Unmute Video": "Activar el sonido del vídeo",
         "Username already in use": "El nombre de usuario ya está en uso",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "Atajos de la pizarra",
         "Would you like to continue the room broadcast?": "¿Quieres continuar con la difusión de la sala?",
         "Yes": "Sí",

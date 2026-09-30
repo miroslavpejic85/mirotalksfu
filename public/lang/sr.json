@@ -155,7 +155,22 @@
         "Rectangle": "Правоугаоник",
         "Redo annotation": "Понови напомену",
         "Undo annotation": "Опозови напомену",
-        "Clear my screen annotations": "Obriši moje oznake na ekranu"
+        "Clear my screen annotations": "Obriši moje oznake na ekranu",
+        "Bold text": "Podebljani tekst",
+        "Italic text": "Kurziv",
+        "Underline text": "Podvuci tekst",
+        "Strikethrough text": "Precrtani tekst",
+        "Text color": "Boja teksta",
+        "Text size": "Veličina teksta",
+        "Text alignment: left. Click to cycle": "Poravnanje teksta: levo. Kliknite za ciklus",
+        "Text alignment: center. Click to cycle": "Poravnanje teksta: centar. Kliknite za ciklus",
+        "Text alignment: right. Click to cycle": "Poravnanje teksta: desno. Kliknite za ciklus",
+        "More text options": "Više tekstualnih opcija",
+        "Text background": "Pozadina teksta",
+        "Text background color": "Boja pozadine teksta",
+        "Text rotation": "Rotacija teksta",
+        "Cancel text annotation": "Otkaži tekstualnu napomenu",
+        "Save text annotation": "Sačuvajte tekstualnu napomenu"
     },
     "buttons": {
         "Add arrow": "Dodaj strelicu",
@@ -363,7 +378,8 @@
         "Add diamond": "Add diamond",
         "Copy invite link": "Kopiraj link pozivnice",
         "Invite...": "Pozovi...",
-        "Participant actions": "Radnje učesnika"
+        "Participant actions": "Radnje učesnika",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= Strelica",
@@ -834,7 +850,12 @@
         "Type annotation": "Unesite napomenu",
         "Delete text annotation": "Obriši tekstualnu napomenu",
         "Text annotation": "Tekstualna napomena",
-        "Presenter-only Screen Annotations": "Напомене на екрану само за водитеља"
+        "Presenter-only Screen Annotations": "Напомене на екрану само за водитеља",
+        "Edit screen text annotation": "Izmenite tekstualnu napomenu na ekranu",
+        "More text options": "Više tekstualnih opcija",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "Formatiranje teksta",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "Izmeni naslov okvira",
@@ -972,7 +993,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",

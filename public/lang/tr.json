@@ -155,7 +155,22 @@
         "Rectangle": "Dikdörtgen",
         "Redo annotation": "Ek açıklamayı yinele",
         "Undo annotation": "Ek açıklamayı geri al",
-        "Clear my screen annotations": "Ekran notlarımı temizle"
+        "Clear my screen annotations": "Ekran notlarımı temizle",
+        "Bold text": "Kalın metin",
+        "Italic text": "İtalik metin",
+        "Underline text": "Altı çizili metin",
+        "Strikethrough text": "Üstü çizili metin",
+        "Text color": "Metin rengi",
+        "Text size": "Metin boyutu",
+        "Text alignment: left. Click to cycle": "Metin hizalaması: sol. Döngü için tıklayın",
+        "Text alignment: center. Click to cycle": "Metin hizalama: merkez. Döngü için tıklayın",
+        "Text alignment: right. Click to cycle": "Metin hizalama: sağ. Döngü için tıklayın",
+        "More text options": "Daha fazla metin seçeneği",
+        "Text background": "Metin arka planı",
+        "Text background color": "Metin arka plan rengi",
+        "Text rotation": "Metin döndürme",
+        "Cancel text annotation": "Metin açıklamasını iptal et",
+        "Save text annotation": "Metin açıklamasını kaydet"
     },
     "buttons": {
         "Add arrow": "Ok ekle",
@@ -363,7 +378,8 @@
         "Add diamond": "Add diamond",
         "Copy invite link": "Davet bağlantısını kopyala",
         "Invite...": "Davet et...",
-        "Participant actions": "Katılımcı işlemleri"
+        "Participant actions": "Katılımcı işlemleri",
+        "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
         "= Arrow": "= Ok",
@@ -834,7 +850,12 @@
         "Type annotation": "Açıklama yazın",
         "Delete text annotation": "Metin açıklamasını sil",
         "Text annotation": "Metin açıklaması",
-        "Presenter-only Screen Annotations": "Yalnızca sunucuya özel ekran ek açıklamaları"
+        "Presenter-only Screen Annotations": "Yalnızca sunucuya özel ekran ek açıklamaları",
+        "Edit screen text annotation": "Ekran metni ek açıklamasını düzenle",
+        "More text options": "Daha fazla metin seçeneği",
+        "Screen annotation tools": "Screen annotation tools",
+        "Text formatting": "Metin biçimlendirme",
+        "Rotation": "Rotation"
     },
     "dialogs": {
         "Edit frame title": "Çerçeve başlığını düzenle",
@@ -972,7 +993,7 @@
         "Unmute": "Sesini aç",
         "Unmute Video": "Videonun sesini aç",
         "Username already in use": "Kullanıcı adı zaten kullanımda",
-        "WebRTC SFU v2.5.17": "WebRTC SFU v2.5.17",
+        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Would you like to continue the room broadcast?": "Oda yayınını sürdürmek ister misiniz?",
         "Yes": "Evet",
