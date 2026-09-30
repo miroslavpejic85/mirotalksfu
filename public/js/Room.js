@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.15
+ * @version 2.5.16
  *
  */
 
@@ -4817,16 +4817,30 @@ function redirectOnLeave(disconnectAll = false) {
     rc.exitRoom(disconnectAll);
 
     const url = new URL(redirect && redirect.enabled ? redirect.url : '/newroom', window.location.href).href;
-    const redirectEvent = { type: 'mirotalk:redirect', url };
+    const target = isEmbedded
+        ? window.parent
+        : getQueryParam('mirotalk_widget') === '1' && window.opener && !window.opener.closed
+          ? window.opener
+          : null;
 
-    if (isEmbedded) {
-        window.parent.postMessage(redirectEvent, '*');
-        return;
-    }
+    if (target) {
+        const requestId = `${Date.now()}-${Math.random()}`;
+        let acknowledged = false;
+        const handleAcknowledgment = (event) => {
+            if (event.source !== target || event.data?.type !== 'mirotalk:redirect-ack' || event.data.id !== requestId)
+                return;
 
-    if (getQueryParam('mirotalk_widget') === '1' && window.opener && !window.opener.closed) {
-        window.opener.postMessage(redirectEvent, '*');
-        window.close();
+            acknowledged = true;
+            window.removeEventListener('message', handleAcknowledgment);
+            if (!isEmbedded) window.close();
+        };
+
+        window.addEventListener('message', handleAcknowledgment);
+        target.postMessage({ type: 'mirotalk:redirect', url, id: requestId }, '*');
+        setTimeout(() => {
+            window.removeEventListener('message', handleAcknowledgment);
+            if (!acknowledged) openURL(url);
+        }, 500);
         return;
     }
 
@@ -8916,7 +8930,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.15',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.16',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
