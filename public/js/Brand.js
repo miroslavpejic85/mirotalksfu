@@ -101,7 +101,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.5.12</strong>',
+        title: '<strong>WebRTC SFU v2.5.14</strong>',
         html: `
             <div class="about-content">
                 <p class="about-description">
@@ -110,7 +110,7 @@ let BRAND = {
                 <a
                     class="about-primary-action"
                     data-umami-event="About button"
-                    href="https://docs.mirotalk.com/sites/sfu.html"
+                    href="https://docs.mirotalk.com/sites/sfu"
                     target="_blank"
                     rel="noopener noreferrer"
                 >

@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.12
+ * @version 2.5.14
  *
  */
 
@@ -4216,8 +4216,14 @@ function startServer() {
                     data.y >= 0 &&
                     data.y <= 1;
 
-                if (action === 'create') {
+                if (action === 'create' || action === 'restore') {
+                    const restoring = action === 'restore';
+                    const validRequestedDrawerId =
+                        typeof requestedDrawerId === 'string' &&
+                        requestedDrawerId.length > 0 &&
+                        requestedDrawerId.length <= 100;
                     if (
+                        (restoring && (socket.id !== producerOwnerId || !validRequestedDrawerId)) ||
                         !validAnnotationId ||
                         typeof data.text !== 'string' ||
                         data.text.length === 0 ||
@@ -4228,17 +4234,20 @@ function startServer() {
                     ) {
                         return;
                     }
-                    annotations.set(annotationId, {
+                    const newAnnotation = {
                         type: 'text',
                         action: 'create',
                         producerId,
                         annotationId,
-                        drawerId: socket.id,
+                        drawerId: restoring ? requestedDrawerId : socket.id,
                         peer_name: data.peer_name,
                         text: data.text,
                         x: data.x,
                         y: data.y,
-                    });
+                    };
+                    annotations.set(annotationId, newAnnotation);
+                    room.broadCast(socket.id, 'videoDrawing', newAnnotation);
+                    return;
                 } else if (action === 'clear') {
                     if (socket.id !== producerOwnerId) return;
                     room.clearVideoTextAnnotations(producerId);
@@ -4246,7 +4255,10 @@ function startServer() {
                     if (!validAnnotationId) return;
                     const annotation = annotations.get(annotationId);
                     if (!annotation || (socket.id !== annotation.drawerId && socket.id !== producerOwnerId)) return;
-                    if (action === 'move') {
+                    if (action === 'update') {
+                        if (typeof data.text !== 'string' || data.text.length === 0 || data.text.length > 80) return;
+                        annotation.text = data.text;
+                    } else if (action === 'move') {
                         if (!validPosition) return;
                         annotation.x = data.x;
                         annotation.y = data.y;

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.12
+ * @version 2.5.14
  *
  */
 
@@ -3245,7 +3245,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, tx, ri;
+        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -3281,7 +3281,6 @@ class RoomClient {
                 ts = this.createButton(id + '__snapshot', html.snapshot);
                 mv = this.createButton(id + '__mirror', html.mirror);
                 dw = this.createButton(id + '__draw', html.draw);
-                tx = this.createButton(id + '__text', html.text);
                 pn = this.createButton(id + '__pin', html.pin);
                 st = this.createElement(
                     id + '__sessionTime',
@@ -3357,9 +3356,6 @@ class RoomClient {
                 BUTTONS.producerVideo.drawingButton &&
                     isScreen &&
                     myDropdownContent.appendChild(this.createResponsiveDropdownItem(dw, 'Draw'));
-                BUTTONS.producerVideo.drawingButton &&
-                    isScreen &&
-                    myDropdownContent.appendChild(this.createResponsiveDropdownItem(tx, 'Text annotation'));
                 BUTTONS.producerVideo.videoMirrorButton &&
                     myDropdownContent.appendChild(this.createDropdownItem(mv, 'Mirror', myDropdownContent));
                 BUTTONS.producerVideo.fullScreenButton &&
@@ -3379,7 +3375,6 @@ class RoomClient {
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
-                BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(tx);
                 BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
                 BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
                 if (BUTTONS.producerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
@@ -3422,7 +3417,7 @@ class RoomClient {
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
                 this.handleHA(ha.id, d.id);
-                BUTTONS.producerVideo.drawingButton && isScreen && this.handleDW(dw.id, tx.id, d.id);
+                BUTTONS.producerVideo.drawingButton && isScreen && this.handleDW(dw.id, d.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
                 isScreen && this.autoPinLocalScreenShare(id);
                 this.handleZV(elem.id, d.id, this.peer_id);
@@ -3447,9 +3442,6 @@ class RoomClient {
                     BUTTONS.producerVideo.drawingButton &&
                         isScreen &&
                         this.setTippy(dw.id, 'Enable screen drawing', 'bottom');
-                    BUTTONS.producerVideo.drawingButton &&
-                        isScreen &&
-                        this.setTippy(tx.id, 'Enable screen text', 'bottom');
                     this.setTippy(vp.id, 'Toggle video privacy', 'bottom');
                     this.setTippy(au.id, 'Audio status', 'bottom');
                 }
@@ -4031,7 +4023,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, hg, mv, dw, tx, role;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, hg, mv, dw, role;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -4089,7 +4081,6 @@ class RoomClient {
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 ts = this.createButton(id + '__snapshot', html.snapshot);
                 dw = this.createButton(id + '__draw', html.draw);
-                tx = this.createButton(id + '__text', html.text);
                 pn = this.createButton(id + '__pin', html.pin);
                 ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
                 hg = this.createButton(id + '___' + remotePeerId + '___hideFromGrid', html.hideFromGrid);
@@ -4147,9 +4138,6 @@ class RoomClient {
                 BUTTONS.consumerVideo.drawingButton &&
                     remoteIsScreen &&
                     eVc.appendChild(this.createResponsiveDropdownItem(dw, 'Draw'));
-                BUTTONS.consumerVideo.drawingButton &&
-                    remoteIsScreen &&
-                    eVc.appendChild(this.createResponsiveDropdownItem(tx, 'Text annotation'));
                 BUTTONS.consumerVideo.audioVolumeInput &&
                     eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
                 BUTTONS.consumerVideo.presenterRoleButton &&
@@ -4190,7 +4178,6 @@ class RoomClient {
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
-                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(tx);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(dw);
                 BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
 
@@ -4221,7 +4208,7 @@ class RoomClient {
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
-                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, tx.id, d.id);
+                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
                 this.handleSF(sf.id, peer_name, remotePeerId);
                 this.handleHA(ha.id, d.id);
                 this.handleHFG(hg.id, remotePeerId);
@@ -4265,9 +4252,6 @@ class RoomClient {
                     BUTTONS.consumerVideo.drawingButton &&
                         remoteIsScreen &&
                         this.setTippy(dw.id, 'Enable screen drawing', 'bottom');
-                    BUTTONS.consumerVideo.drawingButton &&
-                        remoteIsScreen &&
-                        this.setTippy(tx.id, 'Enable screen text', 'bottom');
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
@@ -6227,11 +6211,10 @@ class RoomClient {
         });
     }
 
-    handleDW(dwBtnId, textBtnId, camDivId) {
+    handleDW(dwBtnId, camDivId) {
         const btnDw = this.getId(dwBtnId);
-        const btnText = this.getId(textBtnId);
         const camDiv = this.getId(camDivId);
-        if (!btnDw || !btnText || !camDiv) return;
+        if (!btnDw || !camDiv) return;
         VideoDrawingOverlay.canDraw = () => !this._moderator.screen_annotations_cant_draw || isPresenter;
         // Wire up the global emit callback (once) so VideoDrawingOverlay
         // can send batched strokes through the signaling server.
@@ -6270,7 +6253,7 @@ class RoomClient {
         const baseId = camDiv.id.replace('__video', '');
         const producerId = this.getProducerIdByConsumerId(baseId) || baseId;
         const overlay = VideoDrawingOverlay.getOrCreate(camDiv, producerId);
-        overlay.bindControls(btnDw, btnText);
+        overlay.bindControls(btnDw);
     }
 
     // ####################################################
