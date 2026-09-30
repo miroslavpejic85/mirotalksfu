@@ -22,9 +22,14 @@ describe('test-Room', () => {
             action: 'create',
             producerId: 'screen-producer-id',
             annotationId: 'annotation-id',
-            text: 'Review this',
+            text: 'Review this\nmultiline note',
             x: 0.25,
             y: 0.5,
+            color: '#ffeb3b',
+            fontSize: 24,
+            bold: true,
+            italic: true,
+            boxWidth: 0.5,
         };
         const drawingAnnotation = {
             type: 'annotation',

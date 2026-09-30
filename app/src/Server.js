@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.16
+ * @version 2.5.17
  *
  */
 
@@ -4215,9 +4215,29 @@ function startServer() {
                     data.x <= 1 &&
                     data.y >= 0 &&
                     data.y <= 1;
+                const getTextStyle = (fallback = {}) => {
+                    const style = {
+                        color: data.color ?? fallback.color ?? '#ffffff',
+                        fontSize: data.fontSize ?? fallback.fontSize ?? 16,
+                        bold: data.bold ?? fallback.bold ?? false,
+                        italic: data.italic ?? fallback.italic ?? false,
+                        boxWidth: data.boxWidth ?? fallback.boxWidth ?? 0.35,
+                    };
+                    return typeof style.color === 'string' &&
+                        /^#[0-9a-f]{6}$/i.test(style.color) &&
+                        [12, 16, 20, 24, 32].includes(style.fontSize) &&
+                        typeof style.bold === 'boolean' &&
+                        typeof style.italic === 'boolean' &&
+                        Number.isFinite(style.boxWidth) &&
+                        style.boxWidth >= 0.15 &&
+                        style.boxWidth <= 0.8
+                        ? style
+                        : null;
+                };
 
                 if (action === 'create' || action === 'restore') {
                     const restoring = action === 'restore';
+                    const textStyle = getTextStyle();
                     const validRequestedDrawerId =
                         typeof requestedDrawerId === 'string' &&
                         requestedDrawerId.length > 0 &&
@@ -4227,7 +4247,8 @@ function startServer() {
                         !validAnnotationId ||
                         typeof data.text !== 'string' ||
                         data.text.length === 0 ||
-                        data.text.length > 80 ||
+                        data.text.length > 1000 ||
+                        !textStyle ||
                         !validPosition ||
                         annotations.has(annotationId) ||
                         annotations.size >= 200
@@ -4244,6 +4265,7 @@ function startServer() {
                         text: data.text,
                         x: data.x,
                         y: data.y,
+                        ...textStyle,
                     };
                     annotations.set(annotationId, newAnnotation);
                     room.broadCast(socket.id, 'videoDrawing', newAnnotation);
@@ -4256,8 +4278,17 @@ function startServer() {
                     const annotation = annotations.get(annotationId);
                     if (!annotation || (socket.id !== annotation.drawerId && socket.id !== producerOwnerId)) return;
                     if (action === 'update') {
-                        if (typeof data.text !== 'string' || data.text.length === 0 || data.text.length > 80) return;
-                        annotation.text = data.text;
+                        const textStyle = getTextStyle(annotation);
+                        if (
+                            typeof data.text !== 'string' ||
+                            data.text.length === 0 ||
+                            data.text.length > 1000 ||
+                            !textStyle
+                        ) {
+                            return;
+                        }
+                        Object.assign(annotation, { text: data.text, ...textStyle });
+                        Object.assign(data, textStyle);
                     } else if (action === 'move') {
                         if (!validPosition) return;
                         annotation.x = data.x;
