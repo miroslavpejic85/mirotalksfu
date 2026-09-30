@@ -1597,14 +1597,20 @@ class VideoDrawingOverlay {
                 .filter(Boolean)
                 .join(' ');
             input.style.textAlign = textAlign;
-            input.style.backgroundColor =
-                backgroundToggle.getAttribute('aria-pressed') === 'true' ? backgroundColor.value : 'transparent';
-            backgroundColor.disabled = backgroundToggle.getAttribute('aria-pressed') !== 'true';
+            input.style.setProperty(
+                'background',
+                backgroundToggle.getAttribute('aria-pressed') === 'true' ? backgroundColor.value : 'transparent',
+                'important'
+            );
         };
         textColor.addEventListener('input', updatePreview);
         textColor.addEventListener('change', updatePreview);
-        backgroundColor.addEventListener('input', updatePreview);
-        backgroundColor.addEventListener('change', updatePreview);
+        const updateBackgroundColor = () => {
+            backgroundToggle.setAttribute('aria-pressed', 'true');
+            updatePreview();
+        };
+        backgroundColor.addEventListener('input', updateBackgroundColor);
+        backgroundColor.addEventListener('change', updateBackgroundColor);
         fontSize.addEventListener('change', updatePreview);
         input.value = annotation?.text || '';
         updatePreview();
@@ -1648,7 +1654,7 @@ class VideoDrawingOverlay {
             if (!morePanel.contains(event.target) && !moreButton.contains(event.target)) setMoreOpen(false);
         });
         editor.addEventListener('focusout', (event) => {
-            if (!editor.contains(event.relatedTarget)) setMoreOpen(false);
+            if (event.relatedTarget && !editor.contains(event.relatedTarget)) setMoreOpen(false);
         });
         editor.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {

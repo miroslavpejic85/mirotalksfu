@@ -167,7 +167,7 @@ describe('screen annotation text toolbar', () => {
         assert.equal(editor.querySelectorAll('.video-drawing-text-formatting button').length, 5);
         assert.equal(editor.querySelectorAll('.video-drawing-text-actions button').length, 2);
         assert.equal(editor.querySelector('.video-drawing-text-more-panel').hidden, true);
-        assert.equal(editor.querySelector('.video-drawing-text-background-color').disabled, true);
+        assert.equal(editor.querySelector('.video-drawing-text-background-color').disabled, false);
         for (const control of editor.querySelectorAll('button, input, select')) {
             assert.ok(control.getAttribute('aria-label').startsWith('tooltips:'));
             assert.equal(control._tippy.placement, 'bottom');
@@ -226,6 +226,45 @@ describe('screen annotation text toolbar', () => {
         assert.equal(history[1][0].annotation.rotation, 30);
         assert.equal(editor.isConnected, false);
         assert.ok(controls.every((control) => !control._tippy));
+    });
+
+    for (const eventType of ['input', 'change']) {
+        it(`enables the background on color ${eventType} and allows toggling it off and on`, () => {
+            input.value = 'Colored background';
+            editor.querySelector('[aria-expanded]').click();
+            const background = editor.querySelector('.video-drawing-text-background-color');
+            const toggle = editor.querySelector('.fa-fill-drip');
+            assert.equal(toggle.getAttribute('aria-pressed'), 'false');
+            assert.equal(background.disabled, false);
+            background.focus();
+            background.dispatchEvent(new dom.window.FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+            assert.equal(editor.querySelector('.video-drawing-text-more-panel').hidden, false);
+            background.value = '#00ff00';
+            background.dispatchEvent(new dom.window.Event(eventType));
+            assert.equal(toggle.getAttribute('aria-pressed'), 'true');
+            assert.equal(input.style.backgroundColor, 'rgb(0, 255, 0)');
+            assert.equal(input.style.getPropertyPriority('background'), 'important');
+            assert.equal(input.style.backgroundImage, 'none');
+            toggle.click();
+            assert.equal(input.style.backgroundColor, 'transparent');
+            assert.equal(input.style.getPropertyPriority('background'), 'important');
+            assert.equal(input.style.backgroundImage, 'none');
+            assert.equal(background.disabled, false);
+            toggle.click();
+            assert.equal(input.style.backgroundColor, 'rgb(0, 255, 0)');
+            editor.querySelector('.video-drawing-text-save').click();
+            assert.equal(emitted.backgroundColor, '#00ff00');
+        });
+    }
+
+    it('dismisses More when focus moves to a known element outside the editor', () => {
+        editor.querySelector('[aria-expanded]').click();
+        const outside = dom.window.document.createElement('button');
+        dom.window.document.body.appendChild(outside);
+        editor.querySelector('.video-drawing-text-background-color').focus();
+        outside.focus();
+        assert.equal(editor.querySelector('.video-drawing-text-more-panel').hidden, true);
+        assert.equal(editor.isConnected, true);
     });
 
     it('dismisses More first, then cancels from any toolbar control and destroys tooltips', () => {
