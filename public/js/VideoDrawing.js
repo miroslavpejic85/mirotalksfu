@@ -104,6 +104,7 @@ class VideoDrawingOverlay {
         this.fabricCanvas = new fabric.Canvas(this.canvasEl, {
             isDrawingMode: false,
             selection: false,
+            selectionKey: null,
             renderOnAddRemove: true,
             allowTouchScrolling: false,
         });
@@ -608,7 +609,7 @@ class VideoDrawingOverlay {
         this.activeTool = tool;
         const drawingMode = ['pencil', 'highlighter', 'vanishing'].includes(tool);
         this.fabricCanvas.isDrawingMode = drawingMode;
-        this.fabricCanvas.selection = tool === 'select';
+        this.fabricCanvas.selection = false;
         this._setupBrush();
 
         for (const annotation of this.annotations.values()) {

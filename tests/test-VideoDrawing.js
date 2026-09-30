@@ -9,6 +9,56 @@ const { JSDOM } = require('jsdom');
 const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'public/js/VideoDrawing.js'), 'utf8');
 
+describe('screen annotation single selection', () => {
+    let dom;
+    let overlay;
+
+    beforeEach(() => {
+        dom = new JSDOM('<div id="screen"></div>', { runScripts: 'outside-only' });
+        dom.window.fabric = {
+            Canvas: function (element, options) {
+                Object.assign(this, options, {
+                    wrapperEl: element.parentElement,
+                    on() {},
+                    discardActiveObject() {},
+                    requestRenderAll() {},
+                });
+            },
+        };
+        dom.window.eval(`${source}\nwindow.Overlay = VideoDrawingOverlay;`);
+        const Overlay = dom.window.Overlay;
+        Overlay.prototype._setupBrush = () => {};
+        Overlay.prototype._setupPathListener = () => {};
+        Overlay.prototype._setupResizeObserver = () => {};
+        Overlay.getLocalDrawerId = () => 'drawer';
+        overlay = new Overlay(dom.window.document.getElementById('screen'), 'screen-producer');
+    });
+
+    afterEach(() => dom.window.close());
+
+    it('disables box selection and modifier-key grouping when creating the canvas', () => {
+        assert.equal(overlay.fabricCanvas.selection, false);
+        assert.equal(overlay.fabricCanvas.selectionKey, null);
+    });
+
+    it('keeps individual authorized objects selectable without enabling groups across tool changes', () => {
+        const ownObject = {};
+        const otherObject = {};
+        overlay.annotations.set('own', { drawerId: 'drawer', object: ownObject });
+        overlay.annotations.set('other', { drawerId: 'other-drawer', object: otherObject });
+
+        for (const tool of ['select', 'pencil', 'select', null, 'select']) {
+            overlay.setTool(tool);
+            assert.equal(overlay.fabricCanvas.selection, false);
+            assert.equal(overlay.fabricCanvas.selectionKey, null);
+            assert.equal(ownObject.selectable, tool === 'select');
+            assert.equal(ownObject.evented, tool === 'select');
+            assert.equal(otherObject.selectable, false);
+            assert.equal(otherObject.evented, false);
+        }
+    });
+});
+
 describe('screen annotation text toolbar', () => {
     let dom;
     let overlay;
