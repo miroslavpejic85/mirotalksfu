@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "Rombusz",
+        "Download annotated screen (PDF)": "Megjegyzésekkel ellátott képernyő letöltése (PDF)",
+        "Download annotated screen (PNG)": "Megjegyzésekkel ellátott képernyő letöltése (PNG)",
         "🔊 Volume": "🔊 Hangerő",
         "Accept": "Elfogad",
         "Add option": "Lehetőség hozzáadása",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "Annotációk letöltése",
         "= Arrow": "= Nyíl",
         "= Diamond": "= Rombusz",
         "= Frame": "= Keret",
@@ -993,7 +997,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "Nem sikerült letölteni a képernyő-annotációkat",
         "Select a grouped object to ungroup.": "Jelöljön ki egy csoportosított objektumot a csoportbontáshoz.",
         "Select two or more objects to group.": "Jelöljön ki két vagy több objektumot a csoportosításhoz.",
         "⚪ Wake Lock released": "⚪ Ébren tartás feloldva",

@@ -123,7 +123,7 @@ class VideoDrawingOverlay {
         this._setupPathListener();
         this.fabricCanvas.on('mouse:down', (event) => {
             if (this.activeTool === 'text' && event.e) this._beginTextInput(event.e);
-            if (['circle', 'rectangle', 'arrow'].includes(this.activeTool) && event.e) {
+            if (['circle', 'rectangle', 'diamond', 'arrow'].includes(this.activeTool) && event.e) {
                 this._beginShape(event.e);
             }
         });
@@ -362,6 +362,7 @@ class VideoDrawingOverlay {
             'Vanishing pen',
             'Circle',
             'Rectangle',
+            'Diamond',
             'Arrow',
             'Text',
             'Select and move',
@@ -372,6 +373,8 @@ class VideoDrawingOverlay {
             'Delete selected annotation',
             'Clear my screen annotations',
             'Clear screen annotations',
+            'Download annotated screen (PNG)',
+            'Download annotated screen (PDF)',
             'Hide annotation toolbar',
         ];
         annotationTooltipLabels.forEach((label) => window.i18n?.t(label, 'tooltips'));
@@ -395,6 +398,7 @@ class VideoDrawingOverlay {
             ['vanishing', 'fas fa-wand-magic-sparkles', 'Vanishing pen'],
             ['circle', 'far fa-circle', 'Circle'],
             ['rectangle', 'far fa-square', 'Rectangle'],
+            ['diamond', 'video-drawing-diamond far fa-square', 'Diamond'],
             ['arrow', 'fas fa-arrow-right-long', 'Arrow'],
             ['text', 'fas fa-font', 'Text'],
             ['select', 'fas fa-mouse-pointer', 'Select and move'],
@@ -467,6 +471,19 @@ class VideoDrawingOverlay {
         clearButton.addEventListener('click', () => this.clearAnnotations(true));
         toolbar.appendChild(clearButton);
 
+        const exportTools = this._createToolbarGroup('Annotation downloads');
+        this.downloadButtons = [];
+        for (const [format, icon, label] of [
+            ['png', 'fas fa-download', 'Download annotated screen (PNG)'],
+            ['pdf', 'fas fa-file-pdf', 'Download annotated screen (PDF)'],
+        ]) {
+            const button = this._createToolbarButton(icon, label);
+            button.addEventListener('click', () => this.downloadSnapshot(format));
+            exportTools.appendChild(button);
+            this.downloadButtons.push(button);
+        }
+        toolbar.appendChild(exportTools);
+
         const closeButton = this._createToolbarButton('video-drawing-close fas fa-times', 'Hide annotation toolbar');
         closeButton.addEventListener('click', () => this.setToolbarCollapsed(true));
         toolbar.appendChild(closeButton);
@@ -488,6 +505,107 @@ class VideoDrawingOverlay {
             this.setTool(tool);
         });
         this.refreshPermissions();
+    }
+
+    async captureSnapshot() {
+        const video = this.cameraDivEl.querySelector('video');
+        const wrapper = this.fabricCanvas.wrapperEl;
+        const width = this.fabricCanvas.getWidth();
+        const height = this.fabricCanvas.getHeight();
+        if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight || !width || !height) {
+            throw new Error('No screen video frame is available');
+        }
+        const snapshot = document.createElement('canvas');
+        snapshot.width = video.videoWidth;
+        snapshot.height = video.videoHeight;
+        const context = snapshot.getContext('2d');
+        context.drawImage(video, 0, 0, snapshot.width, snapshot.height);
+        const labels = this.fabricCanvas.getObjects().filter((object) => object.excludeFromExport);
+        const visibility = labels.map((object) => object.visible);
+        try {
+            labels.forEach((object) => (object.visible = false));
+            const drawing = this.fabricCanvas.toCanvasElement();
+            context.drawImage(drawing, 0, 0, snapshot.width, snapshot.height);
+        } finally {
+            labels.forEach((object, index) => (object.visible = visibility[index]));
+        }
+        if (!this.textAnnotations.size) return snapshot;
+        if (typeof window.html2canvas !== 'function') throw new Error('Screen capture library is unavailable');
+
+        const frame = document.createElement('div');
+        Object.assign(frame.style, {
+            position: 'absolute',
+            left: '-100000px',
+            top: '0',
+            width: `${width}px`,
+            height: `${height}px`,
+            overflow: 'hidden',
+            pointerEvents: 'none',
+            fontFamily: getComputedStyle(this.cameraDivEl).fontFamily,
+        });
+        frame.setAttribute('aria-hidden', 'true');
+        Object.assign(snapshot.style, { width: `${width}px`, height: `${height}px`, display: 'block' });
+        frame.appendChild(snapshot);
+        for (const { element } of this.textAnnotations.values()) {
+            const clone = element.cloneNode(true);
+            clone.classList.remove('video-drawing-text-selected', 'video-drawing-text-select-mode');
+            clone.querySelectorAll('button, .video-drawing-text-author').forEach((control) => control.remove());
+            Object.assign(clone.style, {
+                left: `${element.offsetLeft - wrapper.offsetLeft}px`,
+                top: `${element.offsetTop - wrapper.offsetTop}px`,
+                width: `${element.offsetWidth}px`,
+                height: `${element.offsetHeight}px`,
+                borderColor: 'transparent',
+                boxShadow: 'none',
+            });
+            frame.appendChild(clone);
+        }
+        document.body.appendChild(frame);
+        try {
+            const textSnapshot = await window.html2canvas(frame, {
+                backgroundColor: null,
+                scale: snapshot.width / width,
+                width,
+                height,
+                logging: false,
+            });
+            context.clearRect(0, 0, snapshot.width, snapshot.height);
+            context.drawImage(textSnapshot, 0, 0, snapshot.width, snapshot.height);
+            return snapshot;
+        } finally {
+            frame.remove();
+        }
+    }
+
+    async downloadSnapshot(format) {
+        if (this.isCapturing) return;
+        this.isCapturing = true;
+        this.downloadButtons.forEach((button) => (button.disabled = true));
+        try {
+            const snapshot = await this.captureSnapshot();
+            const fileName = `screen-annotations-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+            if (format === 'pdf') {
+                if (!window.jspdf?.jsPDF) throw new Error('PDF library is unavailable');
+                const pdf = new window.jspdf.jsPDF({
+                    orientation: snapshot.width >= snapshot.height ? 'landscape' : 'portrait',
+                    unit: 'px',
+                    format: [snapshot.width, snapshot.height],
+                    hotfixes: ['px_scaling'],
+                });
+                pdf.addImage(snapshot, 'PNG', 0, 0, snapshot.width, snapshot.height);
+                pdf.save(`${fileName}.pdf`);
+            } else {
+                const blob = await new Promise((resolve) => snapshot.toBlob(resolve, 'image/png'));
+                if (!blob) throw new Error('Screen image could not be encoded');
+                rc.saveBlobToFile(blob, `${fileName}.png`);
+            }
+        } catch (error) {
+            console.error('Screen annotation capture failed', error);
+            if (typeof rc !== 'undefined') rc.userLog('error', 'Unable to download screen annotations');
+        } finally {
+            this.isCapturing = false;
+            this.downloadButtons.forEach((button) => (button.disabled = false));
+        }
     }
 
     _createToolbarButton(className, label) {
@@ -816,6 +934,37 @@ class VideoDrawingOverlay {
                 evented: false,
             });
             this._applyRectanglePoints(annotation, object);
+        } else if (annotation.tool === 'diamond') {
+            const [start, end] = annotation.points;
+            const centerX = ((start.x + end.x) / 2) * width;
+            const centerY = ((start.y + end.y) / 2) * height;
+            object = new fabric.Polyline(
+                [
+                    { x: centerX, y: start.y * height },
+                    { x: end.x * width, y: centerY },
+                    { x: centerX, y: end.y * height },
+                    { x: start.x * width, y: centerY },
+                    { x: centerX, y: start.y * height },
+                ],
+                {
+                    fill: null,
+                    stroke: annotation.color,
+                    strokeWidth: Math.max(2, annotation.width * width),
+                    strokeLineJoin: 'round',
+                    selectable: false,
+                    evented: false,
+                    objectCaching: false,
+                }
+            );
+            object.containsPoint = (point) => {
+                const center = object.getCenterPoint();
+                const tolerance = Math.max(8, object.strokeWidth * 2);
+                return (
+                    Math.abs(point.x - center.x) / ((object.width * object.scaleX) / 2 + tolerance) +
+                        Math.abs(point.y - center.y) / ((object.height * object.scaleY) / 2 + tolerance) <=
+                    1
+                );
+            };
         } else if (annotation.tool === 'arrow') {
             object = new fabric.Polyline(this._getArrowPoints(annotation, width, height), {
                 fill: null,

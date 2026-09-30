@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "Ромб",
+        "Download annotated screen (PDF)": "Преузми екран са напоменама (PDF)",
+        "Download annotated screen (PNG)": "Преузми екран са напоменама (PNG)",
         "🔊 Volume": "🔊 Jačina zvuka",
         "Accept": "Prihvati",
         "Add option": "Dodaj opciju",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "Преузимање напомена",
         "= Arrow": "= Strelica",
         "= Diamond": "= Romb",
         "= Frame": "= Okvir",
@@ -993,7 +997,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "Није могуће преузети напомене на екрану",
         "Select a grouped object to ungroup.": "Izaberite grupisani objekat za razgrupisavanje.",
         "Select two or more objects to group.": "Izaberite dva ili više objekata za grupisanje.",
         "⚪ Wake Lock released": "⚪ Wake Lock je otpušten",

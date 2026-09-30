@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.20
+ * @version 2.5.21
  *
  */
 
@@ -4164,7 +4164,9 @@ function startServer() {
                     return;
                 }
 
-                const validTool = ['pencil', 'highlighter', 'circle', 'rectangle', 'arrow'].includes(data.tool);
+                const validTool = ['pencil', 'highlighter', 'circle', 'rectangle', 'diamond', 'arrow'].includes(
+                    data.tool
+                );
                 const validColor = typeof data.color === 'string' && /^#[0-9a-f]{6}$/i.test(data.color);
                 const validWidth = Number.isFinite(data.width) && data.width >= 0.001 && data.width <= 0.05;
                 const restoring = action === 'restore';

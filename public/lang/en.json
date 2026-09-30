@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "Diamond",
+        "Download annotated screen (PDF)": "Download annotated screen (PDF)",
+        "Download annotated screen (PNG)": "Download annotated screen (PNG)",
         "🔊 Volume": "🔊 Volume",
         "Accept": "Accept",
         "Add option": "Add option",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "Annotation downloads",
         "= Arrow": "= Arrow",
         "= Circle": "= Circle",
         "= Clear all": "= Clear all",
@@ -994,7 +998,7 @@
         "Unmute": "Unmute",
         "Unmute Video": "Unmute Video",
         "Username already in use": "Username already in use",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "Whiteboard Shortcuts",
         "Would you like to continue the room broadcast?": "Would you like to continue the room broadcast?",
         "Yes": "Yes",
@@ -1004,6 +1008,7 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?"
     },
     "toasts": {
+        "Unable to download screen annotations": "Unable to download screen annotations",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

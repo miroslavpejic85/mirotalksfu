@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "Belah ketupat",
+        "Download annotated screen (PDF)": "Unduh layar beranotasi (PDF)",
+        "Download annotated screen (PNG)": "Unduh layar beranotasi (PNG)",
         "🔊 Volume": "🔊 Volume",
         "Accept": "Terima",
         "Add option": "Tambah opsi",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "Unduhan anotasi",
         "= Arrow": "= Panah",
         "= Diamond": "= Belah ketupat",
         "= Frame": "= Bingkai",
@@ -993,7 +997,7 @@
         "Unmute": "Suarakan",
         "Unmute Video": "Suarakan Video",
         "Username already in use": "Nama pengguna sudah digunakan",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "Pintasan Papan Tulis",
         "Would you like to continue the room broadcast?": "Apakah Anda ingin melanjutkan siaran ruangan?",
         "Yes": "Ya",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "Tidak dapat mengunduh anotasi layar",
         "Select a grouped object to ungroup.": "Pilih objek yang dikelompokkan untuk dipisahkan.",
         "Select two or more objects to group.": "Pilih dua objek atau lebih untuk dikelompokkan.",
         "⚪ Wake Lock released": "⚪ Wake Lock dilepas",

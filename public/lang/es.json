@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "Rombo",
+        "Download annotated screen (PDF)": "Descargar pantalla anotada (PDF)",
+        "Download annotated screen (PNG)": "Descargar pantalla anotada (PNG)",
         "🔊 Volume": "🔊 Volumen",
         "Accept": "Aceptar",
         "Add option": "Añadir opción",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "Descargas de anotaciones",
         "= Arrow": "= Flecha",
         "= Diamond": "= Rombo",
         "= Frame": "= Marco",
@@ -993,7 +997,7 @@
         "Unmute": "Quitar silencio",
         "Unmute Video": "Activar el sonido del vídeo",
         "Username already in use": "El nombre de usuario ya está en uso",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "Atajos de la pizarra",
         "Would you like to continue the room broadcast?": "¿Quieres continuar con la difusión de la sala?",
         "Yes": "Sí",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "No se pudieron descargar las anotaciones de pantalla",
         "Select a grouped object to ungroup.": "Selecciona un objeto agrupado para desagruparlo.",
         "Select two or more objects to group.": "Selecciona dos o más objetos para agruparlos.",
         "⚪ Wake Lock released": "⚪ Wake Lock liberado",

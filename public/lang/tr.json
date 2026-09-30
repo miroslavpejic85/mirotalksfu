@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "Eşkenar dörtgen",
+        "Download annotated screen (PDF)": "Açıklama eklenmiş ekranı indir (PDF)",
+        "Download annotated screen (PNG)": "Açıklama eklenmiş ekranı indir (PNG)",
         "🔊 Volume": "🔊 Ses",
         "Accept": "Kabul et",
         "Add option": "Seçenek ekle",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "Açıklama indirmeleri",
         "= Arrow": "= Ok",
         "= Diamond": "= Eşkenar dörtgen",
         "= Frame": "= Çerçeve",
@@ -993,7 +997,7 @@
         "Unmute": "Sesini aç",
         "Unmute Video": "Videonun sesini aç",
         "Username already in use": "Kullanıcı adı zaten kullanımda",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Would you like to continue the room broadcast?": "Oda yayınını sürdürmek ister misiniz?",
         "Yes": "Evet",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "Ekran açıklamaları indirilemedi",
         "Select a grouped object to ungroup.": "Grubunu çözmek için gruplanmış bir nesne seçin.",
         "Select two or more objects to group.": "Gruplamak için iki veya daha fazla nesne seçin.",
         "⚪ Wake Lock released": "⚪ Wake Lock serbest bırakıldı",

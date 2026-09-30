@@ -292,6 +292,227 @@ describe('screen annotation text toolbar', () => {
     });
 });
 
+describe('screen annotation downloads and diamonds', () => {
+    let dom;
+    let overlay;
+    let images;
+    let video;
+    let drawing;
+    let label;
+
+    beforeEach(() => {
+        dom = new JSDOM('<div id="screen"><video></video><div id="canvas"></div></div>', {
+            runScripts: 'outside-only',
+        });
+        dom.window.eval(`${source}\nwindow.Overlay = VideoDrawingOverlay;`);
+        dom.window.Overlay.getLocalDrawerId = () => 'drawer';
+        images = [];
+        dom.window.HTMLCanvasElement.prototype.getContext = () => ({
+            drawImage: (...args) => images.push(args),
+            clearRect() {},
+        });
+        dom.window.HTMLCanvasElement.prototype.toBlob = (callback) => callback(new dom.window.Blob(['png']));
+        video = dom.window.document.querySelector('video');
+        Object.defineProperties(video, {
+            videoWidth: { value: 1920 },
+            videoHeight: { value: 1080 },
+            readyState: { value: 2, configurable: true },
+        });
+        const wrapper = dom.window.document.getElementById('canvas');
+        Object.defineProperties(wrapper, { offsetLeft: { value: 20 }, offsetTop: { value: 30 } });
+        drawing = dom.window.document.createElement('canvas');
+        label = { excludeFromExport: true, visible: true };
+        overlay = Object.create(dom.window.Overlay.prototype);
+        Object.assign(overlay, {
+            cameraDivEl: dom.window.document.getElementById('screen'),
+            fabricCanvas: {
+                wrapperEl: wrapper,
+                getWidth: () => 800,
+                getHeight: () => 450,
+                getObjects: () => [label, { visible: true }],
+                toCanvasElement: () => {
+                    assert.equal(label.visible, false);
+                    return drawing;
+                },
+            },
+            textAnnotations: new Map(),
+            downloadButtons: [dom.window.document.createElement('button'), dom.window.document.createElement('button')],
+        });
+    });
+
+    afterEach(() => dom.window.close());
+
+    it('composes source-resolution video and drawings without author labels', async () => {
+        const snapshot = await overlay.captureSnapshot();
+        assert.equal(snapshot.width, 1920);
+        assert.equal(snapshot.height, 1080);
+        assert.deepEqual(images, [
+            [video, 0, 0, 1920, 1080],
+            [drawing, 0, 0, 1920, 1080],
+        ]);
+        assert.equal(label.visible, true);
+    });
+
+    it('restores label visibility when Fabric export fails', async () => {
+        overlay.fabricCanvas.toCanvasElement = () => {
+            throw new Error('Fabric failure');
+        };
+        await assert.rejects(overlay.captureSnapshot(), /Fabric failure/);
+        assert.equal(label.visible, true);
+    });
+
+    it('captures formatted text at canvas-relative coordinates and removes temporary DOM on failure', async () => {
+        const element = dom.window.document.createElement('div');
+        element.className = 'video-drawing-text-annotation video-drawing-text-selected video-drawing-text-bold';
+        element.innerHTML =
+            '<span class="video-drawing-text-content">Label</span><button>Edit</button><span class="video-drawing-text-author">Author</span>';
+        element.style.transform = 'rotate(15deg)';
+        for (const [property, value] of Object.entries({
+            offsetLeft: 100,
+            offsetTop: 90,
+            offsetWidth: 150,
+            offsetHeight: 60,
+        })) {
+            Object.defineProperty(element, property, { value });
+        }
+        overlay.textAnnotations.set('text', { element });
+        dom.window.html2canvas = async (frame, options) => {
+            const clone = frame.querySelector('.video-drawing-text-annotation');
+            assert.equal(clone.style.left, '80px');
+            assert.equal(clone.style.top, '60px');
+            assert.equal(clone.style.transform, 'rotate(15deg)');
+            assert.equal(clone.classList.contains('video-drawing-text-bold'), true);
+            assert.equal(clone.classList.contains('video-drawing-text-selected'), false);
+            assert.equal(clone.querySelector('button, .video-drawing-text-author'), null);
+            assert.equal(options.scale, 2.4);
+            throw new Error('renderer failure');
+        };
+        await assert.rejects(overlay.captureSnapshot(), /renderer failure/);
+        assert.equal(dom.window.document.querySelector('[aria-hidden="true"]'), null);
+        assert.equal(element.querySelector('button').textContent, 'Edit');
+    });
+
+    it('downloads a PNG through the existing room helper and restores controls', async () => {
+        let saved;
+        dom.window.rc = { saveBlobToFile: (blob, name) => (saved = { blob, name }) };
+        await overlay.downloadSnapshot('png');
+        assert.match(saved.name, /^screen-annotations-.*\.png$/);
+        assert.ok(saved.blob instanceof dom.window.Blob);
+        assert.equal(overlay.isCapturing, false);
+        assert.ok(overlay.downloadButtons.every((button) => !button.disabled));
+    });
+
+    it('preserves source resolution when the text renderer returns rounded display dimensions', async () => {
+        const element = dom.window.document.createElement('div');
+        overlay.textAnnotations.set('text', { element });
+        const rendered = dom.window.document.createElement('canvas');
+        rendered.width = 1920;
+        rendered.height = 1087;
+        dom.window.html2canvas = async () => rendered;
+        const snapshot = await overlay.captureSnapshot();
+        assert.equal(snapshot.width, 1920);
+        assert.equal(snapshot.height, 1080);
+        assert.deepEqual(images.at(-1), [rendered, 0, 0, 1920, 1080]);
+    });
+
+    it('downloads a source-sized single-page PDF', async () => {
+        let config;
+        let image;
+        let name;
+        dom.window.jspdf = {
+            jsPDF: class {
+                constructor(options) {
+                    config = options;
+                }
+                addImage(...args) {
+                    image = args;
+                }
+                save(file) {
+                    name = file;
+                }
+            },
+        };
+        await overlay.downloadSnapshot('pdf');
+        assert.equal(config.orientation, 'landscape');
+        assert.equal(config.unit, 'px');
+        assert.deepEqual(Array.from(config.format), [1920, 1080]);
+        assert.deepEqual(image.slice(1), ['PNG', 0, 0, 1920, 1080]);
+        assert.match(name, /^screen-annotations-.*\.pdf$/);
+        assert.ok(overlay.downloadButtons.every((button) => !button.disabled));
+    });
+
+    it('reports missing frames and libraries without leaving controls disabled', async () => {
+        let reported;
+        dom.window.console.error = () => {};
+        dom.window.rc = { userLog: (type, message) => (reported = { type, message }) };
+        Object.defineProperty(video, 'readyState', { value: 0, configurable: true });
+        await overlay.downloadSnapshot('png');
+        assert.equal(reported.message, 'Unable to download screen annotations');
+        assert.equal(reported.type, 'error');
+        assert.equal(images.length, 0);
+        Object.defineProperty(video, 'readyState', { value: 2 });
+        await overlay.downloadSnapshot('pdf');
+        assert.equal(overlay.isCapturing, false);
+        assert.ok(overlay.downloadButtons.every((button) => !button.disabled));
+    });
+
+    it('prevents overlapping downloads', async () => {
+        let finish;
+        let captures = 0;
+        overlay.captureSnapshot = () => {
+            captures++;
+            return new Promise((resolve) => (finish = resolve));
+        };
+        dom.window.rc = { saveBlobToFile() {} };
+        const download = overlay.downloadSnapshot('png');
+        assert.ok(overlay.downloadButtons.every((button) => button.disabled));
+        await overlay.downloadSnapshot('png');
+        assert.equal(captures, 1);
+        finish(dom.window.document.createElement('canvas'));
+        await download;
+        assert.ok(overlay.downloadButtons.every((button) => !button.disabled));
+    });
+
+    it('renders a closed diamond in either drag direction using normalized coordinates', () => {
+        dom.window.fabric = {
+            Polyline: class {
+                constructor(points, options) {
+                    this.points = points;
+                    Object.assign(this, options);
+                }
+                set(options) {
+                    Object.assign(this, options);
+                }
+            },
+        };
+        for (const points of [
+            [
+                { x: 0.2, y: 0.2 },
+                { x: 0.6, y: 0.6 },
+            ],
+            [
+                { x: 0.6, y: 0.6 },
+                { x: 0.2, y: 0.2 },
+            ],
+        ]) {
+            const object = overlay._createAnnotationObject({ tool: 'diamond', color: '#ffeb3b', width: 0.004, points });
+            const vertices = Array.from(object.points, ({ x, y }) => [x, y]);
+            assert.equal(vertices.length, 5);
+            assert.deepEqual(vertices[0], vertices[4]);
+            assert.deepEqual(
+                vertices.slice(0, 4).sort(),
+                [
+                    [320, 90],
+                    [480, 180],
+                    [320, 270],
+                    [160, 180],
+                ].sort()
+            );
+            assert.equal(object.stroke, '#ffeb3b');
+        }
+    });
+});
+
 describe('server screen text style validation', () => {
     const server = fs.readFileSync(path.join(root, 'app/src/Server.js'), 'utf8');
     const start = server.indexOf('const getTextStyle = (fallback = {}) => {');
@@ -326,5 +547,61 @@ describe('server screen text style validation', () => {
         ]) {
             assert.equal(validate(invalid), null);
         }
+    });
+});
+
+describe('server diamond annotation relay', () => {
+    const server = fs.readFileSync(path.join(root, 'app/src/Server.js'), 'utf8');
+    const start = server.indexOf("socket.on('videoDrawing', (dataObject) => {");
+    const end = server.indexOf("socket.on('setVideoOff'", start);
+    let receive;
+    let annotations;
+    let relayed;
+
+    beforeEach(() => {
+        annotations = new Map();
+        relayed = [];
+        const room = {
+            _moderator: {},
+            getPeer: () => ({ peer_name: 'Drawer' }),
+            isScreenProducer: (producerId) => producerId === 'screen',
+            getProducerOwnerId: () => 'owner',
+            getVideoDrawingAnnotations: () => annotations,
+            broadCast: (...args) => relayed.push(args),
+        };
+        vm.runInNewContext(server.slice(start, end), {
+            socket: { id: 'drawer', on: (event, handler) => (receive = handler) },
+            roomExists: () => true,
+            checkXSS: (data) => ({ ...data }),
+            getRoom: () => room,
+        });
+    });
+
+    it('stores and relays diamonds, supports movement, and rejects unsupported tools', () => {
+        const annotation = {
+            type: 'annotation',
+            action: 'create',
+            annotationId: 'diamond',
+            producerId: 'screen',
+            tool: 'diamond',
+            color: '#ffeb3b',
+            width: 0.004,
+            points: [
+                { x: 0.2, y: 0.2 },
+                { x: 0.6, y: 0.6 },
+            ],
+        };
+        receive(annotation);
+        assert.equal(annotations.get('diamond').tool, 'diamond');
+        assert.equal(relayed[0][2].drawerId, 'drawer');
+        const points = [
+            { x: 0.3, y: 0.3 },
+            { x: 0.7, y: 0.7 },
+        ];
+        receive({ ...annotation, action: 'move', points });
+        assert.deepEqual(annotations.get('diamond').points, points);
+        receive({ ...annotation, annotationId: 'invalid', tool: 'unsupported' });
+        assert.equal(annotations.size, 1);
+        assert.equal(relayed.length, 2);
     });
 });

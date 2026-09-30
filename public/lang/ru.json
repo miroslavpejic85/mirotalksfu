@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "Ромб",
+        "Download annotated screen (PDF)": "Скачать экран с аннотациями (PDF)",
+        "Download annotated screen (PNG)": "Скачать экран с аннотациями (PNG)",
         "🔊 Volume": "🔊 Громкость",
         "Accept": "Принять",
         "Add option": "Добавить вариант",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "Скачивание аннотаций",
         "= Arrow": "= Стрелка",
         "= Diamond": "= Ромб",
         "= Frame": "= Рамка",
@@ -993,7 +997,7 @@
         "Unmute": "Включить звук",
         "Unmute Video": "Включить звук видео",
         "Username already in use": "Имя пользователя уже используется",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "Горячие клавиши доски",
         "Would you like to continue the room broadcast?": "Хотите продолжить трансляцию комнаты?",
         "Yes": "Да",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "Не удалось скачать аннотации экрана",
         "Select a grouped object to ungroup.": "Выберите сгруппированный объект для разгруппировки.",
         "Select two or more objects to group.": "Выберите два или более объекта для группировки.",
         "⚪ Wake Lock released": "⚪ Wake Lock отключен",

@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "ひし形",
+        "Download annotated screen (PDF)": "注釈付き画面をダウンロード (PDF)",
+        "Download annotated screen (PNG)": "注釈付き画面をダウンロード (PNG)",
         "🔊 Volume": "🔊 音量",
         "Accept": "承認",
         "Add option": "選択肢を追加",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "注釈のダウンロード",
         "= Arrow": "= 矢印",
         "= Diamond": "= ひし形",
         "= Frame": "= フレーム",
@@ -993,7 +997,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "画面の注釈をダウンロードできません",
         "Select a grouped object to ungroup.": "グループ化を解除するオブジェクトを選択してください。",
         "Select two or more objects to group.": "グループ化するオブジェクトを2つ以上選択してください。",
         "⚪ Wake Lock released": "⚪ Wake Lock を解除しました",

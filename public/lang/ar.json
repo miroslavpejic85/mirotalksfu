@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "معيّن",
+        "Download annotated screen (PDF)": "تنزيل الشاشة مع التعليقات التوضيحية (PDF)",
+        "Download annotated screen (PNG)": "تنزيل الشاشة مع التعليقات التوضيحية (PNG)",
         "🔊 Volume": "🔊 مستوى الصوت",
         "Accept": "قبول",
         "Add option": "إضافة خيار",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "تنزيلات التعليقات التوضيحية",
         "= Arrow": "= سهم",
         "= Diamond": "= شكل ماسي",
         "= Frame": "= إطار",
@@ -993,7 +997,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "تعذّر تنزيل التعليقات التوضيحية على الشاشة",
         "Select a grouped object to ungroup.": "حدد كائنًا مجمعًا لفك تجميعه.",
         "Select two or more objects to group.": "حدد عنصرين أو أكثر لتجميعهما.",
         "⚪ Wake Lock released": "⚪ تم إلغاء قفل التنبيه",

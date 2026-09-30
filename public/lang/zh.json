@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "菱形",
+        "Download annotated screen (PDF)": "下载带批注的屏幕 (PDF)",
+        "Download annotated screen (PNG)": "下载带批注的屏幕 (PNG)",
         "🔊 Volume": "🔊 音量",
         "Accept": "接受",
         "Add option": "添加选项",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "批注下载",
         "= Arrow": "= 箭头",
         "= Diamond": "= 菱形",
         "= Frame": "= 框架",
@@ -993,7 +997,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "无法下载屏幕批注",
         "Select a grouped object to ungroup.": "请选择一个已组合的对象以取消组合。",
         "Select two or more objects to group.": "请选择两个或更多对象进行组合。",
         "⚪ Wake Lock released": "⚪ Wake Lock 已释放",

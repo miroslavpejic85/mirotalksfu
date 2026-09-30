@@ -1,5 +1,8 @@
 {
     "tooltips": {
+        "Diamond": "마름모",
+        "Download annotated screen (PDF)": "주석이 포함된 화면 다운로드 (PDF)",
+        "Download annotated screen (PNG)": "주석이 포함된 화면 다운로드 (PNG)",
         "🔊 Volume": "🔊 볼륨",
         "Accept": "수락",
         "Add option": "옵션 추가",
@@ -382,6 +385,7 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Annotation downloads": "주석 다운로드",
         "= Arrow": "= 화살표",
         "= Diamond": "= 마름모",
         "= Frame": "= 프레임",
@@ -993,7 +997,7 @@
         "Unmute": "음소거 해제",
         "Unmute Video": "비디오 음소거 해제",
         "Username already in use": "사용자 이름이 이미 사용 중입니다",
-        "WebRTC SFU v2.5.20": "WebRTC SFU v2.5.20",
+        "WebRTC SFU v2.5.21": "WebRTC SFU v2.5.21",
         "Whiteboard Shortcuts": "화이트보드 단축키",
         "Would you like to continue the room broadcast?": "방 방송을 계속하시겠습니까?",
         "Yes": "예",
@@ -1004,6 +1008,7 @@
         "fas fa-font": "fas fa-font"
     },
     "toasts": {
+        "Unable to download screen annotations": "화면 주석을 다운로드할 수 없습니다",
         "Select a grouped object to ungroup.": "그룹을 해제할 그룹 개체를 선택하세요.",
         "Select two or more objects to group.": "그룹화할 개체를 두 개 이상 선택하세요.",
         "⚪ Wake Lock released": "⚪ Wake Lock 해제됨",
