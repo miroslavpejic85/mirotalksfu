@@ -31,5 +31,6 @@ We would like to extend our gratitude to the following individuals for their res
 | `Vishal Shukla (@shukla304) and sechub.dev AI Agent` | [GitHub](https://github.com/shukla304)                                                              |
 | `Tyler Boykin`                                       | [GitHub](https://github.com/CaptBoykin)                                                             |
 | `tonghuaroot`                                        | [GitHub](https://github.com/tonghuaroot)                                                            |
+| `Kevin Sanchez`                                      | [GitHub](https://github.com/kevinsocute)                                                            |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
