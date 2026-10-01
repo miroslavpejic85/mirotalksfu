@@ -651,8 +651,8 @@ input[type='range'] {
     top: 48px;
     left: 50%;
     display: none !important;
-    align-items: center;
-    justify-content: flex-start;
+    flex-direction: column;
+    align-items: stretch;
     gap: 3px;
     box-sizing: border-box;
     width: max-content;
@@ -662,14 +662,29 @@ input[type='range'] {
     border-radius: 8px;
     background: var(--body-bg);
     box-shadow: var(--box-shadow);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
     transform: translateX(-50%);
 }
 
-.video-drawing-toolbar::-webkit-scrollbar {
-    display: none;
+.video-drawing-toolbar-primary {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+}
+
+.video-drawing-toolbar-panel {
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    max-width: 100%;
+    max-height: 132px;
+    overflow-y: auto;
+    padding: 5px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-right: 0 !important;
+}
+
+.video-drawing-toolbar-panel[hidden] {
+    display: none !important;
 }
 
 .video-drawing-toolbar-group {
@@ -705,10 +720,21 @@ input[type='range'] {
 }
 
 .video-drawing-toolbar button:hover,
-.video-drawing-toolbar button:focus-visible,
-.video-drawing-toolbar button.video-drawing-tool-active {
+.video-drawing-toolbar button:focus-visible {
     background: rgba(255, 255, 255, 0.14);
+}
+
+.video-drawing-toolbar button.video-drawing-tool-active,
+.video-drawing-toolbar button[aria-expanded='true'] {
+    background: rgba(76, 175, 80, 0.22);
+    box-shadow: inset 0 0 0 2px #4caf50;
     color: #4caf50;
+}
+
+.video-drawing-toolbar button:focus-visible,
+.video-drawing-toolbar input:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
 }
 
 .video-drawing-toolbar button:disabled {
@@ -726,12 +752,13 @@ input[type='range'] {
 
 .video-drawing-toolbar button.video-drawing-delete:not(:disabled):hover,
 .video-drawing-toolbar button.video-drawing-delete:not(:disabled):focus-visible,
-.video-drawing-toolbar button.video-drawing-close:hover,
-.video-drawing-toolbar button.video-drawing-close:focus-visible {
+.video-drawing-toolbar button.video-drawing-exit,
+.video-drawing-toolbar button.video-drawing-clear:not(:disabled) {
     color: #ef5350 !important;
 }
 
-.video-drawing-swatch span {
+.video-drawing-swatch span,
+.video-drawing-appearance span {
     box-sizing: border-box;
     width: 18px;
     height: 18px;
@@ -761,19 +788,40 @@ input[type='range'] {
 }
 
 .video-drawing-width {
-    flex: 0 0 64px;
-    width: 64px;
+    flex: 0 0 96px;
+    width: 96px;
     accent-color: #4caf50;
     cursor: pointer;
+}
+
+.video-drawing-width-preview {
+    flex: 0 0 24px;
+    width: 24px;
+    max-height: 12px;
+    border-radius: 3px;
 }
 
 @container camera (max-width: 720px) {
     .video-drawing-toolbar {
         top: 48px !important;
         left: 50% !important;
-        width: calc(100% - 16px);
-        touch-action: pan-x;
-        transform: translateX(-50%);
+        width: min(536px, calc(100% - 16px));
+        transform: translateX(-50%) !important;
+    }
+
+    .video-drawing-toolbar-primary {
+        justify-content: center;
+        gap: 1px;
+    }
+
+    .video-drawing-toolbar-group {
+        gap: 1px;
+        padding-right: 1px;
+    }
+
+    .video-drawing-toolbar-panel {
+        justify-content: center;
+        gap: 4px;
     }
 
     .video-drawing-toolbar .video-drawing-drag-handle {
@@ -781,18 +829,43 @@ input[type='range'] {
     }
 
     .video-drawing-toolbar button,
-    .video-drawing-toolbar .video-drawing-color,
-    .video-drawing-toolbar .video-drawing-width {
-        flex-basis: 40px;
-        width: 40px;
-        height: 40px;
+    .video-drawing-toolbar .video-drawing-color {
+        flex-basis: 44px;
+        width: 44px;
+        height: 44px;
+    }
+}
+
+@container camera (max-width: 540px) {
+    .video-drawing-toolbar-primary {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
     }
 
-    .video-drawing-toolbar button.video-drawing-close {
-        position: sticky;
-        right: 0;
-        background: rgba(18, 18, 18, 0.96);
-        box-shadow: -8px 0 8px rgba(18, 18, 18, 0.96);
+    .video-drawing-toolbar-primary > .video-drawing-toolbar-group {
+        display: contents;
+    }
+
+    .video-drawing-toolbar-primary button {
+        width: 100%;
+        min-width: 0;
+        height: 44px;
+    }
+}
+
+@container camera (max-width: 320px) {
+    .video-drawing-toolbar {
+        padding: 2px;
+    }
+
+    .video-drawing-toolbar-primary {
+        gap: 0;
+    }
+}
+
+@container camera (max-width: 280px) {
+    .video-drawing-toolbar-primary {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
     }
 }
 

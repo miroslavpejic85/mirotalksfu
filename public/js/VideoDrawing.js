@@ -430,12 +430,30 @@ class VideoDrawingOverlay {
         toolbar.setAttribute('role', 'toolbar');
         toolbar.setAttribute('aria-orientation', 'horizontal');
         this._setTranslatedAttribute(toolbar, 'aria-label', 'Screen annotation tools', 'labels');
+        this.toolbarPanels = new Map();
+        const primary = document.createElement('div');
+        primary.className = 'video-drawing-toolbar-primary';
+        toolbar.appendChild(primary);
+        const secondaryTools = this._createToolbarGroup('Drawing tools');
+        const addPanel = (name, icon, label, panel) => {
+            const button = this._createToolbarButton(icon, label);
+            button.setAttribute('aria-expanded', 'false');
+            panel.id = `${this.cameraId}__annotationPanel_${name}`;
+            panel.classList.add('video-drawing-toolbar-panel');
+            panel.hidden = true;
+            button.setAttribute('aria-controls', panel.id);
+            button.addEventListener('click', () => this.setToolbarPanel(panel.hidden ? name : null));
+            primary.appendChild(button);
+            toolbar.appendChild(panel);
+            this.toolbarPanels.set(name, { button, panel });
+            return button;
+        };
 
         const dragHandle = this._createToolbarButton(
             'video-drawing-drag-handle fas fa-arrows-alt',
             'Move annotation toolbar'
         );
-        toolbar.appendChild(dragHandle);
+        primary.appendChild(dragHandle);
 
         const drawingTools = this._createToolbarGroup('Drawing tools');
         const tools = [
@@ -458,11 +476,15 @@ class VideoDrawingOverlay {
             button.addEventListener('click', () => {
                 this.lastDrawingTool = tool;
                 this.setTool(tool);
+                this.setToolbarPanel(null, true);
             });
-            drawingTools.appendChild(button);
+            const group = ['pencil', 'highlighter', 'laser', 'eraser'].includes(tool) ? drawingTools : secondaryTools;
+            group.appendChild(button);
             this.toolButtons[tool] = button;
         }
-        toolbar.appendChild(drawingTools);
+        drawingTools.prepend(this.toolButtons.select);
+        primary.appendChild(drawingTools);
+        addPanel('tools', 'fas fa-shapes', 'Drawing tools', secondaryTools);
 
         const appearanceTools = this._createToolbarGroup('Annotation appearance');
         this.colorButtons = [];
@@ -502,10 +524,28 @@ class VideoDrawingOverlay {
         this._setTranslatedAttribute(widthInput, 'aria-label', 'Annotation width', 'tooltips');
         widthInput.addEventListener('input', () => {
             this.annotationWidth = Number(widthInput.value);
+            this.widthPreview.style.height = `${Math.round(this.annotationWidth * 1000)}px`;
             this._setupBrush();
         });
         appearanceTools.appendChild(widthInput);
-        toolbar.appendChild(appearanceTools);
+        this.widthInput = widthInput;
+        const widthPreview = document.createElement('span');
+        widthPreview.className = 'video-drawing-width-preview';
+        widthPreview.setAttribute('aria-hidden', 'true');
+        widthPreview.style.height = `${Math.round(this.annotationWidth * 1000)}px`;
+        widthPreview.style.backgroundColor = this.annotationColor;
+        appearanceTools.appendChild(widthPreview);
+        this.widthPreview = widthPreview;
+        this.appearanceButton = addPanel(
+            'appearance',
+            'video-drawing-appearance',
+            'Annotation appearance',
+            appearanceTools
+        );
+        const colorPreview = document.createElement('span');
+        colorPreview.setAttribute('aria-hidden', 'true');
+        colorPreview.style.backgroundColor = this.annotationColor;
+        this.appearanceButton.appendChild(colorPreview);
 
         const historyTools = this._createToolbarGroup('Annotation history');
         this.undoButton = this._createToolbarButton('fas fa-undo', 'Undo annotation');
@@ -524,21 +564,22 @@ class VideoDrawingOverlay {
         );
         this.deleteButton.disabled = true;
         this.deleteButton.addEventListener('click', () => this.deleteSelectedAnnotation());
-        historyTools.appendChild(this.deleteButton);
-        toolbar.appendChild(historyTools);
+        primary.appendChild(historyTools);
+        const moreTools = this._createToolbarGroup('More annotation options');
+        moreTools.appendChild(this.deleteButton);
 
         const clearLabel =
             VideoDrawingOverlay.getLocalDrawerId?.() === VideoDrawingOverlay.getProducerOwnerId?.(this.producerId)
                 ? 'Clear screen annotations'
                 : 'Clear my screen annotations';
-        const clearButton = this._createToolbarButton('fas fa-broom', clearLabel);
+        const clearButton = this._createToolbarButton('video-drawing-clear fas fa-broom', clearLabel);
         clearButton.addEventListener('click', () => this.clearAnnotations(true));
         this.clearButton = clearButton;
-        toolbar.appendChild(clearButton);
+        moreTools.appendChild(clearButton);
 
         this.visibilityButton = this._createToolbarButton('fas fa-eye', 'Hide annotations');
         this.visibilityButton.addEventListener('click', () => this.setAnnotationsHidden(!this.annotationsHidden));
-        toolbar.appendChild(this.visibilityButton);
+        moreTools.appendChild(this.visibilityButton);
         if (this._isScreenOwner()) {
             this.permissionsButton = this._createToolbarButton('fas fa-lock-open', 'Disable participant annotations');
             this.permissionsButton.addEventListener('click', () => {
@@ -546,7 +587,7 @@ class VideoDrawingOverlay {
                 this.setParticipantsAllowed(allowed);
                 VideoDrawingOverlay.onEmitDrawing?.({ type: 'permissions', producerId: this.producerId, allowed });
             });
-            toolbar.appendChild(this.permissionsButton);
+            moreTools.appendChild(this.permissionsButton);
         }
 
         const exportTools = this._createToolbarGroup('Annotation downloads');
@@ -560,12 +601,26 @@ class VideoDrawingOverlay {
             exportTools.appendChild(button);
             this.downloadButtons.push(button);
         }
-        toolbar.appendChild(exportTools);
+        moreTools.appendChild(exportTools);
+        const exitButton = this._createToolbarButton('video-drawing-exit fas fa-power-off', 'Disable screen drawing');
+        exitButton.addEventListener('click', () => {
+            this.setTool(null);
+            this.drawingButton.focus();
+        });
+        moreTools.appendChild(exitButton);
+        addPanel('more', 'fas fa-ellipsis-h', 'More annotation options', moreTools);
 
-        const closeButton = this._createToolbarButton('video-drawing-close fas fa-times', 'Hide annotation toolbar');
+        const closeButton = this._createToolbarButton(
+            'video-drawing-close fas fa-chevron-up',
+            'Hide annotation toolbar'
+        );
         closeButton.addEventListener('click', () => this.setToolbarCollapsed(true));
-        toolbar.appendChild(closeButton);
+        primary.appendChild(closeButton);
         toolbar.addEventListener('keydown', (event) => this._handleToolbarKeyDown(event));
+        this._handleToolbarOutsidePointer = (event) => {
+            if (!toolbar.contains(event.target)) this.setToolbarPanel(null);
+        };
+        document.addEventListener('pointerdown', this._handleToolbarOutsidePointer);
 
         this.toolbar = toolbar;
         this.cameraDivEl.appendChild(toolbar);
@@ -578,7 +633,10 @@ class VideoDrawingOverlay {
         if (!isMobileDevice) this._bindToolbarDrag(toolbar, dragHandle);
 
         drawingButton.addEventListener('click', () => {
-            if (this.isActive && this.isToolbarCollapsed) this.setToolbarCollapsed(false);
+            if (this.isActive && this.isToolbarCollapsed) {
+                this.setToolbarCollapsed(false);
+                return;
+            }
             const tool = this.isActive ? null : this.lastDrawingTool;
             this.setTool(tool);
         });
@@ -703,7 +761,26 @@ class VideoDrawingOverlay {
         return group;
     }
 
+    setToolbarPanel(name, restoreFocus = false) {
+        for (const [panelName, { button, panel }] of this.toolbarPanels || []) {
+            if (!panel.hidden && panelName !== name && restoreFocus) button.focus();
+            panel.hidden = panelName !== name;
+            button.setAttribute('aria-expanded', String(!panel.hidden));
+        }
+        this._constrainToolbarPosition();
+    }
+
     _handleToolbarKeyDown(event) {
+        if (event.key === 'Escape') {
+            if ([...(this.toolbarPanels?.values() || [])].some(({ panel }) => !panel.hidden)) {
+                this.setToolbarPanel(null, true);
+            } else {
+                this.setToolbarCollapsed(true);
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key) || event.target.tagName !== 'BUTTON') {
             return;
         }
@@ -794,13 +871,17 @@ class VideoDrawingOverlay {
 
     setToolbarCollapsed(collapsed) {
         this.isToolbarCollapsed = collapsed;
+        if (collapsed) this.setToolbarPanel(null);
         this.toolbar?.classList.toggle('video-drawing-toolbar-collapsed', collapsed);
         if (collapsed && this.toolbar?.contains(document.activeElement) && !this.drawingButton?.hidden) {
             this.drawingButton?.focus();
         }
+        this._updateDrawingButton();
     }
 
     setTool(tool) {
+        if (!tool) this.setToolbarPanel(null);
+        if (tool && this.isToolbarCollapsed) this.setToolbarCollapsed(false);
         if (tool && tool !== 'view' && !this._canDraw()) tool = 'view';
         this._finishErasing();
         if (this.activeTool === 'laser' && tool !== 'laser') this._stopLaser();
@@ -835,15 +916,39 @@ class VideoDrawingOverlay {
             button.classList.toggle('video-drawing-tool-active', selected);
             button.setAttribute('aria-pressed', String(selected));
         }
-        this.drawingButton?.classList.toggle('video-drawing-tool-active', this.isActive);
-        this.drawingButton?.setAttribute('aria-pressed', String(this.isActive));
+        const secondaryTools = this.toolbarPanels?.get('tools');
+        if (secondaryTools) {
+            const selectedButton = this.toolButtons[tool];
+            secondaryTools.button.className =
+                selectedButton && secondaryTools.panel.contains(selectedButton)
+                    ? selectedButton.className
+                    : 'fas fa-shapes';
+        }
+        this._updateDrawingButton();
         if (tool !== 'text') this.textInput?.__cancel?.();
         this.fabricCanvas.requestRenderAll();
+    }
+
+    _updateDrawingButton() {
+        if (!this.drawingButton) return;
+        this.drawingButton.classList.toggle('video-drawing-tool-active', this.isActive);
+        this.drawingButton.setAttribute('aria-pressed', String(this.isActive));
+        const label =
+            this.isActive && this.isToolbarCollapsed
+                ? 'Show annotation toolbar'
+                : `${this.isActive ? 'Disable' : 'Enable'} screen drawing`;
+        this._setTranslatedAttribute(this.drawingButton, 'aria-label', label, 'tooltips');
+        if (this.drawingButton._tippy) {
+            this.drawingButton._tippy.__i18nSrc = label;
+            this.drawingButton._tippy.setContent(window.i18n?.t(label, 'tooltips') || label);
+        }
     }
 
     setColor(color) {
         this.annotationColor = color;
         if (this.colorInput) this.colorInput.value = color;
+        if (this.appearanceButton) this.appearanceButton.firstChild.style.backgroundColor = color;
+        if (this.widthPreview) this.widthPreview.style.backgroundColor = color;
         for (const button of this.colorButtons || []) {
             const selected = button.dataset.color === color.toLowerCase();
             button.classList.toggle('video-drawing-tool-active', selected);
@@ -2601,6 +2706,7 @@ class VideoDrawingOverlay {
         }
         this._pendingPaths = [];
         document.removeEventListener('keydown', this._handleHistoryKeyDown);
+        document.removeEventListener('pointerdown', this._handleToolbarOutsidePointer);
 
         if (VideoDrawingOverlay.getProducerOwnerId?.(this.producerId) === VideoDrawingOverlay.getLocalDrawerId?.()) {
             VideoDrawingOverlay.onEmitDrawing?.({ type: 'text', action: 'clear', producerId: this.producerId });

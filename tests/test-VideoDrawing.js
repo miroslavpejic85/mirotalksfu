@@ -808,6 +808,72 @@ describe('screen annotation laser pointer and color swatches', () => {
         );
     }
 
+    it('reopens a collapsed toolbar without disabling the selected drawing tool', () => {
+        overlay.toolButtons.highlighter.click();
+        overlay.toolbar.querySelector('.video-drawing-close').click();
+        assert.equal(overlay.isToolbarCollapsed, true);
+        assert.equal(overlay.drawingButton.getAttribute('aria-label'), 'Show annotation toolbar');
+        overlay.drawingButton.click();
+        assert.equal(overlay.isToolbarCollapsed, false);
+        assert.equal(overlay.isActive, true);
+        assert.equal(overlay.activeTool, 'highlighter');
+        overlay.drawingButton.click();
+        assert.equal(overlay.isActive, false);
+    });
+
+    it('opens only one secondary panel and restores focus when Escape dismisses it', () => {
+        overlay.drawingButton.click();
+        const tools = overlay.toolbarPanels.get('tools');
+        const appearance = overlay.toolbarPanels.get('appearance');
+        assert.equal(tools.panel.hidden, true);
+        tools.button.click();
+        assert.equal(tools.panel.hidden, false);
+        assert.equal(tools.button.getAttribute('aria-expanded'), 'true');
+        assert.equal(tools.button.getAttribute('aria-controls'), tools.panel.id);
+        appearance.button.click();
+        assert.equal(tools.panel.hidden, true);
+        assert.equal(appearance.panel.hidden, false);
+        overlay.colorInput.focus();
+        overlay.colorInput.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        assert.equal(appearance.panel.hidden, true);
+        assert.equal(dom.window.document.activeElement, appearance.button);
+        assert.equal(overlay.isActive, true);
+        appearance.button.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        assert.equal(overlay.isToolbarCollapsed, true);
+        assert.equal(dom.window.document.activeElement, overlay.drawingButton);
+    });
+
+    it('dismisses secondary tools after selection and when clicking outside', () => {
+        overlay.drawingButton.click();
+        const tools = overlay.toolbarPanels.get('tools');
+        tools.button.click();
+        overlay.toolButtons.arrow.click();
+        assert.equal(overlay.activeTool, 'arrow');
+        assert.equal(tools.panel.hidden, true);
+        assert.equal(tools.button.classList.contains('video-drawing-tool-active'), true);
+        assert.equal(tools.button.classList.contains('fa-arrow-right-long'), true);
+        assert.equal(dom.window.document.activeElement, tools.button);
+        tools.button.click();
+        overlay.fabricCanvas.upperCanvasEl.dispatchEvent(new dom.window.Event('pointerdown', { bubbles: true }));
+        assert.equal(tools.panel.hidden, true);
+    });
+
+    it('previews the current color and width and offers an explicit exit action', () => {
+        overlay.drawingButton.click();
+        overlay.setColor('#ff1744');
+        assert.equal(overlay.appearanceButton.firstChild.style.backgroundColor, 'rgb(255, 23, 68)');
+        overlay.widthInput.value = '0.008';
+        overlay.widthInput.dispatchEvent(new dom.window.Event('input'));
+        assert.equal(overlay.annotationWidth, 0.008);
+        assert.equal(overlay.widthPreview.style.height, '8px');
+        assert.equal(overlay.widthPreview.style.backgroundColor, 'rgb(255, 23, 68)');
+        overlay.toolbarPanels.get('more').button.click();
+        overlay.toolbar.querySelector('.video-drawing-exit').click();
+        assert.equal(overlay.isActive, false);
+        assert.equal(overlay.toolbarPanels.get('more').panel.hidden, true);
+        assert.equal(dom.window.document.activeElement, overlay.drawingButton);
+    });
+
     it('erases only local strokes and text across a sweep with grouped undo and redo', () => {
         for (const [annotationId, drawerId, center] of [
             ['first', 'local', 0.25],
