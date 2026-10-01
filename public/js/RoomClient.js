@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.23
+ * @version 2.5.24
  *
  */
 
@@ -2936,15 +2936,17 @@ class RoomClient {
         const customFrameRate = parseInt(selectedValue, 10);
 
         const screenResolutionMap = this.getResolutionMap();
-
-        // Default to Full HD
-        const [width, height] = screenResolutionMap[screenQuality.value] || [1920, 1080];
+        const resolution = screenResolutionMap[screenQuality.value];
 
         const videoConstraints = {
-            width: { ideal: width },
-            height: { ideal: height },
             frameRate: { ideal: customFrameRate || 30 },
         };
+
+        if (resolution) {
+            const [width, height] = resolution;
+            videoConstraints.width = { ideal: width };
+            videoConstraints.height = { ideal: height };
+        }
 
         return {
             audio: true,
