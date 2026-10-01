@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.25
+ * @version 2.5.26
  *
  */
 
@@ -1473,6 +1473,7 @@ class RoomClient {
                 type,
                 text_annotations = [],
                 drawing_annotations = [],
+                annotations_allowed = true,
             } of data) {
                 // Skip own producers to prevent echo from self-consumption
                 if (peer_info.peer_id === this.peer_id) {
@@ -1480,6 +1481,13 @@ class RoomClient {
                     continue;
                 }
                 await this.consume(producer_id, peer_name, peer_info, type);
+                if (type === mediaType.screen) {
+                    this.handleVideoDrawing({
+                        type: 'permissions',
+                        producerId: producer_id,
+                        allowed: annotations_allowed,
+                    });
+                }
                 for (const annotation of text_annotations) {
                     this.handleVideoDrawing(annotation);
                 }
@@ -3032,6 +3040,7 @@ class RoomClient {
             }
         }
 
+        // TODO: work around Safari legacy simulcast issue remove on fix mediasoup side
         if (this.device.handlerName === 'Safari12' && encodings?.length > 1) {
             console.warn('Safari legacy simulcast disabled: using browser-default single-stream encoding');
             encodings = undefined;
@@ -6181,7 +6190,12 @@ class RoomClient {
 
     handleVideoDrawing(data) {
         if (typeof VideoDrawingOverlay === 'undefined') return;
-        if (!data || !data.producerId || (!['text', 'annotation', 'laser'].includes(data.type) && !data.paths)) return;
+        if (
+            !data ||
+            !data.producerId ||
+            (!['text', 'annotation', 'laser', 'permissions'].includes(data.type) && !data.paths)
+        )
+            return;
         // Translate the canonical producerId to our local camera div ID.
         // If we are the producer, the div is {producerId}__video.
         // If we are a consumer of that producer, the div is {consumerId}__video.
@@ -6211,6 +6225,7 @@ class RoomClient {
             points: data.points,
             clearAll: data.clearAll,
             end: data.end,
+            allowed: data.allowed,
         });
     }
 
@@ -6231,7 +6246,7 @@ class RoomClient {
                 this.producerLabel.get(mediaType.screen) === producerId ? this.socket.id : null;
             VideoDrawingOverlay.onEmitDrawing = (data) => {
                 // Persistent annotations must reach the server even while alone so late joiners can replay them.
-                if (!['text', 'annotation'].includes(data.type) && !this.thereAreParticipants()) return;
+                if (!['text', 'annotation', 'permissions'].includes(data.type) && !this.thereAreParticipants()) return;
 
                 // cameraId format: "{id}__video" — extract the base ID
                 const baseId = data.cameraId?.replace('__video', '');

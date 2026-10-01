@@ -78,6 +78,7 @@ module.exports = class Room {
         this.peers = new Map();
         this.videoTextAnnotations = new Map();
         this.videoDrawingAnnotations = new Map();
+        this.videoDrawingPermissions = new Map();
         this.bannedPeers = new Map(); // uuid -> timestamp, with TTL-based expiration
         this.webRtcTransport = config.mediasoup.webRtcTransport;
         this.router = null;
@@ -546,6 +547,7 @@ module.exports = class Room {
                     type: producer.appData.mediaType,
                     text_annotations: textAnnotations,
                     drawing_annotations: drawingAnnotations,
+                    annotations_allowed: this.videoDrawingPermissions.get(producer.id) !== false,
                 });
             });
         });
@@ -591,6 +593,7 @@ module.exports = class Room {
 
     clearVideoDrawingAnnotations(producerId) {
         this.videoDrawingAnnotations.delete(producerId);
+        this.videoDrawingPermissions.delete(producerId);
     }
 
     removePeer(socket_id) {

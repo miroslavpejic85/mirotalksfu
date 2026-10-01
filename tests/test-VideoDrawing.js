@@ -401,6 +401,14 @@ describe('screen annotation downloads and diamonds', () => {
         assert.equal(label.visible, true);
     });
 
+    it('exports only the video when annotations are hidden locally', async () => {
+        overlay.annotationsHidden = true;
+        overlay.textAnnotations.set('label', {});
+        const snapshot = await overlay.captureSnapshot();
+        assert.equal(snapshot.width, 1920);
+        assert.deepEqual(images, [[video, 0, 0, 1920, 1080]]);
+    });
+
     it('captures formatted text at canvas-relative coordinates and removes temporary DOM on failure', async () => {
         const element = dom.window.document.createElement('div');
         element.className = 'video-drawing-text-annotation video-drawing-text-selected video-drawing-text-bold';
@@ -597,24 +605,56 @@ describe('server diamond annotation relay', () => {
     let receive;
     let annotations;
     let relayed;
+    let room;
+    let socket;
 
     beforeEach(() => {
         annotations = new Map();
         relayed = [];
-        const room = {
+        room = {
             _moderator: {},
+            videoDrawingPermissions: new Map(),
             getPeer: () => ({ peer_name: 'Drawer' }),
             isScreenProducer: (producerId) => producerId === 'screen',
             getProducerOwnerId: () => 'owner',
             getVideoDrawingAnnotations: () => annotations,
             broadCast: (...args) => relayed.push(args),
         };
+        socket = { id: 'drawer', on: (event, handler) => (receive = handler), emit: (...args) => relayed.push(args) };
         vm.runInNewContext(server.slice(start, end), {
-            socket: { id: 'drawer', on: (event, handler) => (receive = handler) },
+            socket,
             roomExists: () => true,
             checkXSS: (data) => ({ ...data }),
             getRoom: () => room,
         });
+    });
+
+    it('allows only the active screen owner to lock and gates every annotation type', () => {
+        const permission = { type: 'permissions', producerId: 'screen', allowed: false };
+        receive(permission);
+        assert.equal(room.videoDrawingPermissions.size, 0);
+        socket.id = 'owner';
+        receive({ ...permission, allowed: 'false' });
+        receive({ ...permission, producerId: 'camera' });
+        assert.equal(relayed.length, 0);
+        receive(permission);
+        assert.equal(room.videoDrawingPermissions.get('screen'), false);
+        assert.equal(relayed.length, 2);
+        socket.id = 'drawer';
+        for (const type of ['annotation', 'text', 'pen', 'laser']) {
+            for (const action of ['create', 'move', 'delete', 'clear', 'restore']) {
+                receive({ type, action, producerId: 'screen', paths: [{}], points: [{ x: 0.1, y: 0.2 }] });
+            }
+        }
+        assert.equal(relayed.length, 2);
+        socket.id = 'owner';
+        receive({ type: 'laser', producerId: 'screen', points: [{ x: 0.1, y: 0.2 }] });
+        assert.equal(relayed.length, 3);
+        receive({ ...permission, allowed: true });
+        assert.equal(room.videoDrawingPermissions.size, 0);
+        socket.id = 'drawer';
+        receive({ type: 'laser', producerId: 'screen', points: [{ x: 0.1, y: 0.2 }] });
+        assert.equal(relayed.length, 6);
     });
 
     it('stores and relays diamonds, supports movement, and rejects unsupported tools', () => {
@@ -767,6 +807,145 @@ describe('screen annotation laser pointer and color swatches', () => {
             new dom.window.MouseEvent('pointermove', { clientX, clientY })
         );
     }
+
+    it('erases only local strokes and text across a sweep with grouped undo and redo', () => {
+        for (const [annotationId, drawerId, center] of [
+            ['first', 'local', 0.25],
+            ['second', 'local', 0.75],
+            ['remote', 'remote', 0.25],
+        ]) {
+            overlay.annotations.set(annotationId, {
+                annotationId,
+                drawerId,
+                tool: 'pencil',
+                color: '#ff0000',
+                width: 0.004,
+                points: [
+                    { x: center, y: 0.4 },
+                    { x: center, y: 0.6 },
+                ],
+                object: {},
+            });
+        }
+        for (const [annotationId, drawerId] of [
+            ['text', 'local'],
+            ['remote-text', 'remote'],
+        ]) {
+            overlay.addTextAnnotation({ annotationId, drawerId, text: 'Label', x: 0.5, y: 0.5 });
+            overlay.textAnnotations.get(annotationId).element.getBoundingClientRect = () => ({
+                left: 390,
+                top: 210,
+                right: 450,
+                bottom: 245,
+            });
+        }
+        overlay.toolButtons.eraser.click();
+        overlay._startErasing({ preventDefault() {}, clientX: 80, clientY: 225, pointerId: 1 });
+        move(720, 225);
+        overlay._finishErasing();
+        assert.deepEqual([...overlay.annotations.keys()], ['remote']);
+        assert.deepEqual([...overlay.textAnnotations.keys()], ['remote-text']);
+        assert.equal(overlay.undoStack.length, 1);
+        assert.equal(emitted.filter((data) => data.action === 'delete').length, 3);
+        const commands = [];
+        overlay._executeHistoryCommand = (command) => commands.push(command);
+        overlay.undo();
+        assert.equal(commands.length, 3);
+        assert.ok(commands.every((command) => command.action === 'create'));
+        overlay.redo();
+        assert.equal(commands.length, 6);
+        assert.ok(commands.slice(3).every((command) => command.action === 'delete'));
+    });
+
+    it('hides annotations locally, retains incoming text and leaves viewing controls available', () => {
+        overlay.setTool('laser');
+        move();
+        overlay.visibilityButton.click();
+        assert.equal(overlay.annotationsHidden, true);
+        assert.equal(overlay.laserPointers.size, 0);
+        assert.equal(overlay.visibilityButton.getAttribute('aria-label'), 'Show annotations');
+        assert.equal(overlay.toolButtons.pencil.disabled, true);
+        assert.equal(overlay.drawingButton.disabled, false);
+        assert.equal(overlay.downloadButtons[0].disabled, false);
+        overlay.receiveText({
+            action: 'create',
+            annotationId: 'incoming',
+            drawerId: 'remote',
+            text: 'Label',
+            x: 0.2,
+            y: 0.2,
+        });
+        assert.equal(overlay.textAnnotations.size, 1);
+        overlay.visibilityButton.click();
+        assert.equal(overlay.annotationsHidden, false);
+        assert.equal(overlay.toolButtons.pencil.disabled, false);
+        assert.equal(overlay.textAnnotations.size, 1);
+    });
+
+    it('locks editing, cancels unfinished shapes and enables text received while locked after unlocking', () => {
+        overlay.setTool('rectangle');
+        overlay._beginShape({ clientX: 100, clientY: 100 });
+        assert.equal(overlay.annotations.size, 1);
+        overlay.setParticipantsAllowed(false);
+        assert.equal(overlay.annotations.size, 0);
+        assert.equal(overlay.activeShape, null);
+        assert.equal(overlay.activeTool, 'view');
+        assert.equal(overlay.toolButtons.pencil.disabled, true);
+        overlay.addTextAnnotation({ annotationId: 'owned', drawerId: 'local', text: 'Label', x: 0.2, y: 0.2 });
+        const annotation = overlay.textAnnotations.get('owned');
+        assert.equal(annotation.element.querySelectorAll('button').length, 3);
+        overlay._duplicateTextAnnotation(annotation);
+        overlay._deleteTextAnnotationWithHistory(annotation);
+        overlay.clearAnnotations(true);
+        overlay.undo();
+        assert.equal(overlay.textAnnotations.size, 1);
+        assert.equal(emitted.length, 0);
+        overlay.setParticipantsAllowed(true);
+        assert.equal(overlay._canManageText(annotation), true);
+        assert.equal(overlay.toolButtons.pencil.disabled, false);
+    });
+
+    it('queues permission events before tiles exist and exposes red lock controls only to the owner', () => {
+        const Overlay = dom.window.Overlay;
+        assert.equal(overlay.permissionsButton, undefined);
+        Overlay.receiveRemoteDrawing({ type: 'permissions', cameraId: 'queued', producerId: 'queued', allowed: false });
+        const tile = dom.window.document.createElement('div');
+        tile.id = 'queued';
+        dom.window.document.body.appendChild(tile);
+        const queued = new Overlay(tile, 'queued');
+        queued.bindControls(dom.window.document.createElement('button'));
+        assert.equal(queued.participantsAllowed, false);
+        assert.equal(queued.toolButtons.pencil.disabled, true);
+        queued.destroy();
+        assert.equal(Overlay.pendingPermissions.size, 0);
+        Overlay.getProducerOwnerId = () => 'local';
+        const ownerTile = dom.window.document.createElement('div');
+        ownerTile.id = 'owner';
+        dom.window.document.body.appendChild(ownerTile);
+        const owner = new Overlay(ownerTile, 'owner-producer');
+        owner.bindControls(dom.window.document.createElement('button'));
+        owner.permissionsButton.click();
+        assert.equal(owner.participantsAllowed, false);
+        assert.equal(owner.toolButtons.pencil.disabled, false);
+        assert.equal(owner.permissionsButton.classList.contains('video-drawing-permissions-locked'), true);
+        assert.equal(owner.permissionsButton.getAttribute('aria-label'), 'Enable participant annotations');
+        assert.equal(emitted.at(-1).type, 'permissions');
+        owner.destroy();
+    });
+
+    it('cancels an in-progress text drag on lock without emitting a move', () => {
+        overlay.addTextAnnotation({ annotationId: 'dragged', drawerId: 'local', text: 'Label', x: 0.2, y: 0.2 });
+        const annotation = overlay.textAnnotations.get('dragged');
+        annotation.element.setPointerCapture = () => {};
+        annotation.element.dispatchEvent(new dom.window.MouseEvent('pointerdown', { clientX: 100, clientY: 100 }));
+        annotation.x = 0.5;
+        annotation.y = 0.6;
+        overlay.setParticipantsAllowed(false);
+        annotation.element.dispatchEvent(new dom.window.MouseEvent('pointerup', { clientX: 200, clientY: 200 }));
+        assert.equal(annotation.x, 0.2);
+        assert.equal(annotation.y, 0.2);
+        assert.equal(emitted.length, 0);
+    });
 
     it('follows hover without drawing and throttles to the latest position', () => {
         overlay.toolButtons.laser.click();

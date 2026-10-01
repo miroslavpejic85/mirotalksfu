@@ -1,5 +1,10 @@
 {
     "tooltips": {
+        "Erase my annotations": "擦除我的批注",
+        "Hide annotations": "隐藏批注",
+        "Show annotations": "显示批注",
+        "Disable participant annotations": "禁用参与者批注",
+        "Enable participant annotations": "启用参与者批注",
         "Diamond": "菱形",
         "Download annotated screen (PDF)": "下载带批注的屏幕 (PDF)",
         "Download annotated screen (PNG)": "下载带批注的屏幕 (PNG)",
@@ -1003,7 +1008,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.5.25": "WebRTC SFU v2.5.25",
+        "WebRTC SFU v2.5.26": "WebRTC SFU v2.5.26",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",

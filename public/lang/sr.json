@@ -1,5 +1,10 @@
 {
     "tooltips": {
+        "Erase my annotations": "Обриши моје напомене",
+        "Hide annotations": "Сакриј напомене",
+        "Show annotations": "Прикажи напомене",
+        "Disable participant annotations": "Онемогући напомене учесника",
+        "Enable participant annotations": "Омогући напомене учесника",
         "Diamond": "Ромб",
         "Download annotated screen (PDF)": "Преузми екран са напоменама (PDF)",
         "Download annotated screen (PNG)": "Преузми екран са напоменама (PNG)",
@@ -1003,7 +1008,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.5.25": "WebRTC SFU v2.5.25",
+        "WebRTC SFU v2.5.26": "WebRTC SFU v2.5.26",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",

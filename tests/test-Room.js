@@ -56,6 +56,7 @@ describe('test-Room', () => {
         room.videoDrawingAnnotations = new Map([
             ['screen-producer-id', new Map([[drawingAnnotation.annotationId, drawingAnnotation]])],
         ]);
+        room.videoDrawingPermissions = new Map([['screen-producer-id', false]]);
         room.peers = new Map([
             [
                 'screen-owner-id',
@@ -75,6 +76,10 @@ describe('test-Room', () => {
         producers.should.have.length(1);
         producers[0].text_annotations.should.deepEqual([textAnnotation]);
         producers[0].drawing_annotations.should.deepEqual([drawingAnnotation]);
+        producers[0].annotations_allowed.should.equal(false);
+        room.clearVideoDrawingAnnotations('screen-producer-id');
+        room.videoDrawingPermissions.size.should.equal(0);
+        room.getProducerListForPeer('joining-peer-id')[0].annotations_allowed.should.equal(true);
     });
 
     it('recognizes only active screenType producers as screen shares', () => {

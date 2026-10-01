@@ -1,5 +1,10 @@
 {
     "tooltips": {
+        "Erase my annotations": "मेरे एनोटेशन मिटाएँ",
+        "Hide annotations": "एनोटेशन छिपाएँ",
+        "Show annotations": "एनोटेशन दिखाएँ",
+        "Disable participant annotations": "प्रतिभागियों के एनोटेशन अक्षम करें",
+        "Enable participant annotations": "प्रतिभागियों के एनोटेशन सक्षम करें",
         "Diamond": "हीराकार",
         "Download annotated screen (PDF)": "टिप्पणी सहित स्क्रीन डाउनलोड करें (PDF)",
         "Download annotated screen (PNG)": "टिप्पणी सहित स्क्रीन डाउनलोड करें (PNG)",
@@ -1003,7 +1008,7 @@
         "Unmute": "अनम्यूट करें",
         "Unmute Video": "वीडियो की ध्वनि चालू करें",
         "Username already in use": "उपयोगकर्ता नाम पहले से उपयोग में है",
-        "WebRTC SFU v2.5.25": "WebRTC SFU v2.5.25",
+        "WebRTC SFU v2.5.26": "WebRTC SFU v2.5.26",
         "Whiteboard Shortcuts": "व्हाइटबोर्ड शॉर्टकट",
         "Would you like to continue the room broadcast?": "क्या आप रूम प्रसारण जारी रखना चाहते हैं?",
         "Yes": "हाँ",

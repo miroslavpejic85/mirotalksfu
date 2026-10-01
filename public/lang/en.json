@@ -1,5 +1,10 @@
 {
     "tooltips": {
+        "Erase my annotations": "Erase my annotations",
+        "Hide annotations": "Hide annotations",
+        "Show annotations": "Show annotations",
+        "Disable participant annotations": "Disable participant annotations",
+        "Enable participant annotations": "Enable participant annotations",
         "Diamond": "Diamond",
         "Download annotated screen (PDF)": "Download annotated screen (PDF)",
         "Download annotated screen (PNG)": "Download annotated screen (PNG)",
@@ -1004,7 +1009,7 @@
         "Unmute": "Unmute",
         "Unmute Video": "Unmute Video",
         "Username already in use": "Username already in use",
-        "WebRTC SFU v2.5.25": "WebRTC SFU v2.5.25",
+        "WebRTC SFU v2.5.26": "WebRTC SFU v2.5.26",
         "Whiteboard Shortcuts": "Whiteboard Shortcuts",
         "Would you like to continue the room broadcast?": "Would you like to continue the room broadcast?",
         "Yes": "Yes",

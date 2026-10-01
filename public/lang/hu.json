@@ -1,5 +1,10 @@
 {
     "tooltips": {
+        "Erase my annotations": "Saját jegyzeteim törlése",
+        "Hide annotations": "Jegyzetek elrejtése",
+        "Show annotations": "Jegyzetek megjelenítése",
+        "Disable participant annotations": "Résztvevők jegyzetelésének letiltása",
+        "Enable participant annotations": "Résztvevők jegyzetelésének engedélyezése",
         "Diamond": "Rombusz",
         "Download annotated screen (PDF)": "Megjegyzésekkel ellátott képernyő letöltése (PDF)",
         "Download annotated screen (PNG)": "Megjegyzésekkel ellátott képernyő letöltése (PNG)",
@@ -1003,7 +1008,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.5.25": "WebRTC SFU v2.5.25",
+        "WebRTC SFU v2.5.26": "WebRTC SFU v2.5.26",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",

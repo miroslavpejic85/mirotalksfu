@@ -1,5 +1,10 @@
 {
     "tooltips": {
+        "Erase my annotations": "Apagar minhas anotações",
+        "Hide annotations": "Ocultar anotações",
+        "Show annotations": "Mostrar anotações",
+        "Disable participant annotations": "Desativar anotações dos participantes",
+        "Enable participant annotations": "Ativar anotações dos participantes",
         "Diamond": "Losango",
         "Download annotated screen (PDF)": "Baixar tela anotada (PDF)",
         "Download annotated screen (PNG)": "Baixar tela anotada (PNG)",
@@ -1003,7 +1008,7 @@
         "Unmute": "Tirar o silêncio",
         "Unmute Video": "Ativar o som do vídeo",
         "Username already in use": "Nome de usuário já em uso",
-        "WebRTC SFU v2.5.25": "WebRTC SFU v2.5.25",
+        "WebRTC SFU v2.5.26": "WebRTC SFU v2.5.26",
         "Whiteboard Shortcuts": "Atalhos do quadro branco",
         "Would you like to continue the room broadcast?": "Deseja continuar a transmissão da sala?",
         "Yes": "Sim",
