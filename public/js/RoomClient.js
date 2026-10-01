@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.27
+ * @version 2.5.28
  *
  */
 
@@ -3039,13 +3039,6 @@ class RoomClient {
                 }
             }
         }
-
-        // TODO: work around Safari legacy simulcast issue remove on fix mediasoup side
-        if (this.device.handlerName === 'Safari12' && encodings?.length > 1) {
-            console.warn('Safari legacy simulcast disabled: using browser-default single-stream encoding');
-            encodings = undefined;
-        }
-
         return { encodings, codec };
     }
 
