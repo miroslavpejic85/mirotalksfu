@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.24
+ * @version 2.5.25
  *
  */
 
@@ -6181,7 +6181,7 @@ class RoomClient {
 
     handleVideoDrawing(data) {
         if (typeof VideoDrawingOverlay === 'undefined') return;
-        if (!data || !data.producerId || (data.type !== 'text' && data.type !== 'annotation' && !data.paths)) return;
+        if (!data || !data.producerId || (!['text', 'annotation', 'laser'].includes(data.type) && !data.paths)) return;
         // Translate the canonical producerId to our local camera div ID.
         // If we are the producer, the div is {producerId}__video.
         // If we are a consumer of that producer, the div is {consumerId}__video.
@@ -6210,6 +6210,7 @@ class RoomClient {
             width: data.width,
             points: data.points,
             clearAll: data.clearAll,
+            end: data.end,
         });
     }
 

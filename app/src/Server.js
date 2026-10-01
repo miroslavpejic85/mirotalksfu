@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.24
+ * @version 2.5.25
  *
  */
 
@@ -4087,6 +4087,33 @@ function startServer() {
             const requestedDrawerId = data.drawerId;
             data.drawerId = socket.id;
             data.peer_name = peer.peer_info?.peer_name || peer.peer_name;
+
+            if (data.type === 'laser') {
+                if (
+                    !Array.isArray(data.points) ||
+                    data.points.length !== 1 ||
+                    !data.points.every(
+                        (point) =>
+                            point &&
+                            Number.isFinite(point.x) &&
+                            Number.isFinite(point.y) &&
+                            point.x >= 0 &&
+                            point.x <= 1 &&
+                            point.y >= 0 &&
+                            point.y <= 1
+                    )
+                )
+                    return;
+                room.broadCast(socket.id, 'videoDrawing', {
+                    type: 'laser',
+                    producerId: data.producerId,
+                    drawerId: socket.id,
+                    peer_name: data.peer_name,
+                    points: data.points,
+                    end: Boolean(data.end),
+                });
+                return;
+            }
 
             if (data.type === 'annotation') {
                 const { action, annotationId, producerId } = data;

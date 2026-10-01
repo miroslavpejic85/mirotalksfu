@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { JSDOM } = require('jsdom');
+const sinon = require('sinon');
 
 const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'public/js/VideoDrawing.js'), 'utf8');
@@ -642,5 +643,214 @@ describe('server diamond annotation relay', () => {
         receive({ ...annotation, annotationId: 'invalid', tool: 'unsupported' });
         assert.equal(annotations.size, 1);
         assert.equal(relayed.length, 2);
+    });
+
+    it('relays temporary laser positions with authenticated identity without persisting them', () => {
+        const laser = {
+            type: 'laser',
+            producerId: 'screen',
+            drawerId: 'spoofed',
+            peer_name: 'spoofed',
+            points: [{ x: 0.25, y: 0.75 }],
+        };
+        receive(laser);
+        assert.equal(relayed[0][2].drawerId, 'drawer');
+        assert.equal(relayed[0][2].peer_name, 'Drawer');
+        assert.equal(relayed[0][2].end, false);
+        receive({ ...laser, end: true });
+        assert.equal(relayed[1][2].end, true);
+        assert.equal(annotations.size, 0);
+        for (const points of [
+            [],
+            [{ x: -0.1, y: 0 }],
+            [{ x: 0, y: 2 }],
+            [{ x: NaN, y: 0 }],
+            [{ x: '0', y: 0 }],
+            [null],
+            [
+                { x: 0, y: 0 },
+                { x: 1, y: 1 },
+            ],
+        ]) {
+            receive({ ...laser, points });
+        }
+        receive({ ...laser, producerId: 'camera' });
+        assert.equal(relayed.length, 2);
+    });
+});
+
+describe('screen annotation laser pointer and color swatches', () => {
+    let dom;
+    let overlay;
+    let clock;
+    let emitted;
+
+    beforeEach(() => {
+        dom = new JSDOM('<div id="screen"><button id="draw"></button></div>', { runScripts: 'outside-only' });
+        clock = sinon.useFakeTimers({ global: dom.window });
+        class FabricObject {
+            constructor(options = {}) {
+                Object.assign(this, options);
+            }
+            set(options) {
+                Object.assign(this, options);
+            }
+            setCoords() {}
+            getBoundingRect() {
+                return { left: this.left, top: this.top, width: 12, height: 12 };
+            }
+        }
+        dom.window.fabric = {
+            Circle: FabricObject,
+            Shadow: FabricObject,
+            Rect: FabricObject,
+            Text: class extends FabricObject {
+                constructor(text, options) {
+                    super(options);
+                    this.width = 50;
+                }
+            },
+            Group: class extends FabricObject {
+                constructor(objects, options) {
+                    super(options);
+                }
+            },
+            Canvas: function (element, options) {
+                let width = 800;
+                let height = 450;
+                const objects = [];
+                const upper = element.ownerDocument.createElement('canvas');
+                element.parentElement.appendChild(upper);
+                upper.getBoundingClientRect = () => ({ left: 0, top: 0, width, height });
+                Object.assign(this, options, {
+                    wrapperEl: element.parentElement,
+                    upperCanvasEl: upper,
+                    freeDrawingBrush: {},
+                    on() {},
+                    discardActiveObject() {},
+                    requestRenderAll() {},
+                    dispose() {},
+                    getWidth: () => width,
+                    getHeight: () => height,
+                    setWidth: (value) => (width = value),
+                    setHeight: (value) => (height = value),
+                    getObjects: () => objects,
+                    add: (object) => objects.push(object),
+                    remove: (object) => {
+                        const index = objects.indexOf(object);
+                        if (index >= 0) objects.splice(index, 1);
+                    },
+                    clear: () => objects.splice(0),
+                });
+            },
+        };
+        dom.window.isMobileDevice = false;
+        dom.window.eval(`${source}\nwindow.Overlay = VideoDrawingOverlay;`);
+        const Overlay = dom.window.Overlay;
+        Overlay.prototype._setupResizeObserver = () => {};
+        Overlay.getLocalDrawerId = () => 'local';
+        Overlay.resolveDrawerName = () => 'Drawer';
+        emitted = [];
+        Overlay.onEmitDrawing = (data) => emitted.push(data);
+        overlay = new Overlay(dom.window.document.getElementById('screen'), 'screen-producer');
+        overlay.bindControls(dom.window.document.getElementById('draw'));
+    });
+
+    afterEach(() => {
+        overlay.destroy();
+        clock.restore();
+        dom.window.close();
+    });
+
+    function move(clientX = 400, clientY = 225) {
+        overlay.fabricCanvas.upperCanvasEl.dispatchEvent(
+            new dom.window.MouseEvent('pointermove', { clientX, clientY })
+        );
+    }
+
+    it('follows hover without drawing and throttles to the latest position', () => {
+        overlay.toolButtons.laser.click();
+        move();
+        move(600, 300);
+        assert.equal(overlay.laserPointers.size, 1);
+        assert.equal(overlay.fabricCanvas.isDrawingMode, false);
+        assert.equal(overlay.annotations.size, 0);
+        assert.equal(overlay.undoStack.length, 0);
+        assert.equal(emitted.length, 0);
+        clock.tick(50);
+        assert.equal(emitted.length, 1);
+        assert.deepEqual(JSON.parse(JSON.stringify(emitted[0].points)), [{ x: 0.75, y: 0.6667 }]);
+    });
+
+    it('clears on leave, tool change, cancellation and touch release without delayed updates', () => {
+        for (const reason of ['pointerleave', 'tool', 'pointercancel', 'pointerup']) {
+            overlay.setTool('laser');
+            move();
+            if (reason === 'tool') overlay.setTool('pencil');
+            else {
+                const event = new dom.window.Event(reason);
+                Object.defineProperty(event, 'pointerType', { value: 'touch' });
+                overlay.fabricCanvas.upperCanvasEl.dispatchEvent(event);
+            }
+            assert.equal(overlay.laserPointers.size, 0);
+            assert.equal(emitted.at(-1).end, true);
+        }
+        clock.tick(50);
+        assert.equal(emitted.length, 4);
+    });
+
+    it('replaces remote positions, excludes pointers from export and expires stale pointers', () => {
+        const receive = (point, end = false) =>
+            dom.window.Overlay.receiveRemoteDrawing({
+                type: 'laser',
+                cameraId: 'screen',
+                producerId: 'screen-producer',
+                drawerId: 'remote',
+                points: [point],
+                end,
+            });
+        receive({ x: 0.1, y: 0.2 });
+        const object = overlay.laserPointers.get('remote').object;
+        receive({ x: 0.3, y: 0.4 });
+        assert.equal(overlay.laserPointers.size, 1);
+        assert.equal(overlay.laserPointers.get('remote').object, object);
+        assert.equal(object.left, 240);
+        assert.equal(object.excludeFromExport, true);
+        assert.equal(overlay.annotations.size, 0);
+        clock.tick(1000);
+        assert.equal(overlay.laserPointers.size, 0);
+        assert.equal(overlay.fabricCanvas.getObjects().length, 0);
+        receive({ x: 0.5, y: 0.5 });
+        receive({ x: 0.5, y: 0.5 }, true);
+        assert.equal(overlay.laserPointers.size, 0);
+    });
+
+    it('cancels pending emissions and timers when destroyed', () => {
+        overlay.setTool('laser');
+        move();
+        overlay.receiveLaser({ drawerId: 'remote', points: [{ x: 0.1, y: 0.1 }] });
+        overlay.destroy();
+        clock.tick(1000);
+        assert.equal(emitted.filter((data) => data.type === 'laser').length, 1);
+        assert.equal(emitted[0].end, true);
+        assert.equal(overlay.laserPointers.size, 0);
+        assert.equal(overlay._laserTimers.size, 0);
+    });
+
+    it('synchronizes swatches and custom colors without changing tools', () => {
+        overlay.setTool('pencil');
+        assert.equal(overlay.colorButtons.length, 5);
+        assert.equal(overlay.colorButtons[0].getAttribute('aria-pressed'), 'true');
+        overlay.colorButtons[1].click();
+        assert.equal(overlay.annotationColor, '#ff1744');
+        assert.equal(overlay.colorInput.value, '#ff1744');
+        assert.equal(overlay.fabricCanvas.freeDrawingBrush.color, '#ff1744');
+        assert.equal(overlay.activeTool, 'pencil');
+        overlay.colorInput.value = '#123456';
+        overlay.colorInput.dispatchEvent(new dom.window.Event('input'));
+        assert.ok(overlay.colorButtons.every((button) => button.getAttribute('aria-pressed') === 'false'));
+        overlay.colorInput.value = '#ffffff';
+        overlay.colorInput.dispatchEvent(new dom.window.Event('input'));
+        assert.equal(overlay.colorButtons[4].getAttribute('aria-pressed'), 'true');
     });
 });

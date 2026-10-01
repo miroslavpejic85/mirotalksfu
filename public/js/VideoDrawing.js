@@ -38,6 +38,10 @@ class VideoDrawingOverlay {
     /** Batched sync interval in milliseconds */
     static SYNC_INTERVAL_MS = 1000;
 
+    static LASER_SYNC_INTERVAL_MS = 50;
+    static LASER_CLEAR_MS = 1000;
+    static LASER_COLOR = '#ff1744';
+
     static MAX_TEXT_LENGTH = 1000;
 
     /** Default brush color (semi-transparent yellow) */
@@ -81,6 +85,10 @@ class VideoDrawingOverlay {
         this._drawerLabels = new Map();
         this._drawerLabelTimers = new Map();
         this.textAnnotations = new Map();
+        this.laserPointers = new Map();
+        this._laserTimers = new Map();
+        this._laserSyncTimer = null;
+        this._pendingLaserPoint = null;
 
         /** Pending local strokes (normalized) waiting to be batched and sent */
         this._pendingPaths = [];
@@ -131,6 +139,14 @@ class VideoDrawingOverlay {
             if (this.activeShape && event.e) this._resizeShape(event.e);
         });
         this.fabricCanvas.on('mouse:up', () => this._finishShape());
+        const pointerCanvas = this.fabricCanvas.upperCanvasEl;
+        pointerCanvas?.addEventListener('pointermove', (event) => this._moveLaser(event));
+        pointerCanvas?.addEventListener('pointerdown', (event) => this._moveLaser(event));
+        for (const type of ['pointerleave', 'pointercancel', 'pointerup']) {
+            pointerCanvas?.addEventListener(type, (event) => {
+                if (type !== 'pointerup' || event.pointerType !== 'mouse') this._stopLaser();
+            });
+        }
         this.fabricCanvas.on('selection:created', (event) => this._selectAnnotation(event.selected?.[0]));
         this.fabricCanvas.on('selection:updated', (event) => this._selectAnnotation(event.selected?.[0]));
         this.fabricCanvas.on('selection:cleared', () => this._selectAnnotation(null));
@@ -343,6 +359,16 @@ class VideoDrawingOverlay {
         this.fabricCanvas.requestRenderAll();
         this._positionTextAnnotations();
         this._constrainToolbarPosition();
+        for (const pointer of this.laserPointers.values()) {
+            pointer.object.set({
+                left: pointer.point.x * newWidth,
+                top: pointer.point.y * newHeight,
+                scaleX: 1,
+                scaleY: 1,
+            });
+            pointer.object.setCoords();
+            this._showDrawerLabel(pointer.drawerId, pointer.peer_name, pointer.object);
+        }
 
         this._prevWidth = newWidth;
         this._prevHeight = newHeight;
@@ -360,6 +386,12 @@ class VideoDrawingOverlay {
             'Pencil',
             'Highlighter',
             'Vanishing pen',
+            'Laser pointer',
+            'Yellow annotation color',
+            'Red annotation color',
+            'Green annotation color',
+            'Blue annotation color',
+            'White annotation color',
             'Circle',
             'Rectangle',
             'Diamond',
@@ -396,6 +428,7 @@ class VideoDrawingOverlay {
             ['pencil', 'fas fa-pencil-alt', 'Pencil'],
             ['highlighter', 'fas fa-highlighter', 'Highlighter'],
             ['vanishing', 'fas fa-wand-magic-sparkles', 'Vanishing pen'],
+            ['laser', 'fas fa-bullseye', 'Laser pointer'],
             ['circle', 'far fa-circle', 'Circle'],
             ['rectangle', 'far fa-square', 'Rectangle'],
             ['diamond', 'video-drawing-diamond far fa-square', 'Diamond'],
@@ -417,15 +450,31 @@ class VideoDrawingOverlay {
         toolbar.appendChild(drawingTools);
 
         const appearanceTools = this._createToolbarGroup('Annotation appearance');
+        this.colorButtons = [];
+        for (const [color, label] of [
+            ['#ffeb3b', 'Yellow annotation color'],
+            ['#ff1744', 'Red annotation color'],
+            ['#00e676', 'Green annotation color'],
+            ['#2979ff', 'Blue annotation color'],
+            ['#ffffff', 'White annotation color'],
+        ]) {
+            const button = this._createToolbarButton('video-drawing-swatch', label);
+            button.dataset.color = color;
+            const swatch = document.createElement('span');
+            swatch.style.backgroundColor = color;
+            button.appendChild(swatch);
+            button.addEventListener('click', () => this.setColor(color));
+            appearanceTools.appendChild(button);
+            this.colorButtons.push(button);
+        }
         const colorInput = document.createElement('input');
         colorInput.type = 'color';
         colorInput.value = this.annotationColor;
         colorInput.className = 'video-drawing-color';
         this._setTranslatedAttribute(colorInput, 'aria-label', 'Annotation color', 'tooltips');
-        colorInput.addEventListener('input', () => {
-            this.annotationColor = colorInput.value;
-            this._setupBrush();
-        });
+        colorInput.addEventListener('input', () => this.setColor(colorInput.value));
+        this.colorInput = colorInput;
+        this.setColor(this.annotationColor);
         appearanceTools.appendChild(colorInput);
 
         const widthInput = document.createElement('input');
@@ -723,6 +772,7 @@ class VideoDrawingOverlay {
 
     setTool(tool) {
         if (tool && !this._canDraw()) return;
+        if (this.activeTool === 'laser' && tool !== 'laser') this._stopLaser();
         this.isActive = Boolean(tool);
         this.activeTool = tool;
         const drawingMode = ['pencil', 'highlighter', 'vanishing'].includes(tool);
@@ -756,6 +806,111 @@ class VideoDrawingOverlay {
         this.drawingButton?.classList.toggle('video-drawing-tool-active', this.isActive);
         this.drawingButton?.setAttribute('aria-pressed', String(this.isActive));
         if (tool !== 'text') this.textInput?.__cancel?.();
+        this.fabricCanvas.requestRenderAll();
+    }
+
+    setColor(color) {
+        this.annotationColor = color;
+        if (this.colorInput) this.colorInput.value = color;
+        for (const button of this.colorButtons || []) {
+            const selected = button.dataset.color === color.toLowerCase();
+            button.classList.toggle('video-drawing-tool-active', selected);
+            button.setAttribute('aria-pressed', String(selected));
+        }
+        this._setupBrush();
+    }
+
+    _moveLaser(event) {
+        if (this.activeTool !== 'laser') return;
+        if (!this._canDraw()) {
+            this._stopLaser();
+            return;
+        }
+        event.preventDefault();
+        const rect = this.fabricCanvas.upperCanvasEl.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const point = {
+            x: Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)),
+            y: Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height)),
+        };
+        const drawerId = VideoDrawingOverlay.getLocalDrawerId?.() || 'local';
+        this.receiveLaser({ drawerId, peer_name: VideoDrawingOverlay.resolveDrawerName?.(drawerId), points: [point] });
+        this._pendingLaserPoint = point;
+        if (this._laserSyncTimer) return;
+        this._laserSyncTimer = setTimeout(() => {
+            this._laserSyncTimer = null;
+            const latest = this._pendingLaserPoint;
+            this._pendingLaserPoint = null;
+            if (!latest) return;
+            VideoDrawingOverlay.onEmitDrawing?.({
+                type: 'laser',
+                producerId: this.producerId,
+                points: [{ x: +latest.x.toFixed(4), y: +latest.y.toFixed(4) }],
+                end: false,
+            });
+        }, VideoDrawingOverlay.LASER_SYNC_INTERVAL_MS);
+    }
+
+    _stopLaser() {
+        clearTimeout(this._laserSyncTimer);
+        this._laserSyncTimer = null;
+        this._pendingLaserPoint = null;
+        const drawerId = VideoDrawingOverlay.getLocalDrawerId?.() || 'local';
+        const pointer = this.laserPointers?.get(drawerId);
+        if (!pointer) return;
+        this._removeLaser(drawerId);
+        VideoDrawingOverlay.onEmitDrawing?.({
+            type: 'laser',
+            producerId: this.producerId,
+            points: [pointer.point],
+            end: true,
+        });
+    }
+
+    _removeLaser(drawerId) {
+        clearTimeout(this._laserTimers.get(drawerId));
+        this._laserTimers.delete(drawerId);
+        const pointer = this.laserPointers.get(drawerId);
+        if (!pointer) return;
+        this._removeDrawerLabel(drawerId, pointer.object);
+        this.fabricCanvas.remove(pointer.object);
+        this.laserPointers.delete(drawerId);
+        this.fabricCanvas.requestRenderAll();
+    }
+
+    receiveLaser(data) {
+        if (data.end) {
+            this._removeLaser(data.drawerId);
+            return;
+        }
+        const point = data.points?.[0];
+        if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
+        const previous = this.laserPointers.get(data.drawerId);
+        const object =
+            previous?.object ||
+            new fabric.Circle({
+                radius: 6,
+                originX: 'center',
+                originY: 'center',
+                fill: VideoDrawingOverlay.LASER_COLOR,
+                stroke: '#ffffff',
+                strokeWidth: 1.5,
+                shadow: new fabric.Shadow({ color: VideoDrawingOverlay.LASER_COLOR, blur: 12 }),
+                selectable: false,
+                evented: false,
+                excludeFromExport: true,
+            });
+        object.set({ left: point.x * this.fabricCanvas.getWidth(), top: point.y * this.fabricCanvas.getHeight() });
+        object.setCoords();
+        if (!previous) this.fabricCanvas.add(object);
+        const peerName = data.peer_name || VideoDrawingOverlay.resolveDrawerName?.(data.drawerId) || 'Participant';
+        this.laserPointers.set(data.drawerId, { object, point, drawerId: data.drawerId, peer_name: peerName });
+        this._showDrawerLabel(data.drawerId, peerName, object);
+        clearTimeout(this._laserTimers.get(data.drawerId));
+        this._laserTimers.set(
+            data.drawerId,
+            setTimeout(() => this._removeLaser(data.drawerId), VideoDrawingOverlay.LASER_CLEAR_MS)
+        );
         this.fabricCanvas.requestRenderAll();
     }
 
@@ -2170,6 +2325,8 @@ class VideoDrawingOverlay {
      * Clear all drawings immediately.
      */
     clearAll() {
+        this._stopLaser();
+        for (const drawerId of this.laserPointers.keys()) this._removeLaser(drawerId);
         // Cancel all pending auto-clear timers
         for (const [, timerId] of this._clearTimers) {
             clearTimeout(timerId);
@@ -2195,6 +2352,8 @@ class VideoDrawingOverlay {
      */
     destroy() {
         console.log('[VideoDrawingOverlay] Destroy', this.cameraId);
+        this._stopLaser();
+        for (const drawerId of this.laserPointers.keys()) this._removeLaser(drawerId);
 
         // Cancel all pending timers
         for (const [, timerId] of this._clearTimers) {
@@ -2323,6 +2482,7 @@ class VideoDrawingOverlay {
 
         if (data.type === 'text') overlay.receiveText(data);
         else if (data.type === 'annotation') overlay.receiveAnnotation(data);
+        else if (data.type === 'laser') overlay.receiveLaser(data);
         else if (data.paths) overlay.addRemotePaths(data.paths, data.peerName, data.drawerId);
     }
 

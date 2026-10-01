@@ -716,6 +716,19 @@ input[type='range'] {
     color: #ef5350 !important;
 }
 
+.video-drawing-swatch span {
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+}
+
+.video-drawing-swatch[aria-pressed='true'] span {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
 .video-drawing-color {
     flex: 0 0 36px;
     width: 36px;
