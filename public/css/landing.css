@@ -1653,19 +1653,25 @@ main {
     letter-spacing: 0px;
 }
 .site-footer a {
-    color: #8a94a7;
+    color: #b4b8c5;
     text-decoration: none;
 }
 .site-footer a:hover,
-.site-footer a:active {
+.site-footer a:focus-visible {
+    color: #f9faff;
     text-decoration: underline;
+    text-underline-offset: 4px;
+}
+.site-footer a:focus-visible {
+    outline: 2px solid #6991fa;
+    outline-offset: 2px;
 }
 .site-footer-inner {
     position: relative;
     display: flex;
     flex-wrap: wrap;
-    padding-top: 48px;
-    padding-bottom: 48px;
+    padding-top: 32px;
+    padding-bottom: 32px;
 }
 .footer-brand,
 .footer-links,
@@ -1673,39 +1679,108 @@ main {
 .footer-copyright {
     flex: none;
     width: 100%;
-    display: inline-flex;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
 }
 
 .footer-copyright {
-    font-size: 14px;
-    line-height: 22px;
-    color: #8a94a7;
+    font-size: 12px;
+    line-height: 20px;
+    color: #9299aa;
+    text-align: center;
 }
 
 .footer-brand,
 .footer-links,
 .footer-social-links {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+}
+.footer-brand a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 6px;
+}
+.footer-social-links {
+    gap: 8px;
 }
 .footer-social-links li {
-    display: inline-flex;
-}
-.footer-social-links li + li {
-    margin-left: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
 }
 .footer-social-links li a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
     padding: 8px;
 }
-.footer-links li + li {
-    margin-left: 24px;
+.footer-links {
+    gap: 4px 8px;
 }
-.footer-social-icon {
-    transform: scale(1);
-    transition: transform 0.2s;
+.footer-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 20px;
 }
-.footer-social-icon:hover {
-    transform: scale(2);
+.footer-social-icon a {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+}
+.footer-social-icon a:hover,
+.footer-social-icon a:focus-visible {
+    background-color: rgba(105, 145, 250, 0.12);
+}
+.footer-social-icon svg {
+    width: 20px;
+    height: 20px;
+}
+.footer-social-icon svg path {
+    fill: #6991fa;
+    transition: fill 0.15s ease;
+}
+.footer-social-icon a:hover svg path,
+.footer-social-icon a:focus-visible svg path {
+    fill: #a8c0ff;
+}
+@media (max-width: 640px) {
+    .footer-social-links {
+        max-width: 360px;
+        margin-right: auto;
+        margin-left: auto;
+        gap: 12px 8px;
+    }
+    .footer-support {
+        flex: 0 1 calc(50% - 4px);
+    }
+    .footer-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 360px;
+        margin-right: auto;
+        margin-left: auto;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .footer-links li:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+    .footer-links a {
+        padding: 8px;
+    }
 }
 @media (min-width: 641px) {
     .site-footer {
@@ -1713,14 +1788,15 @@ main {
     }
     .site-footer-inner {
         justify-content: space-between;
-        padding-top: 64px;
-        padding-bottom: 64px;
+        padding-top: 40px;
+        padding-bottom: 40px;
     }
     .footer-brand,
     .footer-links,
     .footer-social-links,
     .footer-copyright {
-        flex: 50%;
+        flex: 1 1 50%;
+        min-width: 0;
     }
     .footer-brand,
     .footer-copyright {
@@ -1733,6 +1809,12 @@ main {
     .footer-links {
         order: 1;
         margin-bottom: 0;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .footer-copyright {
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
 }
 
