@@ -61,7 +61,11 @@ both the key and the initial value.
     }
     ```
 
-3. Enable native translation and select the language, then open a room:
+3. Add the language code and native display name to `LANG_DISPLAY` in
+   [public/js/I18n.js](../js/I18n.js), following the existing entries. The native
+   picker uses this list, not automatic discovery of JSON files.
+
+4. Enable native translation and select the language, then open a room:
 
     ```bash
     UI_TRANSLATION_MODE=auto   # or "native"
@@ -95,6 +99,8 @@ depending on where it appears (e.g. "Cancel" as a dialog button vs. a tooltip):
   `"Start with {name}"`); keep the `{name}` token unchanged in your translation. Other
   strings with inline dynamic values (counts, arbitrary names) are not translated and remain
   in English.
+- Review right-to-left text and mixed-script strings when translating Arabic, Urdu,
+  or Persian. A dictionary translates text; it does not mirror the room layout.
 - To exclude an element from translation, add `class="notranslate"`, `translate="no"`, or
   `data-i18n-skip` in the HTML.
 - Out of scope: the marketing/landing site, documentation, and user-generated content

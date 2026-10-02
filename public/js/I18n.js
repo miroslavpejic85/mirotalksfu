@@ -44,6 +44,14 @@
         ko: { flag: '🇰🇷', name: '한국어' },
         tr: { flag: '🇹🇷', name: 'Türkçe' },
         nl: { flag: '🇳🇱', name: 'Nederlands' },
+        bn: { flag: '🇧🇩', name: 'বাংলা' },
+        ur: { flag: '🇵🇰', name: 'اردو' },
+        vi: { flag: '🇻🇳', name: 'Tiếng Việt' },
+        te: { flag: '🇮🇳', name: 'తెలుగు' },
+        mr: { flag: '🇮🇳', name: 'मराठी' },
+        ta: { flag: '🇮🇳', name: 'தமிழ்' },
+        sw: { flag: '🇹🇿', name: 'Kiswahili' },
+        fa: { flag: '🇮🇷', name: 'فارسی' },
     };
 
     const ATTR_KEYS = ['title', 'placeholder', 'aria-label', 'data-tippy-content'];
