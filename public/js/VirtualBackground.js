@@ -58,6 +58,9 @@ class VirtualBackground {
         this.pendingFrames = [];
         this.activeProcessor = null;
         this.activeGenerator = null;
+        this.activeOutputTrack = null;
+        this.activeAbortController = null;
+        this.activePipelinePromise = null;
         this.isProcessing = false;
         this.gifAnimation = null;
         this.gifCanvas = null;
@@ -98,11 +101,16 @@ class VirtualBackground {
     handleSegmentationResults(results) {
         if (!results?.segmentationMask) return;
 
-        this.lastSegmentationMask = results.segmentationMask;
-
         const pendingFrame = this.pendingFrames.shift();
 
         if (!pendingFrame) return;
+
+        if (pendingFrame.signal.aborted) {
+            this.closeFrames(pendingFrame.videoFrame, pendingFrame.imageBitmap);
+            return;
+        }
+
+        this.lastSegmentationMask = results.segmentationMask;
 
         this.processFrame(
             pendingFrame.videoFrame,
@@ -180,10 +188,12 @@ class VirtualBackground {
         // Create new processor and generator for stream transformation
         const processor = new MediaStreamTrackProcessor({ track: videoTrack });
         const { generator, track: outputTrack } = this.createVideoTrackGenerator();
+        const abortController = new AbortController();
+        const { signal } = abortController;
 
         const transformer = new TransformStream({
             transform: async (videoFrame, controller) => {
-                if (!this.segmentation || !this.initialized) {
+                if (signal.aborted || !this.segmentation || !this.initialized) {
                     console.warn('⚠️ Segmentation is not initialized, skipping frame.');
                     this.closeFrames(videoFrame);
                     return;
@@ -194,6 +204,11 @@ class VirtualBackground {
                 try {
                     // Create image bitmap from video frame
                     imageBitmap = await createImageBitmap(videoFrame);
+
+                    if (signal.aborted) {
+                        this.closeFrames(videoFrame, imageBitmap);
+                        return;
+                    }
 
                     if (!imageBitmap) {
                         console.warn('⚠️ Failed to create imageBitmap, skipping frame.');
@@ -208,6 +223,7 @@ class VirtualBackground {
                             controller,
                             imageBitmap,
                             maskHandler,
+                            signal,
                         });
 
                         // Send the image to the segmentation model
@@ -218,6 +234,7 @@ class VirtualBackground {
                     } else {
                         // If no previous mask, just enqueue the original frame
                         controller.enqueue(videoFrame);
+                        imageBitmap.close();
                     }
 
                     this.frameCounter++; // Increment frame counter
@@ -236,16 +253,21 @@ class VirtualBackground {
         // Store active streams
         this.activeProcessor = processor;
         this.activeGenerator = generator;
+        this.activeOutputTrack = outputTrack;
+        this.activeAbortController = abortController;
         this.isProcessing = true;
 
         try {
             // Pipeline error handling without recursive calls
-            const pipelinePromise = processor.readable.pipeThrough(transformer).pipeTo(generator.writable);
+            const inputPromise = processor.readable.pipeTo(transformer.writable, { signal });
+            const outputPromise = transformer.readable.pipeTo(generator.writable, { signal });
+            this.activePipelinePromise = Promise.allSettled([inputPromise, outputPromise]);
+            const pipelinePromise = Promise.all([inputPromise, outputPromise]);
 
             // Handle errors without awaiting (prevents blocking and recursion)
             pipelinePromise.catch(() => {
                 // Only stop if we're still processing (avoid recursive calls)
-                if (this.isProcessing && this.activeProcessor) {
+                if (this.isProcessing && this.activeProcessor === processor) {
                     console.log('Stopping processor due to pipeline error...');
                     // Don't await this - let it run async to avoid recursion
                     this.stopCurrentProcessor().catch((stopError) => {
@@ -279,26 +301,25 @@ class VirtualBackground {
         }
 
         this.isProcessing = false;
-        this.cleanPendingFrames();
 
         try {
-            // Abort the writable stream if it's not locked
-            if (this.activeGenerator?.writable && !this.activeGenerator.writable.locked) {
-                await this.activeGenerator.writable.abort('Processing stopped');
-            }
-
-            // Cancel the readable stream if it's not locked
-            if (this.activeProcessor?.readable && !this.activeProcessor.readable.locked) {
-                await this.activeProcessor.readable.cancel('Processing stopped');
-            }
+            this.activeAbortController?.abort('Processing stopped');
+            this.activeOutputTrack?.stop();
+            await this.activePipelinePromise;
 
             console.log('✅ Processor successfully stopped');
         } catch (error) {
             console.error('❌ Processor shutdown error', error);
         } finally {
+            this.cleanPendingFrames();
             // Reset active processor and generator
             this.activeProcessor = null;
             this.activeGenerator = null;
+            this.activeOutputTrack = null;
+            this.activeAbortController = null;
+            this.activePipelinePromise = null;
+            this.frameCounter = 0;
+            this.lastSegmentationMask = null;
         }
     }
 
