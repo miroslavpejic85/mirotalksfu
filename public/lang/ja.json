@@ -396,6 +396,8 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "参加する前にBluetoothヘッドセットまたは外部マイクを接続してください。音声の入出力先はiOSが制御します。",
+        "If your external microphone isn't detected, disconnect and reconnect it.": "外部マイクが認識されない場合は、一度取り外してから再接続してください。",
         "Annotation downloads": "注釈のダウンロード",
         "= Arrow": "= 矢印",
         "= Diamond": "= ひし形",
@@ -1008,7 +1010,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.5.40": "WebRTC SFU v2.5.40",
+        "WebRTC SFU v2.5.41": "WebRTC SFU v2.5.41",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",

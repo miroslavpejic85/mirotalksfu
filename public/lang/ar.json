@@ -396,6 +396,8 @@
         "Duplicate text annotation": "Duplicate text annotation"
     },
     "labels": {
+        "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "وصّل سماعة البلوتوث أو الميكروفون الخارجي قبل الانضمام. يتحكم iOS في توجيه الصوت.",
+        "If your external microphone isn't detected, disconnect and reconnect it.": "إذا لم يتم اكتشاف الميكروفون الخارجي، فافصله ثم أعد توصيله.",
         "Annotation downloads": "تنزيلات التعليقات التوضيحية",
         "= Arrow": "= سهم",
         "= Diamond": "= شكل ماسي",
@@ -1008,7 +1010,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.5.40": "WebRTC SFU v2.5.40",
+        "WebRTC SFU v2.5.41": "WebRTC SFU v2.5.41",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.40
+ * @version 2.5.41
  *
  */
 
@@ -26,7 +26,6 @@ const parser = new UAParser(userAgent);
 const parserResult = parser.getResult();
 const deviceType = parserResult.device.type || 'desktop';
 const isMobileDevice = deviceType === 'mobile';
-const isMobileSafari = isMobileDevice && parserResult.browser.name?.toLowerCase().includes('safari');
 const isTabletDevice = deviceType === 'tablet';
 const isIPadDevice = parserResult.device.model?.toLowerCase() === 'ipad';
 const isDesktopDevice = deviceType === 'desktop';
@@ -1475,49 +1474,29 @@ function mergeConfig(current, updated) {
 }
 
 function showMobileAudioGuidance() {
-    if (!isMobileDevice) return;
+    if (!isMobileDevice || !BUTTONS.main.startAudioButton || !isEnumerateAudioDevices) return;
 
-    const guidance = isMobileSafari
-        ? `
-            <div class="mic-guidance ios">
-                <p class="title">
-                    <i class="fas fa-info-circle"></i>
-                    iOS Audio Routing
-                </p>
-                <p class="text">
-                    iOS automatically routes audio to connected Bluetooth or external devices.
-                    Connect your preferred microphone <strong>before</strong> joining.
-                </p>
-            </div>
-        `
-        : `
-            <div class="mic-guidance mobile">
-                <p class="title">
-                    <i class="fas fa-mobile-alt"></i>
-                    External Microphones
-                </p>
-                <p class="text">
-                    External microphones may require device reconnection to activate.
-                </p>
-            </div>
-        `;
+    const initUserContainer = document.getElementById('initUser');
+    if (!initUserContainer || initUserContainer.querySelector('#mobileAudioGuidance')) return;
+
+    const guidance =
+        parserResult.os.name === 'iOS'
+            ? 'Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.'
+            : "If your external microphone isn't detected, disconnect and reconnect it.";
 
     const audioGuidanceDiv = document.createElement('div');
     audioGuidanceDiv.id = 'mobileAudioGuidance';
-    audioGuidanceDiv.innerHTML = guidance;
-    audioGuidanceDiv.style.transition = 'opacity 0.5s ease';
+    audioGuidanceDiv.className = 'mic-guidance';
+    audioGuidanceDiv.setAttribute('role', 'note');
 
-    const initUserContainer = document.getElementById('initUser');
-    if (initUserContainer && initMicrophoneSelect) {
-        initMicrophoneSelect.parentElement.insertBefore(audioGuidanceDiv, initMicrophoneSelect);
-    }
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-info-circle';
+    icon.setAttribute('aria-hidden', 'true');
 
-    setTimeout(() => {
-        audioGuidanceDiv.style.opacity = '0';
-        setTimeout(() => {
-            audioGuidanceDiv.remove();
-        }, 500);
-    }, 6000);
+    const text = document.createElement('p');
+    text.textContent = guidance;
+    audioGuidanceDiv.append(icon, text);
+    initUserContainer.appendChild(audioGuidanceDiv);
 }
 
 function handleAudio() {
@@ -8931,7 +8910,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.40',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.41',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

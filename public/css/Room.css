@@ -6866,42 +6866,42 @@ hr {
 /* Mic Guidance */
 
 .mic-guidance {
-    padding: 10px;
-    border-radius: 10px;
-    margin: 10px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin: 12px 0 0;
+    border-left: 3px solid #64b5f6;
+    background: rgba(100, 181, 246, 0.08);
+    color: var(--text-color, #ddd);
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.5;
+    text-align: left;
 }
 
 .mic-guidance p {
-    margin: 5px 0;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
 }
 
-.mic-guidance .title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
+.mic-guidance > i {
+    flex-shrink: 0;
+    margin-top: 3px;
+    color: #64b5f6;
 }
 
-.mic-guidance.ios {
-    background: var(--body-bg);
-}
+@media screen and (min-width: 1025px) {
+    .init-user:has(> .mic-guidance) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 10px;
+    }
 
-.mic-guidance.ios .title {
-    color: #ffc107;
-}
-
-.mic-guidance.mobile {
-    background: var(--body-bg);
-}
-
-.mic-guidance.mobile .title {
-    color: #2196f3;
-}
-
-.mic-guidance .text {
-    color: #ddd;
+    .init-user > .mic-guidance {
+        grid-column: 1 / -1;
+    }
 }
 
 /* ####################################################
