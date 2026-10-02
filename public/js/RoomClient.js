@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.30
+ * @version 2.5.35
  *
  */
 
@@ -479,6 +479,8 @@ class RoomClient {
 
         // Noise Suppression
         this.RNNoiseProcessor = null;
+        this.noiseSuppressionRequest = 0;
+        this.microphoneRequest = 0;
         this.isRNNoiseSupported = true; // Will be set to false if AudioWorklet/WASM not available
 
         this.videoProducerId = null;
@@ -2256,6 +2258,9 @@ class RoomClient {
         let audio = false;
         let video = false;
         let screen = false;
+        let audioRequest;
+        let audioProcessor;
+        let microphoneStream;
 
         switch (type) {
             case mediaType.audio:
@@ -2295,6 +2300,7 @@ class RoomClient {
 
         console.log(`Media constraints ${type}:`, mediaConstraints);
 
+        if (audio) audioRequest = ++this.microphoneRequest;
         try {
             if (init) {
                 stream = initStream;
@@ -2326,14 +2332,31 @@ class RoomClient {
                 }
             }
 
+            if (audio) {
+                microphoneStream = stream;
+                if (audioRequest !== this.microphoneRequest) {
+                    stream.getAudioTracks().forEach((track) => track.stop());
+                    return;
+                }
+            }
+
             if (audio && BUTTONS.settings.customNoiseSuppression) {
                 /*
                  * Initialize RNNoise Suppression if enabled and supported
                  * This will only apply to audio tracks
                  * and will not affect video tracks.
                  */
-                await this.initRNNoiseSuppression();
-                stream = await this.getRNNoiseSuppressionStream(stream);
+                audioProcessor = await this.initRNNoiseSuppression();
+                if (audioRequest !== this.microphoneRequest) {
+                    microphoneStream.getAudioTracks().forEach((track) => track.stop());
+                    return;
+                }
+                stream = await this.getRNNoiseSuppressionStream(stream, audioProcessor);
+            }
+
+            if (audio && (audioRequest !== this.microphoneRequest || !stream)) {
+                microphoneStream.getAudioTracks().forEach((track) => track.stop());
+                return;
             }
 
             console.log('Supported Constraints', navigator.mediaDevices.getSupportedConstraints());
@@ -2415,6 +2438,11 @@ class RoomClient {
             if (!producer) {
                 throw new Error('Producer not found!');
             }
+            if (audio && audioRequest !== this.microphoneRequest) {
+                producer.close();
+                microphoneStream.getAudioTracks().forEach((track) => track.stop());
+                return;
+            }
 
             console.log('PRODUCER MEDIA TYPE ----> ' + type);
             console.log('PRODUCER', producer);
@@ -2491,6 +2519,11 @@ class RoomClient {
             this.sound('joined');
             return producer;
         } catch (err) {
+            if (audio) {
+                if (audioProcessor && this.RNNoiseProcessor === audioProcessor) this.disableRNNoiseSuppression();
+                microphoneStream?.getAudioTracks().forEach((track) => track.stop());
+                if (audioRequest !== this.microphoneRequest) return;
+            }
             console.error('Produce error:', err);
             handleMediaError(type, err);
         }
@@ -2783,28 +2816,30 @@ class RoomClient {
     // ####################################################
 
     async initRNNoiseSuppression() {
+        this.disableRNNoiseSuppression();
+        const request = this.noiseSuppressionRequest;
         if (typeof RNNoiseProcessor === 'undefined') {
             console.warn('RNNoiseProcessor is not available.');
             this.handleRNNoiseNotSupported();
-            return;
+            return null;
         }
 
         if (!RNNoiseProcessor.isSupported()) {
             console.warn('RNNoise: AudioWorklet or WebAssembly not supported on this device, skipping.');
             this.handleRNNoiseNotSupported();
-            return;
+            return null;
         }
 
         const supports48k = await RNNoiseProcessor.isSampleRateSupported();
+        if (request !== this.noiseSuppressionRequest) return null;
         if (!supports48k) {
             console.warn('RNNoise: device does not support 48 kHz sample rate, skipping.');
             this.handleRNNoiseNotSupported();
-            return;
+            return null;
         }
 
-        this.disableRNNoiseSuppression();
-
         this.RNNoiseProcessor = new RNNoiseProcessor();
+        return this.RNNoiseProcessor;
     }
 
     handleRNNoiseNotSupported() {
@@ -2819,40 +2854,90 @@ class RoomClient {
         elemDisplay('noiseSuppressionButton', false);
     }
 
-    async getRNNoiseSuppressionStream(stream) {
-        if (!this.RNNoiseProcessor) {
-            console.warn('RNNoiseProcessor not initialized.');
-            //
-            return stream;
-        }
+    async getRNNoiseSuppressionStream(stream, processor = this.RNNoiseProcessor) {
+        if (processor !== this.RNNoiseProcessor) return null;
+        const request = ++this.noiseSuppressionRequest;
+        if (!processor) return this.fallbackRNNoiseSuppression(stream, processor, request);
 
         try {
-            const processedStream = await this.RNNoiseProcessor.startProcessing(stream);
-
-            if (localStorageSettings.mic_noise_suppression) {
-                this.RNNoiseProcessor.toggleNoiseSuppression();
-                switchNoiseSuppression.checked = this.RNNoiseProcessor.noiseSuppressionEnabled;
+            const processedStream = await processor.startProcessing(stream);
+            if (request !== this.noiseSuppressionRequest || processor !== this.RNNoiseProcessor) {
+                if (processor !== this.RNNoiseProcessor) processor.stopProcessing();
+                return null;
+            }
+            if (!processedStream?.getAudioTracks().length) {
+                return this.fallbackRNNoiseSuppression(stream, processor, request);
             }
 
+            processor.setNoiseSuppression(localStorageSettings.mic_noise_suppression);
+            switchNoiseSuppression.checked = processor.noiseSuppressionEnabled;
+            processor.onError = (error) => {
+                console.warn('RNNoise processing failed:', error);
+                this.fallbackRNNoiseSuppression(stream, processor, request).catch((err) => {
+                    console.warn('RNNoise fallback failed:', err);
+                });
+            };
+
             if (typeof labelNoiseSuppression !== 'undefined') {
-                labelNoiseSuppression.style.color = this.RNNoiseProcessor.noiseSuppressionEnabled ? 'lime' : 'white';
+                labelNoiseSuppression.style.color = processor.noiseSuppressionEnabled ? 'lime' : 'white';
             }
 
             return processedStream;
         } catch (err) {
             console.warn('RNNoiseProcessor failed, using original stream:', err);
-            return stream;
+            return this.fallbackRNNoiseSuppression(stream, processor, request);
         }
     }
 
-    disableRNNoiseSuppression() {
-        if (this.RNNoiseProcessor) {
+    async fallbackRNNoiseSuppression(stream, processor, request) {
+        const isCurrent = () => request === this.noiseSuppressionRequest && processor === this.RNNoiseProcessor;
+        if (!isCurrent()) return null;
+        const processedStream = processor?.processedStream;
+        processor?.stopProcessing();
+        this.handleRNNoiseNotSupported();
+        if (typeof labelNoiseSuppression !== 'undefined') labelNoiseSuppression.style.color = 'white';
+        let nativeSuppressionEnabled = false;
+        const track = stream.getAudioTracks()[0];
+        try {
+            await track.applyConstraints({ ...track.getConstraints?.(), noiseSuppression: true });
+            nativeSuppressionEnabled = track.getSettings?.().noiseSuppression === true;
+        } catch (err) {
+            console.warn('Browser noise suppression could not be enabled:', err);
+        }
+        if (!isCurrent()) return null;
+
+        const producerId = this.producerLabel.get(mediaType.audio);
+        const producer = this.producers.get(producerId);
+        if (processedStream && this.localAudioStream === processedStream && producer) {
+            track.enabled = !producer.paused;
+            await producer.replaceTrack({ track });
+            if (!isCurrent()) return null;
+            this.localAudioStream = stream;
+            const audioElement = this.getId(producerId);
+            if (audioElement) audioElement.srcObject = stream;
+            getMicrophoneVolumeIndicator(stream);
+        }
+        userLog(
+            'warning',
+            nativeSuppressionEnabled
+                ? 'Noise suppression is not supported on this device. Using default WebRTC noise suppression instead.'
+                : 'Noise suppression could not be enabled. Using the microphone without noise suppression.',
+            'top-end',
+            6000
+        );
+        return stream;
+    }
+
+    disableRNNoiseSuppression(stopInput = true) {
+        this.noiseSuppressionRequest++;
+        const processor = this.RNNoiseProcessor;
+        this.RNNoiseProcessor = null;
+        if (processor) {
             try {
-                this.RNNoiseProcessor.stopProcessing();
+                processor.stopProcessing(stopInput);
             } catch (err) {
                 // ignore
             }
-            this.RNNoiseProcessor = null;
             console.warn('RNNoiseProcessor already initialized, stopping previous instance.');
         }
     }
@@ -3542,6 +3627,10 @@ class RoomClient {
     }
 
     closeProducer(type, event = 'Close Producer') {
+        if (type === mediaType.audio) {
+            this.microphoneRequest++;
+            this.disableRNNoiseSuppression();
+        }
         if (!this.producerLabel.has(type)) {
             return console.warn('There is no producer for this type ' + type);
         }
@@ -4652,10 +4741,11 @@ class RoomClient {
     // ####################################################
 
     exit(offline = false) {
+        this.microphoneRequest++;
+        this.disableRNNoiseSuppression();
         if (VideoAI.active) this.stopSession();
         if (this.rtmpFilestreamer) this.stopRTMP();
         if (this.rtmpUrlstreamer) this.stopRTMPfromURL();
-        if (this.RNNoiseProcessor) this.disableRNNoiseSuppression();
 
         const clean = () => {
             this._isConnected = false;
