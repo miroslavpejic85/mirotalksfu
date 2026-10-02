@@ -17,22 +17,35 @@ class VirtualBackground {
     }
 
     checkSupport() {
+        if (this.supportsTrackPipeline() || this.supportsCanvasPipeline()) return true;
+        console.warn('Virtual background requires track processing APIs or canvas captureStream and WebGL.');
+        return false;
+    }
+
+    supportsCanvasPipeline() {
+        if (typeof document === 'undefined') return false;
+        const canvas = document.createElement('canvas');
+        return (
+            typeof canvas.captureStream === 'function' &&
+            Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'))
+        );
+    }
+
+    createCanvas(width, height) {
+        if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(width, height);
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+    }
+
+    supportsTrackPipeline() {
         // Check if required APIs are supported.
         // Note: MediaStreamTrackGenerator is a non-standard/experimental API that newer
         // Chromium builds are phasing out in favor of VideoTrackGenerator, so accept either.
         const hasProcessor = Boolean(window.MediaStreamTrackProcessor);
         const hasTransformStream = Boolean(window.TransformStream);
         const hasGenerator = Boolean(window.MediaStreamTrackGenerator || window.VideoTrackGenerator);
-
-        if (!hasProcessor || !hasTransformStream || !hasGenerator) {
-            const missing = [];
-            if (!hasProcessor) missing.push('MediaStreamTrackProcessor');
-            if (!hasGenerator) missing.push('MediaStreamTrackGenerator/VideoTrackGenerator');
-            if (!hasTransformStream) missing.push('TransformStream');
-            console.warn(
-                `⚠️ Virtual background unsupported in this environment. Missing API(s): ${missing.join(', ')}`
-            );
-        }
 
         return hasProcessor && hasTransformStream && hasGenerator;
     }
@@ -61,6 +74,7 @@ class VirtualBackground {
         this.activeOutputTrack = null;
         this.activeAbortController = null;
         this.activePipelinePromise = null;
+        this.activeCanvas = null;
         this.isProcessing = false;
         this.gifAnimation = null;
         this.gifCanvas = null;
@@ -100,6 +114,20 @@ class VirtualBackground {
 
     handleSegmentationResults(results) {
         if (!results?.segmentationMask) return;
+
+        if (this.activeCanvas) {
+            const { canvas, context, video, maskHandler, signal } = this.activeCanvas;
+            if (signal.aborted) return;
+            context.save();
+            try {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(results.image || video, 0, 0, canvas.width, canvas.height);
+                maskHandler(context, canvas, results.segmentationMask, results.image || video);
+            } finally {
+                context.restore();
+            }
+            return;
+        }
 
         const pendingFrame = this.pendingFrames.shift();
 
@@ -175,7 +203,7 @@ class VirtualBackground {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
-                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
+                'Neither track processing nor canvas virtual backgrounds are supported in this environment.'
             );
         }
 
@@ -184,6 +212,10 @@ class VirtualBackground {
 
         // Initialize segmentation if not already done
         await this.initializeSegmentation();
+
+        if (!this.supportsTrackPipeline()) {
+            return this.processCanvasStream(videoTrack, maskHandler);
+        }
 
         // Create new processor and generator for stream transformation
         const processor = new MediaStreamTrackProcessor({ track: videoTrack });
@@ -284,6 +316,79 @@ class VirtualBackground {
         }
     }
 
+    async processCanvasStream(videoTrack, maskHandler) {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.setAttribute('aria-hidden', 'true');
+        video.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none';
+        video.srcObject = new MediaStream([videoTrack]);
+        document.body.appendChild(video);
+        const canvas = document.createElement('canvas');
+        const abortController = new AbortController();
+        const state = {
+            video,
+            canvas,
+            context: canvas.getContext('2d'),
+            maskHandler,
+            signal: abortController.signal,
+            timer: null,
+            cameraTrack: videoTrack,
+            onEnded: () => this.stopCurrentProcessor(),
+        };
+        this.activeCanvas = state;
+        this.activeAbortController = abortController;
+        this.isProcessing = true;
+        videoTrack.addEventListener('ended', state.onEnded, { once: true });
+
+        try {
+            await video.play();
+            if (state.signal.aborted) throw new Error('Background processing stopped');
+            const settings = videoTrack.getSettings();
+            const fps = Math.min(15, settings.frameRate || 30);
+            const render = async () => {
+                if (state.signal.aborted) return;
+                if (videoTrack.readyState === 'ended' || this.activeOutputTrack?.readyState === 'ended') {
+                    void this.stopCurrentProcessor();
+                    return;
+                }
+                const width = video.videoWidth || settings.width || 640;
+                const height = video.videoHeight || settings.height || 480;
+                const scale = Math.min(1, 1280 / width, 720 / height);
+                const outputWidth = Math.max(1, Math.round(width * scale));
+                const outputHeight = Math.max(1, Math.round(height * scale));
+                if (canvas.width !== outputWidth || canvas.height !== outputHeight) {
+                    canvas.width = outputWidth;
+                    canvas.height = outputHeight;
+                }
+                try {
+                    await this.segmentation.send({ image: video });
+                } catch (error) {
+                    if (!state.signal.aborted) {
+                        console.error('Canvas background processing failed', error);
+                        void this.stopCurrentProcessor();
+                    }
+                    throw error;
+                }
+                if (!state.signal.aborted) {
+                    state.timer = setTimeout(() => {
+                        this.activePipelinePromise = render();
+                        this.activePipelinePromise.catch(() => {});
+                    }, 1000 / fps);
+                }
+            };
+            this.activePipelinePromise = render();
+            await this.activePipelinePromise;
+            if (state.signal.aborted) throw new Error('Background processing stopped');
+            const stream = canvas.captureStream(fps);
+            this.activeOutputTrack = stream.getVideoTracks()[0];
+            return stream;
+        } catch (error) {
+            await this.stopCurrentProcessor();
+            throw error;
+        }
+    }
+
     cleanPendingFrames() {
         // Close all pending frames to release resources
         while (this.pendingFrames.length) {
@@ -295,7 +400,7 @@ class VirtualBackground {
     }
 
     async stopCurrentProcessor() {
-        if (!this.activeProcessor) {
+        if (!this.activeProcessor && !this.activeCanvas) {
             console.warn('⚠️ No active processing to stop');
             return;
         }
@@ -304,6 +409,12 @@ class VirtualBackground {
 
         try {
             this.activeAbortController?.abort('Processing stopped');
+            if (this.activeCanvas) {
+                const { timer, cameraTrack, onEnded, video } = this.activeCanvas;
+                clearTimeout(timer);
+                cameraTrack.removeEventListener('ended', onEnded);
+                video.pause();
+            }
             this.activeOutputTrack?.stop();
             await this.activePipelinePromise;
 
@@ -311,6 +422,11 @@ class VirtualBackground {
         } catch (error) {
             console.error('❌ Processor shutdown error', error);
         } finally {
+            if (this.activeCanvas) {
+                this.activeCanvas.video.srcObject = null;
+                this.activeCanvas.video.remove();
+                this.activeCanvas = null;
+            }
             this.cleanPendingFrames();
             // Reset active processor and generator
             this.activeProcessor = null;
@@ -327,8 +443,12 @@ class VirtualBackground {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
-                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
+                'Neither track processing nor canvas virtual backgrounds are supported in this environment.'
             );
+        }
+
+        if (!this.supportsTrackPipeline() && !('filter' in document.createElement('canvas').getContext('2d'))) {
+            throw new Error('Background blur is not supported by this browser. Choose a background image instead.');
         }
 
         // Handler for applying blur effect to the background
@@ -355,7 +475,7 @@ class VirtualBackground {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
-                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
+                'Neither track processing nor canvas virtual backgrounds are supported in this environment.'
             );
         }
 
@@ -366,7 +486,7 @@ class VirtualBackground {
         // Handler for applying virtual background
         const maskHandler = (ctx, canvas, mask, imageBitmap) => {
             // Create an offscreen canvas for a softer mask
-            const maskCanvas = new OffscreenCanvas(canvas.width, canvas.height);
+            const maskCanvas = this.createCanvas(canvas.width, canvas.height);
             const maskCtx = maskCanvas.getContext('2d');
 
             // Apply slight blur to mask to smooth edges
@@ -390,7 +510,7 @@ class VirtualBackground {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
-                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
+                'Neither track processing nor canvas virtual backgrounds are supported in this environment.'
             );
         }
 
@@ -403,7 +523,7 @@ class VirtualBackground {
             ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
 
             // Create an offscreen canvas for smooth masking
-            const maskCanvas = new OffscreenCanvas(canvas.width, canvas.height);
+            const maskCanvas = this.createCanvas(canvas.width, canvas.height);
             const maskCtx = maskCanvas.getContext('2d');
 
             // Blur the mask slightly for softer edges

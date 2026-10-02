@@ -55,6 +55,135 @@ function createEnvironment(overrides = {}) {
     return { background, processors, generators };
 }
 
+function createCanvasEnvironment({ filters = true, webgl = true } = {}) {
+    const contexts = [];
+    const canvases = [];
+    const videos = [];
+    const setTimeout = sinon.stub().returns(1);
+    const clearTimeout = sinon.spy();
+    const document = {
+        body: { appendChild: sinon.spy() },
+        createElement(type) {
+            if (type === 'video') {
+                const video = {
+                    style: {},
+                    videoWidth: 1920,
+                    videoHeight: 1080,
+                    play: sinon.stub().resolves(),
+                    pause: sinon.spy(),
+                    remove: sinon.spy(),
+                    setAttribute: sinon.spy(),
+                };
+                videos.push(video);
+                return video;
+            }
+            const context = {
+                save: sinon.spy(),
+                restore: sinon.spy(),
+                clearRect: sinon.spy(),
+                drawImage: sinon.spy(),
+                ...(filters ? { filter: 'none' } : {}),
+            };
+            const track = { readyState: 'live', stop: sinon.spy() };
+            const canvas = {
+                getContext: (kind) => (kind === '2d' ? context : webgl ? {} : null),
+                captureStream: sinon.stub().returns({ getVideoTracks: () => [track] }),
+            };
+            contexts.push(context);
+            canvases.push(canvas);
+            return canvas;
+        },
+    };
+    const environment = createEnvironment({ window: {}, document, setTimeout, clearTimeout });
+    environment.background.segmentation.send = sinon.stub().callsFake(async ({ image }) => {
+        environment.background.handleSegmentationResults({ image, segmentationMask: {} });
+    });
+    const camera = {
+        readyState: 'live',
+        getSettings: () => ({ frameRate: 30 }),
+        stop: sinon.spy(),
+        addEventListener: sinon.spy(),
+        removeEventListener: sinon.spy(),
+    };
+    return { ...environment, camera, contexts, canvases, videos, setTimeout, clearTimeout };
+}
+
+describe('Virtual background canvas fallback', () => {
+    it('supports canvas capture without track APIs, but rejects environments without WebGL', () => {
+        assert.equal(createCanvasEnvironment().background.isSupported, true);
+        assert.equal(createCanvasEnvironment({ webgl: false }).background.isSupported, false);
+        assert.equal(createEnvironment({ window: {} }).background.isSupported, false);
+    });
+
+    it('renders with the existing effect handler at up to 720p and 15 FPS', async () => {
+        const { background, camera, processors, setTimeout } = createCanvasEnvironment();
+        const handler = sinon.spy();
+        const stream = await background.processStreamWithSegmentation(camera, handler);
+        const { canvas, context, video } = background.activeCanvas;
+
+        assert.equal(processors.length, 0);
+        assert.equal(canvas.width, 1280);
+        assert.equal(canvas.height, 720);
+        assert.equal(canvas.captureStream.calledWith(15), true);
+        assert.equal(stream.getVideoTracks()[0], background.activeOutputTrack);
+        assert.equal(handler.calledWith(context, canvas, sinon.match.object, video), true);
+        assert.equal(context.restore.calledOnce, true);
+        assert.equal(setTimeout.firstCall.args[1], 1000 / 15);
+        await background.stopCurrentProcessor();
+    });
+
+    it('stops output, timers and the hidden video without stopping the camera when switching effects', async () => {
+        const { background, camera, videos, clearTimeout } = createCanvasEnvironment();
+        const first = await background.processStreamWithSegmentation(camera, () => {});
+        await background.processStreamWithSegmentation(camera, () => {});
+
+        assert.equal(first.getVideoTracks()[0].stop.calledOnce, true);
+        assert.equal(clearTimeout.calledWith(1), true);
+        assert.equal(videos[0].pause.calledOnce, true);
+        assert.equal(videos[0].remove.calledOnce, true);
+        assert.equal(videos[0].srcObject, null);
+        assert.equal(camera.stop.called, false);
+        await background.stopCurrentProcessor();
+    });
+
+    it('ignores late segmentation results while waiting for in-flight work to finish', async () => {
+        const { background, camera, contexts, setTimeout } = createCanvasEnvironment();
+        await background.processStreamWithSegmentation(camera, () => {});
+        const context = background.activeCanvas.context;
+        let finish;
+        background.segmentation.send = () => new Promise((resolve) => (finish = resolve));
+        setTimeout.firstCall.args[0]();
+        const stopping = background.stopCurrentProcessor();
+        background.handleSegmentationResults({ segmentationMask: {} });
+        assert.equal(context.drawImage.calledOnce, true);
+        finish();
+        await stopping;
+
+        assert.equal(background.activeCanvas, null);
+        assert.equal(background.isProcessing, false);
+        assert.equal(contexts.includes(context), true);
+        assert.equal(setTimeout.calledOnce, true);
+    });
+
+    it('cleans up when the source camera ends', async () => {
+        const { background, camera } = createCanvasEnvironment();
+        const stream = await background.processStreamWithSegmentation(camera, () => {});
+        await camera.addEventListener.firstCall.args[1]();
+        assert.equal(stream.getVideoTracks()[0].stop.calledOnce, true);
+        assert.equal(camera.removeEventListener.calledOnce, true);
+        assert.equal(background.activeCanvas, null);
+    });
+
+    it('rejects blur without canvas filters while keeping image and transparency support', async () => {
+        const { background, camera } = createCanvasEnvironment({ filters: false });
+        await assert.rejects(background.applyBlurToWebRTCStream(camera), /blur is not supported/);
+        assert.equal(background.isSupported, true);
+        await background.applyTransparentVirtualBackgroundToWebRTCStream(camera);
+        assert.equal(background.activeCanvas.context.drawImage.calledThrice, true);
+        await background.stopCurrentProcessor();
+    });
+});
+
 describe('Virtual background pipeline cleanup', () => {
     it('cancels a locked pipeline and stops its output without stopping the source camera', async () => {
         const { background, processors, generators } = createEnvironment();
