@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.41
+ * @version 2.5.42
  *
  */
 
@@ -2533,6 +2533,25 @@ class RoomClient {
     // HANDLE VIRTUAL BACKGROUND AND BLUR
     // ####################################################
 
+    syncVideoBackgroundSelection() {
+        const selectedControl = virtualBackgroundBlurLevel
+            ? virtualBackgroundBlurLevel === 20
+                ? 'highBlurImg'
+                : 'lowBlurImg'
+            : virtualBackgroundSelectedImage
+              ? null
+              : virtualBackgroundTransparent
+                ? 'transparentBg'
+                : 'cleanVbImg';
+
+        document.querySelectorAll('#imageGridVideoControls img, #imageGridVideo img').forEach((img) => {
+            const selected = selectedControl
+                ? img.id === selectedControl
+                : img.getAttribute('src') === virtualBackgroundSelectedImage;
+            img.classList.toggle('vb-selected', selected);
+        });
+    }
+
     showVideoImageSelector() {
         const videoVirtualBackground = document.getElementById('videoVirtualBackground');
         const imageGrid = document.getElementById('imageGrid');
@@ -2549,6 +2568,7 @@ class RoomClient {
         if (imageGridVideoControls) elemDisplay('imageGridVideoControls', true, 'grid');
         // Reveal the section (label + grid) only now that the grid is visible/populated
         if (videoVirtualBackground) show(videoVirtualBackground);
+        this.syncVideoBackgroundSelection();
         if (imageGridVideo.innerHTML != '') return;
 
         imageGrid.innerHTML = ''; // Clear previous init images
@@ -2556,12 +2576,15 @@ class RoomClient {
         if (imageGridVideoControls) imageGridVideoControls.innerHTML = ''; // Clear previous controls
 
         function createImage(id, src, tooltip, index, clickHandler, target = imageGridVideo) {
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'image-wrapper';
             const img = document.createElement('img');
             img.id = id;
             img.src = src;
             img.dataset.index = index;
             img.addEventListener('click', clickHandler);
-            target.appendChild(img);
+            imageContainer.appendChild(img);
+            target.appendChild(imageContainer);
             if (tooltip) {
                 setTippy(img.id, tooltip, 'top');
             }
@@ -2699,6 +2722,7 @@ class RoomClient {
             imageContainer.appendChild(customImg);
             imageContainer.appendChild(deleteBtn);
             imageGridVideo.appendChild(imageContainer);
+            rc.syncVideoBackgroundSelection();
         }
 
         // Function to fetch and store an image from URL
@@ -2761,6 +2785,7 @@ class RoomClient {
                 handleVirtualBackground(null, imageUrl);
             });
         });
+        this.syncVideoBackgroundSelection();
 
         // Load stored images and add to image grid UI
         indexedDBHelper.getAllImages().then((images) => images.forEach(addImageToUI));
@@ -2808,6 +2833,7 @@ class RoomClient {
             await virtualBackground.stopCurrentProcessor();
         }
 
+        this.syncVideoBackgroundSelection();
         videoSelect.onchange();
         saveVirtualBackgroundSettings(blurLevel, backgroundImage, backgroundTransparent);
     }

@@ -6,6 +6,88 @@ const path = require('path');
 const vm = require('vm');
 const sinon = require('sinon');
 const { ReadableStream, WritableStream, TransformStream } = require('stream/web');
+const { JSDOM } = require('jsdom');
+
+describe('Virtual background settings selection', () => {
+    let context;
+    let document;
+    let client;
+
+    beforeEach(() => {
+        document = new JSDOM(`
+            <div id="videoVirtualBackground"></div>
+            <div id="imageGrid"></div>
+            <div id="imageGridVideoControls"></div>
+            <div id="imageGridVideo"></div>
+        `).window.document;
+        context = vm.createContext({
+            document,
+            virtualBackgroundBlurLevel: null,
+            virtualBackgroundSelectedImage: 'background.jpg',
+            virtualBackgroundTransparent: null,
+            virtualBackgrounds: ['background.jpg', 'other.jpg'],
+            image: {},
+            elemDisplay() {},
+            show() {},
+            hide() {},
+            setTippy() {},
+            saveImageUrlBtn: document.createElement('button'),
+            cancelImageUrlBtn: document.createElement('button'),
+            indexedDBHelper: { getAllImages: async () => ['data:image/png;base64,custom'] },
+        });
+        const source = fs.readFileSync(path.join(__dirname, '../public/js/RoomClient.js'), 'utf8');
+        const methods = source.slice(
+            source.indexOf('    syncVideoBackgroundSelection()'),
+            source.indexOf('    async applyVirtualBackground(')
+        );
+        client = vm.runInContext(`new (class { ${methods} })()`, context);
+        context.rc = client;
+    });
+
+    function selectedImages() {
+        return [...document.querySelectorAll('.vb-selected')];
+    }
+
+    it('highlights the default image selected in prejoin when settings is built', () => {
+        client.showVideoImageSelector();
+        assert.deepEqual(
+            selectedImages().map((img) => img.id),
+            ['virtualBg0']
+        );
+        assert.equal(document.querySelectorAll('.image-wrapper:has(> img.vb-selected)').length, 1);
+    });
+
+    it('highlights the prejoin custom image after stored images load', async () => {
+        context.virtualBackgroundSelectedImage = 'data:image/png;base64,custom';
+        client.showVideoImageSelector();
+        await Promise.resolve();
+        assert.deepEqual(
+            selectedImages().map((img) => img.getAttribute('src')),
+            ['data:image/png;base64,custom']
+        );
+        assert.equal(document.querySelectorAll('.image-wrapper:has(> img.vb-selected)').length, 1);
+    });
+
+    it('refreshes an existing grid for blur, transparency and no background', () => {
+        client.showVideoImageSelector();
+        context.virtualBackgroundSelectedImage = null;
+        for (const [blur, transparent, expected] of [
+            [20, null, 'highBlurImg'],
+            [10, null, 'lowBlurImg'],
+            [null, true, 'transparentBg'],
+            [null, null, 'cleanVbImg'],
+        ]) {
+            context.virtualBackgroundBlurLevel = blur;
+            context.virtualBackgroundTransparent = transparent;
+            client.showVideoImageSelector();
+            assert.deepEqual(
+                selectedImages().map((img) => img.id),
+                [expected]
+            );
+            assert.equal(document.querySelectorAll('.image-wrapper:has(> img.vb-selected)').length, 1);
+        }
+    });
+});
 
 function createEnvironment(overrides = {}) {
     const processors = [];

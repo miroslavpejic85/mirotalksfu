@@ -656,17 +656,46 @@ body {
 }
 
 /* Custom images share the same grid cell sizing as the icon images */
-#tabVirtualBackground #imageGridVideo .image-wrapper {
+#tabVirtualBackground #imageGridVideo .image-wrapper,
+#tabVirtualBackground #imageGridVideoControls .image-wrapper {
     display: block;
     width: 100%;
+    min-width: 0;
+}
+
+#tabVirtualBackground .image-wrapper img {
+    display: block;
+}
+
+#tabVirtualBackground .image-wrapper:has(> img.vb-selected)::after {
+    content: '\2713';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    background: #4caf50;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 50%;
+    line-height: 22px;
+    text-align: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#tabVirtualBackground .image-wrapper .delete-icon {
+    top: auto;
+    bottom: 4px;
+    right: 4px;
 }
 
 /* Highlight the currently selected virtual background / control */
 #tabVirtualBackground #imageGridVideoControls img.vb-selected,
 #tabVirtualBackground #imageGridVideo img.vb-selected {
-    outline: 3px solid #4caf50;
-    outline-offset: -3px;
-    box-shadow: 0px 0px 12px rgba(76, 175, 80, 0.6);
+    outline: 2px solid #4caf50;
+    outline-offset: -2px;
 }
 
 @keyframes shockwave {
