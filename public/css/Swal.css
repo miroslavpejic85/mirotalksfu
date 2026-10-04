@@ -1,7 +1,32 @@
-.swal2-toast .swal2-title,
-.swal2-toast .swal2-html-container {
+.swal2-popup.swal2-toast .swal2-title,
+.swal2-popup.swal2-toast .swal2-html-container {
+    box-sizing: border-box;
     min-width: 0;
     overflow-wrap: anywhere;
+    padding-inline-end: 4.5em !important;
+}
+
+.swal2-popup.swal2-toast .swal2-close {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0.25em;
+    min-width: 44px;
+    min-height: 44px;
+    color: #fff !important;
+    z-index: 1;
+}
+
+.swal2-popup.swal2-toast .swal2-close:hover {
+    color: #ff6b6b !important;
+}
+
+.swal2-popup.swal2-toast .swal2-close:focus {
+    box-shadow: none !important;
+}
+
+.swal2-popup.swal2-toast .swal2-close:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
 }
 
 .swal2-popup:not(.swal2-toast):not(.breakout-swal) .swal2-actions {

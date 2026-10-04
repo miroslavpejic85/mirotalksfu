@@ -427,7 +427,7 @@ class Transcription {
         if (this.transcripts.length != 0) {
             Swal.fire({
                 background: swalBackground,
-                position: 'top',
+                position: 'center',
                 title: 'Clean up all transcripts?',
                 imageUrl: image.delete,
                 ...swalDestructiveOptions(),

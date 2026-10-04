@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.57
+ * @version 2.5.60
  *
  */
 
@@ -1714,7 +1714,7 @@ class RoomClient {
         const roomLabel = room ? room.name || `Room ${roomIdx + 1}` : data.breakoutRoom;
         Swal.fire({
             background: swalBackground,
-            position: 'top',
+            position: 'center',
             title: 'Help Requested',
             html: renderRoomTemplate('popupBreakoutHelpTemplate', {
                 text: {
@@ -2039,7 +2039,7 @@ class RoomClient {
             showDenyButton: false,
             showConfirmButton: false,
             background: swalBackground,
-            position: 'top',
+            position: 'center',
             icon: 'warning',
             title: 'Server away',
             html: renderRoomTemplate('popupServerAwayTemplate'),
@@ -5290,102 +5290,73 @@ class RoomClient {
     }
 
     userLog(icon, message, position = 'top-end', timer = 5000) {
-        const Toast = Swal.mixin({
+        return showSwalToast({
             background: swalBackground,
-            toast: true,
             position: position,
-            showConfirmButton: false,
             timer: timer,
-            timerProgressBar: true,
+            timerProgressBar: timer > 1800,
+            pauseOnHover: timer > 1800,
+            queue: timer > 1800,
+            ...(icon === 'html' ? { html: message } : { icon, title: message }),
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         });
-        switch (icon) {
-            case 'html':
-                Toast.fire({
-                    html: message,
-                    showClass: { popup: 'animate__animated animate__fadeInDown' },
-                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                });
-                break;
-            default:
-                Toast.fire({
-                    icon: icon,
-                    title: message,
-                    showClass: { popup: 'animate__animated animate__fadeInDown' },
-                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                });
-        }
     }
 
     toast(icon, title, text, position = 'top-end', timer = 5000, sound = false) {
         if (sound) this.sound('alert');
 
-        const Toast = Swal.mixin({
-            toast: true,
+        return showSwalToast({
             position: position,
+            showCloseButton: true,
             showConfirmButton: false,
             timer: timer,
             timerProgressBar: true,
             background: swalBackground,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        });
-        Toast.fire({
             icon: icon,
             title: title,
             text: text,
         });
     }
 
-    msgPopup(type, message, timer = 3000, position = 'center') {
+    msgPopup(type, message, timer = 3000, position) {
         switch (type) {
             case 'warning':
             case 'error':
-                Swal.fire({
-                    background: swalBackground,
-                    position: position,
-                    icon: type,
-                    title: type,
-                    text: message,
-                    showClass: { popup: 'animate__animated animate__fadeInDown' },
-                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                });
-                this.sound('alert');
-                break;
             case 'info':
             case 'success':
-                Swal.fire({
+            case 'toast': {
+                if (type === 'warning' || type === 'error') this.sound('alert');
+                const icon = type === 'toast' ? 'info' : type;
+                const titles = {
+                    error: 'Error',
+                    info: 'Information',
+                    success: 'Success',
+                    warning: 'Warning',
+                };
+                return showSwalToast({
                     background: swalBackground,
-                    position: position,
-                    icon: type,
-                    title: type,
-                    text: message,
+                    toast: true,
+                    position: position || 'top-end',
+                    showCloseButton: true,
+                    showConfirmButton: false,
+                    timer,
+                    timerProgressBar: true,
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                    icon,
+                    title: titles[icon],
+                    text: message,
                 });
-                break;
+            }
             case 'html':
                 Swal.fire({
                     background: swalBackground,
-                    position: position,
+                    position: position || 'center',
                     icon: type,
                     html: message,
-                    showClass: { popup: 'animate__animated animate__fadeInDown' },
-                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                });
-                break;
-            case 'toast':
-                const Toast = Swal.mixin({
-                    background: swalBackground,
-                    position: 'top-end',
-                    icon: 'info',
-                    showConfirmButton: false,
-                    timerProgressBar: true,
-                    toast: true,
-                    timer: timer,
-                });
-                Toast.fire({
-                    icon: 'info',
-                    title: message,
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 });
@@ -5421,17 +5392,16 @@ class RoomClient {
         }
         // TOAST less invasive
         function toastMessage(duration = 3000) {
-            const Toast = Swal.mixin({
+            return showSwalToast({
                 background: swalBackground,
                 position: 'top-end',
                 icon: icon,
+                showCloseButton: true,
                 showConfirmButton: false,
                 timerProgressBar: true,
                 toast: true,
                 timer: duration,
-            });
-            Toast.fire({
-                title: title,
+                title: title || (data.action === enums.recording.stop ? 'Recording stopped' : 'Recording started'),
                 html: html,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -7583,7 +7553,7 @@ class RoomClient {
     deleteMessage(id) {
         Swal.fire({
             background: swalBackground,
-            position: 'top',
+            position: 'center',
             title: 'Delete this Message?',
             imageUrl: image.delete,
             ...swalDestructiveOptions(),
@@ -7818,7 +7788,7 @@ class RoomClient {
         }
         Swal.fire({
             background: swalBackground,
-            position: 'top',
+            position: 'center',
             title: 'Clean up all chat Messages?',
             imageUrl: image.delete,
             ...swalDestructiveOptions(),
@@ -8352,7 +8322,7 @@ class RoomClient {
                 // confirm before delete poll
                 Swal.fire({
                     background: swalBackground,
-                    position: 'top',
+                    position: 'center',
                     title: 'Delete this poll?',
                     imageUrl: image.delete,
                     ...swalDestructiveOptions(),
@@ -8855,7 +8825,7 @@ class RoomClient {
     editorSave() {
         Swal.fire({
             background: swalBackground,
-            position: 'top',
+            position: 'center',
             imageUrl: image.save,
             title: 'Editor save options',
             showDenyButton: true,
@@ -9457,7 +9427,7 @@ class RoomClient {
         if (window.localStorage.isReconnected === 'false') {
             Swal.fire({
                 background: swalBackground,
-                position: 'top',
+                position: 'center',
                 title: 'Recording',
                 html: renderRoomTemplate('popupRecordingInfoTemplate', {
                     text: {
@@ -10395,7 +10365,7 @@ class RoomClient {
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     background: swalBackground,
-                    position: 'top',
+                    position: 'center',
                     imageUrl: image.videoShare,
                     title: 'Unmute Video',
                     text: 'Tap the button below to unmute and play the video with sound.',
@@ -10561,7 +10531,7 @@ class RoomClient {
             switch (action) {
                 case 'broadcasting':
                     this.socket.emit('roomAction', data);
-                    if (popup) this.roomStatus(action);
+                    if (popup) this.roomStatus(action, 1800);
                     break;
                 case 'lock':
                     if (room_password) {
@@ -10613,27 +10583,27 @@ class RoomClient {
                     break;
                 case 'lobbyOn':
                     this.socket.emit('roomAction', data);
-                    if (popup) this.roomStatus(action);
+                    if (popup) this.roomStatus(action, 1800);
                     break;
                 case 'lobbyOff':
                     this.socket.emit('roomAction', data);
-                    if (popup) this.roomStatus(action);
+                    if (popup) this.roomStatus(action, 1800);
                     break;
                 case 'joinLockOn':
                     this.socket.emit('roomAction', data);
-                    if (popup) this.roomStatus(action);
+                    if (popup) this.roomStatus(action, 1800);
                     break;
                 case 'joinLockOff':
                     this.socket.emit('roomAction', data);
-                    if (popup) this.roomStatus(action);
+                    if (popup) this.roomStatus(action, 1800);
                     break;
                 case 'hostOnlyRecordingOn':
                     this.socket.emit('roomAction', data);
-                    if (popup) this.roomStatus(action);
+                    if (popup) this.roomStatus(action, 1800);
                     break;
                 case 'hostOnlyRecordingOff':
                     this.socket.emit('roomAction', data);
-                    if (popup) this.roomStatus(action);
+                    if (popup) this.roomStatus(action, 1800);
                     break;
                 case 'isBanned':
                     this.socket.emit('roomAction', data);
@@ -10647,10 +10617,15 @@ class RoomClient {
         }
     }
 
-    roomStatus(action) {
+    roomStatus(action, timer = 5000) {
         switch (action) {
             case 'broadcasting':
-                this.userLog('info', `${icons.room} BROADCASTING ${isBroadcastingEnabled ? 'On' : 'Off'}`, 'top-end');
+                this.userLog(
+                    timer === 1800 && isBroadcastingEnabled ? 'success' : 'info',
+                    `${icons.room} BROADCASTING ${isBroadcastingEnabled ? 'On' : 'Off'}`,
+                    'top-end',
+                    timer
+                );
                 break;
             case 'lock':
                 if (!isPresenter) return;
@@ -10665,27 +10640,42 @@ class RoomClient {
                 break;
             case 'lobbyOn':
                 this.event(_EVENTS.lobbyOn);
-                this.userLog('info', `${icons.lobby} Lobby is enabled`, 'top-end');
+                this.userLog(timer === 1800 ? 'success' : 'info', `${icons.lobby} Lobby is enabled`, 'top-end', timer);
                 break;
             case 'lobbyOff':
                 this.event(_EVENTS.lobbyOff);
-                this.userLog('info', `${icons.lobby} Lobby is disabled`, 'top-end');
+                this.userLog('info', `${icons.lobby} Lobby is disabled`, 'top-end', timer);
                 break;
             case 'joinLockOn':
                 this.event(_EVENTS.joinLockOn);
-                this.userLog('info', `${icons.lock} The room is locked, no new participants can join`, 'top-end');
+                this.userLog(
+                    timer === 1800 ? 'success' : 'info',
+                    `${icons.lock} The room is locked, no new participants can join`,
+                    'top-end',
+                    timer
+                );
                 break;
             case 'joinLockOff':
                 this.event(_EVENTS.joinLockOff);
-                this.userLog('info', `${icons.unlock} The room is unlocked, new participants can join`, 'top-end');
+                this.userLog(
+                    'info',
+                    `${icons.unlock} The room is unlocked, new participants can join`,
+                    'top-end',
+                    timer
+                );
                 break;
             case 'hostOnlyRecordingOn':
                 this.event(_EVENTS.hostOnlyRecordingOn);
-                this.userLog('info', `${icons.recording} Host only recording is enabled`, 'top-end');
+                this.userLog(
+                    timer === 1800 ? 'success' : 'info',
+                    `${icons.recording} Host only recording is enabled`,
+                    'top-end',
+                    timer
+                );
                 break;
             case 'hostOnlyRecordingOff':
                 this.event(_EVENTS.hostOnlyRecordingOff);
-                this.userLog('info', `${icons.recording} Host only recording is disabled`, 'top-end');
+                this.userLog('info', `${icons.recording} Host only recording is disabled`, 'top-end', timer);
                 break;
             default:
                 break;
@@ -10694,152 +10684,97 @@ class RoomClient {
 
     roomMessage(action, active = false) {
         const status = active ? 'ON' : 'OFF';
+        const notifySwitch = (message) => this.userLog(active ? 'success' : 'info', message, 'top-end', 1800);
         this.sound('switch');
         switch (action) {
             case 'toggleVideoMirror':
-                this.userLog('info', `${icons.mirror} Video mirror ${status}`, 'top-end');
+                notifySwitch(`${icons.mirror} Video mirror ${status}`);
                 break;
             case 'pitchBar':
-                this.userLog('info', `${icons.pitchBar} Audio pitch bar ${status}`, 'top-end');
+                notifySwitch(`${icons.pitchBar} Audio pitch bar ${status}`);
                 break;
             case 'sounds':
-                this.userLog('info', `${icons.sounds} Sounds notification ${status}`, 'top-end');
+                notifySwitch(`${icons.sounds} Sounds notification ${status}`);
                 break;
             case 'ptt':
-                this.userLog('info', `${icons.ptt} Push to talk ${status}`, 'top-end');
+                notifySwitch(`${icons.ptt} Push to talk ${status}`);
                 break;
             case 'notify':
-                this.userLog('info', `${icons.share} Share room on join ${status}`, 'top-end');
+                notifySwitch(`${icons.share} Share room on join ${status}`);
                 break;
             case 'hostOnlyRecording':
-                this.userLog('info', `${icons.recording} Only host recording ${status}`, 'top-end');
+                notifySwitch(`${icons.recording} Only host recording ${status}`);
                 break;
             case 'showChat':
                 active
-                    ? this.userLog('info', `${icons.chat} Chat will be shown, when you receive a message`, 'top-end')
-                    : this.userLog(
-                          'info',
-                          `${icons.chat} Chat not will be shown, when you receive a message`,
-                          'top-end'
-                      );
+                    ? notifySwitch(`${icons.chat} Chat will be shown, when you receive a message`)
+                    : notifySwitch(`${icons.chat} Chat not will be shown, when you receive a message`);
                 break;
             case 'speechMessages':
-                this.userLog('info', `${icons.speech} Speech incoming messages ${status}`, 'top-end');
+                notifySwitch(`${icons.speech} Speech incoming messages ${status}`);
                 break;
             case 'transcriptShowOnMsg':
                 active
-                    ? this.userLog(
-                          'info',
-                          `${icons.transcript} Transcript will be shown, when you receive a message`,
-                          'top-end'
-                      )
-                    : this.userLog(
-                          'info',
-                          `${icons.transcript} Transcript not will be shown, when you receive a message`,
-                          'top-end'
-                      );
+                    ? notifySwitch(`${icons.transcript} Transcript will be shown, when you receive a message`)
+                    : notifySwitch(`${icons.transcript} Transcript not will be shown, when you receive a message`);
                 break;
             case 'transcriptSendToAll':
                 active
-                    ? this.userLog(
-                          'info',
-                          `${icons.transcript} Transcription will be sent to all participants`,
-                          'top-end'
-                      )
-                    : this.userLog(
-                          'info',
-                          `${icons.transcript} Transcription will not be sent to participants`,
-                          'top-end'
-                      );
+                    ? notifySwitch(`${icons.transcript} Transcription will be sent to all participants`)
+                    : notifySwitch(`${icons.transcript} Transcription will not be sent to participants`);
                 break;
             case 'video_start_privacy':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: everyone starts in privacy mode ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: everyone starts in privacy mode ${status}`);
                 break;
             case 'audio_start_muted':
-                this.userLog('info', `${icons.moderator} Moderator: everyone starts muted ${status}`, 'top-end');
+                notifySwitch(`${icons.moderator} Moderator: everyone starts muted ${status}`);
                 break;
             case 'video_start_hidden':
-                this.userLog('info', `${icons.moderator} Moderator: everyone starts hidden ${status}`, 'top-end');
+                notifySwitch(`${icons.moderator} Moderator: everyone starts hidden ${status}`);
                 break;
             case 'audio_cant_unmute':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: everyone can't unmute themselves ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: everyone can't unmute themselves ${status}`);
                 break;
             case 'video_cant_unhide':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: everyone can't unhide themselves ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: everyone can't unhide themselves ${status}`);
                 break;
             case 'screen_cant_share':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: everyone can't share the screen ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: everyone can't share the screen ${status}`);
                 break;
             case 'screen_annotations_cant_draw':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: only presenters can draw screen annotations ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: only presenters can draw screen annotations ${status}`);
                 break;
             case 'chat_cant_privately':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: everyone can't chat privately ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: everyone can't chat privately ${status}`);
                 break;
             case 'chat_cant_publicly':
-                this.userLog('info', `${icons.moderator} Moderator: everyone can't chat publicly ${status}`, 'top-end');
+                notifySwitch(`${icons.moderator} Moderator: everyone can't chat publicly ${status}`);
                 break;
             case 'chat_cant_chatgpt':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: everyone can't chat with ChatGPT ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: everyone can't chat with ChatGPT ${status}`);
                 break;
             case 'chat_cant_deep_seek':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: everyone can't chat with DeepSeek ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: everyone can't chat with DeepSeek ${status}`);
                 break;
             case 'media_cant_sharing':
-                this.userLog('info', `${icons.moderator} Moderator: everyone can't share media ${status}`, 'top-end');
+                notifySwitch(`${icons.moderator} Moderator: everyone can't share media ${status}`);
                 break;
             case 'polls_cant_create':
-                this.userLog(
-                    'info',
-                    `${icons.moderator} Moderator: only presenter can create/edit/delete polls ${status}`,
-                    'top-end'
-                );
+                notifySwitch(`${icons.moderator} Moderator: only presenter can create/edit/delete polls ${status}`);
                 break;
             case 'disconnect_all_on_leave':
-                this.userLog('info', `${icons.moderator} Moderator: disconnect all on leave room ${status}`, 'top-end');
+                notifySwitch(`${icons.moderator} Moderator: disconnect all on leave room ${status}`);
                 break;
             case 'everyone_follows_me':
-                this.userLog('info', `${icons.moderator} Moderator: everyone follows me ${status}`, 'top-end');
+                notifySwitch(`${icons.moderator} Moderator: everyone follows me ${status}`);
                 break;
             case 'recSyncServer':
                 active
                     ? this.showRecServerSideAdvice()
-                    : this.userLog('info', `${icons.recording} Server sync recording ${status}`, 'top-end');
+                    : notifySwitch(`${icons.recording} Server sync recording ${status}`);
                 break;
             case 'customThemeKeep':
-                this.userLog('info', `${icons.theme} Custom theme keep ${status}`, 'top-end');
+                notifySwitch(`${icons.theme} Custom theme keep ${status}`);
                 break;
             case 'save_room_notifications':
                 this.userLog('success', 'Room notifications saved successfully', 'top-end');
@@ -11247,9 +11182,10 @@ class RoomClient {
         const isAccepted = status === 'accept';
 
         if (isAccepted) {
-            Swal.fire({
+            return showSwalToast({
                 toast: true,
                 position: 'top',
+                showCloseButton: true,
                 showConfirmButton: false,
                 timer: 2800,
                 timerProgressBar: true,
@@ -11262,7 +11198,6 @@ class RoomClient {
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             });
-            return;
         }
 
         this.sound('eject');
@@ -13919,7 +13854,7 @@ class RoomClient {
             if (!VideoAI.shareToRoom) {
                 const result = await Swal.fire({
                     background: swalBackground,
-                    position: 'top',
+                    position: 'center',
                     title: 'Share Avatar to Room?',
                     text: 'Are you sure you want to share the avatar video and audio with all participants?',
                     showCancelButton: true,

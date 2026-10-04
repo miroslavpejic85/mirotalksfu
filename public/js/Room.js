@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.57
+ * @version 2.5.60
  *
  */
 
@@ -2956,6 +2956,7 @@ function handleButtons() {
         const status = event.currentTarget.checked;
         setWhiteboardParticipantNames(status);
         whiteboardAction({ ...getWhiteboardAction('participantNames'), status });
+        rc.userLog(status ? 'success' : 'info', `Participants names ${status ? 'ON' : 'OFF'}`, 'top-end', 1800);
     };
     whiteboardShortcutsBtn.onclick = () => {
         showWhiteboardShortcuts();
@@ -3530,6 +3531,21 @@ function handleSelects() {
     switchDominantSpeakerFocus.onchange = async (e) => {
         localStorageSettings.dominant_speaker_focus = e.currentTarget.checked;
         lS.setSettings(localStorageSettings);
+        rc.userLog(
+            e.currentTarget.checked ? 'success' : 'info',
+            `Speaker Focus ${e.currentTarget.checked ? 'ON' : 'OFF'}`,
+            'top-end',
+            1800
+        );
+        e.target.blur();
+    };
+
+    switchNoiseSuppression.onchange = (e) => {
+        const enabled = e.currentTarget.checked;
+        localStorageSettings.mic_noise_suppression = enabled;
+        lS.setSettings(localStorageSettings);
+        if (rc.RNNoiseProcessor) rc.RNNoiseProcessor.setNoiseSuppression(enabled);
+        userLog(enabled ? 'success' : 'info', `Noise suppression ${enabled ? 'enabled' : 'disabled'}`, 'top-end', 1800);
         e.target.blur();
     };
 
@@ -3599,6 +3615,12 @@ function handleSelects() {
         toggleCameraOffParticipantsVisibility(e.currentTarget.checked);
         localStorageSettings.show_camera_off_participants = showCameraOffParticipants;
         lS.setSettings(localStorageSettings);
+        rc.userLog(
+            showCameraOffParticipants ? 'success' : 'info',
+            `Camera-off participants ${showCameraOffParticipants ? 'ON' : 'OFF'}`,
+            'top-end',
+            1800
+        );
         e.target.blur();
     };
     switchShare.onchange = (e) => {
@@ -3613,7 +3635,7 @@ function handleSelects() {
         localStorageSettings.keep_buttons_visible = isButtonsBarOver;
         lS.setSettings(localStorageSettings);
         const status = isButtonsBarOver ? 'enabled' : 'disabled';
-        userLog('info', `Buttons always visible ${status}`, 'top-end');
+        userLog(isButtonsBarOver ? 'success' : 'info', `Buttons always visible ${status}`, 'top-end', 1800);
         e.target.blur();
     };
 
@@ -3632,7 +3654,7 @@ function handleSelects() {
         localStorageSettings.chat_pin = isChatPinEnabled;
         lS.setSettings(localStorageSettings);
         const status = isChatPinEnabled ? 'enabled' : 'disabled';
-        userLog('info', `Chat auto pin ${status}`, 'top-end');
+        userLog(isChatPinEnabled ? 'success' : 'info', `Chat auto pin ${status}`, 'top-end', 1800);
         e.target.blur();
     };
 
@@ -3733,9 +3755,13 @@ function handleSelects() {
         e.target.blur();
     };
     transcriptWhisperMode.onchange = (e) => {
-        const enabled = transcription.whisper.toggleMode(e.currentTarget.checked);
+        const requested = e.currentTarget.checked;
+        const enabled = transcription.whisper.toggleMode(requested);
         e.currentTarget.checked = enabled;
         transcription.updateSelectorsVisibility();
+        if (!transcription.transcriptionRunning && enabled === requested) {
+            rc.userLog(enabled ? 'success' : 'info', `Whisper mode ${enabled ? 'ON' : 'OFF'}`, 'top-end', 1800);
+        }
         e.target.blur();
     };
     // whiteboard options
@@ -3891,7 +3917,7 @@ function handleKeyboardShortcuts() {
     } else {
         switchShortcuts.onchange = (e) => {
             const status = setKeyboardShortcuts(e.currentTarget.checked);
-            userLog('info', `Keyboard shortcuts ${status}`, 'top-end');
+            userLog(e.currentTarget.checked ? 'success' : 'info', `Keyboard shortcuts ${status}`, 'top-end', 1800);
             e.target.blur();
         };
 
@@ -4868,15 +4894,13 @@ function redirectOnLeave(disconnectAll = false) {
 }
 
 function userLog(icon, message, position = 'top-end', timer = 3000) {
-    const Toast = Swal.mixin({
+    return showSwalToast({
         background: swalBackground,
-        toast: true,
         position: position,
-        showConfirmButton: false,
         timer: timer,
-        timerProgressBar: true,
-    });
-    Toast.fire({
+        timerProgressBar: timer > 1800,
+        pauseOnHover: timer > 1800,
+        queue: timer > 1800,
         icon: icon,
         title: message,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -7055,7 +7079,7 @@ function confirmClearBoard() {
     Swal.fire({
         background: swalBackground,
         imageUrl: image.delete,
-        position: 'top',
+        position: 'center',
         title: 'Clean the board',
         text: 'Are you sure you want to clean the board?',
         ...swalDestructiveOptions(),
@@ -7103,8 +7127,10 @@ function toggleLockUnlockWhiteboard() {
     whiteboardAction(getWhiteboardAction(action));
 
     if (wbIsLock) {
-        userLog('info', 'The whiteboard is locked. \n The participants cannot interact with it.', 'top-right');
+        userLog('success', 'The whiteboard is locked. \n The participants cannot interact with it.', 'top-end', 1800);
         sound('locked');
+    } else {
+        userLog('info', 'The whiteboard is unlocked. \n The participants can interact with it.', 'top-end', 1800);
     }
 }
 
@@ -8899,7 +8925,7 @@ window.addEventListener('popstate', (event) => {
     // Show a custom confirmation dialog
     Swal.fire({
         background: swalBackground,
-        position: 'top',
+        position: 'center',
         title: 'Leave session?',
         text: 'Are you sure you want to exit this session?',
         icon: 'warning',
@@ -8955,7 +8981,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.57',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.60',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
@@ -9093,7 +9119,7 @@ async function deleteAllBreakoutRooms() {
     const deletingAllRooms = activeRooms.length === 0;
     const confirmed = await Swal.fire({
         background: swalBackground,
-        position: 'top',
+        position: 'center',
         title: deletingAllRooms ? 'Delete All Breakout Rooms?' : 'Delete Inactive Breakout Rooms?',
         html: `
             <div class="popup-template-copy popup-template-copy--left">
@@ -9397,7 +9423,7 @@ async function launchBreakoutRooms() {
 
     const confirmed = await Swal.fire({
         background: swalBackground,
-        position: 'top',
+        position: 'center',
         title: 'Launch Breakout Rooms',
         html: renderRoomTemplate('popupBreakoutLaunchTemplate', {
             text: {
@@ -9637,7 +9663,7 @@ async function endAllBreakoutSessions() {
 
     const confirmed = await Swal.fire({
         background: swalBackground,
-        position: 'top',
+        position: 'center',
         title: 'End All Breakout Sessions?',
         html: renderRoomTemplate('popupBreakoutEndTemplate', {
             text: {

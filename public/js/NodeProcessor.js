@@ -160,19 +160,6 @@ class RNNoiseProcessor {
             labelNoiseSuppression: document.getElementById('labelNoiseSuppression'),
             switchNoiseSuppression: document.getElementById('switchNoiseSuppression'),
         };
-
-        this.elements.switchNoiseSuppression.onchange = (e) => {
-            const enabled = e.currentTarget.checked;
-            localStorageSettings.mic_noise_suppression = enabled;
-            lS.setSettings(localStorageSettings);
-            userLog(
-                enabled ? 'success' : 'info',
-                `Noise suppression ${enabled ? 'enabled' : 'disabled'}`,
-                'top-end',
-                3000
-            );
-            this.setNoiseSuppression(enabled);
-        };
     }
 
     initializeDependencies() {

@@ -7,6 +7,77 @@ window.Swal = window.Swal.mixin({
     cancelButtonColor: 'var(--swal-neutral-bg, #505866)',
 });
 
+const swalToastQueue = [];
+let swalToastActive = false;
+let swalToastRetry = null;
+
+// Toasts wait for existing notifications and dialogs instead of dismissing them.
+function showSwalToast(options) {
+    if (options.queue === false) {
+        // Immediate switch feedback is obsolete by the time a blocking dialog closes.
+        if (Swal.isVisible() && !Swal.getPopup().classList.contains('swal2-toast')) {
+            return Promise.resolve({ isDismissed: true, dismiss: 'suppressed-by-dialog' });
+        }
+        return fireSwalToast(options);
+    }
+    return new Promise((resolve, reject) => {
+        swalToastQueue.push({ options, resolve, reject });
+        drainSwalToasts();
+    });
+}
+
+function fireSwalToast(options) {
+    const { pauseOnHover = true, queue, ...swalOptions } = options;
+    return Swal.fire({
+        ...swalOptions,
+        toast: true,
+        position: options.position || 'top-end',
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: options.timer ?? 5000,
+        timerProgressBar: options.timerProgressBar ?? true,
+        didOpen: (popup) => {
+            if (pauseOnHover) pauseSwalToastOnHover(popup);
+            if (typeof options.didOpen === 'function') options.didOpen(popup);
+        },
+    });
+}
+
+function drainSwalToasts() {
+    if (swalToastActive || swalToastRetry !== null || !swalToastQueue.length) return;
+    if (Swal.isVisible()) {
+        swalToastRetry = setTimeout(() => {
+            swalToastRetry = null;
+            drainSwalToasts();
+        }, 250);
+        return;
+    }
+
+    const { options, resolve, reject } = swalToastQueue.shift();
+    swalToastActive = true;
+    const finish = () => {
+        swalToastActive = false;
+        drainSwalToasts();
+    };
+    try {
+        fireSwalToast(options).then(
+            (result) => {
+                resolve(result);
+                finish();
+            },
+            (error) => {
+                console.error('Could not show toast notification:', error);
+                reject(error);
+                finish();
+            }
+        );
+    } catch (error) {
+        console.error('Could not show toast notification:', error);
+        reject(error);
+        finish();
+    }
+}
+
 function getSwalLuminance(channels) {
     return channels
         .map((channel) => {
@@ -73,6 +144,18 @@ function setSwalTheme(vars) {
     }
     const focus = getSwalButtonPalette(getSwalColorChannels(vars['--swal-focus-bg'] || '#111111', '#111111'));
     document.documentElement.style.setProperty('--swal-focus-ink', focus.ink);
+}
+
+function pauseSwalToastOnHover(toast, toastSwal = Swal) {
+    const resume = () => {
+        if (!toast.matches(':hover') && !toast.contains(document.activeElement)) toastSwal.resumeTimer();
+    };
+    toast.addEventListener('mouseenter', () => toastSwal.stopTimer());
+    toast.addEventListener('mouseleave', resume);
+    toast.addEventListener('focusin', () => toastSwal.stopTimer());
+    toast.addEventListener('focusout', (event) => {
+        if (!toast.matches(':hover') && !toast.contains(event.relatedTarget)) toastSwal.resumeTimer();
+    });
 }
 
 function swalDestructiveOptions() {
