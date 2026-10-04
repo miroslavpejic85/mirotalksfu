@@ -184,7 +184,8 @@
         "Text background color": "文本背景颜色",
         "Text rotation": "文本旋转",
         "Cancel text annotation": "取消文本注释",
-        "Save text annotation": "保存文本注释"
+        "Save text annotation": "保存文本注释",
+        "Text": "Text"
     },
     "buttons": {
         "Add arrow": "添加箭头",
@@ -393,7 +394,9 @@
         "Copy invite link": "复制邀请链接",
         "Invite...": "邀请...",
         "Participant actions": "参会者操作",
-        "Duplicate text annotation": "Duplicate text annotation"
+        "Duplicate text annotation": "Duplicate text annotation",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "加入前请连接蓝牙耳机或外接麦克风。iOS 会控制音频路由。",
@@ -872,7 +875,8 @@
         "More text options": "更多文本选项",
         "Screen annotation tools": "Screen annotation tools",
         "Text formatting": "文本格式",
-        "Rotation": "Rotation"
+        "Rotation": "Rotation",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "Edit frame title": "编辑框架标题",
@@ -1010,7 +1014,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",
@@ -1018,7 +1022,31 @@
         "Your microphone is off": "你的麦克风已关闭",
         "Your private note will be lost unless you save it to a file.": "除非您将私人笔记保存到文件，否则它将丢失。",
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "您保存的偏好会在每个房间中将关闭摄像头的参与者从网格中隐藏。在此处保留吗？",
-        "fas fa-font": "fas fa-font"
+        "fas fa-font": "fas fa-font",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "无法下载屏幕批注",

@@ -184,7 +184,8 @@
         "Text background color": "मजकूर पार्श्वभूमी रंग",
         "Text rotation": "मजकूर रोटेशन",
         "Cancel text annotation": "मजकूर भाष्य रद्द करा",
-        "Save text annotation": "मजकूर भाष्य जतन करा"
+        "Save text annotation": "मजकूर भाष्य जतन करा",
+        "Text": "Text"
     },
     "buttons": {
         "Abort": "निरस्त करा",
@@ -393,7 +394,9 @@
         "Whiteboard": "व्हाईटबोर्ड",
         "YouTube": "YouTube",
         "YouTube Live": "YouTube Live",
-        "Duplicate text annotation": "डुप्लिकेट मजकूर भाष्य"
+        "Duplicate text annotation": "डुप्लिकेट मजकूर भाष्य",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "सामील होण्यापूर्वी तुमचा ब्लूटूथ हेडसेट किंवा बाह्य मायक्रोफोन कनेक्ट करा. iOS ऑडिओ राउटिंग नियंत्रित करते.",
@@ -872,7 +875,8 @@
         "More text options": "अधिक मजकूर पर्याय",
         "Screen annotation tools": "स्क्रीन भाष्य साधने",
         "Text formatting": "मजकूर स्वरूपन",
-        "Rotation": "रोटेशन"
+        "Rotation": "रोटेशन",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "मीटिंग सुरू करण्यासाठी प्रस्तुतकर्ता आवश्यक आहे. कृपया नंतर पुन्हा सामील होण्याचा प्रयत्न करा.",
@@ -1011,14 +1015,38 @@
         "Unmute": "अनम्यूट करा",
         "Unmute Video": "व्हिडिओ अनम्यूट करा",
         "Username already in use": "वापरकर्तानाव आधीपासूनच वापरात आहे",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "व्हाईटबोर्ड शॉर्टकट",
         "Would you like to continue the room broadcast?": "तुम्ही रूम ब्रॉडकास्ट सुरू ठेवू इच्छिता?",
         "Yes": "होय",
         "You are banned from this room!": "तुम्हाला या खोलीतून बंदी आहे!",
         "Your microphone is off": "तुमचा मायक्रोफोन बंद आहे",
         "Your private note will be lost unless you save it to a file.": "तुमची खाजगी नोट तुम्ही फाइलमध्ये सेव्ह केल्याशिवाय ती हरवली जाईल.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "तुमचे सेव्ह केलेले प्राधान्य सहभागींना त्यांच्या कॅमेरासह प्रत्येक खोलीतील ग्रिडमधून लपवून ठेवते. इथे ठेवायचे?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "तुमचे सेव्ह केलेले प्राधान्य सहभागींना त्यांच्या कॅमेरासह प्रत्येक खोलीतील ग्रिडमधून लपवून ठेवते. इथे ठेवायचे?",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "स्क्रीन भाष्य डाउनलोड करण्यात अक्षम",

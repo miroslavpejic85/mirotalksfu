@@ -184,7 +184,8 @@
         "Text background color": "テキストの背景色",
         "Text rotation": "テキストの回転",
         "Cancel text annotation": "テキストアノテーションをキャンセル",
-        "Save text annotation": "テキスト注釈を保存"
+        "Save text annotation": "テキスト注釈を保存",
+        "Text": "Text"
     },
     "buttons": {
         "Add arrow": "矢印を追加",
@@ -393,7 +394,9 @@
         "Copy invite link": "招待リンクをコピー",
         "Invite...": "招待...",
         "Participant actions": "参加者の操作",
-        "Duplicate text annotation": "Duplicate text annotation"
+        "Duplicate text annotation": "Duplicate text annotation",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "参加する前にBluetoothヘッドセットまたは外部マイクを接続してください。音声の入出力先はiOSが制御します。",
@@ -872,7 +875,8 @@
         "More text options": "その他のテキストオプション",
         "Screen annotation tools": "Screen annotation tools",
         "Text formatting": "テキストの書式設定",
-        "Rotation": "Rotation"
+        "Rotation": "Rotation",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "Edit frame title": "フレームタイトルを編集",
@@ -1010,7 +1014,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",
@@ -1018,7 +1022,31 @@
         "Your microphone is off": "マイクがオフです",
         "Your private note will be lost unless you save it to a file.": "プライベートノートはファイルに保存しない限り失われます。",
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "保存された設定により、カメラをオフにしている参加者はすべてのルームでグリッドから非表示になります。ここでも維持しますか？",
-        "fas fa-font": "fas fa-font"
+        "fas fa-font": "fas fa-font",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "画面の注釈をダウンロードできません",

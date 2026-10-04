@@ -184,7 +184,8 @@
         "Text background color": "टेक्स्ट बैकग्राउंड का रंग",
         "Text rotation": "टेक्स्ट रोटेशन",
         "Cancel text annotation": "टेक्स्ट एनोटेशन कैंसिल करें",
-        "Save text annotation": "टेक्स्ट एनोटेशन सेव करें"
+        "Save text annotation": "टेक्स्ट एनोटेशन सेव करें",
+        "Text": "Text"
     },
     "buttons": {
         "Add arrow": "तीर जोड़ें",
@@ -393,7 +394,9 @@
         "Copy invite link": "आमंत्रण लिंक कॉपी करें",
         "Invite...": "आमंत्रित करें...",
         "Participant actions": "प्रतिभागी कार्रवाइयाँ",
-        "Duplicate text annotation": "Duplicate text annotation"
+        "Duplicate text annotation": "Duplicate text annotation",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "जुड़ने से पहले अपना ब्लूटूथ हेडसेट या बाहरी माइक्रोफ़ोन कनेक्ट करें। iOS ऑडियो रूटिंग नियंत्रित करता है।",
@@ -872,7 +875,8 @@
         "More text options": "टेक्स्ट के और विकल्प",
         "Screen annotation tools": "Screen annotation tools",
         "Text formatting": "टेक्स्ट फ़ॉर्मेटिंग",
-        "Rotation": "Rotation"
+        "Rotation": "Rotation",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "Edit frame title": "फ़्रेम शीर्षक संपादित करें",
@@ -1010,7 +1014,7 @@
         "Unmute": "अनम्यूट करें",
         "Unmute Video": "वीडियो की ध्वनि चालू करें",
         "Username already in use": "उपयोगकर्ता नाम पहले से उपयोग में है",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "व्हाइटबोर्ड शॉर्टकट",
         "Would you like to continue the room broadcast?": "क्या आप रूम प्रसारण जारी रखना चाहते हैं?",
         "Yes": "हाँ",
@@ -1018,7 +1022,31 @@
         "Your microphone is off": "आपका माइक्रोफ़ोन बंद है",
         "Your private note will be lost unless you save it to a file.": "जब तक आप इसे किसी फ़ाइल में नहीं सहेजते, आपका निजी नोट खो जाएगा।",
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "आपकी सहेजी गई प्राथमिकता हर कमरे में कैमरा बंद करने वाले प्रतिभागियों को ग्रिड से छिपाए रखती है। इसे यहाँ रखें?",
-        "fas fa-font": "fas fa-font"
+        "fas fa-font": "fas fa-font",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "स्क्रीन की टिप्पणियाँ डाउनलोड नहीं हो सकीं",

@@ -184,7 +184,8 @@
         "Text background color": "لون خلفية النص",
         "Text rotation": "دوران النص",
         "Cancel text annotation": "إلغاء التعليق التوضيحي النصي",
-        "Save text annotation": "حفظ التعليق التوضيحي النصي"
+        "Save text annotation": "حفظ التعليق التوضيحي النصي",
+        "Text": "Text"
     },
     "buttons": {
         "Add arrow": "إضافة سهم",
@@ -393,7 +394,9 @@
         "Copy invite link": "نسخ رابط الدعوة",
         "Invite...": "دعوة...",
         "Participant actions": "إجراءات المشاركين",
-        "Duplicate text annotation": "Duplicate text annotation"
+        "Duplicate text annotation": "Duplicate text annotation",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "وصّل سماعة البلوتوث أو الميكروفون الخارجي قبل الانضمام. يتحكم iOS في توجيه الصوت.",
@@ -872,7 +875,8 @@
         "More text options": "المزيد من خيارات النص",
         "Screen annotation tools": "Screen annotation tools",
         "Text formatting": "تنسيق النص",
-        "Rotation": "Rotation"
+        "Rotation": "Rotation",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "Edit frame title": "تعديل عنوان الإطار",
@@ -1010,7 +1014,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",
@@ -1018,7 +1022,31 @@
         "Your microphone is off": "الميكروفون مغلق",
         "Your private note will be lost unless you save it to a file.": "ستُفقد ملاحظتك الخاصة ما لم تحفظها في ملف.",
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "يُبقي إعدادك المحفوظ المشاركين ذوي الكاميرا المغلقة مخفيين من الشبكة في كل غرفة. هل تريد الإبقاء عليه هنا؟",
-        "fas fa-font": "fas fa-font"
+        "fas fa-font": "fas fa-font",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "تعذّر تنزيل التعليقات التوضيحية على الشاشة",

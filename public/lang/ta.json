@@ -184,7 +184,8 @@
         "Text background color": "உரை பின்னணி நிறம்",
         "Text rotation": "உரை சுழற்சி",
         "Cancel text annotation": "உரை சிறுகுறிப்பை ரத்துசெய்",
-        "Save text annotation": "உரை சிறுகுறிப்பைச் சேமிக்கவும்"
+        "Save text annotation": "உரை சிறுகுறிப்பைச் சேமிக்கவும்",
+        "Text": "Text"
     },
     "buttons": {
         "Abort": "கைவிடு",
@@ -393,7 +394,9 @@
         "Whiteboard": "வெள்ளை பலகை",
         "YouTube": "YouTube",
         "YouTube Live": "YouTube Live",
-        "Duplicate text annotation": "நகல் உரை சிறுகுறிப்பு"
+        "Duplicate text annotation": "நகல் உரை சிறுகுறிப்பு",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "சேர்வதற்கு முன் உங்கள் புளூடூத் ஹெட்செட் அல்லது வெளிப்புற மைக்ரோஃபோனை இணைக்கவும். iOS ஆடியோ ரூட்டிங் கட்டுப்படுத்துகிறது.",
@@ -872,7 +875,8 @@
         "More text options": "மேலும் உரை விருப்பங்கள்",
         "Screen annotation tools": "திரை சிறுகுறிப்பு கருவிகள்",
         "Text formatting": "உரை வடிவமைத்தல்",
-        "Rotation": "சுழற்சி"
+        "Rotation": "சுழற்சி",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "கூட்டத்தைத் தொடங்க ஒரு தொகுப்பாளர் தேவை. பின்னர் மீண்டும் சேர முயற்சிக்கவும்.",
@@ -1011,14 +1015,38 @@
         "Unmute": "ஒலியடக்கவும்",
         "Unmute Video": "வீடியோவை முடக்கு",
         "Username already in use": "பயனர் பெயர் ஏற்கனவே பயன்பாட்டில் உள்ளது",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "ஒயிட்போர்டு குறுக்குவழிகள்",
         "Would you like to continue the room broadcast?": "அறை ஒளிபரப்பைத் தொடர விரும்புகிறீர்களா?",
         "Yes": "ஆம்",
         "You are banned from this room!": "இந்த அறையில் இருந்து நீங்கள் தடைசெய்யப்பட்டுள்ளீர்கள்!",
         "Your microphone is off": "உங்கள் மைக்ரோஃபோன் முடக்கப்பட்டுள்ளது",
         "Your private note will be lost unless you save it to a file.": "உங்கள் தனிப்பட்ட குறிப்பை நீங்கள் ஒரு கோப்பில் சேமிக்கும் வரை அதை இழக்க நேரிடும்.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "உங்கள் சேமித்த விருப்பத்தேர்வு பங்கேற்பாளர்களின் கேமராவை அணைத்து வைத்திருக்கும். இங்கே வைக்கவா?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "உங்கள் சேமித்த விருப்பத்தேர்வு பங்கேற்பாளர்களின் கேமராவை அணைத்து வைத்திருக்கும். இங்கே வைக்கவா?",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "திரைக் குறிப்புகளைப் பதிவிறக்க முடியவில்லை",

@@ -184,7 +184,8 @@
         "Text background color": "رنگ پس زمینه متن",
         "Text rotation": "چرخش متن",
         "Cancel text annotation": "حاشیه نویسی متن را لغو کنید",
-        "Save text annotation": "یادداشت متن را ذخیره کنید"
+        "Save text annotation": "یادداشت متن را ذخیره کنید",
+        "Text": "Text"
     },
     "buttons": {
         "Abort": "سقط",
@@ -393,7 +394,9 @@
         "Whiteboard": "تخته وایت برد",
         "YouTube": "YouTube",
         "YouTube Live": "YouTube Live",
-        "Duplicate text annotation": "حاشیه نویسی متن تکراری"
+        "Duplicate text annotation": "حاشیه نویسی متن تکراری",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "قبل از پیوستن، هدست بلوتوث یا میکروفون خارجی خود را وصل کنید. iOS مسیریابی صدا را کنترل می کند.",
@@ -872,7 +875,8 @@
         "More text options": "گزینه های متنی بیشتر",
         "Screen annotation tools": "ابزارهای حاشیه نویسی صفحه",
         "Text formatting": "قالب بندی متن",
-        "Rotation": "چرخش"
+        "Rotation": "چرخش",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "یک مجری برای شروع جلسه الزامی است. لطفاً بعداً دوباره عضویت را امتحان کنید.",
@@ -1011,14 +1015,38 @@
         "Unmute": "باصدا کردن",
         "Unmute Video": "باصدا کردن ویدیو",
         "Username already in use": "نام کاربری در حال حاضر استفاده شده است",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "میانبرهای تخته سفید",
         "Would you like to continue the room broadcast?": "آیا می‌خواهید پخش اتاق را ادامه دهید؟",
         "Yes": "بله",
         "You are banned from this room!": "شما از این اتاق منع شده اید!",
         "Your microphone is off": "میکروفون شما خاموش است",
         "Your private note will be lost unless you save it to a file.": "یادداشت خصوصی شما از بین خواهد رفت مگر اینکه آن را در یک فایل ذخیره کنید.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "تنظیمات برگزیده ذخیره شده شما باعث می‌شود شرکت‌کنندگانی که دوربینشان خاموش است از شبکه در هر اتاق پنهان بماند. اینجا نگهش دارم؟"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "تنظیمات برگزیده ذخیره شده شما باعث می‌شود شرکت‌کنندگانی که دوربینشان خاموش است از شبکه در هر اتاق پنهان بماند. اینجا نگهش دارم؟",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "دانلود حاشیه نویسی صفحه امکان پذیر نیست",

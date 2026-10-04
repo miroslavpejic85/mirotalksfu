@@ -184,7 +184,8 @@
         "Text background color": "Rangi ya mandharinyuma ya maandishi",
         "Text rotation": "Mzunguko wa maandishi",
         "Cancel text annotation": "Ghairi ufafanuzi wa maandishi",
-        "Save text annotation": "Hifadhi ufafanuzi wa maandishi"
+        "Save text annotation": "Hifadhi ufafanuzi wa maandishi",
+        "Text": "Text"
     },
     "buttons": {
         "Abort": "Toa mimba",
@@ -393,7 +394,9 @@
         "Whiteboard": "Ubao mweupe",
         "YouTube": "YouTube",
         "YouTube Live": "YouTube Live",
-        "Duplicate text annotation": "Rudufu ufafanuzi wa maandishi"
+        "Duplicate text annotation": "Rudufu ufafanuzi wa maandishi",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "Unganisha kipaza sauti chako cha Bluetooth au maikrofoni ya nje kabla ya kujiunga. iOS hudhibiti uelekezaji wa sauti.",
@@ -872,7 +875,8 @@
         "More text options": "Chaguo zaidi za maandishi",
         "Screen annotation tools": "Zana za ufafanuzi wa skrini",
         "Text formatting": "Uumbizaji wa maandishi",
-        "Rotation": "Mzunguko"
+        "Rotation": "Mzunguko",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "Mwasilishaji anahitajika ili kuanzisha mkutano. Tafadhali jaribu kujiunga tena baadaye.",
@@ -1011,14 +1015,38 @@
         "Unmute": "Rejesha sauti",
         "Unmute Video": "Rejesha Sauti ya Video",
         "Username already in use": "Jina la mtumiaji tayari linatumika",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "Njia za mkato za Ubao Mweupe",
         "Would you like to continue the room broadcast?": "Je, ungependa kuendelea na matangazo ya chumba?",
         "Yes": "Ndiyo",
         "You are banned from this room!": "Umepigwa marufuku kutoka kwenye chumba hiki!",
         "Your microphone is off": "Maikrofoni yako imezimwa",
         "Your private note will be lost unless you save it to a file.": "Ujumbe wako wa faragha utapotea isipokuwa ukiuhifadhi kwenye faili.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Upendeleo wako uliohifadhiwa huwazuia washiriki na kamera zao kufichwa kwenye gridi ya kila chumba. Uihifadhi hapa?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Upendeleo wako uliohifadhiwa huwazuia washiriki na kamera zao kufichwa kwenye gridi ya kila chumba. Uihifadhi hapa?",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "Haiwezi kupakua maelezo ya skrini",

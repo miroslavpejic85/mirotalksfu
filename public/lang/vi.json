@@ -184,7 +184,8 @@
         "Text background color": "Màu nền văn bản",
         "Text rotation": "Xoay văn bản",
         "Cancel text annotation": "Hủy chú thích văn bản",
-        "Save text annotation": "Lưu chú thích văn bản"
+        "Save text annotation": "Lưu chú thích văn bản",
+        "Text": "Text"
     },
     "buttons": {
         "Abort": "Hủy bỏ",
@@ -393,7 +394,9 @@
         "Whiteboard": "Bảng trắng",
         "YouTube": "YouTube",
         "YouTube Live": "YouTube Live",
-        "Duplicate text annotation": "Chú thích văn bản trùng lặp"
+        "Duplicate text annotation": "Chú thích văn bản trùng lặp",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "Kết nối tai nghe Bluetooth hoặc micrô bên ngoài trước khi tham gia. iOS kiểm soát định tuyến âm thanh.",
@@ -872,7 +875,8 @@
         "More text options": "Nhiều tùy chọn văn bản hơn",
         "Screen annotation tools": "Công cụ chú thích màn hình",
         "Text formatting": "Định dạng văn bản",
-        "Rotation": "Xoay"
+        "Rotation": "Xoay",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "Cần có người thuyết trình để bắt đầu cuộc họp. Vui lòng thử tham gia lại sau.",
@@ -1011,14 +1015,38 @@
         "Unmute": "Bật tiếng",
         "Unmute Video": "Bật tiếng video",
         "Username already in use": "Tên người dùng đã được sử dụng",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "Phím tắt bảng trắng",
         "Would you like to continue the room broadcast?": "Bạn có muốn tiếp tục phát sóng phòng không?",
         "Yes": "Có",
         "You are banned from this room!": "Bạn bị cấm vào phòng này!",
         "Your microphone is off": "Micrô của bạn bị tắt",
         "Your private note will be lost unless you save it to a file.": "Ghi chú riêng tư của bạn sẽ bị mất trừ khi bạn lưu nó vào một tập tin.",
-        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Tùy chọn đã lưu của bạn sẽ giúp người tham gia tắt camera của họ khỏi lưới trong mỗi phòng. Giữ nó ở đây?"
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Tùy chọn đã lưu của bạn sẽ giúp người tham gia tắt camera của họ khỏi lưới trong mỗi phòng. Giữ nó ở đây?",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "Không thể tải xuống chú thích màn hình",

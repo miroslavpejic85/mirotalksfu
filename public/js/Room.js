@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.43
+ * @version 2.5.50
  *
  */
 
@@ -1645,8 +1645,6 @@ async function shareRoom(useNavigator = false) {
             }),
             showDenyButton: true,
             showCancelButton: true,
-            cancelButtonColor: 'red',
-            denyButtonColor: 'green',
             confirmButtonText: `Copy URL`,
             denyButtonText: `Email invite`,
             cancelButtonText: `Close`,
@@ -1726,7 +1724,6 @@ function shareRoomByEmail() {
         html: renderRoomTemplate('popupDateTimePickerTemplate'),
         showCancelButton: true,
         confirmButtonText: 'Open email',
-        cancelButtonColor: 'red',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         didOpen: () => {
@@ -1992,9 +1989,9 @@ function confirmJoinLock(lock) {
         text: lock
             ? 'Are you sure you want to lock the room? No new participants will be able to join from now on.'
             : 'Are you sure you want to unlock the room? New participants will be able to join again.',
-        showDenyButton: true,
+        showCancelButton: true,
         confirmButtonText: lock ? 'Lock room' : 'Unlock room',
-        denyButtonText: 'Cancel',
+        cancelButtonText: 'Cancel',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -4765,17 +4762,17 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
         allowEscapeKey: false,
         showDenyButton: true,
         showCancelButton: allowCancel,
-        confirmButtonColor: 'green',
-        denyButtonColor: 'red',
-        cancelButtonColor: 'gray',
+        focusConfirm: false,
+        focusCancel: allowCancel,
+        focusDeny: !allowCancel,
         background: swalBackground,
         imageUrl: image.feedback,
         position: 'top',
         title: 'Leave a feedback',
         text: 'Do you want to rate your MiroTalk experience?',
-        confirmButtonText: `Yes`,
-        denyButtonText: `No`,
-        cancelButtonText: `Cancel`,
+        confirmButtonText: 'Rate experience',
+        denyButtonText: 'Leave without rating',
+        cancelButtonText: 'Stay in meeting',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -6408,9 +6405,9 @@ function setupFileSelection(title, accept, renderToCanvas) {
             dropArea.addEventListener('dragleave', handleDragLeave);
             dropArea.addEventListener('drop', handleDrop);
         },
-        showDenyButton: true,
-        confirmButtonText: `OK`,
-        denyButtonText: `Cancel`,
+        showCancelButton: true,
+        confirmButtonText: 'Add to board',
+        cancelButtonText: 'Cancel',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -7017,9 +7014,9 @@ function confirmClearBoard() {
         position: 'top',
         title: 'Clean the board',
         text: 'Are you sure you want to clean the board?',
-        showDenyButton: true,
-        confirmButtonText: `Yes`,
-        denyButtonText: `No`,
+        ...swalDestructiveOptions(),
+        confirmButtonText: 'Clear board',
+        cancelButtonText: 'Cancel',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -8058,7 +8055,6 @@ function advisePersistedCameraOffSetting() {
         showDenyButton: true,
         confirmButtonText: 'Keep hidden',
         denyButtonText: 'Show them',
-        denyButtonColor: 'green',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -8347,6 +8343,7 @@ function applyTheme(props) {
     }
     root.setProperty('--room-switch-accent', props['--room-switch-accent'] || props['--dd-color']);
     root.setProperty('--room-switch-ink', props['--room-switch-ink'] || '#101314');
+    setSwalTheme(props);
     swalBackground = props['--body-bg'];
     document.body.style.background = props['--body-bg'];
 }
@@ -8369,6 +8366,8 @@ function setCustomTheme() {
         '--dd-color': '#FFFFFF',
         '--room-switch-accent': `color-mix(in srgb, ${color} 45%, white)`,
         '--room-switch-ink': '#101314',
+        '--swal-neutral-bg': `color-mix(in srgb, ${color} 55%, black)`,
+        '--swal-focus-bg': color,
     });
 }
 
@@ -8860,11 +8859,9 @@ window.addEventListener('popstate', (event) => {
         title: 'Leave session?',
         text: 'Are you sure you want to exit this session?',
         icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No',
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        ...swalDestructiveOptions(),
+        confirmButtonText: 'Leave session',
+        cancelButtonText: 'Stay in meeting',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -8910,7 +8907,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.43',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.50',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
@@ -9057,14 +9054,14 @@ async function deleteAllBreakoutRooms() {
                 }
             </div>
         `,
-        showDenyButton: true,
+        ...swalDestructiveOptions(),
         confirmButtonText: '<i class="fas fa-trash"></i> Delete',
-        denyButtonText: 'Cancel',
+        cancelButtonText: 'Cancel',
         customClass: {
             popup: 'breakout-swal breakout-swal--end',
             htmlContainer: 'breakout-swal-html',
-            confirmButton: 'breakout-swal-confirm breakout-swal-confirm--end',
-            denyButton: 'breakout-swal-deny',
+            confirmButton: 'breakout-swal-confirm breakout-swal-confirm--end swal-destructive',
+            cancelButton: 'breakout-swal-deny',
         },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -9360,14 +9357,14 @@ async function launchBreakoutRooms() {
                 summary,
             },
         }),
-        showDenyButton: true,
+        showCancelButton: true,
         confirmButtonText: '<i class="fas fa-rocket"></i> Launch',
-        denyButtonText: 'Cancel',
+        cancelButtonText: 'Cancel',
         customClass: {
             popup: 'breakout-swal breakout-swal--launch',
             htmlContainer: 'breakout-swal-html',
             confirmButton: 'breakout-swal-confirm breakout-swal-confirm--launch',
-            denyButton: 'breakout-swal-deny',
+            cancelButton: 'breakout-swal-deny',
         },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -9597,14 +9594,14 @@ async function endAllBreakoutSessions() {
                 participantLabel: `participant${totalPeers !== 1 ? 's' : ''}`,
             },
         }),
-        showDenyButton: true,
+        ...swalDestructiveOptions(),
         confirmButtonText: '<i class="fas fa-door-open"></i> End All',
-        denyButtonText: 'Cancel',
+        cancelButtonText: 'Cancel',
         customClass: {
             popup: 'breakout-swal breakout-swal--end',
             htmlContainer: 'breakout-swal-html',
-            confirmButton: 'breakout-swal-confirm breakout-swal-confirm--end',
-            denyButton: 'breakout-swal-deny',
+            confirmButton: 'breakout-swal-confirm breakout-swal-confirm--end swal-destructive',
+            cancelButton: 'breakout-swal-deny',
         },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },

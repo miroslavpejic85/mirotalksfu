@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.43
+ * @version 2.5.50
  *
  */
 
@@ -1720,14 +1720,14 @@ class RoomClient {
                     roomLabel,
                 },
             }),
-            showDenyButton: true,
+            showCancelButton: true,
             confirmButtonText: `${icons.signIn} Join Room`,
-            denyButtonText: 'Dismiss',
+            cancelButtonText: 'Dismiss',
             customClass: {
                 popup: 'breakout-swal breakout-swal--help',
                 htmlContainer: 'breakout-swal-html',
                 confirmButton: 'breakout-swal-confirm breakout-swal-confirm--help',
-                denyButton: 'breakout-swal-deny',
+                cancelButton: 'breakout-swal-deny',
             },
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -1758,14 +1758,14 @@ class RoomClient {
                     durationChip,
                 },
             }),
-            showDenyButton: true,
+            showCancelButton: true,
             confirmButtonText: `${icons.arrowRight} Join`,
-            denyButtonText: 'Stay',
+            cancelButtonText: 'Stay',
             customClass: {
                 popup: 'breakout-swal breakout-swal--join',
                 htmlContainer: 'breakout-swal-html',
                 confirmButton: 'breakout-swal-confirm breakout-swal-confirm--join',
-                denyButton: 'breakout-swal-deny breakout-swal-deny--quiet',
+                cancelButton: 'breakout-swal-deny',
             },
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -2167,9 +2167,9 @@ class RoomClient {
             title: 'Room broadcasting Enabled',
             text: 'Would you like to continue the room broadcast?',
             showDenyButton: true,
-            confirmButtonColor: '#18392B',
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            confirmButtonText: 'Continue broadcast',
+            denyButtonText: 'Stop broadcast',
+            customClass: { denyButton: 'swal-destructive' },
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -4745,9 +4745,9 @@ class RoomClient {
                 position: 'center',
                 icon: 'question',
                 text: 'Do you want to share your screen?',
-                showDenyButton: true,
-                confirmButtonText: `Yes`,
-                denyButtonText: `No`,
+                showCancelButton: true,
+                confirmButtonText: 'Share screen',
+                cancelButtonText: 'Cancel',
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
@@ -7562,9 +7562,9 @@ class RoomClient {
             position: 'top',
             title: 'Delete this Message?',
             imageUrl: image.delete,
-            showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            ...swalDestructiveOptions(),
+            confirmButtonText: 'Delete message',
+            cancelButtonText: 'Cancel',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -7797,9 +7797,9 @@ class RoomClient {
             position: 'top',
             title: 'Clean up all chat Messages?',
             imageUrl: image.delete,
-            showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            ...swalDestructiveOptions(),
+            confirmButtonText: 'Clear chat',
+            cancelButtonText: 'Cancel',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -8298,7 +8298,6 @@ class RoomClient {
                     showCancelButton: true,
                     confirmButtonText: 'Save',
                     cancelButtonText: 'Cancel',
-                    cancelButtonColor: '#dc3545',
                     preConfirm: () => {
                         const newQuestion = document.getElementById('swal-input-question').value;
                         const newOptions = this.getPollOptions(poll.options.length);
@@ -8332,9 +8331,9 @@ class RoomClient {
                     position: 'top',
                     title: 'Delete this poll?',
                     imageUrl: image.delete,
-                    showDenyButton: true,
-                    confirmButtonText: `Yes`,
-                    denyButtonText: `No`,
+                    ...swalDestructiveOptions(),
+                    confirmButtonText: 'Delete poll',
+                    cancelButtonText: 'Cancel',
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 }).then((result) => {
@@ -8746,7 +8745,7 @@ class RoomClient {
             confirmButtonText: 'Save as Text',
             denyButtonText: 'Save as HTML',
             cancelButtonText: 'Discard',
-            reverseButtons: true,
+            customClass: { cancelButton: 'swal-destructive' },
             allowOutsideClick: false,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -8813,9 +8812,9 @@ class RoomClient {
             position: 'center',
             title: this.isEditorPrivate ? 'Clear your private note?' : 'Clear the editor content?',
             imageUrl: image.delete,
-            showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            ...swalDestructiveOptions(),
+            confirmButtonText: 'Clear editor',
+            cancelButtonText: 'Cancel',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -8837,10 +8836,8 @@ class RoomClient {
             title: 'Editor save options',
             showDenyButton: true,
             showCancelButton: true,
-            cancelButtonColor: 'red',
-            denyButtonColor: 'green',
-            confirmButtonText: `Text`,
-            denyButtonText: `Html`,
+            confirmButtonText: 'Save as Text',
+            denyButtonText: 'Save as HTML',
             cancelButtonText: `Cancel`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -9779,9 +9776,9 @@ class RoomClient {
                     applySelection(file);
                 });
             },
-            showDenyButton: true,
+            showCancelButton: true,
             confirmButtonText,
-            denyButtonText: 'Cancel',
+            cancelButtonText: 'Cancel',
             preConfirm: () => {
                 if (!selectedFile) {
                     Swal.showValidationMessage(t('Choose a file before continuing.'));
@@ -10049,9 +10046,9 @@ class RoomClient {
                     text: this.incomingFileInfo.fileName + ' size ' + this.bytesToSize(this.incomingFileInfo.fileSize),
                     imageUrl: e.target.result,
                     imageAlt: 'mirotalksfu-file-img-download',
-                    showDenyButton: true,
+                    showCancelButton: true,
                     confirmButtonText: `Save`,
-                    denyButtonText: `Cancel`,
+                    cancelButtonText: 'Cancel',
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 }).then((result) => {
@@ -10068,9 +10065,9 @@ class RoomClient {
                 position: 'center',
                 title: 'Received file',
                 text: this.incomingFileInfo.fileName + ' size ' + this.bytesToSize(this.incomingFileInfo.fileSize),
-                showDenyButton: true,
+                showCancelButton: true,
                 confirmButtonText: `Save`,
-                denyButtonText: `Cancel`,
+                cancelButtonText: 'Cancel',
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
@@ -10482,13 +10479,13 @@ class RoomClient {
                         Swal.fire({
                             allowOutsideClick: false,
                             allowEscapeKey: false,
-                            showDenyButton: true,
+                            showCancelButton: true,
                             background: swalBackground,
                             imageUrl: image.locked,
                             input: 'text',
                             inputPlaceholder: 'Set room password',
-                            confirmButtonText: `OK`,
-                            denyButtonText: `Cancel`,
+                            confirmButtonText: 'Lock room',
+                            cancelButtonText: 'Cancel',
                             showClass: { popup: 'animate__animated animate__fadeInDown' },
                             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                             inputValidator: (pwd) => {
@@ -12449,9 +12446,14 @@ class RoomClient {
             imageUrl: imageUrl,
             title: title,
             text: text,
-            showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            showCancelButton: true,
+            confirmButtonText:
+                type === mediaType.audio
+                    ? 'Turn on microphone'
+                    : type === mediaType.video
+                      ? 'Turn on camera'
+                      : 'Share screen',
+            cancelButtonText: 'Cancel',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then(async (result) => {
@@ -12515,9 +12517,9 @@ class RoomClient {
                     title: 'Ban current participant',
                     input: 'text',
                     inputPlaceholder: 'Ban reason',
-                    showDenyButton: true,
-                    confirmButtonText: `Yes`,
-                    denyButtonText: `No`,
+                    ...swalDestructiveOptions(),
+                    confirmButtonText: 'Ban participant',
+                    cancelButtonText: 'Cancel',
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 })
@@ -12549,9 +12551,9 @@ class RoomClient {
                     title: 'Eject ' + whoEject,
                     input: 'text',
                     inputPlaceholder: 'Eject reason',
-                    showDenyButton: true,
-                    confirmButtonText: `Yes`,
-                    denyButtonText: `No`,
+                    ...swalDestructiveOptions(),
+                    confirmButtonText: data.broadcast ? 'Eject everyone' : 'Eject participant',
+                    cancelButtonText: 'Cancel',
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 })
@@ -12633,9 +12635,16 @@ class RoomClient {
                     imageUrl: imageUrl,
                     title: title,
                     text: text,
-                    showDenyButton: true,
-                    confirmButtonText: `Yes`,
-                    denyButtonText: `No`,
+                    showCancelButton: true,
+                    confirmButtonText: {
+                        mute: 'Mute',
+                        unmute: 'Unmute',
+                        hide: 'Hide',
+                        unhide: 'Show',
+                        stop: 'Stop',
+                        start: 'Start',
+                    }[action],
+                    cancelButtonText: 'Cancel',
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 })
@@ -13412,8 +13421,8 @@ class RoomClient {
                 },
             }),
             showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            confirmButtonText: 'Share location',
+            denyButtonText: "Don't share",
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -13507,9 +13516,9 @@ class RoomClient {
                     message: `Would you like to open ${cmd.from_peer_name} geolocation?`,
                 },
             }),
-            showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            showCancelButton: true,
+            confirmButtonText: 'Open map',
+            cancelButtonText: 'Cancel',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -13793,9 +13802,9 @@ class RoomClient {
                     position: 'top',
                     title: 'Share Avatar to Room?',
                     text: 'Are you sure you want to share the avatar video and audio with all participants?',
-                    showDenyButton: true,
-                    confirmButtonText: 'Yes',
-                    denyButtonText: 'No',
+                    showCancelButton: true,
+                    confirmButtonText: 'Share avatar',
+                    cancelButtonText: 'Cancel',
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 });

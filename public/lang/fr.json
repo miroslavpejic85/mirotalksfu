@@ -184,7 +184,8 @@
         "Text background color": "Couleur d'arrière-plan du texte",
         "Text rotation": "Rotation du texte",
         "Cancel text annotation": "Annuler l'annotation de texte",
-        "Save text annotation": "Enregistrer l'annotation du texte"
+        "Save text annotation": "Enregistrer l'annotation du texte",
+        "Text": "Text"
     },
     "buttons": {
         "Add arrow": "Ajouter une flèche",
@@ -393,7 +394,9 @@
         "Copy invite link": "Copier le lien d’invitation",
         "Invite...": "Inviter...",
         "Participant actions": "Actions des participants",
-        "Duplicate text annotation": "Duplicate text annotation"
+        "Duplicate text annotation": "Duplicate text annotation",
+        "Delete text annotation": "Delete text annotation",
+        "Edit text annotation": "Edit text annotation"
     },
     "labels": {
         "Connect your Bluetooth headset or external microphone before joining. iOS controls audio routing.": "Connectez votre casque Bluetooth ou votre microphone externe avant de rejoindre la réunion. iOS gère le routage audio.",
@@ -872,7 +875,8 @@
         "More text options": "Plus d'options de texte",
         "Screen annotation tools": "Screen annotation tools",
         "Text formatting": "Mise en forme du texte",
-        "Rotation": "Rotation"
+        "Rotation": "Rotation",
+        "Choose Background...": "Choose Background..."
     },
     "dialogs": {
         "Edit frame title": "Modifier le titre du cadre",
@@ -1010,7 +1014,7 @@
         "Unmute": "Réactiver le micro",
         "Unmute Video": "Réactiver le son de la vidéo",
         "Username already in use": "Nom d'utilisateur déjà utilisé",
-        "WebRTC SFU v2.5.43": "WebRTC SFU v2.5.43",
+        "WebRTC SFU v2.5.50": "WebRTC SFU v2.5.50",
         "Whiteboard Shortcuts": "Raccourcis du tableau blanc",
         "Would you like to continue the room broadcast?": "Voulez-vous poursuivre la diffusion de la salle ?",
         "Yes": "Oui",
@@ -1018,7 +1022,31 @@
         "Your microphone is off": "Votre microphone est désactivé",
         "Your private note will be lost unless you save it to a file.": "Votre note privée sera perdue à moins de l'enregistrer dans un fichier.",
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Votre préférence enregistrée masque les participants dont la caméra est éteinte de la grille dans chaque salle. La conserver ici ?",
-        "fas fa-font": "fas fa-font"
+        "fas fa-font": "fas fa-font",
+        "Add to board": "Add to board",
+        "Ban participant": "Ban participant",
+        "Clear board": "Clear board",
+        "Clear chat": "Clear chat",
+        "Clear editor": "Clear editor",
+        "Clear transcripts": "Clear transcripts",
+        "Continue broadcast": "Continue broadcast",
+        "Delete message": "Delete message",
+        "Delete poll": "Delete poll",
+        "Don't share": "Don't share",
+        "Eject everyone": "Eject everyone",
+        "Eject participant": "Eject participant",
+        "Enable transcription": "Enable transcription",
+        "Leave session": "Leave session",
+        "Leave without rating": "Leave without rating",
+        "Not now": "Not now",
+        "Open map": "Open map",
+        "Rate experience": "Rate experience",
+        "Share avatar": "Share avatar",
+        "Share location": "Share location",
+        "Share screen": "Share screen",
+        "Stay in meeting": "Stay in meeting",
+        "Stop broadcast": "Stop broadcast",
+        "Turn on camera": "Turn on camera"
     },
     "toasts": {
         "Unable to download screen annotations": "Impossible de télécharger les annotations de l'écran",

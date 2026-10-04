@@ -10,7 +10,6 @@ function showScheduleSwal(options) {
     return Swal.fire({
         background: '#1D2026',
         color: '#FFFFFF',
-        confirmButtonColor: '#0270D7',
         customClass: { popup: 'sch-popup', confirmButton: 'sch-btn', cancelButton: 'sch-btn' },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -92,7 +91,6 @@ function openScheduleModal() {
         html: container.innerHTML,
         confirmButtonText: '<i class="fas fa-paper-plane"></i> Send Invitations',
         showCancelButton: true,
-        cancelButtonColor: '#dc3545',
         didOpen: () => {
             flatpickr('#schDateTime', {
                 enableTime: true,

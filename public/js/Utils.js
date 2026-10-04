@@ -7,7 +7,6 @@ function popup(icon, text, position = 'top') {
         icon: icon,
         text: text,
         color: '#FFFFFF',
-        confirmButtonColor: '#1A84F5',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });
