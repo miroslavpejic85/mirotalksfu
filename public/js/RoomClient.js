@@ -5272,7 +5272,7 @@ class RoomClient {
         }
     }
 
-    userLog(icon, message, position, timer = 5000) {
+    userLog(icon, message, position = 'top-end', timer = 5000) {
         const Toast = Swal.mixin({
             background: swalBackground,
             toast: true,
@@ -5284,7 +5284,6 @@ class RoomClient {
         switch (icon) {
             case 'html':
                 Toast.fire({
-                    icon: icon,
                     html: message,
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },

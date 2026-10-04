@@ -1,3 +1,9 @@
+.swal2-toast .swal2-title,
+.swal2-toast .swal2-html-container {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 .swal2-popup:not(.swal2-toast):not(.breakout-swal) .swal2-actions {
     width: calc(100% - 3rem);
     margin: 1.25rem 1.5rem 0;
