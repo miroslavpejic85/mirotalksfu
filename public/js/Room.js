@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.50
+ * @version 2.5.51
  *
  */
 
@@ -2398,12 +2398,7 @@ function handleButtons() {
     settingsButton.onclick = () => {
         rc.toggleMySettings();
     };
-    participantViewMenu.onclick = (e) => {
-        const viewButton = e.target.closest('[data-participant-view]');
-        if (!viewButton) return;
-        setParticipantViewMode(viewButton.dataset.participantView);
-        setTimeout(() => bootstrap.Dropdown.getOrCreateInstance(participantViewButton).hide());
-    };
+    setupParticipantViewDropdown();
     mySettingsCloseBtn.onclick = () => {
         rc.toggleMySettings();
     };
@@ -3332,6 +3327,27 @@ function handleCameraMirror(video) {
     }
 
     video.classList.toggle('mirror', !!sessionVideoMirror);
+}
+
+function setupParticipantViewDropdown() {
+    let isSelectingParticipantView = false;
+
+    participantViewButton.addEventListener('hide.bs.dropdown', (e) => {
+        // Layout changes can trigger pin/unpin clicks outside this dropdown.
+        if (isSelectingParticipantView) e.preventDefault();
+    });
+
+    participantViewMenu.onclick = (e) => {
+        e.stopPropagation();
+        const viewButton = e.target.closest('[data-participant-view]');
+        if (!viewButton) return;
+        isSelectingParticipantView = true;
+        try {
+            setParticipantViewMode(viewButton.dataset.participantView);
+        } finally {
+            isSelectingParticipantView = false;
+        }
+    };
 }
 
 function updateParticipantViewButtonVisibility() {
@@ -8907,7 +8923,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.50',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.51',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

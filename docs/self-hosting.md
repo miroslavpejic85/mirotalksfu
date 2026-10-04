@@ -8,6 +8,12 @@
 
 [https://docs.mirotalk.com/scripts/about/](https://docs.mirotalk.com/scripts/about/)
 
+### Participant views
+
+The participant-view dropdown stays open while selecting layouts, including changes
+that automatically pin or unpin a video. Click outside, click the toggle again, or
+press Escape to close it. Desktop hover behavior remains unchanged.
+
 ### Dialog customization
 
 SweetAlert dialogs share [button defaults and theme helpers](../public/js/Swal.js)
