@@ -212,6 +212,15 @@ describe('test-ServerAPI', () => {
 
     describe('getToken', () => {
         it('should return an encrypted JWT token', () => {
+            const jwtKey = 'test-jwt-secret';
+            const ServerApi = proxyquire('../app/src/ServerApi', {
+                './config': {
+                    api: { keySecret: apiKeySecret },
+                    security: { jwt: { key: jwtKey, exp: '1h' } },
+                    '@noCallThru': true,
+                },
+            });
+            serverApi = new ServerApi(host, authorization);
             const tokenData = { username: 'user', password: 'pass', presenter: true, expire: '1h' };
             const signStub = sinon.stub(jwt, 'sign').returns('jwtToken');
             const encryptStub = sinon.stub(CryptoJS.AES, 'encrypt').returns({ toString: () => 'encryptedPayload' });
@@ -219,14 +228,9 @@ describe('test-ServerAPI', () => {
             const result = serverApi.getToken(tokenData);
             result.should.equal('jwtToken');
 
-            signStub
-                .calledWith({ data: 'encryptedPayload' }, 'mirotalksfu_jwt_secret', { expiresIn: '1h' })
-                .should.be.true();
+            signStub.calledWith({ data: 'encryptedPayload' }, jwtKey, { expiresIn: '1h' }).should.be.true();
             encryptStub
-                .calledWith(
-                    JSON.stringify({ username: 'user', password: 'pass', presenter: 'true' }),
-                    'mirotalksfu_jwt_secret'
-                )
+                .calledWith(JSON.stringify({ username: 'user', password: 'pass', presenter: 'true' }), jwtKey)
                 .should.be.true();
 
             signStub.restore();
