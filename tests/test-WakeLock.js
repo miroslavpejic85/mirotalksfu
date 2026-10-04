@@ -7,6 +7,7 @@ const vm = require('vm');
 const sinon = require('sinon');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'public/js/WakeLock.js'), 'utf8');
+const roomSource = fs.readFileSync(path.join(__dirname, '..', 'public/js/Room.js'), 'utf8');
 
 function deferred() {
     let resolve;
@@ -97,6 +98,89 @@ describe('mobile wake-lock lifecycle', () => {
         await first;
         assert.equal(context.switchKeepAwake.checked, true);
         assert.equal(context.userLog.callCount, 0);
+    });
+
+    for (const media of ['video', 'screen']) {
+        it(`honors the manual choice while ${media} is active`, async () => {
+            context.audio = false;
+            context[media] = true;
+            context.applyKeepAwake(true);
+            await clock.tickAsync(100);
+            assert.equal(context.navigator.wakeLock.request.callCount, 1);
+            assert.equal(context.switchKeepAwake.checked, true);
+
+            context.applyKeepAwake(false);
+            await clock.tickAsync(100);
+            assert.equal(sentinel.release.callCount, 1);
+            assert.equal(context.switchKeepAwake.checked, false);
+        });
+    }
+
+    it('preserves the manual choice across room media events', async () => {
+        const events = {};
+        const start = roomSource.indexOf('    rc.on(RoomClient.EVENTS.startAudio,');
+        const end = roomSource.indexOf('    rc.on(RoomClient.EVENTS.roomLock,', start);
+        assert.ok(start !== -1 && end > start);
+        Object.assign(context, {
+            rc: { on: (name, handler) => (events[name] = handler) },
+            RoomClient: { EVENTS: new Proxy({}, { get: (_, name) => name }) },
+            BUTTONS: { main: { startAudioButton: true, startVideoButton: true } },
+            hide() {},
+            show() {},
+            setColor() {},
+            setAudioButtonsDisabled() {},
+            setVideoButtonsDisabled() {},
+            stopMicrophoneProcessing() {},
+            hideClassElements() {},
+            startAudioButton: {},
+            stopAudioButton: {},
+            startVideoButton: {},
+            stopVideoButton: {},
+            startScreenButton: {},
+            stopScreenButton: {},
+            isVideoPrivacyActive: false,
+        });
+        context.console.log = sinon.spy();
+        vm.runInContext(roomSource.slice(start, end), context);
+        context.audio = false;
+        context.applyKeepAwake(true);
+        await clock.tickAsync(100);
+
+        for (const handler of Object.values(events)) {
+            handler();
+            await clock.tickAsync(100);
+            assert.equal(context.switchKeepAwake.checked, true);
+            assert.equal(sentinel.release.callCount, 0);
+        }
+        assert.equal(context.navigator.wakeLock.request.callCount, 1);
+    });
+
+    it('does not turn media-driven wake locking into a manual choice', async () => {
+        const events = {};
+        const start = roomSource.indexOf('    rc.on(RoomClient.EVENTS.startAudio,');
+        const end = roomSource.indexOf('    rc.on(RoomClient.EVENTS.pauseAudio,', start);
+        Object.assign(context, {
+            rc: { on: (name, handler) => (events[name] = handler) },
+            RoomClient: { EVENTS: { startAudio: 'startAudio' } },
+            hide() {},
+            show() {},
+            setColor() {},
+            setAudioButtonsDisabled() {},
+            startAudioButton: {},
+            stopAudioButton: {},
+        });
+        context.console.log = sinon.spy();
+        vm.runInContext(roomSource.slice(start, end), context);
+        context.video = true;
+        events.startAudio();
+        await clock.tickAsync(100);
+        assert.equal(context.navigator.wakeLock.request.callCount, 0);
+        context.video = false;
+        await context.syncWakeLock();
+        assert.equal(context.navigator.wakeLock.request.callCount, 1);
+        context.audio = false;
+        await context.syncWakeLock();
+        assert.equal(sentinel.release.callCount, 1);
     });
 
     for (const state of ['hidden', 'video', 'screen', 'pip', 'pagehide', 'disabled']) {

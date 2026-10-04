@@ -15,7 +15,7 @@ function isWakeLockSupported() {
 }
 
 function isAudioOrUIActive() {
-    return (audio || userWantsKeepAwake) && !video && !screen;
+    return userWantsKeepAwake || (audio && !video && !screen);
 }
 
 function shouldKeepAwake() {

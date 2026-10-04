@@ -466,7 +466,7 @@ async function initClient() {
         setTippy('switchShowCameraOffParticipants', 'Show participants with the camera off in the grid', 'right');
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
         setTippy('switchKeepButtonsVisible', 'Keep buttons always visible', 'right');
-        setTippy('switchKeepAwake', 'Prevent the device from sleeping (if supported)', 'right');
+        setTippy('switchKeepAwake', 'Prevent sleep while the meeting is visible, even with the camera on', 'right');
         setTippy('switchChatPin', 'Auto pin chat when opened', 'right');
         setTippy('roomId', 'Room name', 'right');
         setTippy('copyRoomUrlBtn', 'Share room link', 'left');
@@ -4568,7 +4568,7 @@ function handleRoomClientEvents() {
         setColor(startAudioButton, 'red');
         setAudioButtonsDisabled(false);
         audio = true;
-        applyKeepAwake(audio);
+        syncWakeLockDebounced();
     });
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
         console.log('Room event: Client pause audio');
@@ -4577,7 +4577,7 @@ function handleRoomClientEvents() {
         setColor(startAudioButton, 'red');
         setAudioButtonsDisabled(false);
         audio = false;
-        applyKeepAwake(audio);
+        syncWakeLockDebounced();
     });
     rc.on(RoomClient.EVENTS.resumeAudio, () => {
         console.log('Room event: Client resume audio');
@@ -4585,7 +4585,7 @@ function handleRoomClientEvents() {
         BUTTONS.main.startAudioButton && show(stopAudioButton);
         setAudioButtonsDisabled(false);
         audio = true;
-        applyKeepAwake(audio);
+        syncWakeLockDebounced();
     });
     rc.on(RoomClient.EVENTS.stopAudio, () => {
         console.log('Room event: Client stop audio');
@@ -4594,7 +4594,7 @@ function handleRoomClientEvents() {
         setAudioButtonsDisabled(false);
         stopMicrophoneProcessing();
         audio = false;
-        applyKeepAwake(audio);
+        syncWakeLockDebounced();
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
         console.log('Room event: Client start video');
@@ -4605,7 +4605,7 @@ function handleRoomClientEvents() {
         hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
         video = true;
-        applyKeepAwake(audio);
+        syncWakeLockDebounced();
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room event: Client pause video');
@@ -4615,7 +4615,7 @@ function handleRoomClientEvents() {
         setVideoButtonsDisabled(false);
         hideClassElements('videoMenuBar');
         video = false;
-        applyKeepAwake(audio);
+        syncWakeLockDebounced();
     });
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
         console.log('Room event: Client resume video');
@@ -4625,7 +4625,7 @@ function handleRoomClientEvents() {
         isVideoPrivacyActive = false;
         hideClassElements('videoMenuBar');
         video = true;
-        applyKeepAwake(audio);
+        syncWakeLockDebounced();
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
         console.log('Room event: Client stop video');
@@ -4636,7 +4636,7 @@ function handleRoomClientEvents() {
         hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
         video = false;
-        applyKeepAwake(audio);
+        syncWakeLockDebounced();
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room event: Client start screen');
