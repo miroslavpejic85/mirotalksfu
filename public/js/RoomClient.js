@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.51
+ * @version 2.5.52
  *
  */
 
@@ -8900,8 +8900,8 @@ class RoomClient {
     // RECORDING
     // ####################################################
 
-    popupRecordingOnLeaveRoom() {
-        Swal.fire({
+    popupRecordingOnLeaveRoom(onConfirm) {
+        return Swal.fire({
             background: swalBackground,
             position: 'center',
             imageUrl: image.recording,
@@ -8912,7 +8912,7 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                survey && survey.enabled ? leaveFeedback(true) : redirectOnLeave();
+                onConfirm();
             }
         });
     }

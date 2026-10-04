@@ -93,6 +93,11 @@ depending on where it appears (e.g. "Cancel" as a dialog button vs. a tooltip):
 
 ## Notes
 
+- The survey-enabled leave dialog uses "Leave without rating" as its primary action,
+  "Leave & rate" as an optional survey action, and "Stay in meeting" to cancel.
+  Translate these strings in `dialogs`; keep the optional nature of rating explicit.
+  Recording is saved and participants are disconnected only after an exit action is
+  selected. The recording-save dialog then continues the selected exit action.
 - Keys must match the English source **exactly** (including punctuation and casing).
   Surrounding whitespace is ignored.
 - A few dynamically-built strings use a `{name}` placeholder in the key (e.g.

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.51
+ * @version 2.5.52
  *
  */
 
@@ -4758,47 +4758,50 @@ function initLeaveMeeting() {
 }
 
 async function leaveRoom(allowCancel = true, disconnectAll = false) {
+    return survey && survey.enabled ? leaveFeedback(allowCancel, disconnectAll) : completeRoomExit(disconnectAll);
+}
+
+function completeRoomExit(disconnectAll = false, rateExperience = false) {
     if (rc.isRecording() || rc.hasActiveRecorder()) {
         recShowInfo = false;
         rc.saveRecording('User is leaving the room, saving recording before exit');
-        rc.popupRecordingOnLeaveRoom();
+        rc.popupRecordingOnLeaveRoom(() => completeRoomExit(disconnectAll, rateExperience));
         return;
     }
-    // Broadcast the eject-all command up-front, BEFORE any Swal or navigation.
-    if (isPresenter && disconnectAll) {
-        rc.ejectAllOnLeave();
-        disconnectAll = false; // already handled, prevent double-eject below
+    if (rateExperience) {
+        isExiting = true;
+        endRoomSession();
+        rc.exitRoom(disconnectAll);
+        openURL(survey.url);
+    } else {
+        redirectOnLeave(disconnectAll);
     }
-    survey && survey.enabled ? leaveFeedback(allowCancel, disconnectAll) : redirectOnLeave(disconnectAll);
 }
 
 function leaveFeedback(allowCancel, disconnectAll = false) {
-    Swal.fire({
+    return Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
         showDenyButton: true,
         showCancelButton: allowCancel,
-        focusConfirm: false,
+        reverseButtons: true,
+        focusConfirm: !allowCancel,
         focusCancel: allowCancel,
-        focusDeny: !allowCancel,
         background: swalBackground,
         imageUrl: image.feedback,
-        position: 'top',
-        title: 'Leave a feedback',
-        text: 'Do you want to rate your MiroTalk experience?',
-        confirmButtonText: 'Rate experience',
-        denyButtonText: 'Leave without rating',
+        position: 'center',
+        title: 'Leave the meeting?',
+        text: 'You can optionally rate your MiroTalk experience before you go.',
+        confirmButtonText: 'Leave without rating',
+        denyButtonText: 'Leave & rate',
         cancelButtonText: 'Stay in meeting',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
-            isExiting = true;
-            endRoomSession();
-            rc.exitRoom(disconnectAll);
-            openURL(survey.url);
+            completeRoomExit(disconnectAll);
         } else if (result.isDenied) {
-            redirectOnLeave(disconnectAll);
+            completeRoomExit(disconnectAll, true);
         }
     });
 }
@@ -8923,7 +8926,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.51',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.52',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
