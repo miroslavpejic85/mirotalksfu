@@ -5825,7 +5825,8 @@ function setupQuickDeviceSwitchDropdowns() {
         testIcon.className = 'fa-solid fa-circle-play';
         testBtn.appendChild(testIcon);
         testBtn.appendChild(document.createTextNode(' Test Speaker'));
-        testBtn.addEventListener('click', () => {
+        testBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             playSpeaker(speakerSelect?.value, 'speaker');
         });
         audioMenu.appendChild(testBtn);
