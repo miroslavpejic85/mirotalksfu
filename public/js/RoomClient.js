@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.53
+ * @version 2.5.54
  *
  */
 
@@ -9483,12 +9483,15 @@ class RoomClient {
                 downloadLink.rel = 'noopener';
                 this._recordingSave.awaitingDownload = true;
                 let downloadRequested = false;
+                const leavingRoom = isLeavingRoom || this._forcedExitPending;
                 const result = await Swal.fire({
                     background: swalBackground,
-                    title: 'Recording ready',
-                    text: 'Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done.',
+                    title: 'Recording',
+                    text: leavingRoom
+                        ? 'Download your recording, finish saving it, then continue leaving.'
+                        : 'Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done.',
                     confirmButtonText: 'Download recording',
-                    denyButtonText: 'Done saving',
+                    denyButtonText: leavingRoom ? 'Continue leaving' : 'Done saving',
                     showDenyButton: true,
                     allowOutsideClick: false,
                     allowEscapeKey: false,
@@ -9498,7 +9501,7 @@ class RoomClient {
                             downloadRequested = true;
                         } catch (error) {
                             console.error('Recording download failed:', error);
-                            Swal.showValidationMessage('Download failed. Please try again.');
+                            Swal.showValidationMessage('Recording download failed. Please try again.');
                         }
                         return false;
                     },

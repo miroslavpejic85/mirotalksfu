@@ -520,6 +520,10 @@ describe('recording finalization before room exit', () => {
         assert.equal(h.events.includes('revoke'), false);
         assert.equal(dialog.allowOutsideClick, false);
         assert.equal(dialog.allowEscapeKey, false);
+        assert.equal(dialog.title, 'Recording');
+        assert.equal(dialog.confirmButtonText, 'Download recording');
+        assert.equal(dialog.denyButtonText, 'Continue leaving');
+        assert.equal(dialog.text, 'Download your recording, finish saving it, then continue leaving.');
         const validationMessages = [];
         h.context.Swal.showValidationMessage = (message) => validationMessages.push(message);
         assert.equal(dialog.preDeny(), false);
@@ -544,11 +548,16 @@ describe('recording finalization before room exit', () => {
         const confirmation = deferred();
         h.client.isMobileDevice = true;
         h.client.getId = () => ({ className: '' });
-        h.context.Swal.fire = () => confirmation.promise;
+        let dialog;
+        h.context.Swal.fire = (options) => {
+            dialog = options;
+            return confirmation.promise;
+        };
         h.data(new Blob(['data'], { type: 'video/mp4' }));
         h.client.stopRecording();
         h.stopEvent();
         await tick();
+        assert.equal(dialog.denyButtonText, 'Done saving');
         const exit = h.context.completeRoomExit();
         assert.equal(h.events.includes('progress'), false);
         assert.equal(h.events.includes('exit-room'), false);
@@ -679,7 +688,8 @@ describe('recording finalization before room exit', () => {
         h.data(new Blob(['final-data'], { type: 'video/mp4' }));
         h.stopEvent();
         await tick();
-        assert.equal(dialogs.current.options.title, 'Recording ready');
+        assert.equal(dialogs.current.options.title, 'Recording');
+        assert.equal(dialogs.current.options.denyButtonText, 'Continue leaving');
         assert.equal(h.context.isLeavingRoom, true);
         assert.equal(h.client._forcedExitPending, true);
         assert.equal(dialogs.dialogs.length, 2);
@@ -730,7 +740,8 @@ describe('recording finalization before room exit', () => {
         await tick();
         const exit = h.client.peerAction('Presenter', 'participant', 'eject', false);
         assert.equal(dialogs.dialogs.length, 1);
-        assert.equal(dialogs.current.options.title, 'Recording ready');
+        assert.equal(dialogs.current.options.title, 'Recording');
+        assert.equal(dialogs.current.options.denyButtonText, 'Done saving');
         dialogs.current.options.preConfirm();
         dialogs.finish({ isDenied: true });
         await exit;

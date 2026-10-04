@@ -1,136 +1,54 @@
-# In-room UI translations (native / human)
+# In-room UI translations
 
-Optional, hand-editable translation files for the **in-room video conference UI**.
+Translation files in this folder apply to the in-room UI, not the landing page or user-generated content.
 
-When a file `public/lang/<lang>.json` exists for the configured UI language and native
-translation is enabled, MiroTalk SFU uses it to translate the in-room UI **and disables the
-Google Translate widget** for that page. When no such file exists (or the mode forces
-Google), the runtime machine translation (Google, 133+ languages) is used exactly as before.
-This is fully opt-in and non-breaking.
+## Configuration
 
-The configured language comes from `config.ui.brand.app.language` (env `UI_LANGUAGE`,
-default `en`). See [app/src/config.template.js](../../app/src/config.template.js).
+Set these environment variables, or the corresponding `config.ui.brand.app` fields in
+[config.template.js](../../app/src/config.template.js):
 
-## Translation mode (`UI_TRANSLATION_MODE`)
+```env
+UI_TRANSLATION_MODE=native
+UI_LANGUAGE=en
+```
 
-`config.ui.brand.app.translationMode` (env `UI_TRANSLATION_MODE`) controls the strategy.
-**The default is `google`**, if the value is unset, empty, or invalid, MiroTalk behaves
-exactly as before native translation existed (backward compatible). Native translation is
-opt-in via `auto` or `native`.
+| Mode               | Behavior                                                        |
+| ------------------ | --------------------------------------------------------------- |
+| `google` (default) | Use Google Translate; ignore native JSON files                   |
+| `auto`             | Use the native language file if available, otherwise Google      |
+| `native`           | Use native files only; missing translations remain English       |
 
-| Mode               | Behavior                                                            | In-room language switcher                      |
-| ------------------ | ------------------------------------------------------------------- | ---------------------------------------------- |
-| `google` (default) | Always use Google machine translation; native files are ignored     | Google Translate combo                         |
-| `auto`             | Use the native file if it exists for the language, otherwise Google | Native picker (native/English) or Google combo |
-| `native`           | Human files only — never load Google (missing strings stay English) | Native picker                                  |
+The config fields are `translationMode` and `language`. In native mode, switch languages
+from Settings > Language. Browser language preferences override `UI_LANGUAGE`; reset to
+the server default when testing configuration changes.
 
-Notes on behavior:
+## Add or update a language
 
-- In `auto`/`native`, an in-room **Language** picker (Settings → Language) lists English
-  plus every language that has a native file, and switches **live without a page reload**.
-- In `google`, the switcher is the Google Translate combo (English needs no translation, so
-  the native picker is not shown).
-- The chosen language is remembered per browser (`localStorage`): `uiLanguageOverride` for
-  the native picker, `googleTransLang` for the Google combo. It overrides `UI_LANGUAGE` on
-  the next load until reset back to the server default.
+1. Copy [en.json](./en.json) to `<language-code>.json` (for example, `hu.json`) if the file does not exist.
+2. Translate the **values** only. Keep English keys, punctuation, casing, and placeholders such as `{name}` unchanged.
+3. For a new language, add its code, flag, and native name to `LANG_DISPLAY` in [I18n.js](../js/I18n.js).
+4. Set `UI_TRANSLATION_MODE=native` or `auto`, select the language, and open a room to verify it.
 
-## How to add a language
+Missing or empty values fall back to English, so partial translations are supported.
 
-Use `public/lang/en.json` as the starting point for every translation. It contains the
-current in-room UI strings, grouped by namespace, with each English source string used as
-both the key and the initial value.
+| Namespace  | UI content                                 |
+| ---------- | ------------------------------------------ |
+| `tooltips` | Hover hints                                |
+| `buttons`  | Button text and attributes                  |
+| `labels`   | Static text, headings, and label attributes |
+| `dialogs`  | Popup titles, text, buttons, and inputs     |
+| `toasts`   | Notifications                              |
 
-1. Copy `en.json` to a new file named after the language code used in `UI_LANGUAGE`, e.g.
-   Hungarian:
+To exclude an HTML element from translation, use `class="notranslate"`, `translate="no"`,
+or `data-i18n-skip`.
 
-    ```bash
-    cp public/lang/en.json public/lang/hu.json
-    ```
+## Synchronize translation keys
 
-2. Open `hu.json` and translate each **value**. Leave every **key** (the English source
-   string) unchanged.
-
-    ```json
-    {
-        "tooltips": {
-            "Mute": "Némítás"
-        },
-        "dialogs": {
-            "Cancel": "Mégse"
-        }
-    }
-    ```
-
-3. Add the language code and native display name to `LANG_DISPLAY` in
-   [public/js/I18n.js](../js/I18n.js), following the existing entries. The native
-   picker uses this list, not automatic discovery of JSON files.
-
-4. Enable native translation and select the language, then open a room:
-
-    ```bash
-    UI_TRANSLATION_MODE=auto   # or "native"
-    UI_LANGUAGE=hu             # or config.ui.brand.app.language = 'hu'
-    ```
-
-    With the default `google` mode the native file is ignored, so `auto` or `native` is
-    required to activate it.
-
-Missing or empty values fall back to the original English text, you can translate
-incrementally and ship a partial file.
-
-## Namespaces
-
-Keys are grouped by UI context so the same English word can be translated differently
-depending on where it appears (e.g. "Cancel" as a dialog button vs. a tooltip):
-
-| Namespace  | Covers                                                                |
-| ---------- | --------------------------------------------------------------------- |
-| `tooltips` | Tippy tooltips (hover hints on controls)                              |
-| `buttons`  | Text and `title`/`placeholder`/`aria-label` on `<button>` elements    |
-| `labels`   | All other static UI text, headings, placeholders and label attributes |
-| `dialogs`  | SweetAlert popups: titles, buttons, input placeholders, body text     |
-| `toasts`   | Snackbar / toast notifications                                        |
-
-## Notes
-
-- The survey-enabled leave dialog uses "Leave without rating" as its primary action,
-  "Leave & rate" as an optional survey action, and "Stay in meeting" to cancel.
-  Translate these strings in `dialogs`; keep the optional nature of rating explicit.
-  Recording is saved and participants are disconnected only after an exit action is
-  selected. The recording-save dialog waits for local download preparation or server
-  uploads and finalization, then continues the selected exit action. If saving fails,
-  the user can stay or explicitly choose "Leave without saving".
-  On mobile, "Download recording" opens the device's download/save flow. The dialog
-  and download link remain available until the user selects "Done saving"; only
-  then does the selected exit action continue. Browsers do not report when a file
-  has actually finished saving, so this confirmation is manual.
-  Browser tab close/refresh cannot reliably wait for asynchronous recording saves;
-  use the in-app leave controls to finish saving before navigating away.
-  Presenter ejection/ban stops recording and disconnects media immediately. The
-  ejection notice then continues through the same recording-save flow before
-  navigation, without the optional survey dialog.
-- Keys must match the English source **exactly** (including punctuation and casing).
-  Surrounding whitespace is ignored.
-- A few dynamically-built strings use a `{name}` placeholder in the key (e.g.
-  `"Start with {name}"`); keep the `{name}` token unchanged in your translation. Other
-  strings with inline dynamic values (counts, arbitrary names) are not translated and remain
-  in English.
-- Review right-to-left text and mixed-script strings when translating Arabic, Urdu,
-  or Persian. A dictionary translates text; it does not mirror the room layout.
-- To exclude an element from translation, add `class="notranslate"`, `translate="no"`, or
-  `data-i18n-skip` in the HTML.
-- Out of scope: the marketing/landing site, documentation, and user-generated content
-  (chat messages, transcriptions).
-
-## Regenerating the English template
-
-`en.json` is generated from the in-room source strings, and every other language file is
-synchronized to the same namespace and key structure:
+Run from the repository root after changing UI strings:
 
 ```bash
 node app/src/scripts/extract-ui-lang.js
 ```
 
-The script preserves existing translated values. Missing keys are added to each language
-with the English source text as a fallback, ready for human translation, and stale keys are
-removed. Review the generated changes before committing them.
+This regenerates `en.json` and synchronizes the other language files, preserving existing
+translations, adding missing keys with English values, and removing stale keys. Review the diff.

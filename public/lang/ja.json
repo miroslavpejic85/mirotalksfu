@@ -1015,7 +1015,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.5.53": "WebRTC SFU v2.5.53",
+        "WebRTC SFU v2.5.54": "WebRTC SFU v2.5.54",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",
@@ -1057,7 +1057,10 @@
         "Download recording": "Download recording",
         "Please download the recording before continuing.": "Please download the recording before continuing.",
         "Recording ready": "Recording ready",
-        "Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done.": "Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done."
+        "Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done.": "Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done.",
+        "Continue leaving": "Continue leaving",
+        "Download your recording, finish saving it, then continue leaving.": "Download your recording, finish saving it, then continue leaving.",
+        "Recording download failed. Please try again.": "Recording download failed. Please try again."
     },
     "toasts": {
         "Unable to download screen annotations": "画面の注釈をダウンロードできません",
