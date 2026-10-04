@@ -51,7 +51,8 @@ node app/src/scripts/extract-ui-lang.js
 ```
 
 This regenerates `en.json` and synchronizes the other language files, preserving existing
-translations, adding missing keys with English values, and removing stale keys. Review the diff.
+translations, keeping keys in the same order as `en.json`, adding missing keys with English values,
+and removing stale keys. Review the diff.
 
 Dynamic video and participant dropdown captions (including conditional presenter actions)
 are extracted into `buttons`. Translate newly added English values in each locale before shipping;
