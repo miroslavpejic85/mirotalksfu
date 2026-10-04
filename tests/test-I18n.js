@@ -47,13 +47,18 @@ describe('native translation catalogs', () => {
                 buttons: ['Delete text annotation', 'Edit text annotation', 'Duplicate text annotation'],
                 labels: ['Choose Background...'],
                 dialogs: [
+                    'Recording started',
+                    'Recording stopped',
                     'Download recording',
                     'Download your recording, finish saving it, then continue leaving.',
                     'Recording save failed',
                     'Your recording could not be saved. Stay in the meeting or leave without saving?',
                     'Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done.',
                 ],
-                toasts: ['Please wait while your recording is saved.'],
+                toasts: [
+                    'Please wait while your recording is saved.',
+                    'The whiteboard is unlocked. The participants can interact with it.',
+                ],
             })) {
                 for (const key of keys) {
                     assert.notEqual(locale[namespace][key], key, `${file}: ${namespace}.${key}`);
