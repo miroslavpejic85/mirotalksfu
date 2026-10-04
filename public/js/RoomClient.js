@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.54
+ * @version 2.5.55
  *
  */
 
@@ -6053,7 +6053,9 @@ class RoomClient {
         item.className = 'navbar-dropdown-item';
         item.appendChild(btnEl);
         const span = document.createElement('span');
-        span.textContent = label;
+        const caption = document.createTextNode(window.i18n?.t(label, 'buttons') || label);
+        caption.__i18nSrc = label;
+        span.appendChild(caption);
         item.appendChild(span);
         if (color) {
             btnEl.style.setProperty('color', color, 'important');
@@ -6088,7 +6090,9 @@ class RoomClient {
         const icon = document.createElement('i');
         icon.className = `fas ${iconClass}`;
         const span = document.createElement('span');
-        span.textContent = label;
+        const caption = document.createTextNode(window.i18n?.t(label, 'buttons') || label);
+        caption.__i18nSrc = label;
+        span.appendChild(caption);
         const proxyRange = sourceRange.cloneNode(false);
         proxyRange.removeAttribute('id');
         proxyRange.removeAttribute('style');
@@ -6108,16 +6112,7 @@ class RoomClient {
     handleDropdownEvents(dropdownDiv, dropdownBtn, dropdownContent) {
         let closeTimer = null;
 
-        const showDropdown = () => {
-            if (closeTimer) {
-                clearTimeout(closeTimer);
-                closeTimer = null;
-            }
-            document.querySelectorAll('.navbar-dropdown-content.show').forEach((el) => {
-                if (el !== dropdownContent) el.classList.remove('show');
-            });
-            dropdownContent.classList.add('show');
-
+        const positionDropdown = () => {
             const gap = 2;
             const viewportMargin = 8;
             const buttonRect = dropdownBtn.getBoundingClientRect();
@@ -6135,6 +6130,19 @@ class RoomClient {
             dropdownContent.style.top = top + 'px';
             dropdownContent.style.right = 'auto';
             dropdownContent.style.left = Math.max(viewportMargin, left) + 'px';
+        };
+        dropdownContent._positionDropdown = positionDropdown;
+
+        const showDropdown = () => {
+            if (closeTimer) {
+                clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+            document.querySelectorAll('.navbar-dropdown-content.show').forEach((el) => {
+                if (el !== dropdownContent) el.classList.remove('show');
+            });
+            dropdownContent.classList.add('show');
+            positionDropdown();
         };
 
         const scheduleClose = () => {

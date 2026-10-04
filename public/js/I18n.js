@@ -376,6 +376,9 @@
 
         translateTree(document.body);
         refreshTooltips();
+        for (const menu of document.querySelectorAll('.navbar-dropdown-content.show')) {
+            if (typeof menu._positionDropdown === 'function') menu._positionDropdown();
+        }
     }
 
     const OVERRIDE_KEY = 'uiLanguageOverride';

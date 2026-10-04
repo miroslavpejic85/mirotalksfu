@@ -211,6 +211,13 @@ function scanJs(file) {
         /_?setTranslatedAttribute\(\s*[^,]+,\s*(['"])[^'"]+\1,\s*(['"])((?:\\.|(?!\2).)*)\2,\s*(['"])(tooltips|buttons|labels|dialogs|toasts)\4\s*\)/g;
     while ((m = translatedAttributeRe.exec(src))) add(m[5], unescapeJs(m[3]));
 
+    const dropdownRe =
+        /\bcreate(?:Responsive)?Dropdown(?:Range)?Item\(\s*[^,]+,\s*(?:[^,?()]+\?\s*)?(['"])((?:\\.|(?!\1).)*)\1(?:\s*:\s*(['"])((?:\\.|(?!\3).)*)\3)?/g;
+    while ((m = dropdownRe.exec(src))) {
+        add('buttons', unescapeJs(m[2]));
+        if (m[4]) add('buttons', unescapeJs(m[4]));
+    }
+
     // Declarative tooltip keys used by dynamically-built control lists.
     const tooltipListRe = /\bconst\s+\w*[Tt]ooltipLabels\s*=\s*\[([\s\S]*?)\];/g;
     let tooltipList;

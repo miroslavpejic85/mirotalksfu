@@ -12,11 +12,11 @@ UI_TRANSLATION_MODE=native
 UI_LANGUAGE=en
 ```
 
-| Mode               | Behavior                                                        |
-| ------------------ | --------------------------------------------------------------- |
-| `google` (default) | Use Google Translate; ignore native JSON files                   |
-| `auto`             | Use the native language file if available, otherwise Google      |
-| `native`           | Use native files only; missing translations remain English       |
+| Mode               | Behavior                                                    |
+| ------------------ | ----------------------------------------------------------- |
+| `google` (default) | Use Google Translate; ignore native JSON files              |
+| `auto`             | Use the native language file if available, otherwise Google |
+| `native`           | Use native files only; missing translations remain English  |
 
 The config fields are `translationMode` and `language`. In native mode, switch languages
 from Settings > Language. Browser language preferences override `UI_LANGUAGE`; reset to
@@ -31,13 +31,13 @@ the server default when testing configuration changes.
 
 Missing or empty values fall back to English, so partial translations are supported.
 
-| Namespace  | UI content                                 |
-| ---------- | ------------------------------------------ |
-| `tooltips` | Hover hints                                |
-| `buttons`  | Button text and attributes                  |
-| `labels`   | Static text, headings, and label attributes |
-| `dialogs`  | Popup titles, text, buttons, and inputs     |
-| `toasts`   | Notifications                              |
+| Namespace  | UI content                                         |
+| ---------- | -------------------------------------------------- |
+| `tooltips` | Hover hints                                        |
+| `buttons`  | Button text, attributes, and dynamic menu captions |
+| `labels`   | Static text, headings, and label attributes        |
+| `dialogs`  | Popup titles, text, buttons, and inputs            |
+| `toasts`   | Notifications                                      |
 
 To exclude an HTML element from translation, use `class="notranslate"`, `translate="no"`,
 or `data-i18n-skip`.
@@ -52,3 +52,9 @@ node app/src/scripts/extract-ui-lang.js
 
 This regenerates `en.json` and synchronizes the other language files, preserving existing
 translations, adding missing keys with English values, and removing stale keys. Review the diff.
+
+Dynamic video and participant dropdown captions (including conditional presenter actions)
+are extracted into `buttons`. Translate newly added English values in each locale before shipping;
+matching values can also be intentional for brands, technical identifiers, or shared vocabulary.
+Dropdowns size to translated captions, wrap at the viewport boundary, and reposition when
+switching languages while open.

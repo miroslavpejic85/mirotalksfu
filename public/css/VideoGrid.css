@@ -356,7 +356,10 @@
     display: none !important;
     position: fixed;
     z-index: 9999;
-    min-width: 180px;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: min(180px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
     background: var(--body-bg);
     border-radius: 10px;
     border: var(--border);
@@ -378,7 +381,6 @@
     color: #fff;
     font-size: 0.85rem;
     cursor: pointer;
-    white-space: nowrap;
     transition: background 0.15s ease;
 }
 
@@ -412,11 +414,15 @@
 
 .navbar-dropdown-item span {
     flex: 1;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .navbar-dropdown-control input[type='range'] {
     width: 88px;
     max-width: 40vw;
+    min-width: 0;
     accent-color: var(--hover-color);
     cursor: pointer;
 }
