@@ -876,7 +876,8 @@
         "Screen annotation tools": "Screen annotation tools",
         "Text formatting": "Szövegformázás",
         "Rotation": "Rotation",
-        "Choose Background...": "Choose Background..."
+        "Choose Background...": "Choose Background...",
+        "Please wait while your recording is saved. Local recordings are prepared for download; server recordings finish uploading and finalizing before you leave.": "Please wait while your recording is saved. Local recordings are prepared for download; server recordings finish uploading and finalizing before you leave."
     },
     "dialogs": {
         "Edit frame title": "Keret címének szerkesztése",
@@ -1014,7 +1015,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.5.52": "WebRTC SFU v2.5.52",
+        "WebRTC SFU v2.5.53": "WebRTC SFU v2.5.53",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",
@@ -1046,7 +1047,17 @@
         "Share screen": "Share screen",
         "Stay in meeting": "Maradás a megbeszélésen",
         "Stop broadcast": "Stop broadcast",
-        "Turn on camera": "Turn on camera"
+        "Turn on camera": "Turn on camera",
+        "Leave without saving": "Leave without saving",
+        "Recording save failed": "Recording save failed",
+        "Saving recording": "Saving recording",
+        "Your recording could not be saved. Stay in the meeting or leave without saving?": "Your recording could not be saved. Stay in the meeting or leave without saving?",
+        "Done saving": "Done saving",
+        "Download failed. Please try again.": "Download failed. Please try again.",
+        "Download recording": "Download recording",
+        "Please download the recording before continuing.": "Please download the recording before continuing.",
+        "Recording ready": "Recording ready",
+        "Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done.": "Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done."
     },
     "toasts": {
         "Unable to download screen annotations": "Nem sikerült letölteni a képernyő-annotációkat",
@@ -1192,6 +1203,7 @@
         "Whisper transcription started": "Whisper-átírás elindítva",
         "Whisper transcription stopped": "Whisper-átírás leállítva",
         "You cannot change your own role": "A saját szerepkörödet nem módosíthatod",
-        "You cannot send files to yourself.": "Nem küldhetsz fájlokat saját magadnak."
+        "You cannot send files to yourself.": "Nem küldhetsz fájlokat saját magadnak.",
+        "Please wait while your recording is saved.": "Please wait while your recording is saved."
     }
 }

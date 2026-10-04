@@ -97,7 +97,18 @@ depending on where it appears (e.g. "Cancel" as a dialog button vs. a tooltip):
   "Leave & rate" as an optional survey action, and "Stay in meeting" to cancel.
   Translate these strings in `dialogs`; keep the optional nature of rating explicit.
   Recording is saved and participants are disconnected only after an exit action is
-  selected. The recording-save dialog then continues the selected exit action.
+  selected. The recording-save dialog waits for local download preparation or server
+  uploads and finalization, then continues the selected exit action. If saving fails,
+  the user can stay or explicitly choose "Leave without saving".
+  On mobile, "Download recording" opens the device's download/save flow. The dialog
+  and download link remain available until the user selects "Done saving"; only
+  then does the selected exit action continue. Browsers do not report when a file
+  has actually finished saving, so this confirmation is manual.
+  Browser tab close/refresh cannot reliably wait for asynchronous recording saves;
+  use the in-app leave controls to finish saving before navigating away.
+  Presenter ejection/ban stops recording and disconnects media immediately. The
+  ejection notice then continues through the same recording-save flow before
+  navigation, without the optional survey dialog.
 - Keys must match the English source **exactly** (including punctuation and casing).
   Surrounding whitespace is ignored.
 - A few dynamically-built strings use a `{name}` placeholder in the key (e.g.

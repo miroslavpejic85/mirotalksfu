@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.52
+ * @version 2.5.53
  *
  */
 
@@ -442,6 +442,8 @@ class RoomClient {
         this._isRecording = false;
         this._recStartTs = null;
         this.mediaRecorder = null;
+        this._recordingSave = null;
+        this._forcedExitPending = false;
         this.audioRecorder = null;
         this.screenAudioRecorder = null; // mixes participant audio with system/tab audio
         this.recScreenStream = null;
@@ -1786,9 +1788,12 @@ class RoomClient {
         });
         if (this.peer_info.peer_token) queryParams.set('token', this.peer_info.peer_token);
 
-        if (typeof preventExit !== 'undefined') preventExit = false;
-        this.exit(true);
-        openURL(`${baseUrl}?${queryParams.toString()}`);
+        return runRoomExit(() => {
+            isExiting = true;
+            endRoomSession();
+            this.exit(true);
+            openURL(`${baseUrl}?${queryParams.toString()}`);
+        });
     }
 
     // ####################################################
@@ -2075,13 +2080,16 @@ class RoomClient {
     }
 
     refreshBrowser() {
-        endRoomSession();
         this.updatePeerInfoInLocalStorage();
         const reconnectDirectJoinURL = this.getReconnectDirectJoinURL();
         setTimeout(() => {
-            this.exit(true);
-            openURL(reconnectDirectJoinURL);
-            this.removePeerInfoFromLocalStorage();
+            runRoomExit(() => {
+                isExiting = true;
+                endRoomSession();
+                this.exit(true);
+                openURL(reconnectDirectJoinURL);
+                this.removePeerInfoFromLocalStorage();
+            });
         }, 100);
     }
 
@@ -4768,6 +4776,7 @@ class RoomClient {
     // ####################################################
 
     exit(offline = false) {
+        this.saveRecording('Client exiting the room');
         this.microphoneRequest++;
         this.disableRNNoiseSuppression();
         if (VideoAI.active) this.stopSession();
@@ -5199,6 +5208,14 @@ class RoomClient {
 
     hasActiveRecorder() {
         return this.mediaRecorder !== null;
+    }
+
+    hasPendingRecordingSave() {
+        return !!this._recordingSave?.pending;
+    }
+
+    isAwaitingRecordingDownload() {
+        return !!this._recordingSave?.awaitingDownload;
     }
 
     static get mediaType() {
@@ -8900,20 +8917,19 @@ class RoomClient {
     // RECORDING
     // ####################################################
 
-    popupRecordingOnLeaveRoom(onConfirm) {
+    popupRecordingOnLeaveRoom() {
         return Swal.fire({
             background: swalBackground,
             position: 'center',
             imageUrl: image.recording,
-            title: 'Recording is ON',
+            title: 'Saving recording',
             html: renderRoomTemplate('popupRecordingOnLeaveRoomTemplate'),
-            confirmButtonText: 'OK',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => Swal.showLoading(),
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                onConfirm();
-            }
         });
     }
 
@@ -8956,6 +8972,16 @@ class RoomClient {
     }
 
     startRecording() {
+        if (
+            this._recordingSave?.pending ||
+            this._forcedExitPending ||
+            this.hasActiveRecorder() ||
+            (typeof isLeavingRoom !== 'undefined' && isLeavingRoom) ||
+            (typeof isExiting !== 'undefined' && isExiting)
+        ) {
+            this.userLog('warning', 'Please wait while your recording is saved.', 'top-end', 6000);
+            return;
+        }
         recordedBlobs = [];
 
         // Toggle Video/Audio tabs
@@ -9132,17 +9158,38 @@ class RoomClient {
 
     handleMediaRecorder() {
         if (this.mediaRecorder) {
+            const session = {
+                pending: true,
+                uploadQueue: Promise.resolve(),
+                uploadError: null,
+            };
+            session.promise = new Promise((resolve, reject) => {
+                session.resolve = resolve;
+                session.reject = reject;
+            });
+            session.promise.catch((error) => {
+                this.handleRecordingError('Recording save failed: ' + error.message);
+            });
+            this._recordingSave = session;
             this.recServerFileName = this.getServerRecFileName();
             this.mediaRecorder.addEventListener('start', this.handleMediaRecorderStart);
-            this.mediaRecorder.addEventListener('dataavailable', this.handleMediaRecorderData);
-            this.mediaRecorder.addEventListener('stop', this.handleMediaRecorderStop);
+            this.mediaRecorder.addEventListener('dataavailable', (evt) => this.handleMediaRecorderData(evt, session));
+            this.mediaRecorder.addEventListener('stop', (evt) => this.handleMediaRecorderStop(evt, session));
             // Always pass a timeslice so the browser flushes encoded chunks periodically
             // instead of buffering the entire recording in renderer memory.
             // - Server sync: 4 s chunks → fewer HTTP POSTs to /recSync.
             // - Local blob: 1 s chunks → faster internal flush, lighter recorder buffer.
-            rc.recording.recSyncServerRecording
-                ? this.mediaRecorder.start(this.recSyncTime)
-                : this.mediaRecorder.start(1000);
+            try {
+                this.recording.recSyncServerRecording
+                    ? this.mediaRecorder.start(this.recSyncTime)
+                    : this.mediaRecorder.start(1000);
+            } catch (error) {
+                session.pending = false;
+                session.reject(error);
+                this.mediaRecorder = null;
+                this._isRecording = false;
+                throw error;
+            }
         }
     }
 
@@ -9168,27 +9215,40 @@ class RoomClient {
         rc._recStartTs = performance.now();
     }
 
-    handleMediaRecorderData(evt) {
+    handleMediaRecorderData(evt, session = this._recordingSave) {
         // console.log('MediaRecorder data: ', evt);
         if (evt.data && evt.data.size > 0) {
-            rc.recording.recSyncServerRecording ? rc.syncRecordingInCloud(evt.data) : recordedBlobs.push(evt.data);
+            if (this.recording.recSyncServerRecording) {
+                // Serialize complete blobs as well as their chunks to preserve the encoded byte order.
+                session.uploadQueue = session.uploadQueue
+                    .then(() => {
+                        if (!session.uploadError) return this.syncRecordingInCloud(evt.data);
+                    })
+                    .catch((error) => {
+                        session.uploadError = error;
+                        console.error('Recording upload failed:', error);
+                        this.stopRecording();
+                    });
+            } else {
+                recordedBlobs.push(evt.data);
+            }
         }
     }
 
     async syncRecordingInCloud(data) {
         const arrayBuffer = await data.arrayBuffer();
-        const chunkSize = rc.recSyncChunkSize;
+        const chunkSize = this.recSyncChunkSize;
         const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
         for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
             const chunk = arrayBuffer.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
             try {
                 const response = await axios.post(
-                    `${this.recording.recSyncServerEndpoint}/recSync?fileName=` + rc.recServerFileName,
+                    `${this.recording.recSyncServerEndpoint}/recSync?fileName=` + this.recServerFileName,
                     chunk,
                     {
                         headers: {
                             'Content-Type': 'application/octet-stream',
-                            Authorization: `Bearer ${rc.recUploadToken}`,
+                            Authorization: `Bearer ${this.recUploadToken}`,
                         },
                     }
                 );
@@ -9209,55 +9269,50 @@ class RoomClient {
                     console.error('Error syncing chunk:', error.message);
                 }
                 userLog('warning', errorMessage, 'top-end', 3000);
-                rc.stopRecording();
-                rc.saveLastRecordingInfo('<br/><span class="red">' + errorMessage + '.</span>');
+                this.saveLastRecordingInfo('<br/><span class="red">' + errorMessage + '.</span>');
+                throw error;
             }
         }
     }
 
-    async handleMediaRecorderStop(evt) {
+    async handleMediaRecorderStop(evt, session = this._recordingSave) {
         try {
             console.log('MediaRecorder stopped: ', evt);
-            rc.recording.recSyncServerRecording ? rc.handleServerRecordingStop() : rc.handleLocalRecordingStop();
-            rc.disableRecordingOptions(false);
+            this.stopRecording();
+            await session.uploadQueue;
+            if (session.uploadError) throw session.uploadError;
 
             // If cloud sync is enabled, patch duration on the server
-            if (rc.recording.recSyncServerRecording) {
-                const durationMs = rc._recStartTs ? Math.round(performance.now() - rc._recStartTs) : undefined;
+            if (this.recording.recSyncServerRecording) {
+                const durationMs = this._lastRecDurationMs;
 
                 // Option S3: pass duration to your existing finalize endpoint (preferred if it uploads to S3)
-                if (rc.recording.recSyncServerToS3) {
-                    try {
-                        await axios.post(`${rc.recording.recSyncServerEndpoint}/recSyncFinalize`, null, {
-                            params: { fileName: rc.recServerFileName, durationMs },
-                            headers: { Authorization: `Bearer ${rc.recUploadToken}` },
-                        });
-                        console.log('Finalized (with duration fix) and uploaded to S3');
-                        if (recShowInfo) userLog('success', 'Recording successfully uploaded to S3.', 'top-end', 3000);
-                    } catch (error) {
-                        let errorMessage = 'Finalization failed! ';
-                        if (error.response) errorMessage += error.response.data?.message || 'Server error';
-                        else if (error.request) errorMessage += 'No response from server';
-                        else errorMessage += error.message;
-                        if (recShowInfo) userLog('warning', errorMessage, 'top-end', 3000);
-                    }
+                if (this.recording.recSyncServerToS3) {
+                    await axios.post(`${this.recording.recSyncServerEndpoint}/recSyncFinalize`, null, {
+                        params: { fileName: this.recServerFileName, durationMs },
+                        headers: { Authorization: `Bearer ${this.recUploadToken}` },
+                    });
+                    console.log('Finalized (with duration fix) and uploaded to S3');
+                    if (recShowInfo) userLog('success', 'Recording successfully uploaded to S3.', 'top-end', 3000);
                 } else {
                     // Option Disk: if you don’t use S3 finalize, call a dedicated “fix” endpoint
-                    try {
-                        await axios.post(`${rc.recording.recSyncServerEndpoint}/recSyncFixWebm`, null, {
-                            params: { fileName: rc.recServerFileName, durationMs },
-                            headers: { Authorization: `Bearer ${rc.recUploadToken}` },
-                        });
-                        console.log('Server-side WEBM duration fixed for', rc.recServerFileName);
-                    } catch (error) {
-                        console.warn('WEBM duration server-side fix failed:', error?.message || error);
-                    }
+                    await axios.post(`${this.recording.recSyncServerEndpoint}/recSyncFixWebm`, null, {
+                        params: { fileName: this.recServerFileName, durationMs },
+                        headers: { Authorization: `Bearer ${this.recUploadToken}` },
+                    });
+                    console.log('Server-side WEBM duration fixed for', this.recServerFileName);
                 }
-
-                rc._recStartTs = null;
+                this.handleServerRecordingStop();
+            } else {
+                await this.handleLocalRecordingStop();
             }
+            session.resolve();
         } catch (err) {
-            console.error('Recording save failed', err);
+            session.reject(err);
+        } finally {
+            this._recStartTs = null;
+            session.pending = false;
+            this.disableRecordingOptions(false);
         }
     }
 
@@ -9306,8 +9361,9 @@ class RoomClient {
         return typeof fn === 'function' ? fn : null;
     }
 
-    handleLocalRecordingStop() {
+    async handleLocalRecordingStop() {
         console.log('MediaRecorder Blobs: ', recordedBlobs);
+        if (!recordedBlobs.length) throw new Error('No data was recorded');
 
         const dateTime = getDataTimeString();
         const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
@@ -9349,10 +9405,8 @@ class RoomClient {
             }
         };
 
-        (async () => {
-            const finalBlob = await fixWebmDuration(rawBlob);
-            this.saveRecordingInLocalDevice(finalBlob, recFileName);
-        })();
+        const finalBlob = await fixWebmDuration(rawBlob);
+        await this.saveRecordingInLocalDevice(finalBlob, recFileName);
     }
 
     handleServerRecordingStop() {
@@ -9413,7 +9467,7 @@ class RoomClient {
         }
     }
 
-    saveRecordingInLocalDevice(blob, recFileName) {
+    async saveRecordingInLocalDevice(blob, recFileName) {
         console.log('MediaRecorder Download Blobs');
         const url = window.URL.createObjectURL(blob);
 
@@ -9422,14 +9476,53 @@ class RoomClient {
         downloadLink.href = url;
         downloadLink.download = recFileName;
         document.body.appendChild(downloadLink);
-        downloadLink.click();
-
-        setTimeout(() => {
-            document.body.removeChild(downloadLink);
-            window.URL.revokeObjectURL(url);
-            console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
-            recordedBlobs = [];
-        }, 100);
+        try {
+            if (this.isMobileDevice) {
+                // Mobile browsers may require a fresh gesture and an interactive save/share sheet.
+                downloadLink.target = '_blank';
+                downloadLink.rel = 'noopener';
+                this._recordingSave.awaitingDownload = true;
+                let downloadRequested = false;
+                const result = await Swal.fire({
+                    background: swalBackground,
+                    title: 'Recording ready',
+                    text: 'Tap Download recording and save the file on your device, then tap Done saving. The meeting will stay open until you are done.',
+                    confirmButtonText: 'Download recording',
+                    denyButtonText: 'Done saving',
+                    showDenyButton: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    preConfirm: () => {
+                        try {
+                            downloadLink.click();
+                            downloadRequested = true;
+                        } catch (error) {
+                            console.error('Recording download failed:', error);
+                            Swal.showValidationMessage('Download failed. Please try again.');
+                        }
+                        return false;
+                    },
+                    preDeny: () => {
+                        if (downloadRequested) return true;
+                        Swal.showValidationMessage('Please download the recording before continuing.');
+                        return false;
+                    },
+                });
+                if (!result.isDenied) throw new Error('Recording download was not confirmed');
+            } else {
+                downloadLink.click();
+                await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+        } finally {
+            if (this._recordingSave) this._recordingSave.awaitingDownload = false;
+            try {
+                document.body.removeChild(downloadLink);
+            } finally {
+                window.URL.revokeObjectURL(url);
+            }
+        }
+        console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
+        recordedBlobs = [];
     }
 
     pauseRecording() {
@@ -9456,8 +9549,9 @@ class RoomClient {
             // Capture the elapsed time text BEFORE stopRec event resets it to '0s'
             const recTimeEl = document.getElementById('recordingStatus');
             this._lastRecTimeText = recTimeEl ? recTimeEl.innerText : '0s';
+            this._lastRecDurationMs = this._recStartTs ? Math.round(performance.now() - this._recStartTs) : undefined;
             this._isRecording = false;
-            this.mediaRecorder.stop();
+            if (this.mediaRecorder.state !== 'inactive') this.mediaRecorder.stop();
             this.mediaRecorder = null;
             if (this.recScreenStream) {
                 this.recScreenStream.getTracks().forEach((track) => {
@@ -9479,6 +9573,7 @@ class RoomClient {
             this.recordingAction(enums.recording.stop);
             this.sound('recStop');
         }
+        return this._recordingSave?.promise;
     }
 
     recordingAction(action) {
@@ -9528,8 +9623,9 @@ class RoomClient {
     saveRecording(reason) {
         if (this._isRecording || this.hasActiveRecorder()) {
             console.log(`Save recording: ${reason}`);
-            this.stopRecording();
+            return this.stopRecording();
         }
+        return this._recordingSave?.promise;
     }
 
     // ####################################################
@@ -12075,8 +12171,7 @@ class RoomClient {
     }
 
     handleEjectAllFromRoom(cmd) {
-        if (typeof preventExit !== 'undefined') preventExit = false;
-        if (cmd.redirect && this.isSafeRedirectURL(cmd.redirect)) return openURL(cmd.redirect);
+        if (cmd.redirect && this.isSafeRedirectURL(cmd.redirect)) return completeRoomExit(false, false, cmd.redirect);
         // Detach disconnect / reconnect handlers BEFORE exiting.
         if (this.socket) {
             this.socket.off('disconnect');
@@ -12347,9 +12442,7 @@ class RoomClient {
                         const message = `Will ban you from the room${
                             msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
                         }`;
-                        this.exit(true);
-                        this.sound(action);
-                        this.peerActionProgress(from_peer_name, message, 5000, action);
+                        return this.handleForcedRoomExit(from_peer_name, message, action);
                     }
                     break;
                 case 'eject':
@@ -12357,9 +12450,7 @@ class RoomClient {
                         const message = `Will eject you from the room${
                             msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
                         }`;
-                        this.exit(true);
-                        this.sound(action);
-                        this.peerActionProgress(from_peer_name, message, 5000, action);
+                        return this.handleForcedRoomExit(from_peer_name, message, action);
                     }
                     break;
                 case 'mute':
@@ -12477,8 +12568,28 @@ class RoomClient {
         });
     }
 
+    async handleForcedRoomExit(fromPeerName, message, action) {
+        if (this._forcedExitPending || isExiting) return;
+        this._forcedExitPending = true;
+        const previousRecShowInfo = recShowInfo;
+        try {
+            // Keep recording information from replacing the ejection notice and starting another exit.
+            recShowInfo = false;
+            this.exit(true);
+            this.sound(action);
+            if (isLeavingRoom || this.isAwaitingRecordingDownload()) {
+                await completeRoomExit();
+            } else {
+                await this.peerActionProgress(fromPeerName, message, 5000, action);
+            }
+        } finally {
+            recShowInfo = previousRecShowInfo;
+            this._forcedExitPending = false;
+        }
+    }
+
     peerActionProgress(tt, msg, time, action = 'na') {
-        Swal.fire({
+        return Swal.fire({
             allowOutsideClick: false,
             background: swalBackground,
             icon: action == 'eject' ? 'warning' : 'success',
@@ -12496,8 +12607,7 @@ class RoomClient {
                     break;
                 case 'ban':
                 case 'eject':
-                    this.exit();
-                    break;
+                    return completeRoomExit();
                 default:
                     break;
             }

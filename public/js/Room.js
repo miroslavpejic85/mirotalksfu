@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.52
+ * @version 2.5.53
  *
  */
 
@@ -373,6 +373,7 @@ let workletNode = null;
 let RoomURL = window.location.origin + '/join/' + room_id;
 
 let isExiting = false;
+let isLeavingRoom = false;
 
 let transcription;
 
@@ -4735,15 +4736,8 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         if (isExiting) return;
-        isExiting = true;
 
         console.log('Room event: Client leave room');
-
-        endRoomSession();
-
-        if (rc.isRecording() || rc.hasActiveRecorder()) {
-            rc.saveRecording('Room event: Client save recording before to exit');
-        }
 
         leaveRoom(false); // Don't touch :)
     });
@@ -4754,28 +4748,59 @@ function handleRoomClientEvents() {
 // ####################################################
 
 function initLeaveMeeting() {
-    openURL('/newroom');
+    if (!rc) return openURL('/newroom');
+    return completeRoomExit(false, false, '/newroom');
 }
 
 async function leaveRoom(allowCancel = true, disconnectAll = false) {
+    if (isLeavingRoom || isExiting) return;
     return survey && survey.enabled ? leaveFeedback(allowCancel, disconnectAll) : completeRoomExit(disconnectAll);
 }
 
-function completeRoomExit(disconnectAll = false, rateExperience = false) {
-    if (rc.isRecording() || rc.hasActiveRecorder()) {
+async function runRoomExit(onReady) {
+    if (isLeavingRoom || isExiting) return;
+    isLeavingRoom = true;
+    const previousRecShowInfo = recShowInfo;
+    const showProgress = rc.isRecording() || rc.hasActiveRecorder() || rc.hasPendingRecordingSave();
+    try {
         recShowInfo = false;
-        rc.saveRecording('User is leaving the room, saving recording before exit');
-        rc.popupRecordingOnLeaveRoom(() => completeRoomExit(disconnectAll, rateExperience));
-        return;
+        if (showProgress && !rc.isAwaitingRecordingDownload()) rc.popupRecordingOnLeaveRoom();
+        try {
+            await rc.saveRecording('Saving recording before leaving the room');
+        } catch (error) {
+            console.error('Cannot leave before recording is saved:', error);
+            const result = await Swal.fire({
+                background: swalBackground,
+                icon: 'error',
+                title: 'Recording save failed',
+                text: 'Your recording could not be saved. Stay in the meeting or leave without saving?',
+                showDenyButton: true,
+                confirmButtonText: 'Stay in meeting',
+                denyButtonText: 'Leave without saving',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            });
+            if (!result.isDenied) return;
+        }
+        if (showProgress) Swal.close();
+        return await onReady();
+    } finally {
+        recShowInfo = previousRecShowInfo;
+        isLeavingRoom = false;
     }
-    if (rateExperience) {
-        isExiting = true;
-        endRoomSession();
-        rc.exitRoom(disconnectAll);
-        openURL(survey.url);
-    } else {
-        redirectOnLeave(disconnectAll);
-    }
+}
+
+function completeRoomExit(disconnectAll = false, rateExperience = false, exitUrl = null) {
+    return runRoomExit(() => {
+        if (rateExperience || exitUrl) {
+            isExiting = true;
+            endRoomSession();
+            rc.exitRoom(disconnectAll);
+            openURL(exitUrl || survey.url);
+        } else {
+            redirectOnLeave(disconnectAll);
+        }
+    });
 }
 
 function leaveFeedback(allowCancel, disconnectAll = false) {
@@ -4799,9 +4824,9 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
-            completeRoomExit(disconnectAll);
+            return completeRoomExit(disconnectAll);
         } else if (result.isDenied) {
-            completeRoomExit(disconnectAll, true);
+            return completeRoomExit(disconnectAll, true);
         }
     });
 }
@@ -8885,14 +8910,14 @@ window.addEventListener('popstate', (event) => {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
-            // Save recording if in progress
-            if (rc.isRecording() || rc.hasActiveRecorder()) {
-                recShowInfo = false;
-                rc.saveRecording('User popstate changes');
-            }
-            preventExit = false;
-            // Actually go back in history
-            history.back();
+            return runRoomExit(() => {
+                isExiting = true;
+                endRoomSession();
+                rc.exitRoom();
+                history.back();
+            }).then(() => {
+                if (preventExit) history.pushState({ sessionActive: true }, '', location.href);
+            });
         } else {
             // Stay in session: push state again to prevent exit
             history.pushState({ sessionActive: true }, '', location.href);
@@ -8903,12 +8928,16 @@ window.addEventListener('popstate', (event) => {
 // Intercept tab close, refresh, or direct URL navigation
 window.addEventListener('beforeunload', (e) => {
     // Save recording if in progress
-    if (rc.isRecording() || rc.hasActiveRecorder()) {
+    if (rc && (rc.isRecording() || rc.hasActiveRecorder())) {
         recShowInfo = false;
         rc.saveRecording('User is closing the tab, refreshing, or navigating away');
     }
 
-    if (bypassBeforeUnloadOnce || !preventExit || window.localStorage.isReconnected === 'true') return;
+    if (
+        bypassBeforeUnloadOnce ||
+        ((!preventExit || window.localStorage.isReconnected === 'true') && !rc?.hasPendingRecordingSave())
+    )
+        return;
     // Modern browsers ignore custom messages, but this triggers the prompt
     e.preventDefault();
     e.returnValue = '';
@@ -8926,7 +8955,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.52',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.53',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
@@ -8969,9 +8998,12 @@ function navigateToRoom(room, extraParams = {}) {
     });
     if (peer_token) queryParams.set('token', peer_token);
 
-    if (typeof preventExit !== 'undefined') preventExit = false;
-    rc.exit(true);
-    openURL(`${baseUrl}?${queryParams.toString()}`);
+    return runRoomExit(() => {
+        isExiting = true;
+        endRoomSession();
+        rc.exit(true);
+        openURL(`${baseUrl}?${queryParams.toString()}`);
+    });
 }
 
 function checkBreakoutRoom() {
