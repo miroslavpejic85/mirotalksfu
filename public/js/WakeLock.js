@@ -3,6 +3,10 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/WakeLock
 
 let wakeLockSentinel = null;
+let wakeLockRequestPending = false;
+let wakeLockReleasePending = false;
+let wakeLockGeneration = 0;
+let wakeLockPageActive = true;
 let userWantsKeepAwake = false;
 let syncTimeout = null;
 
@@ -17,6 +21,7 @@ function isAudioOrUIActive() {
 function shouldKeepAwake() {
     return (
         !isDesktopDevice &&
+        wakeLockPageActive &&
         isWakeLockSupported() &&
         document.visibilityState === 'visible' &&
         !document.pictureInPictureElement &&
@@ -25,30 +30,54 @@ function shouldKeepAwake() {
 }
 
 async function requestWakeLock() {
-    if (wakeLockSentinel || !shouldKeepAwake()) return;
+    if (wakeLockSentinel || wakeLockRequestPending || wakeLockReleasePending || !shouldKeepAwake()) return;
+    wakeLockRequestPending = true;
+    const generation = wakeLockGeneration;
     try {
-        wakeLockSentinel = await navigator.wakeLock.request('screen');
-        wakeLockSentinel.addEventListener('release', () => {
+        const sentinel = await navigator.wakeLock.request('screen');
+        wakeLockSentinel = sentinel;
+        sentinel.addEventListener('release', () => {
+            if (wakeLockSentinel !== sentinel) return;
             wakeLockSentinel = null;
+            switchKeepAwake.checked = false;
             syncWakeLockDebounced();
         });
+        if (generation !== wakeLockGeneration || !shouldKeepAwake() || sentinel.released) {
+            await releaseWakeLock();
+            return;
+        }
         switchKeepAwake.checked = true;
-        userLog('info', '🟢 Wake Lock is active');
+        console.info('🟢 Wake Lock is active');
     } catch (err) {
-        wakeLockSentinel = null;
         switchKeepAwake.checked = false;
         userLog('error', '🔴 Failed to request Wake Lock: ' + err.message);
+    } finally {
+        wakeLockRequestPending = false;
+        if (generation !== wakeLockGeneration && shouldKeepAwake()) syncWakeLockDebounced();
     }
 }
 
 async function releaseWakeLock() {
     if (isDesktopDevice) return;
+    wakeLockGeneration++;
+    const sentinel = wakeLockSentinel;
+    if (wakeLockReleasePending) return;
+    if (!sentinel) {
+        switchKeepAwake.checked = false;
+        return;
+    }
+    wakeLockReleasePending = true;
     try {
-        await wakeLockSentinel?.release();
-        userLog('info', '⚪ Wake Lock released');
-    } catch {}
-    wakeLockSentinel = null;
-    switchKeepAwake.checked = false;
+        await sentinel.release();
+        if (wakeLockSentinel === sentinel) wakeLockSentinel = null;
+        switchKeepAwake.checked = false;
+        console.info('⚪ Wake Lock released');
+    } catch (err) {
+        console.error('Failed to release Wake Lock:', err);
+    } finally {
+        wakeLockReleasePending = false;
+        if (!wakeLockSentinel && shouldKeepAwake()) syncWakeLockDebounced();
+    }
 }
 
 function syncWakeLockDebounced() {
@@ -71,4 +100,12 @@ document.addEventListener('visibilitychange', syncWakeLockDebounced);
 document.addEventListener('enterpictureinpicture', releaseWakeLock);
 document.addEventListener('leavepictureinpicture', syncWakeLockDebounced);
 
-window.addEventListener('pagehide', releaseWakeLock);
+window.addEventListener('pagehide', () => {
+    wakeLockPageActive = false;
+    clearTimeout(syncTimeout);
+    releaseWakeLock();
+});
+window.addEventListener('pageshow', () => {
+    wakeLockPageActive = true;
+    syncWakeLockDebounced();
+});

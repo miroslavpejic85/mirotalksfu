@@ -42,12 +42,7 @@ Missing or empty values fall back to English, so partial translations are suppor
 To exclude an HTML element from translation, use `class="notranslate"`, `translate="no"`,
 or `data-i18n-skip`.
 
-Toast helpers share a FIFO queue in [Swal.js](../js/Swal.js): notifications wait for
-active toasts and dialogs, and are translated when displayed. Hovering or focusing a
-regular toast pauses its timer. Local switch feedback stays brief without a progress
-bar or hover pause, bypasses the queue, and replaces the current toast immediately.
-Switch feedback is suppressed while a blocking dialog is open rather than queued.
-Local switch feedback uses a success icon for ON and an informational icon for OFF.
+Toast notifications are translated when displayed.
 Keep lifecycle callbacks in the options passed to `Swal.fire()`
 so the translation wrapper preserves them.
 
@@ -66,5 +61,3 @@ and removing stale keys. Review the diff.
 Dynamic video and participant dropdown captions (including conditional presenter actions)
 are extracted into `buttons`. Translate newly added English values in each locale before shipping;
 matching values can also be intentional for brands, technical identifiers, or shared vocabulary.
-Dropdowns size to translated captions, wrap at the viewport boundary, and reposition when
-switching languages while open.
