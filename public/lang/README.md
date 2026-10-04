@@ -43,6 +43,8 @@ To exclude an HTML element from translation, use `class="notranslate"`, `transla
 or `data-i18n-skip`.
 
 Toast notifications are translated when displayed.
+Use literal messages in `userLog()` calls so the extractor can discover toast keys;
+for conditional messages, put each literal in its own branch.
 Keep lifecycle callbacks in the options passed to `Swal.fire()`
 so the translation wrapper preserves them.
 

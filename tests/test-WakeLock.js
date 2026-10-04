@@ -100,6 +100,133 @@ describe('mobile wake-lock lifecycle', () => {
         assert.equal(context.userLog.callCount, 0);
     });
 
+    it('notifies manual activation only after acquisition succeeds', async () => {
+        context.audio = false;
+        const pending = deferred();
+        context.navigator.wakeLock.request.returns(pending.promise);
+        context.applyKeepAwake(true, true);
+        await clock.tickAsync(100);
+        assert.equal(context.userLog.callCount, 0);
+        pending.resolve(sentinel);
+        await clock.tickAsync(100);
+        assert.equal(context.userLog.callCount, 1);
+        assert.deepEqual(context.userLog.firstCall.args, ['success', 'Device wake lock is active', 'top-end', 1800]);
+
+        context.navigator.wakeLock.request.resolves(createSentinel());
+        sentinel.emitRelease();
+        await clock.tickAsync(100);
+        assert.equal(context.navigator.wakeLock.request.callCount, 2);
+        assert.equal(context.userLog.callCount, 1);
+    });
+
+    it('notifies manual deactivation only after release succeeds', async () => {
+        context.audio = false;
+        context.applyKeepAwake(true);
+        await clock.tickAsync(100);
+        const pending = deferred();
+        sentinel.release.callsFake(async () => {
+            await pending.promise;
+            sentinel.emitRelease();
+        });
+        context.applyKeepAwake(false, true);
+        await clock.tickAsync(100);
+        assert.equal(context.userLog.callCount, 0);
+        pending.resolve();
+        await clock.tickAsync(100);
+        assert.equal(context.userLog.callCount, 1);
+        assert.equal(context.userLog.firstCall.args[0], 'info');
+        assert.equal(context.userLog.firstCall.args[1], 'Device wake lock released');
+    });
+
+    it('explains when automatic audio-only wake locking remains active', async () => {
+        await context.requestWakeLock();
+        context.applyKeepAwake(false, true);
+        await clock.tickAsync(100);
+        assert.equal(sentinel.release.callCount, 0);
+        assert.equal(context.userLog.callCount, 1);
+        assert.equal(context.userLog.firstCall.args[0], 'info');
+        assert.match(context.userLog.firstCall.args[1], /audio-only wake lock remains active/);
+    });
+
+    it('confirms manual activation of an already active automatic lock', async () => {
+        await context.requestWakeLock();
+        context.applyKeepAwake(true, true);
+        await clock.tickAsync(100);
+        assert.equal(context.navigator.wakeLock.request.callCount, 1);
+        assert.equal(context.userLog.callCount, 1);
+        assert.equal(context.userLog.firstCall.args[0], 'success');
+    });
+
+    it('reports manual acquisition failure without a later success notification', async () => {
+        context.navigator.wakeLock.request.rejects(new Error('Permission denied'));
+        context.applyKeepAwake(true, true);
+        await clock.tickAsync(100);
+        assert.equal(context.userLog.callCount, 1);
+        assert.equal(context.userLog.firstCall.args[0], 'error');
+        context.navigator.wakeLock.request.resolves(sentinel);
+        await context.syncWakeLock();
+        assert.equal(context.userLog.callCount, 1);
+    });
+
+    it('reports manual release failure instead of claiming the lock is off', async () => {
+        context.audio = false;
+        context.applyKeepAwake(true);
+        await clock.tickAsync(100);
+        sentinel.release.rejects(new Error('Release failed'));
+        context.applyKeepAwake(false, true);
+        await clock.tickAsync(100);
+        assert.equal(context.userLog.callCount, 1);
+        assert.equal(context.userLog.firstCall.args[0], 'error');
+        assert.match(context.userLog.firstCall.args[1], /Release failed/);
+        assert.equal(context.switchKeepAwake.checked, true);
+    });
+
+    it('translates the release error prefix while preserving the browser error', async () => {
+        context.audio = false;
+        context.window.i18n = { t: sinon.stub().returns('Impossibile disattivare il blocco della sospensione:') };
+        context.applyKeepAwake(true);
+        await clock.tickAsync(100);
+        sentinel.release.rejects(new Error('Release failed'));
+        context.applyKeepAwake(false, true);
+        await clock.tickAsync(100);
+        assert.deepEqual(context.window.i18n.t.firstCall.args, ['Failed to release Wake Lock:', 'toasts']);
+        assert.equal(
+            context.userLog.firstCall.args[1],
+            'Impossibile disattivare il blocco della sospensione: Release failed'
+        );
+    });
+
+    it('does not show a stale success when manually disabled during acquisition', async () => {
+        context.audio = false;
+        const pending = deferred();
+        context.navigator.wakeLock.request.returns(pending.promise);
+        context.applyKeepAwake(true, true);
+        await clock.tickAsync(100);
+        context.applyKeepAwake(false, true);
+        await clock.tickAsync(100);
+        assert.equal(context.userLog.callCount, 0);
+        pending.resolve(sentinel);
+        await clock.tickAsync(100);
+        assert.equal(sentinel.release.callCount, 1);
+        assert.equal(context.userLog.callCount, 1);
+        assert.equal(context.userLog.firstCall.args[0], 'info');
+    });
+
+    it('discards a pending manual notification on pagehide', async () => {
+        context.audio = false;
+        const pending = deferred();
+        context.navigator.wakeLock.request.returns(pending.promise);
+        context.applyKeepAwake(true, true);
+        await clock.tickAsync(100);
+        windowEvents.pagehide();
+        pending.resolve(sentinel);
+        await clock.tickAsync(100);
+        context.navigator.wakeLock.request.resolves(createSentinel());
+        windowEvents.pageshow();
+        await clock.tickAsync(100);
+        assert.equal(context.userLog.callCount, 0);
+    });
+
     for (const media of ['video', 'screen']) {
         it(`honors the manual choice while ${media} is active`, async () => {
             context.audio = false;

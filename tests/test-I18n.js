@@ -45,7 +45,7 @@ describe('native translation catalogs', () => {
             }
             for (const [namespace, keys] of Object.entries({
                 buttons: ['Delete text annotation', 'Edit text annotation', 'Duplicate text annotation'],
-                labels: ['Choose Background...'],
+                labels: ['Choose Background...', 'Prevent sleep while the meeting is visible, even with the camera on'],
                 dialogs: [
                     'Recording started',
                     'Recording stopped',
@@ -58,7 +58,12 @@ describe('native translation catalogs', () => {
                 toasts: [
                     'Please wait while your recording is saved.',
                     'The whiteboard is unlocked. The participants can interact with it.',
+                    'Device wake lock is active',
+                    'Device wake lock released',
+                    'Manual keep-awake disabled; audio-only wake lock remains active',
+                    'Failed to release Wake Lock:',
                 ],
+                tooltips: ['Prevent sleep while the meeting is visible, even with the camera on'],
             })) {
                 for (const key of keys) {
                     assert.notEqual(locale[namespace][key], key, `${file}: ${namespace}.${key}`);

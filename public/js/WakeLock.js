@@ -8,6 +8,7 @@ let wakeLockReleasePending = false;
 let wakeLockGeneration = 0;
 let wakeLockPageActive = true;
 let userWantsKeepAwake = false;
+let pendingManualWakeLockNotification = null;
 let syncTimeout = null;
 
 function isWakeLockSupported() {
@@ -49,10 +50,12 @@ async function requestWakeLock() {
         switchKeepAwake.checked = true;
         console.info('🟢 Wake Lock is active');
     } catch (err) {
+        pendingManualWakeLockNotification = null;
         switchKeepAwake.checked = false;
         userLog('error', '🔴 Failed to request Wake Lock: ' + err.message);
     } finally {
         wakeLockRequestPending = false;
+        notifyManualWakeLockChange();
         if (generation !== wakeLockGeneration && shouldKeepAwake()) syncWakeLockDebounced();
     }
 }
@@ -74,8 +77,14 @@ async function releaseWakeLock() {
         console.info('⚪ Wake Lock released');
     } catch (err) {
         console.error('Failed to release Wake Lock:', err);
+        if (pendingManualWakeLockNotification !== null) {
+            pendingManualWakeLockNotification = null;
+            const message = window.i18n?.t('Failed to release Wake Lock:', 'toasts') ?? 'Failed to release Wake Lock:';
+            userLog('error', message + ' ' + err.message);
+        }
     } finally {
         wakeLockReleasePending = false;
+        notifyManualWakeLockChange();
         if (!wakeLockSentinel && shouldKeepAwake()) syncWakeLockDebounced();
     }
 }
@@ -87,11 +96,32 @@ function syncWakeLockDebounced() {
 
 async function syncWakeLock() {
     shouldKeepAwake() ? await requestWakeLock() : await releaseWakeLock();
+    notifyManualWakeLockChange();
 }
 
-function applyKeepAwake(enabled) {
+function notifyManualWakeLockChange() {
+    if (pendingManualWakeLockNotification === null || wakeLockRequestPending || wakeLockReleasePending) return;
+    if (!wakeLockPageActive || document.visibilityState !== 'visible' || document.pictureInPictureElement) {
+        pendingManualWakeLockNotification = null;
+        return;
+    }
+    const active = !!wakeLockSentinel && !wakeLockSentinel.released;
+    if (pendingManualWakeLockNotification && !active) return;
+    const enabled = pendingManualWakeLockNotification;
+    pendingManualWakeLockNotification = null;
+    if (enabled) {
+        userLog('success', 'Device wake lock is active', 'top-end', 1800);
+    } else if (active) {
+        userLog('info', 'Manual keep-awake disabled; audio-only wake lock remains active', 'top-end', 1800);
+    } else {
+        userLog('info', 'Device wake lock released', 'top-end', 1800);
+    }
+}
+
+function applyKeepAwake(enabled, notify = false) {
     if (isDesktopDevice) return;
     userWantsKeepAwake = !!enabled;
+    pendingManualWakeLockNotification = notify ? userWantsKeepAwake : null;
     syncWakeLockDebounced();
 }
 
@@ -102,6 +132,7 @@ document.addEventListener('leavepictureinpicture', syncWakeLockDebounced);
 
 window.addEventListener('pagehide', () => {
     wakeLockPageActive = false;
+    pendingManualWakeLockNotification = null;
     clearTimeout(syncTimeout);
     releaseWakeLock();
 });
