@@ -435,9 +435,45 @@
         return configLang();
     }
 
+    async function confirmModeChange() {
+        const title = window.i18n?.t('Apply translation mode change?', 'dialogs') || 'Apply translation mode change?';
+        const text =
+            window.i18n?.t('Changing translation mode requires reloading the page. Continue?', 'dialogs') ||
+            'Changing translation mode requires reloading the page. Continue?';
+        const confirmButtonText = window.i18n?.t('Apply and reload', 'dialogs') || 'Apply and reload';
+        const cancelButtonText = window.i18n?.t('Cancel', 'dialogs') || 'Cancel';
+
+        if (window.Swal && typeof window.Swal.fire === 'function') {
+            const modalOptions = {
+                icon: 'question',
+                title,
+                text,
+                showCancelButton: true,
+                confirmButtonText,
+                cancelButtonText,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            };
+
+            if (typeof swalBackground === 'string' && swalBackground.length > 0) {
+                modalOptions.background = swalBackground;
+            }
+
+            const result = await window.Swal.fire(modalOptions);
+            return Boolean(result && result.isConfirmed);
+        }
+
+        return window.confirm(`${title}\n\n${text}`);
+    }
+
     async function applyMode(chosen) {
         const mode = normalizeMode(chosen);
-        if (!mode) return;
+        if (!mode) return false;
+
+        if (mode === state.mode) return false;
+
+        const shouldReload = await confirmModeChange();
+        if (!shouldReload) return false;
 
         try {
             const cfgMode = configMode();
@@ -448,6 +484,7 @@
         }
 
         location.reload();
+        return true;
     }
 
     function renderModeSelect(currentMode, currentSource) {
@@ -501,8 +538,9 @@
         source.textContent = sourceLabel;
         section.appendChild(source);
 
-        modeSelect.addEventListener('change', () => {
-            applyMode(modeSelect.value);
+        modeSelect.addEventListener('change', async () => {
+            const applied = await applyMode(modeSelect.value);
+            if (!applied) modeSelect.value = state.mode;
         });
 
         container.appendChild(section);

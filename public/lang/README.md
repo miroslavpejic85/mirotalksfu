@@ -57,7 +57,7 @@ so the translation wrapper preserves them.
 Run from the repository root after changing UI strings:
 
 ```bash
-node app/src/scripts/extract-ui-lang.js
+npm run lang
 ```
 
 This regenerates `en.json` and synchronizes the other language files, preserving existing
