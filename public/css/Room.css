@@ -3164,12 +3164,50 @@ body {
 .tabcontent button {
     margin-top: 10px;
     width: 100%;
+    min-height: 40px;
+    padding: 10px 14px;
     text-align: left;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    border: 1px solid var(--room-border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--select-bg) 74%, transparent);
+    color: var(--fg-1);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color var(--motion-fast) ease,
+        border-color var(--motion-fast) ease,
+        box-shadow var(--motion-fast) ease,
+        color var(--motion-fast) ease;
 }
 
 .tabcontent button:hover {
-    background: var(--body-bg);
-    transform: scale(1);
+    border-color: var(--room-border-strong);
+    background: var(--room-control-hover);
+    box-shadow: 0 6px 16px color-mix(in srgb, #000 18%, transparent);
+    transform: none;
+}
+
+#mySettings .tabcontent button:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--room-accent) 82%, #fff 18%);
+    outline-offset: 2px;
+}
+
+#mySettings .tabcontent button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    box-shadow: none;
+}
+
+#mySettings .tabcontent button i,
+#mySettings .tabcontent button svg,
+#mySettings .tabcontent button p {
+    margin: 0;
+    padding: 0;
+    color: inherit;
 }
 
 /* on open display devices tab */
