@@ -2973,6 +2973,9 @@ body {
     .mySettingsMain {
         position: relative;
         display: block;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
     }
     #mySettingsHeader {
         justify-content: flex-end;
@@ -3019,9 +3022,9 @@ body {
         inset-block-start: 0;
         inset-inline-start: 0;
         z-index: 3;
-        width: min(320px, calc(100vw - 56px));
+        width: 100%;
         min-width: 0;
-        max-width: 100%;
+        max-width: none;
         min-height: 0;
         height: 100%;
         padding: 8px;
@@ -3037,6 +3040,9 @@ body {
     }
     #mySettings.settings-nav-open #mySettingsNav {
         transform: translateX(0);
+    }
+    #mySettings.settings-nav-open .tabActions {
+        visibility: hidden;
     }
     .tab button {
         width: 100%;
