@@ -163,6 +163,7 @@ describe('mobile wake-lock lifecycle', () => {
         await clock.tickAsync(100);
         assert.equal(context.userLog.callCount, 1);
         assert.equal(context.userLog.firstCall.args[0], 'error');
+        assert.equal(context.userLog.firstCall.args[2], 'top-end');
         context.navigator.wakeLock.request.resolves(sentinel);
         await context.syncWakeLock();
         assert.equal(context.userLog.callCount, 1);

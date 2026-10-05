@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.78
+ * @version 2.5.79
  *
  */
 
@@ -3268,13 +3268,23 @@ function handleMediaError(mediaType, err, redirectURL = false) {
         </ul>
     `;
 
-    popupHtmlMessage(null, image.forbidden, 'Access denied', html, 'center', redirectURL);
+    if (isPrejoinDialogVisible()) {
+        userLog('error', `Access denied for ${mediaType}: ${errMessage}`, 'top-end', 6000);
+    } else {
+        popupHtmlMessage(null, image.forbidden, 'Access denied', html, 'center', redirectURL);
+    }
 
     const errorOutput = getUserMediaError
         ? `Access denied for ${mediaType} device [${err.name}]: ${errMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`
         : `${err.message}`;
 
     throw new Error(errorOutput);
+}
+
+function isPrejoinDialogVisible() {
+    if (!Swal.isVisible?.()) return false;
+    const popup = Swal.getPopup?.();
+    return !!popup && !!popup.querySelector('#usernameInput');
 }
 
 function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = false, reloadPage = false) {
@@ -9014,7 +9024,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.78',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.79',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

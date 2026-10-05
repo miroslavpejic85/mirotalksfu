@@ -428,6 +428,43 @@ describe('toast hover timers with native translation', () => {
         await notification;
     });
 
+    it('keeps the prejoin swal visible when media errors occur', () => {
+        const roomSource = readScript('Room.js');
+        const start = roomSource.indexOf('function handleMediaError(');
+        const end = roomSource.indexOf('\nasync function toggleScreenSharing()', start);
+        assert.ok(start >= 0 && end > start);
+        Object.assign(dom.window, {
+            sound: () => {},
+            videoQuality: { selectedIndex: 0 },
+            rc: { videoQualitySelectedIndex: 0 },
+            image: { forbidden: 'forbidden.png' },
+            userLog: sinon.stub().resolves(),
+        });
+        dom.window.eval(
+            `${roomSource.slice(start, end)}\nwindow.handleMediaError = handleMediaError; window.isPrejoinDialogVisible = isPrejoinDialogVisible;`
+        );
+
+        dom.window.Swal.fire({ title: 'Prejoin' });
+        const input = dom.window.document.createElement('input');
+        input.id = 'usernameInput';
+        popup.appendChild(input);
+
+        assert.equal(dom.window.isPrejoinDialogVisible(), true);
+        assert.throws(
+            () => dom.window.handleMediaError('video/audio', { name: 'NotAllowedError', message: 'Permission denied' }),
+            /Access denied for video\/audio device/
+        );
+        assert.equal(shown.length, 1);
+        sinon.assert.calledOnce(dom.window.userLog);
+        assert.equal(dom.window.userLog.firstCall.args[0], 'error');
+        assert.equal(
+            dom.window.userLog.firstCall.args[1],
+            'Access denied for video/audio: Permission denied in browser'
+        );
+        assert.equal(dom.window.userLog.firstCall.args[2], 'top-end');
+        assert.equal(dom.window.userLog.firstCall.args[3], 6000);
+    });
+
     it('allows a critical dialog to interrupt a toast while pending toasts wait', async () => {
         const first = client.userLog('info', 'First');
         const pending = client.userLog('info', 'Pending');
