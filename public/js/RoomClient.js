@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.71
+ * @version 2.5.72
  *
  */
 
@@ -352,6 +352,13 @@ class RoomClient {
             navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia ? true : false;
 
         this.isMySettingsOpen = false;
+        this.networkMonitorInterval = null;
+        this.networkMonitorLastSnapshot = null;
+        this.networkChartMaxPoints = 60;
+        this.networkChartHistory = {
+            sent: [],
+            received: [],
+        };
 
         this._isConnected = false;
         this.isVideoBarDropDownOpen = false;
@@ -4786,6 +4793,7 @@ class RoomClient {
         const clean = () => {
             this._isConnected = false;
             this.stopConsumerReconcile();
+            this.stopNetworkMonitor(true);
             if (this.consumerTransport) this.consumerTransport.close();
             if (this.producerTransport) this.producerTransport.close();
             if (this.socket) {
@@ -5445,6 +5453,16 @@ class RoomClient {
         mySettings.classList.toggle('show');
         this.isMySettingsOpen = !this.isMySettingsOpen;
         this.videoMediaContainer.style.opacity = this.isMySettingsOpen ? 0.3 : 1;
+
+        if (!this.isMySettingsOpen) {
+            this.stopNetworkMonitor(true);
+            return;
+        }
+
+        const tabNetwork = this.getId('tabNetwork');
+        if (tabNetwork && tabNetwork.style.display === 'block') {
+            this.startNetworkMonitor();
+        }
     }
 
     openTab(evt, tabName) {
@@ -5459,6 +5477,285 @@ class RoomClient {
         }
         this.getId(tabName).style.display = 'block';
         evt.currentTarget.className += ' active';
+
+        if (tabName === 'tabNetwork') {
+            this.startNetworkMonitor();
+        } else {
+            this.stopNetworkMonitor();
+        }
+    }
+
+    startNetworkMonitor() {
+        if (this.networkMonitorInterval) return;
+        this.networkMonitorLastSnapshot = null;
+        this.resetNetworkGraph();
+        this.updateNetworkMonitor().catch((error) => {
+            console.error('Network monitor update failed', error);
+        });
+        this.networkMonitorInterval = setInterval(() => {
+            this.updateNetworkMonitor().catch((error) => {
+                console.error('Network monitor update failed', error);
+            });
+        }, 1000);
+    }
+
+    stopNetworkMonitor(resetValues = false) {
+        if (this.networkMonitorInterval) {
+            clearInterval(this.networkMonitorInterval);
+            this.networkMonitorInterval = null;
+        }
+        this.networkMonitorLastSnapshot = null;
+        if (resetValues) {
+            this.renderNetworkMonitorStats();
+            this.resetNetworkGraph();
+        }
+    }
+
+    async updateNetworkMonitor() {
+        const tabNetwork = this.getId('tabNetwork');
+        if (!this.isMySettingsOpen || !tabNetwork || tabNetwork.style.display !== 'block') {
+            this.stopNetworkMonitor();
+            return;
+        }
+
+        const [producerStats, consumerStats] = await Promise.all([
+            this.getTransportNetworkStats(this.producerTransport, 'producer'),
+            this.getTransportNetworkStats(this.consumerTransport, 'consumer'),
+        ]);
+
+        const bytesSent = producerStats.bytesSent + consumerStats.bytesSent;
+        const bytesReceived = producerStats.bytesReceived + consumerStats.bytesReceived;
+        const packetsLost = producerStats.packetsLost + consumerStats.packetsLost;
+        const packetsReceived = producerStats.packetsReceived + consumerStats.packetsReceived;
+        const jitterSeconds = this.averageNumbers([...producerStats.jitterSamples, ...consumerStats.jitterSamples]);
+        const rttSeconds = this.averageNumbers([...producerStats.rttSamples, ...consumerStats.rttSamples]);
+        const packetLossPercentage = this.calculatePacketLossPercentage(packetsLost, packetsReceived);
+
+        const now = performance.now();
+        let sentBitrate = 0;
+        let receivedBitrate = 0;
+
+        if (this.networkMonitorLastSnapshot) {
+            const elapsedMs = now - this.networkMonitorLastSnapshot.timestamp;
+            if (elapsedMs > 0) {
+                const sentBytesDelta = Math.max(0, bytesSent - this.networkMonitorLastSnapshot.bytesSent);
+                const receivedBytesDelta = Math.max(0, bytesReceived - this.networkMonitorLastSnapshot.bytesReceived);
+                const seconds = elapsedMs / 1000;
+                sentBitrate = (sentBytesDelta * 8) / seconds;
+                receivedBitrate = (receivedBytesDelta * 8) / seconds;
+            }
+        }
+
+        this.networkMonitorLastSnapshot = { timestamp: now, bytesSent, bytesReceived };
+
+        this.pushNetworkGraphPoint(sentBitrate, receivedBitrate);
+
+        this.renderNetworkMonitorStats({
+            sentBitrate,
+            receivedBitrate,
+            packetLossPercentage,
+            jitterSeconds,
+            rttSeconds,
+        });
+    }
+
+    async getTransportNetworkStats(transport, transportType) {
+        const stats = {
+            bytesSent: 0,
+            bytesReceived: 0,
+            packetsLost: 0,
+            packetsReceived: 0,
+            jitterSamples: [],
+            rttSamples: [],
+        };
+
+        if (!transport || transport.closed || typeof transport.getStats !== 'function') return stats;
+
+        try {
+            const report = await transport.getStats();
+            if (!report) return stats;
+
+            const reportStats = Array.isArray(report)
+                ? report
+                : typeof report.values === 'function'
+                  ? Array.from(report.values())
+                  : typeof report[Symbol.iterator] === 'function'
+                    ? Array.from(report)
+                    : Object.values(report);
+
+            for (const stat of reportStats) {
+                if (!stat || !stat.type) continue;
+
+                if (stat.type === 'outbound-rtp' && !stat.isRemote) {
+                    if (typeof stat.bytesSent === 'number') stats.bytesSent += stat.bytesSent;
+                }
+
+                if (stat.type === 'inbound-rtp' && !stat.isRemote) {
+                    if (typeof stat.bytesReceived === 'number') stats.bytesReceived += stat.bytesReceived;
+                    if (typeof stat.packetsLost === 'number') stats.packetsLost += stat.packetsLost;
+                    if (typeof stat.packetsReceived === 'number') stats.packetsReceived += stat.packetsReceived;
+                    if (typeof stat.jitter === 'number') stats.jitterSamples.push(stat.jitter);
+                }
+
+                if (stat.type === 'remote-inbound-rtp' && typeof stat.roundTripTime === 'number') {
+                    stats.rttSamples.push(stat.roundTripTime);
+                }
+
+                if (stat.type === 'candidate-pair' && typeof stat.currentRoundTripTime === 'number') {
+                    stats.rttSamples.push(stat.currentRoundTripTime);
+                }
+            }
+        } catch (error) {
+            console.error(`Failed to read ${transportType} transport stats`, {
+                transportId: transport.id,
+                error,
+            });
+        }
+
+        return stats;
+    }
+
+    averageNumbers(values) {
+        if (!Array.isArray(values) || values.length === 0) return 0;
+        const sum = values.reduce((total, value) => total + value, 0);
+        return sum / values.length;
+    }
+
+    calculatePacketLossPercentage(packetsLost, packetsReceived) {
+        if (!Number.isFinite(packetsLost) || !Number.isFinite(packetsReceived)) return 0;
+        const totalPackets = Math.max(0, packetsLost) + Math.max(0, packetsReceived);
+        if (totalPackets <= 0) return 0;
+        return (Math.max(0, packetsLost) / totalPackets) * 100;
+    }
+
+    formatBitrate(bitsPerSecond) {
+        if (!Number.isFinite(bitsPerSecond) || bitsPerSecond <= 0) return '0 b';
+        const units = ['b', 'kb', 'mb', 'gb'];
+        let value = bitsPerSecond;
+        let unitIndex = 0;
+
+        while (value >= 1000 && unitIndex < units.length - 1) {
+            value /= 1000;
+            unitIndex++;
+        }
+
+        const decimals = value >= 100 ? 0 : value >= 10 ? 1 : 2;
+        return `${value.toFixed(decimals)} ${units[unitIndex]}`;
+    }
+
+    formatSecondsToMilliseconds(seconds) {
+        if (!Number.isFinite(seconds) || seconds <= 0) return '0.00 ms';
+        const milliseconds = seconds * 1000;
+        return `${milliseconds.toFixed(2)} ms`;
+    }
+
+    resetNetworkGraph() {
+        this.networkChartHistory.sent = [];
+        this.networkChartHistory.received = [];
+        this.renderNetworkBitrateGraph();
+    }
+
+    pushNetworkGraphPoint(sentBitrate, receivedBitrate) {
+        this.networkChartHistory.sent.push(Number.isFinite(sentBitrate) ? Math.max(0, sentBitrate) : 0);
+        this.networkChartHistory.received.push(Number.isFinite(receivedBitrate) ? Math.max(0, receivedBitrate) : 0);
+
+        if (this.networkChartHistory.sent.length > this.networkChartMaxPoints) this.networkChartHistory.sent.shift();
+        if (this.networkChartHistory.received.length > this.networkChartMaxPoints)
+            this.networkChartHistory.received.shift();
+
+        this.renderNetworkBitrateGraph();
+    }
+
+    renderNetworkBitrateGraph() {
+        const canvas = this.getId('networkBitrateChart');
+        if (!canvas) return;
+
+        const cssWidth = canvas.clientWidth || 300;
+        const cssHeight = canvas.clientHeight || 120;
+        const dpr = window.devicePixelRatio || 1;
+        const targetWidth = Math.max(1, Math.floor(cssWidth * dpr));
+        const targetHeight = Math.max(1, Math.floor(cssHeight * dpr));
+
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+        }
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, targetWidth, targetHeight);
+        ctx.scale(dpr, dpr);
+
+        const width = cssWidth;
+        const height = cssHeight;
+        const top = 8;
+        const bottom = height - 8;
+        const plotHeight = Math.max(1, bottom - top);
+        const left = 8;
+        const right = width - 8;
+        const plotWidth = Math.max(1, right - left);
+
+        const values = [...this.networkChartHistory.sent, ...this.networkChartHistory.received];
+        const maxValue = Math.max(1, ...values);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+        ctx.lineWidth = 1;
+        const gridLines = 3;
+        for (let i = 0; i <= gridLines; i++) {
+            const y = top + (plotHeight * i) / gridLines;
+            ctx.beginPath();
+            ctx.moveTo(left, y);
+            ctx.lineTo(right, y);
+            ctx.stroke();
+        }
+
+        const drawLine = (series, color) => {
+            if (!series.length) return;
+            const denominator = Math.max(1, this.networkChartMaxPoints - 1);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            series.forEach((value, index) => {
+                const x = left + (plotWidth * index) / denominator;
+                const normalized = Math.min(1, Math.max(0, value / maxValue));
+                const y = bottom - normalized * plotHeight;
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+        };
+
+        drawLine(this.networkChartHistory.sent, '#4ecb71');
+        drawLine(this.networkChartHistory.received, '#5aa8ff');
+    }
+
+    renderNetworkMonitorStats(stats = null) {
+        const sentEl = this.getId('networkSentValue');
+        const receivedEl = this.getId('networkReceivedValue');
+        const packetLossEl = this.getId('networkPacketLossValue');
+        const jitterEl = this.getId('networkJitterValue');
+        const rttEl = this.getId('networkRttValue');
+
+        if (!sentEl || !receivedEl || !packetLossEl || !jitterEl || !rttEl) return;
+
+        const sentBitrate = stats?.sentBitrate ?? 0;
+        const receivedBitrate = stats?.receivedBitrate ?? 0;
+        const packetLossPercentage = stats?.packetLossPercentage ?? 0;
+        const jitterSeconds = stats?.jitterSeconds ?? 0;
+        const rttSeconds = stats?.rttSeconds ?? 0;
+
+        sentEl.textContent = this.formatBitrate(sentBitrate);
+        receivedEl.textContent = this.formatBitrate(receivedBitrate);
+        packetLossEl.textContent = Number.isFinite(packetLossPercentage)
+            ? `${Math.max(0, packetLossPercentage).toFixed(2)}%`
+            : '0.00%';
+        jitterEl.textContent = this.formatSecondsToMilliseconds(jitterSeconds);
+        rttEl.textContent = this.formatSecondsToMilliseconds(rttSeconds);
     }
 
     changeBtnsBarPosition(position) {

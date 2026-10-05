@@ -55,6 +55,7 @@ let BUTTONS = {
         micOptionsButton: true,
         tabRTMPStreamingBtn: true, // presenter
         tabNotificationsBtn: true, // presenter
+        tabNetworkBtn: true,
         tabModerator: true, // presenter
         tabVideoAIBtn: true, // presenter
         tabRecording: true,

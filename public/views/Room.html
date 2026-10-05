@@ -558,6 +558,9 @@
                     <button id="tabShortcutsBtn" class="fas fa-keyboard tablinks">
                         <p class="tabButtonText">Shortcuts</p>
                     </button>
+                    <button id="tabNetworkBtn" class="fa-solid fa-network-wired tablinks">
+                        <p class="tabButtonText">Network</p>
+                    </button>
                     <button id="tabAspectBtn" class="fas fa-screwdriver-wrench tablinks">
                         <p class="tabButtonText">Layout</p>
                     </button>
@@ -1849,6 +1852,96 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <div id="tabNetwork" class="tabcontent">
+                        <div class="settings-section-intro">
+                            <h3>Network monitor</h3>
+                            <p>Track live transport stats from your current session.</p>
+                        </div>
+                        <table class="settingsTable">
+                            <tr>
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-upload"></i>
+                                        <span class="settings-option-copy">
+                                            <strong>Sent</strong>
+                                            <small>Upload bitrate from your connection</small>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td><p id="networkSentValue">0 b</p></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-download"></i>
+                                        <span class="settings-option-copy">
+                                            <strong>Received</strong>
+                                            <small>Download bitrate from remote peers</small>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td><p id="networkReceivedValue">0 b</p></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                        <span class="settings-option-copy">
+                                            <strong>Packet lost</strong>
+                                            <small>Estimated packet loss rate for incoming media</small>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td><p id="networkPacketLossValue">0.00%</p></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-wave-square"></i>
+                                        <span class="settings-option-copy">
+                                            <strong>Jitter</strong>
+                                            <small>Variation in packet arrival timing</small>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td><p id="networkJitterValue">0.00 ms</p></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-rotate"></i>
+                                        <span class="settings-option-copy">
+                                            <strong>RTT</strong>
+                                            <small>Round-trip latency to the network path</small>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td><p id="networkRttValue">0.00 ms</p></td>
+                            </tr>
+                        </table>
+                        <div class="network-graph-panel">
+                            <div class="network-graph-header">
+                                <strong>Live bitrate graph</strong>
+                                <small>Last 60 seconds</small>
+                            </div>
+                            <canvas
+                                id="networkBitrateChart"
+                                class="network-graph-canvas"
+                                aria-label="Network bitrate chart"
+                            ></canvas>
+                            <div class="network-graph-legend" aria-hidden="true">
+                                <span class="network-legend-item">
+                                    <span class="network-legend-dot network-legend-dot--sent"></span>
+                                    Sent
+                                </span>
+                                <span class="network-legend-item">
+                                    <span class="network-legend-dot network-legend-dot--received"></span>
+                                    Received
+                                </span>
+                            </div>
                         </div>
                     </div>
 
