@@ -52,6 +52,9 @@
         ta: { flag: '🇮🇳', name: 'தமிழ்' },
         sw: { flag: '🇹🇿', name: 'Kiswahili' },
         fa: { flag: '🇮🇷', name: 'فارسی' },
+        pl: { flag: '🇵🇱', name: 'Polski' },
+        th: { flag: '🇹🇭', name: 'ไทย' },
+        uk: { flag: '🇺🇦', name: 'Українська' },
     };
 
     const ATTR_KEYS = ['title', 'placeholder', 'aria-label', 'data-tippy-content'];
