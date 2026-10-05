@@ -493,7 +493,7 @@
 
         const section = document.createElement('div');
         section.className = 'notranslate';
-        section.style.cssText = 'margin-top:12px;';
+        section.style.cssText = 'margin-top:8px;';
 
         const title = document.createElement('div');
         title.className = 'title';
@@ -611,7 +611,9 @@
     // (Translate.css hides #google_translate_element by default).
     function revealGoogleWidget() {
         const el = document.getElementById('google_translate_element');
-        if (el) el.style.setProperty('display', 'block', 'important');
+        if (el) {
+            el.style.cssText = 'display:block !important; margin-top: 8px;';
+        }
     }
 
     // ####################################################
