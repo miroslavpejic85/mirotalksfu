@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.75
+ * @version 2.5.76
  *
  */
 
@@ -5454,11 +5454,15 @@ class RoomClient {
             mySettings.style.width = '100%';
             mySettings.style.height = '100%';
         }
+        if (!this.isMySettingsOpen) {
+            this.closeMobileSettingsNav();
+        }
         mySettings.classList.toggle('show');
         this.isMySettingsOpen = !this.isMySettingsOpen;
         this.videoMediaContainer.style.opacity = this.isMySettingsOpen ? 0.3 : 1;
 
         if (!this.isMySettingsOpen) {
+            this.closeMobileSettingsNav();
             this.stopNetworkMonitor(true);
             return;
         }
@@ -5481,12 +5485,43 @@ class RoomClient {
         }
         this.getId(tabName).style.display = 'block';
         evt.currentTarget.className += ' active';
+        this.closeMobileSettingsNav();
 
         if (tabName === 'tabNetwork') {
             this.startNetworkMonitor();
         } else {
             this.stopNetworkMonitor();
         }
+    }
+
+    setMobileSettingsNavState(open) {
+        const mySettings = this.getId('mySettings');
+        const mySettingsNavToggleBtn = this.getId('mySettingsNavToggleBtn');
+        if (!mySettings) return;
+        const compactSettingsLayout = window.matchMedia('(max-width: 830px)').matches;
+        const shouldOpen = compactSettingsLayout && open;
+
+        mySettings.classList.toggle('settings-nav-open', shouldOpen);
+
+        if (mySettingsNavToggleBtn) {
+            mySettingsNavToggleBtn.setAttribute('aria-expanded', String(shouldOpen));
+            mySettingsNavToggleBtn.setAttribute(
+                'aria-label',
+                shouldOpen ? 'Close settings navigation' : 'Open settings navigation'
+            );
+        }
+    }
+
+    toggleMobileSettingsNav() {
+        const mySettings = this.getId('mySettings');
+        const mySettingsNav = this.getId('mySettingsNav');
+        if (!mySettings || !mySettingsNav || !window.matchMedia('(max-width: 830px)').matches) return;
+        const isOpen = mySettings.classList.contains('settings-nav-open');
+        this.setMobileSettingsNavState(!isOpen);
+    }
+
+    closeMobileSettingsNav() {
+        this.setMobileSettingsNavState(false);
     }
 
     startNetworkMonitor() {
