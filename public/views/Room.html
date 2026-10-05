@@ -141,6 +141,7 @@
         <script defer src="../js/FixWebmDuration.js"></script>
         <script defer src="../js/WakeLock.js"></script>
         <script defer src="../js/RoomTemplate.js"></script>
+        <script defer src="../js/NetworkStats.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/Room.js"></script>
     </head>
@@ -1867,6 +1868,20 @@
                             <tr>
                                 <td>
                                     <div class="title">
+                                        <i class="fa-solid fa-signal"></i>
+                                        <span class="settings-option-copy">
+                                            <strong>Network quality</strong>
+                                            <small>Estimated quality from packet loss, jitter, and latency</small>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span id="networkQualityBadge" class="network-quality-badge">Checking...</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="title">
                                         <i class="fa-solid fa-upload"></i>
                                         <span class="settings-option-copy">
                                             <strong>Sent</strong>
@@ -1943,6 +1958,27 @@
                                 <span class="network-legend-item">
                                     <span class="network-legend-dot network-legend-dot--received"></span>
                                     Received
+                                </span>
+                            </div>
+                        </div>
+                        <div class="network-graph-panel">
+                            <div class="network-graph-header">
+                                <strong>Live latency graph</strong>
+                                <small>Last 60 seconds</small>
+                            </div>
+                            <canvas
+                                id="networkLatencyChart"
+                                class="network-graph-canvas"
+                                aria-label="Network latency chart"
+                            ></canvas>
+                            <div class="network-graph-legend" aria-hidden="true">
+                                <span class="network-legend-item">
+                                    <span class="network-legend-dot network-legend-dot--latency"></span>
+                                    RTT
+                                </span>
+                                <span class="network-legend-item">
+                                    <span class="network-legend-dot network-legend-dot--jitter"></span>
+                                    Jitter
                                 </span>
                             </div>
                         </div>

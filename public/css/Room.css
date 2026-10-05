@@ -3109,6 +3109,46 @@ body {
     background: color-mix(in srgb, var(--select-bg) 48%, transparent);
 }
 
+.network-quality-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    padding: 5px 10px;
+    border: 1px solid var(--room-border);
+    border-radius: 999px;
+    color: var(--fg-1);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    background: color-mix(in srgb, var(--select-bg) 70%, transparent);
+}
+
+.network-quality--excellent {
+    color: #b8f5ca;
+    border-color: rgba(78, 203, 113, 0.6);
+    background: rgba(78, 203, 113, 0.18);
+}
+
+.network-quality--good {
+    color: #d8f6a8;
+    border-color: rgba(160, 220, 90, 0.55);
+    background: rgba(160, 220, 90, 0.16);
+}
+
+.network-quality--fair {
+    color: #ffe4a7;
+    border-color: rgba(244, 184, 74, 0.55);
+    background: rgba(244, 184, 74, 0.16);
+}
+
+.network-quality--poor {
+    color: #ffc0c0;
+    border-color: rgba(255, 107, 107, 0.62);
+    background: rgba(255, 107, 107, 0.18);
+}
+
 .network-graph-header {
     display: flex;
     align-items: center;
@@ -3163,6 +3203,14 @@ body {
 
 .network-legend-dot--received {
     background: #5aa8ff;
+}
+
+.network-legend-dot--latency {
+    background: #bb8dff;
+}
+
+.network-legend-dot--jitter {
+    background: #ffb86c;
 }
 
 @media screen and (max-width: 560px) {
