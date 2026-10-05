@@ -67,6 +67,7 @@
         dict: null,
         lang: 'en',
         mode: 'auto',
+        modeSource: 'server',
         googleActive: false,
     };
 
@@ -350,8 +351,8 @@
     async function applyLanguage(lang) {
         state.lang = lang;
         try {
-            if (lang === configLang()) localStorage.removeItem(OVERRIDE_KEY);
-            else localStorage.setItem(OVERRIDE_KEY, lang);
+            if (lang === configLang()) localStorage.removeItem(LANGUAGE_OVERRIDE_KEY);
+            else localStorage.setItem(LANGUAGE_OVERRIDE_KEY, lang);
         } catch (e) {
             console.warn('i18n: cannot persist language choice', e.message);
         }
@@ -384,11 +385,25 @@
         }
     }
 
-    const OVERRIDE_KEY = 'uiLanguageOverride';
+    const LANGUAGE_OVERRIDE_KEY = 'uiLanguageOverride';
+    const MODE_OVERRIDE_KEY = 'uiTranslationModeOverride';
+    const VALID_MODES = new Set(['auto', 'native', 'google']);
 
     function getOverride() {
         try {
-            return localStorage.getItem(OVERRIDE_KEY);
+            return localStorage.getItem(LANGUAGE_OVERRIDE_KEY);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function normalizeMode(mode) {
+        return VALID_MODES.has(mode) ? mode : null;
+    }
+
+    function getModeOverride() {
+        try {
+            return normalizeMode(localStorage.getItem(MODE_OVERRIDE_KEY));
         } catch (e) {
             return null;
         }
@@ -404,8 +419,13 @@
     // Backward compatible: if unset/absent, use Google machine translation (pre-native behavior).
     function configMode() {
         const brand = typeof BRAND !== 'undefined' && BRAND ? BRAND : window.BRAND || {};
-        const m = brand.app && brand.app.translationMode;
-        return m === 'native' || m === 'auto' || m === 'google' ? m : 'google';
+        return normalizeMode(brand.app && brand.app.translationMode) || 'google';
+    }
+
+    function resolveMode() {
+        const override = getModeOverride();
+        if (override) return { mode: override, source: 'browser' };
+        return { mode: configMode(), source: 'server' };
     }
 
     // Per-browser override (set via the in-room picker) wins over the server UI_LANGUAGE.
@@ -413,6 +433,79 @@
         const override = getOverride();
         if (override && (override === 'en' || LANG_DISPLAY[override])) return override;
         return configLang();
+    }
+
+    async function applyMode(chosen) {
+        const mode = normalizeMode(chosen);
+        if (!mode) return;
+
+        try {
+            const cfgMode = configMode();
+            if (mode === cfgMode) localStorage.removeItem(MODE_OVERRIDE_KEY);
+            else localStorage.setItem(MODE_OVERRIDE_KEY, mode);
+        } catch (e) {
+            console.warn('i18n: cannot persist translation mode override', e.message);
+        }
+
+        location.reload();
+    }
+
+    function renderModeSelect(currentMode, currentSource) {
+        const container = document.getElementById('tabLanguages');
+        if (!container || document.getElementById('i18nModeSelect')) return;
+
+        const section = document.createElement('div');
+        section.className = 'notranslate';
+        section.style.cssText = 'margin-top:12px;';
+
+        const title = document.createElement('div');
+        title.className = 'title';
+        const titleIcon = document.createElement('i');
+        titleIcon.className = 'fa-solid fa-language';
+        const titleText = document.createElement('p');
+        titleText.textContent = window.i18n?.t('Translation mode:', 'labels') || 'Translation mode:';
+        title.appendChild(titleIcon);
+        title.appendChild(titleText);
+        section.appendChild(title);
+
+        const modeSelect = document.createElement('select');
+        modeSelect.id = 'i18nModeSelect';
+        modeSelect.className = 'form-select text-light bg-dark notranslate';
+        modeSelect.style.cssText = 'max-width:280px;margin-top:4px;';
+        const autoOption = document.createElement('option');
+        autoOption.value = 'auto';
+        autoOption.textContent =
+            window.i18n?.t('Auto (native when available)', 'labels') || 'Auto (native when available)';
+        modeSelect.appendChild(autoOption);
+
+        const nativeOption = document.createElement('option');
+        nativeOption.value = 'native';
+        nativeOption.textContent = window.i18n?.t('Native only', 'labels') || 'Native only';
+        modeSelect.appendChild(nativeOption);
+
+        const googleOption = document.createElement('option');
+        googleOption.value = 'google';
+        googleOption.textContent = window.i18n?.t('Google Translate', 'labels') || 'Google Translate';
+        modeSelect.appendChild(googleOption);
+        modeSelect.value = currentMode;
+        section.appendChild(modeSelect);
+
+        const source = document.createElement('small');
+        source.className = 'notranslate';
+        source.style.cssText = 'display:block;margin-top:6px;color:var(--fg-2);font-size:0.82rem;line-height:1.4;';
+        const sourceLabel =
+            currentSource === 'browser'
+                ? window.i18n?.t('Current source: saved browser preference', 'labels') ||
+                  'Current source: saved browser preference'
+                : window.i18n?.t('Current source: default setting', 'labels') || 'Current source: default setting';
+        source.textContent = sourceLabel;
+        section.appendChild(source);
+
+        modeSelect.addEventListener('change', () => {
+            applyMode(modeSelect.value);
+        });
+
+        container.appendChild(section);
     }
 
     // In-room language picker (human-translated languages + English). Switches live without reload.
@@ -459,8 +552,8 @@
             const needsGoogle = chosen !== 'en' && !LANG_DISPLAY[chosen];
             if (state.googleActive || needsGoogle) {
                 try {
-                    if (chosen === configLang()) localStorage.removeItem(OVERRIDE_KEY);
-                    else localStorage.setItem(OVERRIDE_KEY, chosen);
+                    if (chosen === configLang()) localStorage.removeItem(LANGUAGE_OVERRIDE_KEY);
+                    else localStorage.setItem(LANGUAGE_OVERRIDE_KEY, chosen);
                 } catch (e) {
                     console.warn('i18n: cannot persist language choice', e.message);
                 }
@@ -514,8 +607,9 @@
     window.i18n.ready = (async function init() {
         await whenBrandReady();
 
-        const mode = configMode();
+        const { mode, source } = resolveMode();
         state.mode = mode;
+        state.modeSource = source;
         const lang = resolveLang();
         state.lang = lang;
 
@@ -545,6 +639,7 @@
         if (state.native) console.log(`i18n: native translation active for "${lang}" (mode: ${mode})`);
 
         await whenDomReady();
+        renderModeSelect(mode, source);
 
         if (state.native) {
             // Native human translation: hooks, static pass, picker, observer.

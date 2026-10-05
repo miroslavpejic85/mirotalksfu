@@ -28,7 +28,7 @@ function googleTranslateElementInit() {
         stored = localStorage.getItem(GOOGLE_LANG_KEY);
     } catch (e) {}
 
-    const language = stored || BRAND?.app?.language || 'en';
+    const language = stored || window.i18n?.getLang?.() || BRAND?.app?.language || 'en';
 
     console.log('Language', language);
 

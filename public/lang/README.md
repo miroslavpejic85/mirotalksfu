@@ -18,9 +18,13 @@ UI_LANGUAGE=en
 | `auto`             | Use the native language file if available, otherwise Google |
 | `native`           | Use native files only; missing translations remain English  |
 
-The config fields are `translationMode` and `language`. In native mode, switch languages
-from Settings > Language. Browser language preferences override `UI_LANGUAGE`; reset to
-the server default when testing configuration changes.
+The config fields are `translationMode` and `language`. In a room, users can override
+the translation mode from **Settings > Language**. The mode override is persisted in
+browser local storage and reused in subsequent rooms on the same browser.
+
+Mode override precedence is: `browser override` → server `.env` default.
+Language preferences override `UI_LANGUAGE`; reset to the server default when testing
+configuration changes.
 
 ## Add or update a language
 
