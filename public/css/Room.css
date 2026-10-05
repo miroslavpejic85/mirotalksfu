@@ -1726,9 +1726,21 @@ body {
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--room-accent) 24%, transparent);
 }
 
-#myProfileAvatar {
+#myProfileAvatarControls {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+#myProfileAvatarButtons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#myProfileAvatar {
     padding: 5px;
     width: 100px;
     height: 100px;
@@ -1738,6 +1750,10 @@ body {
 #myProfileAvatarUploadBtn,
 #myProfileAvatarResetBtn {
     margin-top: 6px;
+}
+
+#myProfileAvatarButtons > :first-child {
+    margin-top: 0;
 }
 
 .form-check-input {

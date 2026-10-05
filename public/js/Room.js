@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.79
+ * @version 2.5.80
  *
  */
 
@@ -2133,6 +2133,9 @@ async function updateMyPeerAvatarByUrl() {
 
 function applyPeerAvatar(avatarSrc) {
     try {
+        const currentPeerId = rc?.peer_id || socket?.id;
+        if (!currentPeerId) throw new Error('Missing peer id while applying avatar');
+
         peer_avatar = avatarSrc;
         hasTemporaryAvatar = true;
 
@@ -2140,13 +2143,13 @@ function applyPeerAvatar(avatarSrc) {
         lS.setSettings(localStorageSettings);
 
         myProfileAvatar.setAttribute('src', peer_avatar);
-        rc.setVideoAvatarImgName(rc.peer_id + '__img', peer_name, peer_avatar);
+        rc.setVideoAvatarImgName(currentPeerId + '__img', peer_name, peer_avatar);
         rc.setMsgAvatar('left', peer_name, peer_avatar);
         updateMyAvatarResetButtonVisibility();
 
         rc.peer_avatar = peer_avatar;
         rc.peer_info.peer_avatar = peer_avatar;
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'avatar', peer_avatar);
+        rc.updatePeerInfo(peer_name, currentPeerId, 'avatar', peer_avatar);
 
         userLog('info', 'Avatar applied and saved for future sessions');
     } catch (err) {
@@ -2156,6 +2159,13 @@ function applyPeerAvatar(avatarSrc) {
 }
 
 function resetMyPeerAvatarInMemory() {
+    const currentPeerId = rc?.peer_id || socket?.id;
+    if (!currentPeerId) {
+        console.error('Missing peer id while resetting avatar');
+        userLog('error', 'Unable to apply avatar URL');
+        return;
+    }
+
     peer_avatar = false;
     hasTemporaryAvatar = false;
     localStorageSettings.peer_avatar = '';
@@ -2168,13 +2178,13 @@ function resetMyPeerAvatarInMemory() {
         myProfileAvatar.setAttribute('src', rc.genAvatarSvg(peer_name, 64));
     }
 
-    rc.setVideoAvatarImgName(rc.peer_id + '__img', peer_name, false);
+    rc.setVideoAvatarImgName(currentPeerId + '__img', peer_name, false);
     rc.setMsgAvatar('left', peer_name, false);
     updateMyAvatarResetButtonVisibility();
 
     rc.peer_avatar = false;
     rc.peer_info.peer_avatar = false;
-    rc.updatePeerInfo(peer_name, rc.peer_id, 'avatar', false);
+    rc.updatePeerInfo(peer_name, currentPeerId, 'avatar', false);
 
     userLog('info', 'Avatar reset to default');
 }
@@ -9024,7 +9034,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.79',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.5.80',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
