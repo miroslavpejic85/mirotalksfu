@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.81
+ * @version 2.5.82
  *
  */
 
@@ -219,13 +219,24 @@ const enums = {
 const VideoAI = {
     enabled: true,
     active: false,
+    provider: 'liveavatar',
+    providers: {
+        available: {
+            liveavatar: true,
+            anam: false,
+        },
+        defaultProvider: 'liveavatar',
+    },
     info: {},
     avatarId: null,
     avatarName: '',
+    avatarModel: null,
     avatarVoice: null,
     quality: 'medium',
     sessionToken: null,
     livekitRoom: null,
+    anamClient: null,
+    anamSessionId: null,
     sessionTimeLimit: 0,
     sessionCountdown: null,
     avatarProducers: [],
@@ -793,6 +804,8 @@ class RoomClient {
             // Room-level VideoAI availability, kept so handleRules can gate the tab correctly
             // both at join and when a peer is promoted/demoted mid-session.
             this.videoAIEnabled = room.videoAIEnabled || false;
+            this.videoAIProviders = room.videoAIProviders || null;
+            VideoAI.providers = room.videoAIProviders || VideoAI.providers;
 
             handleRules(isPresenter);
 
@@ -867,6 +880,15 @@ class RoomClient {
                 transcription.whisper.isEnabled = this.whisperEnabled;
                 transcription.whisper.segmentMs = (room.whisperSegmentSeconds || 5) * 1000;
                 this.whisperEnabled ? show('transcriptWhisperLi') : hide('transcriptWhisperLi');
+            }
+            const preferredProvider = VideoAI.providers?.defaultProvider || 'liveavatar';
+            const available = VideoAI.providers?.available || {};
+            if (preferredProvider === 'anam' && available.anam) {
+                VideoAI.provider = 'anam';
+            } else if (available.liveavatar) {
+                VideoAI.provider = 'liveavatar';
+            } else if (available.anam) {
+                VideoAI.provider = 'anam';
             }
             // Check if VideoAI is enabled and hide to guests by default
             if (!isPresenter || !this.videoAIEnabled) {
@@ -13664,13 +13686,42 @@ class RoomClient {
     }
 
     // ##############################################
-    // LiveAvatar Video AI
+    // Video AI (LiveAvatar / Anam)
     // ##############################################
 
-    getAvatarList() {
+    initVideoAIProviderSelector() {
+        const providerSelect = this.getId('avatarProvider');
+        if (!providerSelect) return;
+
+        const available = VideoAI.providers?.available || {};
+        const liveavatarEnabled = !!available.liveavatar;
+        const anamEnabled = !!available.anam;
+
+        const liveavatarOption = providerSelect.querySelector('option[value="liveavatar"]');
+        const anamOption = providerSelect.querySelector('option[value="anam"]');
+        if (liveavatarOption) liveavatarOption.style.display = liveavatarEnabled ? '' : 'none';
+        if (anamOption) anamOption.style.display = anamEnabled ? '' : 'none';
+
+        if (VideoAI.provider === 'anam' && !anamEnabled) {
+            VideoAI.provider = liveavatarEnabled ? 'liveavatar' : 'anam';
+        } else if (VideoAI.provider === 'liveavatar' && !liveavatarEnabled) {
+            VideoAI.provider = anamEnabled ? 'anam' : 'liveavatar';
+        }
+
+        providerSelect.value = VideoAI.provider;
+    }
+
+    loadVideoAIProviderData() {
+        this.initVideoAIProviderSelector();
+        this.getAvatarList(VideoAI.provider);
+        this.getVoiceList(VideoAI.provider);
+    }
+
+    getAvatarList(provider = VideoAI.provider) {
         this.socket
-            .request('getAvatarList')
+            .request('getAvatarList', { provider })
             .then(function (completion) {
+                VideoAI.provider = completion?.provider || provider || VideoAI.provider;
                 const avatarVideoAIPreview = document.getElementById('avatarVideoAIPreview');
                 const avatarVideoAISpinner = document.getElementById('avatarVideoAISpinner');
                 const avatarVideoAIcontainer = document.getElementById('avatarVideoAIcontainer');
@@ -13686,9 +13737,10 @@ class RoomClient {
 
                 function selectAvatar(avatar, card) {
                     document.querySelectorAll('.avatarCard').forEach((c) => c.classList.remove('selected'));
-                    card.classList.add('selected');
+                    if (card) card.classList.add('selected');
                     VideoAI.avatarId = avatar.avatar_id;
                     VideoAI.avatarName = avatar.avatar_name;
+                    VideoAI.avatarModel = avatar.avatar_model || null;
                     avatarVideoAIPreview.src = avatar.preview_image_url;
                     avatarVideoAIPreview.alt = avatar.avatar_name;
                     avatarVideoAIPreview.onload = () => {
@@ -13724,6 +13776,10 @@ class RoomClient {
                     }
                 });
 
+                if (!firstPreviewSet && avatars.length) {
+                    selectAvatar(avatars[0], avatarVideoAIcontainer.querySelector('.avatarCard'));
+                }
+
                 // Search/filter avatars by name
                 avatarSearchInput.value = '';
                 avatarSearchInput.oninput = () => {
@@ -13743,24 +13799,24 @@ class RoomClient {
             .catch((err) => {
                 console.error('Video AI getAvatarList error:', err);
                 this.userLog('warning', 'Video AI getAvatarList error:\n' + err, 'top-end', 6000);
-                this.getId('tabVideoAI').style.display = 'none';
-                this.getId('tabVideoAIBtn').style.display = 'none';
-                this.getId('tabRoomBtn').click();
             });
     }
 
-    getVoiceList() {
+    getVoiceList(provider = VideoAI.provider) {
         this.socket
-            .request('getVoiceList')
+            .request('getVoiceList', { provider })
             .then((completion) => {
+                VideoAI.provider = completion?.provider || provider || VideoAI.provider;
                 const voiceList = completion?.response?.voices || [];
-                if (!voiceList.length) {
-                    console.warn('No voices available in the response');
-                    return;
-                }
 
                 const selectElement = document.getElementById('avatarVoiceIDs');
                 selectElement.innerHTML = '<option value="">Select Avatar Voice</option>'; // Reset options with default
+
+                if (!voiceList.length) {
+                    VideoAI.avatarVoice = null;
+                    console.warn('No voices available in the response');
+                    return;
+                }
 
                 // Sort the list alphabetically by language
                 const sortedList = voiceList.sort((a, b) => (a.language ?? '').localeCompare(b.language ?? ''));
@@ -13777,7 +13833,7 @@ class RoomClient {
                 const voicePreviewPlayer = document.getElementById('avatarVoicePreview');
 
                 // Event listener for changes on the select element
-                selectElement.addEventListener('change', async (event) => {
+                selectElement.onchange = async (event) => {
                     VideoAI.avatarVoice = event.target.value || null;
 
                     // Fetch and play real voice preview from LiveAvatar API
@@ -13789,6 +13845,7 @@ class RoomClient {
                                 'previewVoice',
                                 {
                                     voice_id: event.target.value,
+                                    provider: VideoAI.provider,
                                 },
                                 0 // external API, no timeout
                             );
@@ -13809,7 +13866,7 @@ class RoomClient {
                         this.streamingStop();
                         await this.createLiveAvatarSession();
                     }
-                });
+                };
             })
             .catch((err) => {
                 console.error('Video AI getVoiceList error', err);
@@ -13990,7 +14047,17 @@ class RoomClient {
 
     async createLiveAvatarSession() {
         try {
-            const { quality, avatarId, avatarVoice } = VideoAI;
+            const { quality, avatarId, avatarVoice, provider } = VideoAI;
+            if (provider === 'anam' && !avatarVoice) {
+                this.userLog('warning', 'Please select an Anam voice before starting', 'top-end', 6000);
+                this.stopSession();
+                return;
+            }
+            if (provider === 'liveavatar' && !avatarVoice) {
+                this.userLog('warning', 'Please select a LiveAvatar voice before starting', 'top-end', 6000);
+                this.stopSession();
+                return;
+            }
 
             // Step 1: Create session token
             const tokenResponse = await this.socket.request(
@@ -13999,6 +14066,8 @@ class RoomClient {
                     quality: quality,
                     avatar_id: avatarId,
                     voice_id: avatarVoice,
+                    avatar_model: VideoAI.avatarModel,
+                    provider: VideoAI.provider,
                 },
                 0 // external API, no timeout
             );
@@ -14011,23 +14080,36 @@ class RoomClient {
                 return;
             }
 
-            if (tokenResponse.response.code !== 1000) {
+            const isAnamProvider = provider === 'anam';
+            if (!isAnamProvider && tokenResponse.response.code !== 1000) {
                 this.userLog('warning', tokenResponse.response.message, 'top-end');
                 this.stopSession();
                 return;
             }
 
-            const { session_id, session_token } = tokenResponse.response.data;
+            const sessionData = isAnamProvider ? tokenResponse.response : tokenResponse.response.data;
+            const { session_id, session_token } = sessionData;
+            if (isAnamProvider && !session_token) {
+                this.userLog('error', 'Anam session token is missing. Please check server logs.', 'top-end', 6000);
+                this.stopSession();
+                return;
+            }
             VideoAI.info = { session_id };
             VideoAI.sessionToken = session_token;
 
             console.log('Video AI createSessionToken', VideoAI);
+
+            if (isAnamProvider) {
+                await this.connectToAnam(session_token);
+                return;
+            }
 
             // Step 2: Start session to get LiveKit credentials
             const startResponse = await this.socket.request(
                 'startSession',
                 {
                     session_token: session_token,
+                    provider: VideoAI.provider,
                 },
                 0 // external API, no timeout
             );
@@ -14062,6 +14144,37 @@ class RoomClient {
             console.error('Video AI createLiveAvatarSession error:', errMsg);
             this.stopSession();
         }
+    }
+
+    async connectToAnam(sessionToken) {
+        const { createClient, AnamEvent } = await import('https://esm.sh/@anam-ai/js-sdk@latest');
+
+        const anamClient = createClient(sessionToken, { disableInputAudio: true });
+        this.hideVideoLoaderOnPlay(this.videoAIElement);
+        anamClient.addListener(AnamEvent.SESSION_READY, (sessionId) => {
+            VideoAI.anamSessionId = sessionId;
+            VideoAI.info = { session_id: sessionId };
+            console.log('Video AI Anam session ready', sessionId);
+        });
+        anamClient.addListener(AnamEvent.VIDEO_PLAY_STARTED, () => {
+            if (this.videoAIContainer) this.hideVideoLoader(this.videoAIContainer);
+        });
+        anamClient.addListener(AnamEvent.CONNECTION_CLOSED, (reason) => {
+            console.log('Video AI Anam connection closed', reason);
+        });
+
+        await anamClient.streamToVideoElement('videoAIElement');
+
+        VideoAI.anamClient = anamClient;
+        VideoAI.active = true;
+
+        this.startRendering();
+
+        this.isMobileDevice ? this.handleMobileVideoAiChat() : this.handleDesktopVideoAiChat();
+
+        this.startVideoAISessionTimer();
+
+        this.userLog('info', 'Video AI streaming started', 'top-end');
     }
 
     async connectToLiveKit(livekitUrl, livekitToken) {
@@ -14332,6 +14445,16 @@ class RoomClient {
     }
 
     streamingTask(message) {
+        if (VideoAI.provider === 'anam' && VideoAI.anamClient && VideoAI.active && message) {
+            try {
+                VideoAI.anamClient.talk(message);
+                console.log('Video AI Anam talk sent:', message);
+            } catch (err) {
+                console.error('Video AI Anam talk error:', err);
+            }
+            return;
+        }
+
         if (VideoAI.enabled && VideoAI.active && message && VideoAI.livekitRoom) {
             const event = {
                 event_type: 'avatar.speak_text',
@@ -14351,6 +14474,16 @@ class RoomClient {
     }
 
     streamingInterrupt() {
+        if (VideoAI.provider === 'anam' && VideoAI.anamClient && VideoAI.active) {
+            try {
+                VideoAI.anamClient.interruptPersona();
+                console.log('Video AI Anam interrupt sent');
+            } catch (err) {
+                console.error('Video AI Anam interrupt error:', err);
+            }
+            return;
+        }
+
         if (VideoAI.enabled && VideoAI.active && VideoAI.info.session_id && VideoAI.livekitRoom) {
             const event = {
                 event_type: 'avatar.interrupt',
@@ -14470,7 +14603,7 @@ class RoomClient {
     }
 
     setVideoAIControlsDisabled(disabled) {
-        const ids = ['avatarQuality', 'avatarVoiceIDs', 'avatarVideoAIStart'];
+        const ids = ['avatarProvider', 'avatarQuality', 'avatarVoiceIDs', 'avatarVideoAIStart'];
         ids.forEach((id) => {
             const el = this.getId(id);
             if (el) el.disabled = disabled;
@@ -14531,6 +14664,14 @@ class RoomClient {
         const shareBtn = this.getId('avatar__shareToRoom');
         if (shareBtn) setColor(shareBtn, 'white');
 
+        if (VideoAI.provider === 'anam' && VideoAI.anamClient) {
+            VideoAI.anamClient
+                .stopStreaming()
+                .then(() => console.info('Video AI Anam stopStreaming done!'))
+                .catch((error) => console.warn('Video AI Anam stopStreaming:', error?.message || error));
+            VideoAI.anamClient = null;
+        }
+
         // Disconnect LiveKit room
         if (VideoAI.livekitRoom) {
             console.info('Video AI LiveKit room disconnect');
@@ -14540,7 +14681,7 @@ class RoomClient {
         if (VideoAI.active && VideoAI.info && VideoAI.info.session_id) {
             const sessionId = VideoAI.info.session_id;
             this.socket
-                .request('stopSession', { session_id: sessionId })
+                .request('stopSession', { session_id: sessionId, provider: VideoAI.provider })
                 .then(() => {
                     console.info('Video AI stopSession done!');
                 })
@@ -14554,6 +14695,7 @@ class RoomClient {
         VideoAI.active = false;
         VideoAI.sessionToken = null;
         VideoAI.mediaParticipantIdentity = null;
+        VideoAI.anamSessionId = null;
     }
 
     // ##############################################

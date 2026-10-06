@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.81
+ * @version 2.5.82
  *
  */
 
@@ -108,6 +108,7 @@ const Discord = require('./Discord');
 const Mattermost = require('./Mattermost');
 const restrictAccessByIP = require('./middleware/IpWhitelist');
 const { applyEmbedHeaders, embedAllowedOrigins, embedCsp } = require('./middleware/EmbedHeaders');
+const { createVideoAIService } = require('./videoai/service');
 const packageJson = require('../../package.json');
 
 // Login attempts limit
@@ -2133,7 +2134,17 @@ function startServer() {
                     worker_bin: mediasoup?.workerBin,
                 },
                 rtmp: rtmpCfg?.enabled ? rtmpCfg : false,
-                videoAI: config.integrations?.videoAI?.enabled ? config.integrations.videoAI : false,
+                videoAI: config.integrations?.videoAI?.enabled
+                    ? {
+                          enabled: true,
+                          defaultProvider: config.integrations.videoAI.defaultProvider || 'liveavatar',
+                          sessionTimeLimit: config.integrations.videoAI.sessionTimeLimit || 0,
+                          providers: {
+                              liveavatar: !!config.integrations.videoAI.liveavatar?.enabled,
+                              anam: !!config.integrations.videoAI.anam?.enabled,
+                          },
+                      }
+                    : false,
                 server_recording: config?.media?.recording?.enabled ? config.media.recording : false,
             },
 
@@ -4727,192 +4738,88 @@ function startServer() {
             }
         });
 
+        const videoAIService = createVideoAIService(config?.integrations?.videoAI, axios, log);
+
         // https://docs.liveavatar.com/reference/list_public_avatars_v1_avatars_public_get
         // https://docs.liveavatar.com/reference/list_user_avatars_v1_avatars_get
-        socket.on('getAvatarList', async ({}, cb) => {
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-
+        // https://anam.ai/docs/api-reference/avatars/list-avatars
+        socket.on('getAvatarList', async ({ provider }, cb) => {
             try {
-                const headers = {
-                    'Content-Type': 'application/json',
-                    'X-API-KEY': config?.integrations?.videoAI?.apiKey,
-                };
-
-                const [publicRes, privateRes] = await Promise.allSettled([
-                    axios.get(`${config?.integrations?.videoAI?.basePath}/v1/avatars/public?page_size=100`, {
-                        headers,
-                    }),
-                    axios.get(`${config?.integrations?.videoAI?.basePath}/v1/avatars?page_size=100`, { headers }),
-                ]);
-
-                const publicAvatars = publicRes.status === 'fulfilled' ? publicRes.value.data?.data?.results || [] : [];
-                const privateAvatars =
-                    privateRes.status === 'fulfilled' ? privateRes.value.data?.data?.results || [] : [];
-
-                // Normalize LiveAvatar fields to match client expectations
-                const avatars = [...publicAvatars, ...privateAvatars].map((a) => ({
-                    avatar_id: a.id,
-                    avatar_name: a.name,
-                    preview_image_url: a.preview_url,
-                    preview_video_url: null,
-                    is_paid: false,
-                }));
-
-                const data = { response: { avatars } };
-
-                //log.debug('getAvatarList', data);
-
-                cb(data);
+                const data = await videoAIService.getAvatarList(provider);
+                cb({ response: { avatars: data.avatars }, provider: data.provider });
             } catch (error) {
-                log.error('getAvatarList', error.response?.data || error.message);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
-            }
-        });
-
-        // https://docs.liveavatar.com/reference/list_voices_v1_voices_get
-        socket.on('getVoiceList', async ({}, cb) => {
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-
-            try {
-                const response = await axios.get(`${config?.integrations?.videoAI?.basePath}/v1/voices?page_size=100`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-KEY': config?.integrations?.videoAI?.apiKey,
-                    },
-                });
-
-                // Normalize LiveAvatar fields to match client expectations
-                const voices = (response.data?.data?.results || []).map((v) => ({
-                    voice_id: v.id,
-                    name: v.name,
-                    language: v.language,
-                    gender: v.gender,
-                    is_paid: false,
-                }));
-
-                const data = { response: { voices } };
-
-                //log.debug('getVoiceList', data);
-
-                cb(data);
-            } catch (error) {
-                log.error('getVoiceList', error.response?.data || error.message);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
-            }
-        });
-
-        // https://docs.liveavatar.com/reference/get_voice_preview_by_id_v1_voices__voice_id__preview_get
-        socket.on('previewVoice', async ({ voice_id }, cb) => {
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-
-            try {
-                const response = await axios.get(
-                    `${config?.integrations?.videoAI?.basePath}/v1/voices/${encodeURIComponent(voice_id)}/preview`,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-API-KEY': config?.integrations?.videoAI?.apiKey,
-                        },
-                    }
-                );
-
-                const audioBase64 = response.data?.data?.audio_base64;
-                if (audioBase64) {
-                    cb({ audio: `data:audio/mpeg;base64,${audioBase64}` });
-                } else {
-                    cb({ error: 'No audio preview available for this voice' });
-                }
-            } catch (error) {
-                log.error('previewVoice', error.response?.data || error.message);
-                cb({ error: 'Voice preview not available' });
-            }
-        });
-
-        // https://docs.liveavatar.com/reference/create_session_token_v1_sessions_token_post
-        socket.on('createSessionToken', async ({ quality, avatar_id, voice_id }, cb) => {
-            if (!roomExists(socket)) return;
-
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-            try {
-                const mode = config?.integrations?.videoAI?.mode || 'FULL';
-                const contextId = config?.integrations?.videoAI?.contextId;
-
-                const avatarPersona = {};
-                if (voice_id) avatarPersona.voice_id = voice_id;
-                if (contextId) avatarPersona.context_id = contextId;
-
-                const body = {
-                    mode,
-                    avatar_id,
-                    video_settings: { quality: quality || 'high' },
-                };
-
-                if (mode === 'FULL') {
-                    body.avatar_persona = avatarPersona;
-                }
-
-                const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/sessions/token`,
-                    body,
-                    {
-                        headers: {
-                            accept: 'application/json',
-                            'content-type': 'application/json',
-                            'X-API-KEY': config?.integrations?.videoAI?.apiKey,
-                        },
-                    }
-                );
-
-                const data = { response: response.data };
-
-                log.debug('createSessionToken', data);
-
-                cb(data);
-            } catch (error) {
-                log.error('createSessionToken', error.response?.data || error.message);
                 cb({
                     error:
                         error.response?.status === 500
                             ? 'Internal server error'
-                            : error.response?.data || error.message,
+                            : error.normalizedMessage || error.message,
+                });
+            }
+        });
+
+        // https://docs.liveavatar.com/reference/list_voices_v1_voices_get
+        // https://anam.ai/docs/api-reference/voices/list-voices
+        socket.on('getVoiceList', async ({ provider }, cb) => {
+            try {
+                const data = await videoAIService.getVoiceList(provider);
+                cb({ response: { voices: data.voices }, provider: data.provider });
+            } catch (error) {
+                cb({
+                    error:
+                        error.response?.status === 500
+                            ? 'Internal server error'
+                            : error.normalizedMessage || error.message,
+                });
+            }
+        });
+
+        // https://docs.liveavatar.com/reference/get_voice_preview_by_id_v1_voices__voice_id__preview_get
+        // https://anam.ai/docs/api-reference/voices/list-voices
+        socket.on('previewVoice', async ({ voice_id, provider }, cb) => {
+            try {
+                const data = await videoAIService.previewVoice(provider, voice_id);
+                if (data.audio) return cb({ audio: data.audio });
+                cb({ error: 'No audio preview available for this voice' });
+            } catch (error) {
+                cb({ error: error.normalizedMessage || 'Voice preview not available' });
+            }
+        });
+
+        // https://docs.liveavatar.com/reference/create_session_token_v1_sessions_token_post
+        // https://anam.ai/docs/api-reference/sessions/create-session-token
+        socket.on('createSessionToken', async ({ quality, avatar_id, voice_id, avatar_model, provider }, cb) => {
+            if (!roomExists(socket)) return;
+            try {
+                const data = await videoAIService.createSessionToken(provider, {
+                    quality,
+                    avatarId: avatar_id,
+                    voiceId: voice_id,
+                    avatarModel: avatar_model,
+                });
+                cb(data);
+            } catch (error) {
+                cb({
+                    error:
+                        error.response?.status === 500
+                            ? 'Internal server error'
+                            : error.normalizedMessage || error.message,
                 });
             }
         });
 
         // https://docs.liveavatar.com/reference/start_session_v1_sessions_start_post
-        socket.on('startSession', async ({ session_token }, cb) => {
+        // https://anam.ai/docs/javascript-sdk/reference/basic-usage
+        socket.on('startSession', async ({ session_token, provider }, cb) => {
             if (!roomExists(socket)) return;
-
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-
             try {
-                const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/sessions/start`,
-                    {},
-                    {
-                        headers: {
-                            accept: 'application/json',
-                            Authorization: `Bearer ${session_token}`,
-                        },
-                    }
-                );
-
-                const data = { response: response.data.data };
-
-                log.debug('startSession', data);
-
-                cb(data);
+                const data = await videoAIService.startSession(provider, session_token);
+                return cb(data);
             } catch (error) {
-                log.error('startSession', error.response?.data || error.message);
-                cb({
+                return cb({
                     error:
-                        error.response?.data?.message ||
-                        (error.response?.status === 500 ? 'Internal server error' : error.message),
+                        error.response?.status === 500
+                            ? 'Internal server error'
+                            : error.normalizedMessage || error.message,
                 });
             }
         });
@@ -4920,8 +4827,7 @@ function startServer() {
         socket.on('talkToOpenAI', async ({ text, context }, cb) => {
             if (!roomExists(socket)) return;
 
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
+            if (!config?.integrations?.videoAI?.enabled) return cb({ error: 'Video AI seems disabled, try later!' });
 
             try {
                 const systemLimit = config?.integrations?.videoAI?.systemLimit;
@@ -4972,34 +4878,19 @@ function startServer() {
         });
 
         // https://docs.liveavatar.com/reference/stop_session_v1_sessions_stop_post
-        socket.on('stopSession', async ({ session_id }, cb) => {
+        // https://anam.ai/docs/api-reference/sessions/stop-session
+        socket.on('stopSession', async ({ session_id, provider }, cb) => {
             if (!roomExists(socket)) return;
-
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-
             try {
-                const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/sessions/stop`,
-                    {
-                        session_id,
-                    },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-API-KEY': config?.integrations?.videoAI?.apiKey,
-                        },
-                    }
-                );
-
-                const data = { response: response.data };
-
-                log.debug('stopSession', data);
-
-                cb(data);
+                const data = await videoAIService.stopSession(provider, session_id);
+                return cb(data);
             } catch (error) {
-                log.error('stopSession', error.response?.data || error.message);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
+                return cb({
+                    error:
+                        error.response?.status === 500
+                            ? 'Internal server error'
+                            : error.normalizedMessage || error.message,
+                });
             }
         });
 

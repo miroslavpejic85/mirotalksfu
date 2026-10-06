@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.5.81 - Configuration File
+ * MiroTalk SFU v2.5.82 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -776,21 +776,24 @@ module.exports = {
         /**
          * LiveAvatar Video AI Configuration
          * =================================
-         * AI-powered avatar streaming integration (migrated from HeyGen)
+         * AI-powered avatar streaming integrations.
+         * Supported providers: liveavatar, anam
          *
          * Setup Instructions:
          * ------------------
          * 1. Go to https://app.liveavatar.com
          * 2. Create your LiveAvatar account
          * 3. Generate your API key from settings
+         * 4. (Optional) Configure Anam provider:
+         *    - https://lab.anam.ai
+         *    - create API key and copy LLM id
          *
          * Core Settings:
          * -------------
          * - enabled    : Enable/disable Video AI [true/false] (default: false)
-         * - basePath   : LiveAvatar API endpoint (default: 'https://api.liveavatar.com')
-         * - apiKey     : From LiveAvatar account (ALWAYS store in .env)
-         * - mode       : Session mode - FULL (managed LLM) or LITE (custom pipeline)
-         * - contextId  : Optional context ID for avatar personality/knowledge
+         * - defaultProvider: Default provider shown in UI (liveavatar|anam)
+         * - liveavatar     : LiveAvatar provider config
+         * - anam           : Anam provider config
          *
          * AI Behavior:
          * -----------
@@ -799,14 +802,33 @@ module.exports = {
          */
         videoAI: {
             enabled: process.env.VIDEOAI_ENABLED === 'true',
-            basePath: process.env.VIDEOAI_BASE_PATH || 'https://api.liveavatar.com',
-            apiKey: process.env.VIDEOAI_API_KEY || '',
-            mode: process.env.VIDEOAI_MODE || 'FULL',
-            contextId: process.env.VIDEOAI_CONTEXT_ID || '',
+            defaultProvider: process.env.VIDEOAI_DEFAULT_PROVIDER || process.env.VIDEOAI_PROVIDER || 'liveavatar',
             systemLimit: process.env.VIDEOAI_SYSTEM_LIMIT || 'You are a streaming avatar from MiroTalk SFU...',
             sessionTimeLimit: process.env.VIDEOAI_SESSION_TIME_LIMIT
                 ? parseInt(process.env.VIDEOAI_SESSION_TIME_LIMIT, 10)
                 : 0, // Session time limit in seconds (0 = unlimited)
+            liveavatar: {
+                enabled: process.env.VIDEOAI_LIVEAVATAR_ENABLED
+                    ? process.env.VIDEOAI_LIVEAVATAR_ENABLED === 'true'
+                    : true,
+                basePath:
+                    process.env.VIDEOAI_LIVEAVATAR_BASE_PATH ||
+                    process.env.VIDEOAI_BASE_PATH ||
+                    'https://api.liveavatar.com',
+                apiKey: process.env.VIDEOAI_LIVEAVATAR_API_KEY || process.env.VIDEOAI_API_KEY || '',
+                mode: process.env.VIDEOAI_LIVEAVATAR_MODE || process.env.VIDEOAI_MODE || 'FULL',
+                contextId: process.env.VIDEOAI_LIVEAVATAR_CONTEXT_ID || process.env.VIDEOAI_CONTEXT_ID || '',
+            },
+            anam: {
+                enabled: process.env.VIDEOAI_ANAM_ENABLED
+                    ? process.env.VIDEOAI_ANAM_ENABLED === 'true'
+                    : !!(process.env.VIDEOAI_ANAM_API_KEY || ''),
+                basePath: process.env.VIDEOAI_ANAM_BASE_PATH || 'https://api.anam.ai',
+                apiKey: process.env.VIDEOAI_ANAM_API_KEY || '',
+                llmId: process.env.VIDEOAI_ANAM_LLM_ID || '',
+                avatarModel: process.env.VIDEOAI_ANAM_AVATAR_MODEL || 'cara-4',
+                systemLimit: process.env.VIDEOAI_ANAM_SYSTEM_LIMIT || '',
+            },
         },
 
         /**

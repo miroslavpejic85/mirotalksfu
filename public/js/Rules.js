@@ -257,8 +257,10 @@ function handleRules(isPresenter, roomSetup = true) {
             switchHostOnlyRecording.checked = hostOnlyRecording;
             loadModeratorDataFromRoom();
         }
-        // VideoAI is presenter-only and shown only when the room has it enabled
-        if (rc.videoAIEnabled && BUTTONS.settings.tabVideoAIBtn) {
+        // VideoAI is presenter-only and shown only when enabled and at least one provider is available
+        const videoAIProviders = rc.videoAIProviders?.available || {};
+        const hasVideoAIProvider = !!(videoAIProviders.liveavatar || videoAIProviders.anam);
+        if (rc.videoAIEnabled && hasVideoAIProvider && BUTTONS.settings.tabVideoAIBtn) {
             VideoAI.enabled = true;
             elemDisplay('tabVideoAIBtn', true, 'flex');
         } else {
