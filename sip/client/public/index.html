@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>MiroTalk SIP Demo Client</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background: #0f172a;
+                color: #e2e8f0;
+            }
+            .card {
+                background: #1e293b;
+                border: 1px solid #334155;
+                border-radius: 8px;
+                padding: 16px;
+                max-width: 760px;
+                margin-bottom: 16px;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            label {
+                display: block;
+                margin-bottom: 4px;
+                font-size: 12px;
+                color: #94a3b8;
+            }
+            input,
+            button {
+                width: 100%;
+                padding: 10px;
+                border-radius: 6px;
+                border: 1px solid #475569;
+                background: #0b1220;
+                color: #e2e8f0;
+                box-sizing: border-box;
+            }
+            input[type='checkbox'] {
+                width: auto;
+                transform: scale(1.2);
+                margin-top: 10px;
+            }
+            button {
+                cursor: pointer;
+                background: #2563eb;
+                border: none;
+                font-weight: 600;
+            }
+            button.secondary {
+                background: #334155;
+            }
+            .row {
+                display: flex;
+                gap: 12px;
+                margin-top: 12px;
+            }
+            .status {
+                margin-top: 12px;
+                padding: 10px;
+                border-radius: 6px;
+                background: #0b1220;
+                border: 1px solid #334155;
+                min-height: 24px;
+            }
+            small {
+                color: #94a3b8;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>MiroTalk SIP Demo Client</h1>
+        <p>
+            Minimal browser SIP client for Kamailio registration + calling. Open this page in two tabs/browsers with
+            different usernames and call each other.
+        </p>
+
+        <div class="card">
+            <h3>Connection</h3>
+            <div class="grid">
+                <div>
+                    <label for="wsServer">Kamailio WS server</label>
+                    <input id="wsServer" value="ws://127.0.0.1:5066" />
+                </div>
+                <div>
+                    <label for="domain">SIP domain</label>
+                    <input id="domain" value="127.0.0.1" />
+                </div>
+                <div>
+                    <label for="username">Username (extension)</label>
+                    <input id="username" value="1001" />
+                </div>
+                <div>
+                    <label for="authUsername">Auth username (optional)</label>
+                    <input id="authUsername" value="1001" />
+                </div>
+                <div>
+                    <label for="password">Password (optional in this demo)</label>
+                    <input id="password" type="password" value="" />
+                </div>
+                <div>
+                    <label for="hackIpInContact">Contact IP compatibility hack</label>
+                    <input id="hackIpInContact" type="checkbox" checked />
+                </div>
+            </div>
+            <div class="row">
+                <button id="registerBtn">Register</button>
+                <button id="unregisterBtn" class="secondary">Unregister</button>
+            </div>
+            <details style="margin-top: 12px">
+                <summary><strong>Advanced compatibility</strong></summary>
+                <div class="grid" style="margin-top: 10px">
+                    <div>
+                        <label for="displayName">Display name (optional)</label>
+                        <input id="displayName" value="" />
+                    </div>
+                    <div>
+                        <label for="outboundProxy">Outbound proxy / route set (optional)</label>
+                        <input id="outboundProxy" value="" placeholder="sip:proxy.example.com;lr" />
+                    </div>
+                    <div>
+                        <label for="registerExpires">Register expires (seconds)</label>
+                        <input id="registerExpires" type="number" min="60" max="86400" value="600" />
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div class="card">
+            <h3>Call</h3>
+            <div class="grid">
+                <div>
+                    <label for="target">Call target (extension)</label>
+                    <input id="target" value="1002" />
+                </div>
+                <div>
+                    <label for="targetDomain">Target domain</label>
+                    <input id="targetDomain" value="127.0.0.1" />
+                </div>
+            </div>
+            <div class="row">
+                <button id="callBtn">Call</button>
+                <button id="hangupBtn" class="secondary">Hang up</button>
+            </div>
+            <div class="row" id="incomingActions" style="display: none">
+                <button id="acceptBtn">Accept incoming</button>
+                <button id="rejectBtn" class="secondary">Reject incoming</button>
+            </div>
+            <small
+                >Incoming calls require clicking "Accept incoming" (improves browser media permission handling).</small
+            >
+        </div>
+
+        <div class="card">
+            <h3>Audio</h3>
+            <audio id="remoteAudio" autoplay></audio>
+            <div class="status" id="status">Idle</div>
+        </div>
+
+        <script type="module" src="./app.js"></script>
+    </body>
+</html>
