@@ -931,6 +931,7 @@
         "Undo:": "تراجع:",
         "Unpin video": "إلغاء تثبيت الفيديو",
         "Upload bitrate from your connection": "معدل الرفع من اتصالك",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "استخدم هذا إذا فشل التسجيل خلف NAT/وكيل أو مع خوادم SIP الصارمة.",
         "Username:": "اسم المستخدم:",
         "Variation in packet arrival timing": "تفاوت زمن وصول الحزم",
         "Vertical": "عمودي",

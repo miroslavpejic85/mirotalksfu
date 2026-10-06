@@ -931,6 +931,7 @@
         "Undo:": "Batalkan:",
         "Unpin video": "Lepas sematan video",
         "Upload bitrate from your connection": "Bitrate unggah dari koneksi Anda",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Gunakan ini jika pendaftaran gagal di balik NAT/proxy atau dengan server SIP yang ketat.",
         "Username:": "Nama pengguna:",
         "Variation in packet arrival timing": "Variasi waktu kedatangan paket",
         "Vertical": "Vertikal",

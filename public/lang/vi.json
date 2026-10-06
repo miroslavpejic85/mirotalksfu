@@ -931,6 +931,7 @@
         "Undo:": "Hoàn tác:",
         "Unpin video": "Bỏ ghim video",
         "Upload bitrate from your connection": "Bitrate tải lên từ kết nối của bạn",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Hãy dùng tùy chọn này nếu đăng ký thất bại khi ở sau NAT/proxy hoặc với máy chủ SIP nghiêm ngặt.",
         "Username:": "Tên người dùng:",
         "Variation in packet arrival timing": "Biến thiên thời gian đến của gói",
         "Vertical": "Dọc",

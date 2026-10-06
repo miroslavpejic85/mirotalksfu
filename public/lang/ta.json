@@ -931,6 +931,7 @@
         "Undo:": "செயல்தவிர்:",
         "Unpin video": "வீடியோவை அகற்று",
         "Upload bitrate from your connection": "உங்கள் இணைப்பின் பதிவேற்ற பிட்ரேட்",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "NAT/ப்ராக்ஸி பின்னால் அல்லது கடுமையான SIP சர்வர்களுடன் பதிவு தோல்வியடைந்தால் இதைப் பயன்படுத்தவும்.",
         "Username:": "பயனர் பெயர்:",
         "Variation in packet arrival timing": "பாக்கெட் வருகை நேர மாற்றம்",
         "Vertical": "செங்குத்து",

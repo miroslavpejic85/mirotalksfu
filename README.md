@@ -204,6 +204,7 @@ For detailed guides and references, visit the **[official documentation](https:/
 - [Integration](https://docs.mirotalk.com/mirotalk-sfu/integration/)
 - [Direct Room Join](https://docs.mirotalk.com/mirotalk-sfu/join-room/)
 - [RTMP Setup](https://docs.mirotalk.com/mirotalk-sfu/rtmp/)
+- [SIP phone](https://docs.mirotalk.com/mirotalk-sfu/sip/)
 - [REST API Documentation](https://docs.mirotalk.com/mirotalk-sfu/api/)
 - [Scalability](https://docs.mirotalk.com/mirotalk-sfu/scalability/)
 - [Ngrok](https://docs.mirotalk.com/mirotalk-sfu/ngrok/)
@@ -334,37 +335,6 @@ We are grateful to our past sponsors for their support!
 ---
 
 This project is tested with [BrowserStack](https://www.browserstack.com).
-
----
-
-<details>
-<summary>🧪 Experimental SIP demo (Kamailio)</summary>
-
-<br/>
-
-A minimal, self-contained SIP demo is available in [sip/](./sip):
-
-- Kamailio in Docker (`REGISTER` + `INVITE` routing)
-- Simple Node.js web SIP client example
-
-Quick start:
-
-```bash
-cd sip
-chmod +x run.sh
-./run.sh
-```
-
-Open <http://localhost:8088>. Full instructions: [sip/README.md](./sip/README.md).
-
-You can also test the in-room SIP phone MVP directly in MiroTalk SFU:
-
-1. Start MiroTalk SFU normally.
-2. Start the SIP stack (`./sip/run.sh`).
-3. Join a room with two browsers/users.
-4. Open **Settings → SIP phone**, register random users, and call each other.
-
-</details>
 
 ---
 

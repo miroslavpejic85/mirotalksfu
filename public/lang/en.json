@@ -931,6 +931,7 @@
         "Undo:": "Undo:",
         "Unpin video": "Unpin video",
         "Upload bitrate from your connection": "Upload bitrate from your connection",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Use this if registration fails behind NAT/proxy or with strict SIP servers.",
         "Username:": "Username:",
         "Variation in packet arrival timing": "Variation in packet arrival timing",
         "Vertical": "Vertical",

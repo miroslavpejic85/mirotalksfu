@@ -931,6 +931,7 @@
         "Undo:": "చర్యరద్దు:",
         "Unpin video": "వీడియోను అన్‌పిన్ చేయండి",
         "Upload bitrate from your connection": "మీ కనెక్షన్ అప్‌లోడ్ బిట్రేట్",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "NAT/ప్రాక్సీ వెనుక లేదా కఠినమైన SIP సర్వర్లతో నమోదు విఫలమైతే దీన్ని ఉపయోగించండి.",
         "Username:": "వినియోగదారు పేరు:",
         "Variation in packet arrival timing": "ప్యాకెట్ చేరిక సమయ భిన్నత",
         "Vertical": "నిలువు",

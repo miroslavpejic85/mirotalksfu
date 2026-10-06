@@ -931,6 +931,7 @@
         "Undo:": "Annuler:",
         "Unpin video": "Détacher la vidéo",
         "Upload bitrate from your connection": "Débit montant de votre connexion",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Utilisez ceci si l’enregistrement échoue derrière un NAT/proxy ou avec des serveurs SIP stricts.",
         "Username:": "Nom d'utilisateur:",
         "Variation in packet arrival timing": "Variation du temps d'arrivée des paquets",
         "Vertical": "Verticale",

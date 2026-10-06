@@ -931,6 +931,7 @@
         "Undo:": "Poništi:",
         "Unpin video": "Otkači video",
         "Upload bitrate from your connection": "Brzina slanja sa vaše veze",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Koristite ovo ako registracija ne uspe iza NAT/proxy-ja ili sa strogim SIP serverima.",
         "Username:": "Korisničko ime:",
         "Variation in packet arrival timing": "Varijacija vremena dolaska paketa",
         "Vertical": "Vertikalno",

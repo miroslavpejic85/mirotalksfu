@@ -931,6 +931,7 @@
         "Undo:": "کالعدم کریں:",
         "Unpin video": "ویڈیو کو ان پن کریں",
         "Upload bitrate from your connection": "آپ کے کنکشن کی اپ لوڈ بٹ ریٹ",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "اگر NAT/پراکسی کے پیچھے یا سخت SIP سرورز کے ساتھ رجسٹریشن ناکام ہو جائے تو اسے استعمال کریں۔",
         "Username:": "صارف نام:",
         "Variation in packet arrival timing": "پیکٹ پہنچنے کے وقت میں تغیر",
         "Vertical": "عمودی",

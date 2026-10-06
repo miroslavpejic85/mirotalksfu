@@ -931,6 +931,7 @@
         "Undo:": "Geri al:",
         "Unpin video": "Video sabitlemesini kaldır",
         "Upload bitrate from your connection": "Bağlantınızın gönderme bit hızı",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Kayıt NAT/proxy arkasında veya katı SIP sunucularıyla başarısız olursa bunu kullanın.",
         "Username:": "Kullanıcı adı:",
         "Variation in packet arrival timing": "Paket varış zamanındaki değişkenlik",
         "Vertical": "Dikey",

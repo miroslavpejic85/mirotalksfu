@@ -931,6 +931,7 @@
         "Undo:": "Tendua:",
         "Unpin video": "Bandua video",
         "Upload bitrate from your connection": "Kasi ya kutuma kutoka muunganisho wako",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Tumia hii ikiwa usajili unashindwa ukiwa nyuma ya NAT/proxy au na seva kali za SIP.",
         "Username:": "Jina la mtumiaji:",
         "Variation in packet arrival timing": "Mabadiliko ya muda wa kufika kwa pakiti",
         "Vertical": "Wima",

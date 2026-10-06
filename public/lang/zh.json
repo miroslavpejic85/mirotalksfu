@@ -931,6 +931,7 @@
         "Undo:": "撤销:",
         "Unpin video": "取消固定视频",
         "Upload bitrate from your connection": "你的连接上传比特率",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "如果在 NAT/代理后方或使用严格的 SIP 服务器时注册失败，请使用此项。",
         "Username:": "用户名:",
         "Variation in packet arrival timing": "数据包到达时间的波动",
         "Vertical": "垂直",

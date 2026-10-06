@@ -931,6 +931,7 @@
         "Undo:": "Cofnij:",
         "Unpin video": "Odepnij wideo",
         "Upload bitrate from your connection": "Przepływność wysyłania twojego połączenia",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Użyj tego, jeśli rejestracja nie powiedzie się za NAT/proxy lub przy rygorystycznych serwerach SIP.",
         "Username:": "Nazwa użytkownika:",
         "Variation in packet arrival timing": "Zmienność czasu docierania pakietów",
         "Vertical": "Pionowo",

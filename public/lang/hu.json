@@ -931,6 +931,7 @@
         "Undo:": "Visszavonás:",
         "Unpin video": "Videó rögzítésének feloldása",
         "Upload bitrate from your connection": "A kapcsolatod feltöltési bitrátája",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Használja ezt, ha a regisztráció NAT/proxy mögött vagy szigorú SIP-kiszolgálókkal meghiúsul.",
         "Username:": "Felhasználónév:",
         "Variation in packet arrival timing": "A csomagok érkezési idejének ingadozása",
         "Vertical": "Függőleges",

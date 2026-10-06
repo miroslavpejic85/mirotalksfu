@@ -931,6 +931,7 @@
         "Undo:": "पूर्ववत करा:",
         "Unpin video": "व्हिडिओ अनपिन करा",
         "Upload bitrate from your connection": "तुमच्या कनेक्शनचा अपलोड बिटरेट",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "NAT/प्रॉक्सीमागे किंवा कठोर SIP सर्व्हरसोबत नोंदणी अयशस्वी झाल्यास हे वापरा.",
         "Username:": "वापरकर्तानाव:",
         "Variation in packet arrival timing": "पॅकेट पोहोचण्याच्या वेळेतील बदल",
         "Vertical": "उभ्या",

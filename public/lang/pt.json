@@ -931,6 +931,7 @@
         "Undo:": "Desfazer:",
         "Unpin video": "Desafixar vídeo",
         "Upload bitrate from your connection": "Taxa de upload da sua conexão",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Use isto se o registo falhar atrás de NAT/proxy ou com servidores SIP rígidos.",
         "Username:": "Nome de utilizador:",
         "Variation in packet arrival timing": "Variação no tempo de chegada dos pacotes",
         "Vertical": "Vertical",

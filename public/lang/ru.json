@@ -931,6 +931,7 @@
         "Undo:": "Отменить:",
         "Unpin video": "Открепить видео",
         "Upload bitrate from your connection": "Битрейт отправки вашего соединения",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Используйте это, если регистрация не проходит за NAT/прокси или со строгими SIP-серверами.",
         "Username:": "Имя пользователя:",
         "Variation in packet arrival timing": "Вариация времени прибытия пакетов",
         "Vertical": "Вертикально",

@@ -931,6 +931,7 @@
         "Undo:": "元に戻す:",
         "Unpin video": "ビデオのピン留めを解除",
         "Upload bitrate from your connection": "接続の送信ビットレート",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "NAT/プロキシ配下、または厳格なSIPサーバーで登録に失敗する場合は、これを使用してください。",
         "Username:": "ユーザー名:",
         "Variation in packet arrival timing": "パケット到着時間のばらつき",
         "Vertical": "垂直",

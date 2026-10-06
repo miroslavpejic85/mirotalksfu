@@ -931,6 +931,7 @@
         "Undo:": "실행 취소:",
         "Unpin video": "비디오 고정 해제",
         "Upload bitrate from your connection": "연결의 업로드 비트레이트",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "NAT/프록시 뒤에 있거나 엄격한 SIP 서버에서 등록이 실패하면 이것을 사용하세요.",
         "Username:": "사용자 이름:",
         "Variation in packet arrival timing": "패킷 도착 시간의 변동",
         "Vertical": "세로",

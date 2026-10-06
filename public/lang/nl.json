@@ -931,6 +931,7 @@
         "Undo:": "Ongedaan maken:",
         "Unpin video": "Video losmaken",
         "Upload bitrate from your connection": "Uploadsnelheid van je verbinding",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "Gebruik dit als registratie mislukt achter NAT/proxy of met strikte SIP-servers.",
         "Username:": "Gebruikersnaam:",
         "Variation in packet arrival timing": "Variatie in aankomsttijd van pakketten",
         "Vertical": "Verticaal",

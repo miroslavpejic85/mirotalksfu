@@ -931,6 +931,7 @@
         "Undo:": "واگرد:",
         "Unpin video": "برداشتن پین ویدیو",
         "Upload bitrate from your connection": "نرخ بیت آپلود اتصال شما",
+        "Use this if registration fails behind NAT/proxy or with strict SIP servers.": "اگر ثبت‌نام پشت NAT/پراکسی یا با سرورهای SIP سخت‌گیرانه ناموفق می‌شود، از این گزینه استفاده کنید.",
         "Username:": "نام کاربری:",
         "Variation in packet arrival timing": "نوسان زمان رسیدن بسته‌ها",
         "Vertical": "عمودی",
