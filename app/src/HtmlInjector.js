@@ -21,6 +21,7 @@ class HtmlInjector {
     // Function to get dynamic data for injection (e.g., OG data, title, etc.)
     getInjectData() {
         return {
+            APP_NAME: this.config?.app?.name || 'MiroTalk SFU',
             OG_TYPE: this.config?.og?.type || 'app-webrtc',
             OG_SITE_NAME: this.config?.og?.siteName || 'MiroTalk SFU',
             OG_TITLE: this.config?.og?.title || 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
@@ -72,12 +73,14 @@ class HtmlInjector {
 
     // Function to inject dynamic data (e.g., OG, TITLE, etc.) into a given file
     injectHtml(filePath, res) {
+        const html = this.cache[filePath];
+
         // Check if HTML injection is enabled in the config
         if (!this.config?.htmlInjection) {
-            return res.send(this.cache[filePath]);
+            return res.send(html?.replace(/{{APP_NAME}}/g, 'MiroTalk SFU'));
         }
 
-        if (!this.cache[filePath]) {
+        if (!html) {
             log.error(`File not cached: ${filePath}`);
             if (!res.headersSent) {
                 return res.status(500).send('Server Error');
@@ -87,10 +90,13 @@ class HtmlInjector {
 
         try {
             // Replace placeholders with dynamic data (OG, TITLE, etc.)
-            const modifiedHTML = this.cache[filePath].replace(
-                /{{(OG_[A-Z_]+)}}/g,
-                (_, key) => this.injectData[key] || ''
-            );
+            const modifiedHTML = html.replace(/{{(APP_NAME|OG_[A-Z_]+)}}/g, (_, key) => {
+                const value = this.injectData[key] || '';
+                return String(value).replace(/[&<>"']/g, (character) => {
+                    const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                    return entities[character];
+                });
+            });
 
             if (!res.headersSent) {
                 res.send(modifiedHTML);
