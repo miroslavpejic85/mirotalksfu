@@ -1726,6 +1726,83 @@ body {
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--room-accent) 24%, transparent);
 }
 
+#tabSipPhone :is(input[type='text'], input[type='url'], input[type='password'], input[type='number']) {
+    width: 100%;
+    min-height: 40px;
+    padding: 10px 12px;
+    font-size: 1rem;
+}
+
+#tabSipPhone .settingsTable td:first-child {
+    width: 42%;
+}
+
+#tabSipPhone .settingsTable td:last-child {
+    width: 58%;
+}
+
+#tabSipPhone .sip-switch-cell {
+    justify-content: flex-end;
+    width: auto;
+}
+
+#tabSipPhone .sip-switch-row-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+#tabSipPhone .sip-switch-row .title {
+    justify-content: flex-start;
+    margin: 0;
+}
+
+#tabSipPhone .sip-switch-row .sip-help-text {
+    margin: 8px 0 0 34px;
+    max-width: none;
+}
+
+#tabSipPhone .sip-switch-cell.form-switch.form-switch-md {
+    display: flex;
+    align-items: center;
+}
+
+#tabSipPhone .sip-switch-no-label.form-switch.form-switch-md::after,
+#tabSipPhone .sip-switch-no-label.form-switch.form-switch-md:has(.form-check-input:checked)::after {
+    content: none;
+}
+
+#tabSipPhone .sip-help-text {
+    margin: 0;
+    line-height: 1.25;
+    font-size: 0.8rem;
+    color: color-mix(in srgb, var(--fg-1) 70%, transparent);
+}
+
+#tabSipPhone input::placeholder {
+    color: color-mix(in srgb, var(--fg-1) 55%, transparent);
+}
+
+#tabSipPhone .sip-advanced-details {
+    margin-top: 12px;
+    border: 1px solid var(--room-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--select-bg) 75%, black 25%);
+}
+
+#tabSipPhone .sip-advanced-details > summary {
+    color: var(--fg-1);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+#tabSipPhone .sip-advanced-details > summary::marker,
+#tabSipPhone .sip-advanced-details > summary::-webkit-details-marker {
+    color: var(--fg-1);
+}
+
 #myProfileAvatarControls {
     display: inline-flex;
     align-items: center;

@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.5.82 - Configuration File
+ * MiroTalk SFU v2.5.83 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1502,6 +1502,7 @@ module.exports = {
                 sendEmailInvitation: process.env.SHOW_EMAIL_INVITE !== 'false',
                 micOptionsButton: process.env.SHOW_MIC_OPTIONS !== 'false',
                 tabRTMPStreamingBtn: process.env.SHOW_RTMP_TAB !== 'false',
+                tabSipPhoneBtn: process.env.SHOW_SIP_TAB !== 'false',
                 tabNotificationsBtn: process.env.SHOW_NOTIFICATIONS_TAB !== 'false',
                 tabNetworkBtn: process.env.SHOW_NETWORK_TAB !== 'false',
                 tabModerator: process.env.SHOW_MODERATOR_TAB !== 'false',

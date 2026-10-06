@@ -54,6 +54,7 @@ let BUTTONS = {
         sendEmailInvitation: true, // presenter
         micOptionsButton: true,
         tabRTMPStreamingBtn: true, // presenter
+        tabSipPhoneBtn: true,
         tabNotificationsBtn: true, // presenter
         tabNetworkBtn: true,
         tabModerator: true, // presenter
