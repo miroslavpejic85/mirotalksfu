@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.85
+ * @version 2.5.86
  *
  */
 
@@ -1125,7 +1125,7 @@ function startServer() {
                     roomAllowedForUser: roomAllowedForUser,
                 });
 
-                if (!allowRoomAccess && !roomAllowedForUser) {
+                if (!isDirectJoinAllowed(allowRoomAccess, roomAllowedForUser)) {
                     log.warn('Direct Room Join Unauthorized', room);
                     return res.redirect('/whoAreYou/' + room);
                 }
@@ -5695,6 +5695,11 @@ function startServer() {
         });
 
         return allowRoomAccess;
+    }
+
+    // With OIDC enabled, the `name` query param is self-asserted and must never grant room access
+    function isDirectJoinAllowed(allowRoomAccess, roomAllowedForUser) {
+        return allowRoomAccess || (!OIDC.enabled && roomAllowedForUser);
     }
 
     async function roomExistsForUser(room) {
