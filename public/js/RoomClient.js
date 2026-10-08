@@ -13699,8 +13699,9 @@ class RoomClient {
 
         const liveavatarOption = providerSelect.querySelector('option[value="liveavatar"]');
         const anamOption = providerSelect.querySelector('option[value="anam"]');
-        if (liveavatarOption) liveavatarOption.style.display = liveavatarEnabled ? '' : 'none';
-        if (anamOption) anamOption.style.display = anamEnabled ? '' : 'none';
+        // Safari ignores display/hidden on <option>, so disabled providers are removed from the DOM
+        if (liveavatarOption && !liveavatarEnabled) liveavatarOption.remove();
+        if (anamOption && !anamEnabled) anamOption.remove();
 
         if (VideoAI.provider === 'anam' && !anamEnabled) {
             VideoAI.provider = liveavatarEnabled ? 'liveavatar' : 'anam';
