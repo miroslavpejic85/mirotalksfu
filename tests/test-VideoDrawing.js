@@ -176,6 +176,36 @@ describe('screen annotation text toolbar', () => {
         }
     });
 
+    it('streams a live draft while typing and clears it when the editor closes', () => {
+        const drafts = [];
+        dom.window.Overlay.onEmitDrawing = (data) => drafts.push(data);
+        overlay._canDraw = () => true;
+        input.value = 'Hello';
+        input.dispatchEvent(new dom.window.Event('input'));
+        input.value = 'Hello world';
+        input.dispatchEvent(new dom.window.Event('input'));
+        assert.equal(drafts.length, 0);
+        editor.querySelector('.video-drawing-text-cancel').click();
+        assert.equal(drafts.length, 1);
+        assert.equal(drafts[0].action, 'draft');
+        assert.equal(drafts[0].text, '');
+    });
+
+    it('shows remote drafts as unmanageable temporary text and removes them when emptied', () => {
+        overlay._positionTextAnnotation = () => {};
+        const draft = { action: 'draft', drawerId: 'peer', annotationId: 'draft', text: 'Hi', x: 0.1, y: 0.1 };
+        overlay.receiveText(draft);
+        assert.equal(overlay.textAnnotations.get('draft:peer').element.querySelector('button'), null);
+        overlay.receiveText({ ...draft, text: 'Hi there' });
+        assert.equal(overlay.textAnnotations.size, 1);
+        assert.equal(overlay.textAnnotations.get('draft:peer').text, 'Hi there');
+        assert.ok(overlay.textAnnotations.get('draft:peer').element.classList.contains('video-drawing-text-highlight'));
+        overlay.receiveText({ ...draft, text: '' });
+        assert.equal(overlay.textAnnotations.size, 0);
+        overlay.receiveText({ ...draft, action: 'create', annotationId: 'saved' });
+        assert.ok(overlay.textAnnotations.get('saved').element.classList.contains('video-drawing-text-highlight'));
+    });
+
     it('cycles alignment, previews formatting and persists all new fields', () => {
         input.value = 'Formatted annotation';
         const alignment = editor.querySelector('.video-drawing-text-alignment');
@@ -618,6 +648,7 @@ describe('server diamond annotation relay', () => {
             isScreenProducer: (producerId) => producerId === 'screen',
             getProducerOwnerId: () => 'owner',
             getVideoDrawingAnnotations: () => annotations,
+            getVideoTextAnnotations: () => annotations,
             broadCast: (...args) => relayed.push(args),
         };
         socket = { id: 'drawer', on: (event, handler) => (receive = handler), emit: (...args) => relayed.push(args) };
@@ -683,6 +714,30 @@ describe('server diamond annotation relay', () => {
         receive({ ...annotation, annotationId: 'invalid', tool: 'unsupported' });
         assert.equal(annotations.size, 1);
         assert.equal(relayed.length, 2);
+    });
+
+    it('relays text drafts with authenticated identity without persisting them', () => {
+        const draft = {
+            type: 'text',
+            action: 'draft',
+            producerId: 'screen',
+            annotationId: 'draft',
+            text: 'Typing',
+            x: 0.1,
+            y: 0.2,
+            drawerId: 'spoofed',
+        };
+        receive(draft);
+        assert.equal(relayed.length, 1);
+        assert.equal(relayed[0][2].drawerId, 'drawer');
+        assert.equal(relayed[0][2].peer_name, 'Drawer');
+        receive({ ...draft, text: '' });
+        assert.equal(relayed.length, 2);
+        receive({ ...draft, text: 'x'.repeat(1001) });
+        receive({ ...draft, x: 2 });
+        receive({ ...draft, color: 'red' });
+        assert.equal(relayed.length, 2);
+        assert.equal(annotations.size, 0);
     });
 
     it('relays temporary laser positions with authenticated identity without persisting them', () => {
