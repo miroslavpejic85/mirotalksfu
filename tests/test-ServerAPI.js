@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const CryptoJS = require('crypto-js');
 const ServerApi = require('../app/src/ServerApi');
 const config = require('../app/src/config');
+const { getJwtKeys } = require('../app/src/JwtSecret');
 
 describe('test-ServerAPI', () => {
     let serverApi;
@@ -212,11 +213,12 @@ describe('test-ServerAPI', () => {
 
     describe('getToken', () => {
         it('should return an encrypted JWT token', () => {
-            const jwtKey = 'test-jwt-secret';
+            const jwtSecret = 'test-jwt-secret-0123456789-abcdefghijkl';
+            const jwtKey = getJwtKeys(jwtSecret).auth;
             const ServerApi = proxyquire('../app/src/ServerApi', {
                 './config': {
                     api: { keySecret: apiKeySecret },
-                    security: { jwt: { key: jwtKey, exp: '1h' } },
+                    security: { jwt: { key: jwtSecret, exp: '1h' } },
                     '@noCallThru': true,
                 },
             });

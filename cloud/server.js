@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const sanitizeFilename = require('sanitize-filename');
 const helmet = require('helmet');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const app = express();
@@ -29,7 +30,19 @@ const isServerRecordingEnabled = true;
 
 // Secret used to verify the per-session upload token.
 // IMPORTANT: must match JWT_SECRET on the main MiroTalk SFU server that issues the token.
-const jwtKey = process.env.JWT_SECRET || 'mirotalksfu_jwt_secret';
+// Fail closed: refuse to start with a missing, weak or publicly known secret.
+const JWT_MIN_LENGTH = 32;
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret || jwtSecret.length < JWT_MIN_LENGTH || jwtSecret === 'mirotalksfu_jwt_secret') {
+    log.error(
+        `JWT_SECRET is missing, too weak (min ${JWT_MIN_LENGTH} chars) or a publicly known default. ` +
+            'Set the same strong secret used by the main MiroTalk SFU server (e.g. "openssl rand -hex 32").'
+    );
+    process.exit(1);
+}
+
+// Must match the key derivation of the main server (app/src/JwtSecret.js) for the "rec-upload" purpose.
+const jwtKey = Buffer.from(crypto.hkdfSync('sha256', jwtSecret, '', 'mirotalksfu:rec-upload', 32)).toString('hex');
 
 // Per-IP rate limiter for recording uploads (mitigates flooding / disk exhaustion)
 const recSyncLimiter = rateLimit({
@@ -80,7 +93,7 @@ function checkRecUploadToken(req, res, next) {
         if (!token) {
             return res.status(401).send('Missing upload token');
         }
-        const decoded = jwt.verify(token, jwtKey);
+        const decoded = jwt.verify(token, jwtKey, { algorithms: ['HS256'] });
         if (!decoded || decoded.scope !== 'rec-upload' || !decoded.roomId) {
             return res.status(401).send('Invalid upload token');
         }

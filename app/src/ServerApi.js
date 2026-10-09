@@ -4,9 +4,9 @@ const jwt = require('jsonwebtoken');
 const CryptoJS = require('crypto-js');
 
 const config = require('./config');
+const { getJwtKeys } = require('./JwtSecret');
 const { v4: uuidV4 } = require('uuid');
 
-const JWT_KEY = config.security?.jwt?.key || 'mirotalksfu_jwt_secret';
 const JWT_EXP = config.security?.jwt?.exp || '1h';
 
 module.exports = class ServerApi {
@@ -146,6 +146,7 @@ module.exports = class ServerApi {
         const { username = 'username', password = 'password', presenter = false, expire } = token;
 
         const expireValue = expire || JWT_EXP;
+        const jwtKey = getJwtKeys(config.security?.jwt?.key).auth;
 
         // Constructing payload
         const payload = {
@@ -156,10 +157,10 @@ module.exports = class ServerApi {
 
         // Encrypt payload using AES encryption
         const payloadString = JSON.stringify(payload);
-        const encryptedPayload = CryptoJS.AES.encrypt(payloadString, JWT_KEY).toString();
+        const encryptedPayload = CryptoJS.AES.encrypt(payloadString, jwtKey).toString();
 
         // Constructing JWT token
-        const jwtToken = jwt.sign({ data: encryptedPayload }, JWT_KEY, { expiresIn: expireValue });
+        const jwtToken = jwt.sign({ data: encryptedPayload }, jwtKey, { expiresIn: expireValue });
 
         return jwtToken;
     }

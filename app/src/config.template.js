@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.5.91 - Configuration File
+ * MiroTalk SFU v2.5.92 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -385,11 +385,12 @@ module.exports = {
         /**
          * JWT Configuration
          * ------------------------
-         * - key: Secret for JWT signing
+         * - key: Secret for JWT signing (required, min 32 chars, e.g. `openssl rand -hex 32`).
+         *        The server refuses to start if it is missing, weak or a published default.
          * - exp: Token expiration time
          */
         jwt: {
-            key: process.env.JWT_SECRET || 'mirotalksfu_jwt_secret',
+            key: process.env.JWT_SECRET,
             exp: process.env.JWT_EXPIRATION || '1h',
         },
 

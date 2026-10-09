@@ -40,5 +40,5 @@ RECORDING_RATE_LIMIT_WINDOW_MS=60000   # window in ms (default: 60s)
 RECORDING_RATE_LIMIT_MAX=300           # max upload requests per IP per window
 ```
 
-> If `JWT_SECRET` is not set, both servers fall back to the same default secret. Always set a
-> strong, matching secret on both in production.
+> `JWT_SECRET` is required (min 32 characters, e.g. `openssl rand -hex 32`). Both servers refuse
+> to start if it is missing, too short, or the old published default. Use the same value on both.

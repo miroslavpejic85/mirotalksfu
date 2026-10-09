@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.91
+ * @version 2.5.92
  *
  */
 
@@ -96,6 +96,7 @@ const Room = require('./Room');
 const Peer = require('./Peer');
 const { assignFallbackPresenter, isConfiguredPresenter } = require('./PresenterManager');
 const ServerApi = require('./ServerApi');
+const { getJwtKeys } = require('./JwtSecret');
 const Logger = require('./Logger');
 const Validator = require('./Validator');
 const HtmlInjector = require('./HtmlInjector');
@@ -307,10 +308,20 @@ const io = socketIo(server, {
 const host = config?.server?.hostUrl || `http://localhost:${config?.server?.listen?.port || 3010}`;
 const trustProxy = Boolean(config?.server?.trustProxy);
 
+// Fail closed: refuse to start with a missing, weak or publicly known JWT secret.
+let jwtKeys;
+try {
+    jwtKeys = getJwtKeys(config?.security?.jwt?.key);
+} catch (err) {
+    log.error('Invalid JWT configuration', err.message);
+    process.exit(1);
+}
+
 const jwtCfg = {
-    JWT_KEY: config?.security?.jwt?.key || 'mirotalksfu_jwt_secret',
     JWT_EXP: config?.security?.jwt?.exp || '1h',
 };
+
+const JWT_VERIFY_OPTIONS = { algorithms: ['HS256'] };
 
 // Lifetime of the per-session server recording upload token (must outlive long recordings)
 const recUploadTokenExp = config?.media?.recording?.uploadTokenExp || '24h';
@@ -319,7 +330,7 @@ const recUploadTokenExp = config?.media?.recording?.uploadTokenExp || '24h';
 // actually passed the Socket.IO `join` auth for that room before allowing writes
 // to the recording directory via the /recSync* endpoints.
 function createRecUploadToken(roomId) {
-    return jwt.sign({ scope: 'rec-upload', roomId: String(roomId) }, jwtCfg.JWT_KEY, {
+    return jwt.sign({ scope: 'rec-upload', roomId: String(roomId) }, jwtKeys.recUpload, {
         expiresIn: recUploadTokenExp,
     });
 }
@@ -328,7 +339,7 @@ function createRecUploadToken(roomId) {
 // that peer to call the RTMP HTTP endpoints without sharing the server-wide apiSecret.
 function createRtmpStreamToken(roomId) {
     const hours = parseInt(config?.media?.rtmp?.expirationHours, 10) || 4;
-    return jwt.sign({ scope: 'rtmp-stream', roomId: String(roomId) }, jwtCfg.JWT_KEY, {
+    return jwt.sign({ scope: 'rtmp-stream', roomId: String(roomId) }, jwtKeys.rtmp, {
         expiresIn: `${hours}h`,
     });
 }
@@ -1363,7 +1374,7 @@ function startServer() {
             if (!token) {
                 return res.status(401).json({ error: 'Missing upload token' });
             }
-            const decoded = jwt.verify(token, jwtCfg.JWT_KEY);
+            const decoded = jwt.verify(token, jwtKeys.recUpload, JWT_VERIFY_OPTIONS);
             if (!decoded || decoded.scope !== 'rec-upload' || !decoded.roomId) {
                 return res.status(401).json({ error: 'Invalid upload token' });
             }
@@ -1593,7 +1604,7 @@ function startServer() {
         // Preferred path: per-session token issued on join to the peer that opened /rtmp.
         if (authHeader.startsWith('Bearer ')) {
             try {
-                const decoded = jwt.verify(authHeader.slice(7).trim(), jwtCfg.JWT_KEY);
+                const decoded = jwt.verify(authHeader.slice(7).trim(), jwtKeys.rtmp, JWT_VERIFY_OPTIONS);
                 if (decoded && decoded.scope === 'rtmp-stream' && decoded.roomId) {
                     req.rtmpRoomId = String(decoded.roomId);
                     return next();
@@ -2254,9 +2265,6 @@ function startServer() {
             // Warn if default secrets are still in use
             if (config.api?.keySecret === 'mirotalksfu_default_secret') {
                 log.warn('WARNING: API_KEY_SECRET is set to the default value. Change it before deploying!');
-            }
-            if (jwtCfg.JWT_KEY === 'mirotalksfu_jwt_secret') {
-                log.warn('WARNING: JWT_SECRET is set to the default value. Change it before deploying!');
             }
             if (rtmpEnabled) {
                 const rtmpApiSecret = rtmpCfg?.apiSecret || '';
@@ -5639,7 +5647,7 @@ function startServer() {
 
     async function isValidToken(token) {
         return new Promise((resolve, reject) => {
-            jwt.verify(token, jwtCfg.JWT_KEY, (err, decoded) => {
+            jwt.verify(token, jwtKeys.auth, JWT_VERIFY_OPTIONS, (err, decoded) => {
                 if (err) {
                     // Token is invalid
                     resolve(false);
@@ -5667,10 +5675,10 @@ function startServer() {
 
         // Encrypt payload using AES encryption
         const payloadString = JSON.stringify(payload);
-        const encryptedPayload = CryptoJS.AES.encrypt(payloadString, jwtCfg.JWT_KEY).toString();
+        const encryptedPayload = CryptoJS.AES.encrypt(payloadString, jwtKeys.auth).toString();
 
         // Constructing JWT token
-        const jwtToken = jwt.sign({ data: encryptedPayload }, jwtCfg.JWT_KEY, { expiresIn: expireValue });
+        const jwtToken = jwt.sign({ data: encryptedPayload }, jwtKeys.auth, { expiresIn: expireValue });
 
         return jwtToken;
     }
@@ -5679,13 +5687,13 @@ function startServer() {
         if (!jwtToken) return null;
 
         // Verify and decode the JWT token
-        const decodedToken = jwt.verify(jwtToken, jwtCfg.JWT_KEY);
+        const decodedToken = jwt.verify(jwtToken, jwtKeys.auth, JWT_VERIFY_OPTIONS);
         if (!decodedToken || !decodedToken.data) {
             throw new Error('Invalid token');
         }
 
         // Decrypt the payload using AES decryption
-        const decryptedPayload = CryptoJS.AES.decrypt(decodedToken.data, jwtCfg.JWT_KEY).toString(CryptoJS.enc.Utf8);
+        const decryptedPayload = CryptoJS.AES.decrypt(decodedToken.data, jwtKeys.auth).toString(CryptoJS.enc.Utf8);
 
         // Parse the decrypted payload as JSON
         const payload = JSON.parse(decryptedPayload);
