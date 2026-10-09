@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.92
+ * @version 2.5.93
  *
  */
 
@@ -364,6 +364,27 @@ if (
     (!Array.isArray(hostCfg.users) || hostCfg.users.some((user) => !user || !Validator.isValidPassword(user.password)))
 ) {
     throw new Error('HOST_USERS passwords must contain between 1 and 36 characters');
+}
+
+// Fail closed: refuse to start host protection with publicly known credentials
+const PUBLIC_DEFAULT_CREDENTIALS = [
+    { username: 'admin', password: 'admin' },
+    { username: 'guest', password: 'guest' },
+    { username: 'username', password: 'password' },
+    { username: 'username2', password: 'password2' },
+    { username: 'username3', password: 'password3' },
+];
+if (
+    (hostCfg.protected || hostCfg.user_auth) &&
+    !hostCfg.users_from_db &&
+    hostCfg.users.some((u) =>
+        PUBLIC_DEFAULT_CREDENTIALS.some((d) => u.username === d.username && u.password === d.password)
+    )
+) {
+    log.error(
+        'HOST_USERS contains publicly known default credentials (admin/admin, guest/guest, username/password...). Set your own in .env'
+    );
+    process.exit(1);
 }
 
 const widget = {

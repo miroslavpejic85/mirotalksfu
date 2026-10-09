@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.5.92 - Configuration File
+ * MiroTalk SFU v2.5.93 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -513,7 +513,8 @@ module.exports = {
          *   - Define via HOST_USERS env variable:
          *     HOST_USERS=username:password:displayname:room1,room2|username2:password2:displayname2:*
          *     (Each user separated by '|', fields by ':', allowed_rooms comma-separated or '*' for all)
-         *   - If HOST_USERS is not set, falls back to DEFAULT_USERNAME, DEFAULT_PASSWORD, etc.
+         *   - Empty by default. Required when protected or user_auth is enabled (unless OIDC or users_from_db is used).
+         *   - The server refuses to start with publicly known credentials (admin/admin, guest/guest, username/password...).
          *   - Fields:
          *     - username      : Login username
          *     - password      : Login password
@@ -565,26 +566,7 @@ module.exports = {
                               : ['*'],
                       };
                   })
-                : [
-                      {
-                          username: 'username',
-                          password: 'password',
-                          displayname: 'username displayname',
-                          allowed_rooms: ['*'],
-                      },
-                      {
-                          username: 'username2',
-                          password: 'password2',
-                          displayname: 'username2 displayname',
-                          allowed_rooms: ['room1', 'room2'],
-                      },
-                      {
-                          username: 'username3',
-                          password: 'password3',
-                          displayname: 'username3 displayname',
-                      },
-                      //...
-                  ],
+                : [], // Empty by default: a shipped username/password is a public credential, set your own.
 
             presenters: {
                 list: process.env.PRESENTERS
