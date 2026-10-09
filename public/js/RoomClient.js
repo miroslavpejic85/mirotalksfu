@@ -1594,7 +1594,7 @@ class RoomClient {
     };
 
     handleCmdData = (data) => {
-        console.log('SocketOn Peer cmd:', data);
+        console.log('SocketOn Peer cmd:', data.type === 'remoteControlOK' ? { ...data, data: '[redacted]' } : data);
         this.handleCmd(data);
     };
 

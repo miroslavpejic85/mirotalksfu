@@ -3205,7 +3205,8 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
-            log.debug('cmd', data);
+            // Never log the RustDesk credentials
+            log.debug('cmd', data.type === 'remoteControlOK' ? { ...data, data: '[redacted]' } : data);
 
             if (!Validator.isValidData(data)) return;
 
