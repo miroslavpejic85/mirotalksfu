@@ -3673,6 +3673,71 @@ Note</textarea>
             <div data-template-text="message"></div>
         </template>
 
+        <template id="popupRemoteControlPromptTemplate">
+            <div class="remote-control">
+                <div class="remote-control__icon"><i class="fas fa-computer-mouse"></i></div>
+                <p class="remote-control__text">
+                    <b data-template-text="name"></b> asks to control your mouse and keyboard with RustDesk.
+                </p>
+                <ol class="remote-control__steps">
+                    <li>
+                        Open RustDesk
+                        <a data-template-attr-href="downloadUrl" target="_blank" rel="noopener noreferrer"
+                            >(get it here)</a
+                        >
+                    </li>
+                    <li>Enter your ID and one-time password below</li>
+                </ol>
+                <label class="remote-control__field">
+                    <i class="fas fa-id-badge"></i>
+                    <input
+                        id="remoteControlId"
+                        type="text"
+                        inputmode="numeric"
+                        placeholder="RustDesk ID"
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
+                </label>
+                <label class="remote-control__field">
+                    <i class="fas fa-key"></i>
+                    <input
+                        id="remoteControlPassword"
+                        type="password"
+                        placeholder="One-time password"
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
+                </label>
+                <p class="remote-control__warning">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    Only allow people you trust. You can end the session anytime from RustDesk.
+                </p>
+            </div>
+        </template>
+
+        <template id="popupRemoteControlReadyTemplate">
+            <div class="remote-control">
+                <div class="remote-control__icon remote-control__icon--ok"><i class="fas fa-circle-check"></i></div>
+                <p class="remote-control__text">
+                    <b data-template-text="name"></b> accepted your remote control request.
+                </p>
+                <div class="remote-control__credential">
+                    <span>ID</span>
+                    <code data-template-text="id"></code>
+                    <button type="button" data-copy="id" title="Copy ID"><i class="far fa-copy"></i></button>
+                </div>
+                <div class="remote-control__credential">
+                    <span>Password</span>
+                    <code data-template-text="password"></code>
+                    <button type="button" data-copy="password" title="Copy password">
+                        <i class="far fa-copy"></i>
+                    </button>
+                </div>
+                <p class="remote-control__hint">On desktop, RustDesk asks for the password: paste it when prompted.</p>
+            </div>
+        </template>
+
         <template id="popupDateTimePickerTemplate">
             <div class="email-invitation-date-field">
                 <label for="datetimePicker">Meeting date and time</label>

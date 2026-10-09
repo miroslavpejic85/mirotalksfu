@@ -143,6 +143,8 @@ module.exports = class Room {
             videoAIProviders: this.videoAIProviders,
             videoAISessionTimeLimit: this.videoAISessionTimeLimit,
             chatGPTEnabled: config?.integrations?.chatGPT?.enabled || false,
+            remoteControlEnabled: config?.features?.remoteControl?.enabled || false,
+            remoteControlDownloadUrl: config?.features?.remoteControl?.downloadUrl,
             whisperEnabled: config?.integrations?.whisper?.enabled || false,
             whisperSegmentSeconds: config?.integrations?.whisper?.segmentSeconds || 5,
             thereIsPolls: this.thereIsPolls(),

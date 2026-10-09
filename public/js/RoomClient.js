@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.89
+ * @version 2.5.90
  *
  */
 
@@ -874,6 +874,8 @@ class RoomClient {
             }
             // Store ChatGPT enabled state for VideoAI fallback
             this.chatGPTEnabled = room.chatGPTEnabled || false;
+            this.remoteControlEnabled = room.remoteControlEnabled || false;
+            this.remoteControlDownloadUrl = room.remoteControlDownloadUrl;
             // Whisper server-side transcription
             this.whisperEnabled = room.whisperEnabled || false;
             if (typeof transcription !== 'undefined' && transcription) {
@@ -12201,6 +12203,16 @@ class RoomClient {
                 this.sound('alert');
                 this.userLog('warning', cmd.data, 'top-end', 5000);
                 break;
+            case 'remoteControl':
+                this.confirmPeerRemoteControl(cmd);
+                break;
+            case 'remoteControlOK':
+                this.handleRemoteControlOK(cmd);
+                break;
+            case 'remoteControlKO':
+                this.sound('alert');
+                this.userLog('warning', cmd.data, 'top-end', 5000);
+                break;
             case 'ejectAll':
                 this.handleEjectAllFromRoom(cmd);
                 break;
@@ -13681,6 +13693,112 @@ class RoomClient {
                     `https://www.google.com/maps/search/?api=1&query=${geoLocation.latitude},${geoLocation.longitude}`,
                     true
                 );
+            }
+        });
+    }
+
+    // ####################################################
+    // HANDLE REMOTE CONTROL (RustDesk handshake)
+    // ####################################################
+
+    askPeerRemoteControl(peer_id) {
+        if (!this.remoteControlEnabled || !isPresenter) return;
+        this.remoteControlPeerId = peer_id;
+        this.emitCmd({
+            type: 'remoteControl',
+            from_peer_name: this.peer_name,
+            from_peer_id: this.peer_id,
+            from_peer_uuid: this.peer_uuid,
+            peer_id: peer_id,
+            broadcast: false,
+        });
+        this.peerActionProgress('Remote control', 'Requested. Please wait for confirmation...', 6000);
+    }
+
+    sendPeerRemoteControl(peer_id, type, data) {
+        this.emitCmd({
+            type: type,
+            from_peer_name: this.peer_name,
+            from_peer_id: this.peer_id,
+            peer_id: peer_id,
+            data: data,
+            broadcast: false,
+        });
+    }
+
+    confirmPeerRemoteControl(cmd) {
+        if (!this.remoteControlEnabled) return;
+        this.sound('notify');
+        const downloadUrl = /^https?:\/\//i.test(this.remoteControlDownloadUrl) ? this.remoteControlDownloadUrl : null;
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            position: 'center',
+            title: 'Remote control request',
+            html: renderRoomTemplate('popupRemoteControlPromptTemplate', {
+                text: { name: cmd.from_peer_name },
+                attrs: { downloadUrl },
+            }),
+            showDenyButton: true,
+            confirmButtonText: 'Allow control',
+            denyButtonText: 'Deny',
+            focusConfirm: false,
+            didOpen: () => this.getId('remoteControlId').focus(),
+            preConfirm: () => {
+                // RustDesk shows the ID grouped by spaces (123 456 789)
+                const id = this.getId('remoteControlId').value.replace(/\s+/g, '');
+                const password = this.getId('remoteControlPassword').value.trim();
+                if (!/^[\w.@:-]{6,64}$/.test(id)) return Swal.showValidationMessage('Enter a valid RustDesk ID');
+                if (!/^[^\s<>&"'`]{1,64}$/.test(password)) {
+                    return Swal.showValidationMessage('Enter a valid RustDesk password');
+                }
+                return { id, password };
+            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            result.isConfirmed
+                ? this.sendPeerRemoteControl(cmd.from_peer_id, 'remoteControlOK', result.value)
+                : this.sendPeerRemoteControl(
+                      cmd.from_peer_id,
+                      'remoteControlKO',
+                      `${this.peer_name}: Has declined the remote control request`
+                  );
+        });
+    }
+
+    handleRemoteControlOK(cmd) {
+        // Accept answers only from the peer we asked
+        if (!this.remoteControlEnabled || cmd.from_peer_id !== this.remoteControlPeerId) return;
+        this.remoteControlPeerId = null;
+        const { id, password } = cmd.data;
+        this.sound('notify');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            position: 'center',
+            title: 'Remote control',
+            html: renderRoomTemplate('popupRemoteControlReadyTemplate', {
+                text: { name: cmd.from_peer_name, id, password },
+            }),
+            showCancelButton: true,
+            confirmButtonText: 'Open RustDesk',
+            cancelButtonText: 'Cancel',
+            didOpen: (popup) => {
+                popup.querySelectorAll('[data-copy]').forEach((btn) => {
+                    btn.addEventListener('click', () =>
+                        copyToClipboard(btn.dataset.copy === 'id' ? id : password, false)
+                    );
+                });
+            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            // Desktop RustDesk ignores the password parameter, so it must be pasted manually
+            if (result.isConfirmed) {
+                window.location.href = `rustdesk://connection/new/${encodeURIComponent(id)}?password=${encodeURIComponent(password)}`;
             }
         });
     }

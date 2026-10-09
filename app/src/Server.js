@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.89
+ * @version 2.5.90
  *
  */
 
@@ -3232,6 +3232,24 @@ function startServer() {
                         peer.updatePeerInfo({ type: data.type, volume: data.volume * 100 });
                     }
                     break;
+                case 'remoteControl':
+                case 'remoteControlOK':
+                case 'remoteControlKO': {
+                    // Optional RustDesk handshake: consent relay only, no input is ever proxied by the server
+                    if (!config?.features?.remoteControl?.enabled) return;
+                    data.from_peer_id = socket.id;
+                    data.broadcast = false;
+                    if (data.type === 'remoteControl') {
+                        // Only presenters can request remote control
+                        if (!isPeerPresenter(socket.room_id, socket.id, data.from_peer_name, data.from_peer_uuid))
+                            return;
+                    } else if (data.type === 'remoteControlOK') {
+                        const { id, password } = data.data || {};
+                        if (typeof id !== 'string' || !/^[\w.@:-]{6,64}$/.test(id)) return;
+                        if (typeof password !== 'string' || !/^[^\s<>&"'`]{1,64}$/.test(password)) return;
+                    }
+                    break;
+                }
                 default:
                     break;
                 //...

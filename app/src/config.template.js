@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.5.89 - Configuration File
+ * MiroTalk SFU v2.5.90 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1670,6 +1670,21 @@ module.exports = {
                     Math.max(parseInt(process.env.SCHEDULE_MEETING_RATE_LIMIT_WINDOW_MINUTES, 10) || 60, 1) * 60 * 1000,
                 max: Math.max(parseInt(process.env.SCHEDULE_MEETING_RATE_LIMIT_MAX, 10) || 5, 1),
             },
+        },
+
+        /**
+         * Remote Control (RustDesk)
+         * -------------------------
+         * Optional, disabled by default. Browsers cannot inject OS-level mouse/keyboard input,
+         * so MiroTalk only brokers the consent handshake: a presenter requests control, the
+         * participant accepts and shares their RustDesk ID + one-time password, and the presenter
+         * opens the RustDesk client (https://rustdesk.com). No input data goes through this server.
+         * - enabled: Show "Remote control" in the presenter's participants menu
+         * - downloadUrl: Where participants can get the RustDesk client
+         */
+        remoteControl: {
+            enabled: process.env.REMOTE_CONTROL_ENABLED === 'true',
+            downloadUrl: process.env.REMOTE_CONTROL_DOWNLOAD_URL || 'https://rustdesk.com/',
         },
 
         /**
