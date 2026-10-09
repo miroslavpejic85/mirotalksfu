@@ -7605,12 +7605,36 @@ function handleParticipantDropdownPortal(dropdowns) {
             document.body.appendChild(menu);
         });
 
+        toggle.addEventListener('shown.bs.dropdown', () => fitParticipantMenuToViewport(toggle, menu));
+
         toggle.addEventListener('hidden.bs.dropdown', () => {
+            menu.style.removeProperty('max-height');
             if (!placeholder) return;
             placeholder.replaceWith(menu);
             placeholder = null;
         });
     });
+}
+
+/**
+ * Cap the menu height to the free space above/below the toggle, so it is never taller than
+ * the viewport (otherwise its bottom is unreachable even when scrolling) and Popper can flip it.
+ * @param {HTMLElement} toggle
+ * @param {HTMLElement} menu
+ */
+function fitParticipantMenuToViewport(toggle, menu) {
+    const margin = 12;
+    const maxMenuHeight = 520;
+    menu.style.removeProperty('max-height');
+    const naturalHeight = Math.min(menu.scrollHeight + 2, maxMenuHeight);
+    const toggleRect = toggle.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - toggleRect.bottom - margin;
+    const spaceAbove = toggleRect.top - margin;
+    const available = Math.max(spaceBelow, spaceAbove);
+    const height = Math.max(Math.min(naturalHeight, available), 120);
+    menu.style.setProperty('max-height', `${Math.floor(height)}px`, 'important');
+    const dropdown = bootstrap.Dropdown.getInstance(toggle);
+    if (dropdown) dropdown.update();
 }
 
 function getParticipantsList(peers) {
