@@ -3587,6 +3587,18 @@ body {
     text-align: center;
 }
 
+.remote-control__highlight {
+    font-weight: 600;
+    color: var(--room-switch-accent);
+}
+
+/* Remote control entries (video dropdown menus and participants list): accent icon.
+   --room-switch-accent is blue on the neutral themes, where --room-accent is near-white. */
+.navbar-dropdown-item:has(button[id$='remoteControl']) button,
+.participant-list-dropdown-menu button[id$='remoteControl'] .participant-action-icon {
+    color: var(--room-switch-accent) !important;
+}
+
 .remote-control__steps {
     margin: 0;
     padding-left: 20px;
