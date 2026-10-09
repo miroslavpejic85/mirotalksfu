@@ -91,6 +91,32 @@ copy_if_missing() {
     log info "Created ${destination_file} from ${source_file}"
 }
 
+# JWT_SECRET is required (min 32 chars): generate one unless a valid value is already set,
+# so re-running the installer never invalidates existing tokens.
+ensure_jwt_secret() {
+    local current
+
+    current="$(grep -E '^JWT_SECRET=' "$ENV_FILE" | tail -n 1 | sed -E 's/^JWT_SECRET=//; s/[[:space:]]*#.*$//' || true)"
+    if [[ "${#current}" -ge 32 && "$current" != 'mirotalksfu_jwt_secret' ]]; then
+        log info "Keeping existing JWT_SECRET in ${ENV_FILE}"
+        return
+    fi
+
+    log info 'Generating JWT_SECRET...'
+    local secret
+    secret="$(openssl rand -hex 32)"
+
+    if grep -qE '^JWT_SECRET=' "$ENV_FILE"; then
+        sed -i -E "s|^JWT_SECRET=.*|JWT_SECRET=${secret}|" "$ENV_FILE"
+    else
+        printf '\nJWT_SECRET=%s\n' "$secret" >> "$ENV_FILE"
+    fi
+
+    if [[ -n "${SUDO_UID:-}" && -n "${SUDO_GID:-}" ]]; then
+        chown "$SUDO_UID:$SUDO_GID" "$ENV_FILE"
+    fi
+}
+
 run_as_project_user() {
     if [[ -n "${SUDO_USER:-}" ]] && [[ "$SUDO_USER" != 'root' ]]; then
         sudo -u "$SUDO_USER" -- "$@"
@@ -125,7 +151,7 @@ install_native_dependencies() {
     log info 'Installing native runtime and build dependencies'
     apt-get update
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        build-essential ca-certificates curl ffmpeg gnupg python3 python3-pip
+        build-essential ca-certificates curl ffmpeg gnupg openssl python3 python3-pip
     install_nodejs
 }
 
@@ -172,10 +198,12 @@ if confirm 'Use Docker?' y; then
     fi
 
     require_command docker
+    require_command openssl
     docker compose version >/dev/null 2>&1 || die "Docker Compose v2 is required (the command is 'docker compose')."
 
     copy_if_missing "$CONFIG_TEMPLATE" "$CONFIG_FILE"
     copy_if_missing "$ENV_TEMPLATE" "$ENV_FILE"
+    ensure_jwt_secret
     copy_if_missing "$COMPOSE_TEMPLATE" "$COMPOSE_FILE"
 
     if confirm 'Use the official Docker image?' y; then
@@ -196,11 +224,13 @@ else
 
     require_command node
     require_command npm
+    require_command openssl
     node_major="$(node --version | sed -E 's/^v([0-9]+).*/\1/')"
     (( node_major >= NODE_MAJOR )) || die "Node.js ${NODE_MAJOR} or newer is required; found $(node --version)."
 
     copy_if_missing "$CONFIG_TEMPLATE" "$CONFIG_FILE"
     copy_if_missing "$ENV_TEMPLATE" "$ENV_FILE"
+    ensure_jwt_secret
 
     log info 'Installing npm dependencies from the lockfile'
     run_as_project_user npm ci
