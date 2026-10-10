@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.93
+ * @version 2.5.94
  *
  */
 
@@ -10929,6 +10929,8 @@ class RoomClient {
                     return;
                 }
                 this.RoomLobbyAccepted = true;
+                // Close the waiting popup, otherwise it stays open and blocks the toast queue
+                Swal.close();
                 await this.joinAllowed(data.room);
                 bottomButtons.style.display = 'flex';
                 this.showLobbyDecision('accept');
@@ -11285,7 +11287,11 @@ class RoomClient {
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
-            result.isConfirmed ? (bottomButtons.style.display = 'none') : this.exit();
+            if (result.isConfirmed) {
+                bottomButtons.style.display = 'none';
+            } else if (result.isDenied) {
+                this.exit();
+            }
         });
     }
 
