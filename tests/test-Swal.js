@@ -70,6 +70,10 @@ describe('toast hover timers with native translation', () => {
                 return popup;
             }
 
+            static close() {
+                if (visible) closePopup({ isDismissed: true });
+            }
+
             static stopTimer() {
                 running = false;
             }
@@ -426,6 +430,30 @@ describe('toast hover timers with native translation', () => {
         assert.equal(options.title, 'Waiting notice');
         closePopup();
         await notification;
+    });
+
+    it('closes the lobby waiting dialog on acceptance without leaving the room', async () => {
+        const window = dom.window;
+        window.bottomButtons = { style: {} };
+        client.peer_id = 'me';
+        client.joinAllowed = sinon.stub().resolves();
+        client.exit = sinon.stub();
+        client.waitJoinConfirm();
+        assert.equal(options.customClass.popup, 'lobby-join-popup');
+        await client.roomLobby({ lobby_status: 'accept', peer_id: 'me', room: {} });
+        await clock.tickAsync(250);
+        assert.equal(shown.at(-1).toast, true, 'accept toast should not be blocked by the waiting dialog');
+        assert.equal(client.RoomLobbyAccepted, true);
+        assert.equal(client.exit.called, false);
+    });
+
+    it('leaves the room only when the lobby waiting dialog is denied', async () => {
+        dom.window.bottomButtons = { style: {} };
+        client.exit = sinon.stub();
+        client.waitJoinConfirm();
+        closePopup({ isDenied: true });
+        await clock.tickAsync(0);
+        assert.equal(client.exit.calledOnce, true);
     });
 
     it('keeps the prejoin swal visible when media errors occur', () => {
