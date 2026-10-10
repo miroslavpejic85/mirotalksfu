@@ -32,5 +32,6 @@ We would like to extend our gratitude to the following individuals for their res
 | `Tyler Boykin`                                       | [GitHub](https://github.com/CaptBoykin)                                                             |
 | `tonghuaroot`                                        | [GitHub](https://github.com/tonghuaroot)                                                            |
 | `Kevin Sanchez`                                      | [GitHub](https://github.com/kevinsocute)                                                            |
+| `28Hus`                                              | [GitHub](https://github.com/28Hus)                                                                  |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
