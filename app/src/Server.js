@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.94
+ * @version 2.5.95
  *
  */
 
@@ -99,6 +99,7 @@ const ServerApi = require('./ServerApi');
 const { getJwtKeys } = require('./JwtSecret');
 const Logger = require('./Logger');
 const Validator = require('./Validator');
+const RoomPassword = require('./RoomPassword');
 const HtmlInjector = require('./HtmlInjector');
 const log = new Logger('Server');
 const yaml = require('js-yaml');
@@ -3298,7 +3299,7 @@ function startServer() {
                 return;
             }
 
-            log.debug('Room action:', data);
+            log.debug('Room action:', { ...data, password: data.password ? '***' : data.password });
 
             const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
@@ -3315,22 +3316,31 @@ function startServer() {
                     break;
                 case 'lock':
                     if (!isPresenter) return;
+                    if (typeof data.password !== 'string' || !data.password) return;
                     if (!room.isLocked()) {
                         room.setLocked(true, data.password);
                         room.broadCast(socket.id, 'roomAction', data.action);
                     }
                     break;
-                case 'checkPassword':
-                    let roomData = {
+                case 'checkPassword': {
+                    // Pre-join check, so the sender is not a room member: throttle guesses per IP + room
+                    const ip = getIpSocket(socket);
+                    const roomData = {
                         room: null,
                         password: 'KO',
                     };
-                    if (data.password == room.getPassword()) {
-                        roomData.room = room.toJson();
-                        roomData.password = 'OK';
+                    if (room.isLocked() && !RoomPassword.isBlocked(ip, room.id)) {
+                        if (RoomPassword.passwordMatches(data.password, room.getPassword())) {
+                            RoomPassword.recordSuccess(ip, room.id);
+                            roomData.room = room.toJson();
+                            roomData.password = 'OK';
+                        } else {
+                            RoomPassword.recordFailure(ip, room.id);
+                        }
                     }
                     room.sendTo(socket.id, 'roomPassword', roomData);
                     break;
+                }
                 case 'unlock':
                     if (!isPresenter) return;
                     room.setLocked(false);
