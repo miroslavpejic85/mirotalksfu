@@ -64,6 +64,53 @@ This regenerates `en.json` and synchronizes the other language files, preserving
 translations, keeping keys in the same order as `en.json`, adding missing keys with English values,
 and removing stale keys. Review the diff.
 
+## Auto-translate missing values (optional)
+
+Use machine translation to fill only missing/untranslated locale values
+(`""` or values still equal to the English key), while skipping `en.json`.
+
+Install dependency (recommended on macOS/Homebrew Python and other PEP 668 environments):
+
+```bash
+npm run lang:translate:setup
+```
+
+This creates a local `.venv` and installs `deep-translator` there.
+
+If you prefer manual setup:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python3 -m pip install --upgrade pip
+.venv/bin/python3 -m pip install deep-translator
+```
+
+Run translation:
+
+```bash
+npm run lang:translate
+```
+
+The translator now sends requests in small batches with automatic retry/backoff and
+deliberate request pacing (`sleep`) to reduce
+Google rate-limit failures. If a run still stops due temporary limits, wait a bit
+and run `npm run lang:translate` again.
+Progress is saved after each batch, so reruns resume from the already translated values.
+
+Optional targeted run (single locale):
+
+```bash
+npm run lang:translate -- --locale it
+```
+
+Or run both extraction/sync + translation:
+
+```bash
+npm run lang:auto
+```
+
+This is a bootstrap helper. Review machine-translated strings before shipping.
+
 Dynamic video and participant dropdown captions (including conditional presenter actions)
 are extracted into `buttons`. Translate newly added English values in each locale before shipping;
 matching values can also be intentional for brands, technical identifiers, or shared vocabulary.

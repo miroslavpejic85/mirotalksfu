@@ -10,6 +10,10 @@ npm-debug.log
 
 # cache
 .cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
 
 # personal
 .env
@@ -24,3 +28,7 @@ security
 
 # virtual background
 custom
+
+# python virtual environments
+.venv/
+venv/

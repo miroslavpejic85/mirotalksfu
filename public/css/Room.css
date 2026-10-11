@@ -2626,7 +2626,7 @@ body {
 .btn-rtmp-preset.active {
     background: var(--body-bg) !important;
     border-color: rgb(8, 189, 89);
-    color: rgb(8, 189, 89);
+    box-shadow: inset 0 0 0 1px rgb(8, 189, 89);
 }
 .btn-rtmp-preset i {
     font-size: 14px;
@@ -2638,17 +2638,22 @@ body {
     padding: 0;
 }
 
-/* Brand colors for the RTMP destination presets */
-#rtmpPresetYouTube i {
+/* Brand colors for the RTMP destination presets and the destination summary icon.
+   The `#mySettings` prefix is needed to beat `#mySettings .tabcontent button i { color: inherit }` */
+#mySettings .btn-rtmp-preset i.fa-youtube,
+#mySettings #rtmpDestinationIcon.fa-youtube {
     color: #ff0000;
 }
-#rtmpPresetFacebook i {
+#mySettings .btn-rtmp-preset i.fa-facebook,
+#mySettings #rtmpDestinationIcon.fa-facebook {
     color: #1877f2;
 }
-#rtmpPresetTwitch i {
+#mySettings .btn-rtmp-preset i.fa-twitch,
+#mySettings #rtmpDestinationIcon.fa-twitch {
     color: #9146ff;
 }
-#rtmpPresetCustom i {
+#mySettings .btn-rtmp-preset i.fa-globe,
+#mySettings #rtmpDestinationIcon.fa-globe {
     color: #08bd59;
 }
 
