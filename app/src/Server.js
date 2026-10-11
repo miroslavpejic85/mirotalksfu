@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.10
+ * @version 2.6.11
  *
  */
 
@@ -346,9 +346,13 @@ function createRtmpStreamToken(roomId) {
 }
 
 // Short-lived token bound to a room, issued by GET /createRoomToken only to requesters the HTTP
-// policy allows to create rooms. The Socket.IO `createRoom` event requires it when OIDC is enabled,
-// because the socket carries no OIDC session of its own.
+// policy allows to create rooms. The Socket.IO `createRoom` event requires it when OIDC or host
+// protection is enabled, because the socket carries no session of its own.
 const CREATE_ROOM_TOKEN_EXP = '2m';
+
+function isRoomCreationRestricted() {
+    return Boolean(OIDC.enabled || hostCfg.protected);
+}
 
 function createCreateRoomToken(roomId) {
     return jwt.sign({ scope: 'create-room', roomId: String(roomId) }, jwtKeys.createRoom, {
@@ -1112,15 +1116,16 @@ function startServer() {
     });
 
     // Issue a short-lived token that authorizes the Socket.IO `createRoom` event for this room.
-    // It applies the same room creation policy as the HTTP join routes (OIDC session or valid join token).
+    // It applies the same room creation policy as the HTTP join routes (OIDC session, host login,
+    // valid join token or an allowed user name).
     app.get('/createRoomToken', async (req, res) => {
-        const { room } = checkXSS(req.query);
+        const { room, name } = checkXSS(req.query);
 
         if (!room || !Validator.isValidRoomName(room)) {
             return res.status(400).json({ message: 'Invalid room' });
         }
 
-        if (!OIDC.enabled) {
+        if (!isRoomCreationRestricted()) {
             return res.json({ required: false, token: null });
         }
 
@@ -1131,7 +1136,12 @@ function startServer() {
         if (!allowed) {
             const authHeader = req.headers.authorization || '';
             const joinToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
-            allowed = await isJoinTokenAuthorized(joinToken);
+            allowed = await isJoinTokenAuthorized(joinToken, room);
+        }
+
+        // Host protection only: same as the HTTP direct join by user name (never trusted with OIDC)
+        if (!allowed && !OIDC.enabled && hostCfg.authenticated) {
+            allowed = await isRoomAllowedForUser('Create room by name', name, room);
         }
 
         if (!allowed) {
@@ -2489,8 +2499,8 @@ function startServer() {
                 return callback({ error: 'already exists' });
             }
 
-            // Security: enforce the room creation policy (OIDC) that the HTTP routes apply.
-            if (config?.security?.oidc?.enabled && !isCreateRoomTokenValid(token, room_id)) {
+            // Security: enforce the room creation policy (OIDC / host protection) that the HTTP routes apply.
+            if (isRoomCreationRestricted() && !isCreateRoomTokenValid(token, room_id)) {
                 log.warn('[createRoom] - Room creation not authorized', { ip, room_id });
                 return callback({ error: 'Room creation not authorized' });
             }
@@ -5766,12 +5776,18 @@ function startServer() {
         }
     }
 
-    // A valid API/login join token carrying valid peer credentials may create the room it opens
-    async function isJoinTokenAuthorized(token) {
+    // A valid API/login join token carrying valid peer credentials may create the room it opens.
+    // Presenter tokens must also be allowed for that room, as in the HTTP direct join.
+    async function isJoinTokenAuthorized(token, room) {
         try {
             if (!token || !(await isValidToken(token))) return false;
-            const { username, password } = checkXSS(decodeToken(token));
-            return await isAuthPeer(username, password);
+            const { username, password, presenter } = checkXSS(decodeToken(token));
+            if (!(await isAuthPeer(username, password))) return false;
+            const isPeerPresenter = presenter === '1' || presenter === 'true';
+            if (isPeerPresenter && !hostCfg.users_from_db) {
+                return await isRoomAllowedForUser('Create room with token', username, room);
+            }
+            return true;
         } catch {
             return false;
         }

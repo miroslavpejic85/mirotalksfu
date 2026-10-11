@@ -21,7 +21,7 @@ const jwtKeys = getJwtKeys('a'.repeat(32));
 const JWT_VERIFY_OPTIONS = { algorithms: ['HS256'] };
 
 describe('Room creation authorization (Socket.IO createRoom)', () => {
-    function setupSocket({ oidcEnabled }) {
+    function setupSocket({ oidcEnabled = false, hostProtected = false }) {
         const handlers = {};
         const socket = { id: 'anon', on: (event, handler) => (handlers[event] = handler) };
         const roomList = new Map([['existing', {}]]);
@@ -30,7 +30,8 @@ describe('Room creation authorization (Socket.IO createRoom)', () => {
             jwt,
             jwtKeys,
             JWT_VERIFY_OPTIONS,
-            config: { security: { oidc: { enabled: oidcEnabled } } },
+            OIDC: { enabled: oidcEnabled },
+            hostCfg: { protected: hostProtected },
             log: { debug() {}, warn() {}, error() {} },
             roomList,
             Validator: { isValidRoomName: () => true },
@@ -91,7 +92,19 @@ describe('Room creation authorization (Socket.IO createRoom)', () => {
         assert.equal(socket.room_id, 'existing');
     });
 
-    it('does not require a token when OIDC is disabled', async () => {
+    it('rejects an anonymous createRoom for a new room when host protection is enabled', async () => {
+        const { handlers, roomList, context } = setupSocket({ hostProtected: true });
+        const denied = sinon.spy();
+        await handlers.createRoom({ room_id: 'new-room' }, denied);
+        assert.equal(denied.firstCall.args[0].error, 'Room creation not authorized');
+        assert.equal(roomList.has('new-room'), false);
+
+        const created = sinon.spy();
+        await handlers.createRoom({ room_id: 'new-room', token: context.createCreateRoomToken('new-room') }, created);
+        assert.equal(created.firstCall.args[0].room_id, 'new-room');
+    });
+
+    it('does not require a token when neither OIDC nor host protection is enabled', async () => {
         const { handlers, roomList } = setupSocket({ oidcEnabled: false });
         const cb = sinon.spy();
         await handlers.createRoom({ room_id: 'new-room' }, cb);
@@ -101,12 +114,12 @@ describe('Room creation authorization (Socket.IO createRoom)', () => {
 });
 
 describe('GET /createRoomToken', () => {
-    function setupRoute({ oidc, roomList = new Map(), joinTokenOk = false }) {
+    function setupRoute({ oidc, roomList = new Map(), joinTokenOk = false, hostCfg, nameAllowed = false }) {
         let handler;
         const context = vm.createContext({
             app: { get: (route, fn) => (handler = fn) },
             OIDC: oidc,
-            hostCfg: { protected: false, authenticated: true },
+            hostCfg: hostCfg || { protected: false, authenticated: true },
             roomList,
             Validator: { isValidRoomName: (r) => /^[\w-]+$/.test(r) },
             checkXSS: (d) => d,
@@ -115,6 +128,7 @@ describe('GET /createRoomToken', () => {
             jwtKeys,
             JWT_VERIFY_OPTIONS,
             isJoinTokenAuthorized: async () => joinTokenOk,
+            isRoomAllowedForUser: async (msg, name) => nameAllowed && name === 'alice',
         });
         vm.runInContext(
             `${tokenSource}\n${policySource}\n${routeSource}\nthis.isCreateRoomTokenValid = isCreateRoomTokenValid;`,
@@ -123,7 +137,7 @@ describe('GET /createRoomToken', () => {
         return { handler, context };
     }
 
-    function call(handler, { room = 'new-room', authenticated = false, authorization } = {}) {
+    function call(handler, { room = 'new-room', authenticated = false, authorization, name } = {}) {
         const res = {
             statusCode: 200,
             status(code) {
@@ -137,7 +151,7 @@ describe('GET /createRoomToken', () => {
             },
         };
         const req = {
-            query: { room },
+            query: { room, name },
             headers: authorization ? { authorization } : {},
             oidc: { isAuthenticated: () => authenticated },
         };
@@ -147,7 +161,7 @@ describe('GET /createRoomToken', () => {
     const oidc = (allow) => ({ enabled: true, allow_rooms_creation_for_auth_users: allow });
     const existing = () => new Map([['existing', {}]]);
 
-    it('requires no token when OIDC is disabled', async () => {
+    it('requires no token when OIDC and host protection are disabled', async () => {
         const { handler } = setupRoute({ oidc: { enabled: false } });
         const res = await call(handler);
         assert.equal(res.body.required, false);
@@ -182,6 +196,54 @@ describe('GET /createRoomToken', () => {
         assert.equal(context.isCreateRoomTokenValid(res.body.token, 'new-room'), true);
     });
 
+    describe('host protection', () => {
+        const host = (authenticated) => ({ protected: true, authenticated });
+        const off = { enabled: false };
+
+        it('denies anonymous creation when other rooms exist', async () => {
+            const { handler } = setupRoute({ oidc: off, hostCfg: host(true), roomList: existing() });
+            const res = await call(handler);
+            assert.equal(res.statusCode, 403);
+        });
+
+        it('allows the first room once the host is logged in, but not before', async () => {
+            const loggedIn = setupRoute({ oidc: off, hostCfg: host(true) });
+            assert.equal((await call(loggedIn.handler)).statusCode, 200);
+            const loggedOut = setupRoute({ oidc: off, hostCfg: host(false) });
+            assert.equal((await call(loggedOut.handler)).statusCode, 403);
+        });
+
+        it('allows a valid join token (login/API flow)', async () => {
+            const { handler, context } = setupRoute({
+                oidc: off,
+                hostCfg: host(false),
+                roomList: existing(),
+                joinTokenOk: true,
+            });
+            const res = await call(handler, { authorization: 'Bearer join-token' });
+            assert.equal(res.statusCode, 200);
+            assert.equal(context.isCreateRoomTokenValid(res.body.token, 'new-room'), true);
+        });
+
+        it('allows a direct join by an allowed user name only while the host is logged in', async () => {
+            const on = setupRoute({ oidc: off, hostCfg: host(true), roomList: existing(), nameAllowed: true });
+            assert.equal((await call(on.handler, { name: 'alice' })).statusCode, 200);
+            assert.equal((await call(on.handler, { name: 'mallory' })).statusCode, 403);
+            const out = setupRoute({ oidc: off, hostCfg: host(false), roomList: existing(), nameAllowed: true });
+            assert.equal((await call(out.handler, { name: 'alice' })).statusCode, 403);
+        });
+
+        it('never trusts a self-asserted name with OIDC enabled', async () => {
+            const { handler } = setupRoute({
+                oidc: oidc(false),
+                hostCfg: host(true),
+                roomList: existing(),
+                nameAllowed: true,
+            });
+            assert.equal((await call(handler, { name: 'alice' })).statusCode, 403);
+        });
+    });
+
     it('rejects an invalid room name', async () => {
         const { handler } = setupRoute({ oidc: oidc(true) });
         const res = await call(handler, { room: '../bad', authenticated: true });
@@ -190,12 +252,14 @@ describe('GET /createRoomToken', () => {
 });
 
 describe('isJoinTokenAuthorized', () => {
-    function load({ valid, creds, authOk }) {
+    function load({ valid, creds, authOk, roomOk = true, usersFromDb = false }) {
         const context = vm.createContext({
             isValidToken: async () => valid,
             decodeToken: () => creds,
             checkXSS: (d) => d,
             isAuthPeer: async () => authOk,
+            hostCfg: { users_from_db: usersFromDb },
+            isRoomAllowedForUser: async () => roomOk,
         });
         vm.runInContext(`${joinTokenSource}\nthis.isJoinTokenAuthorized = isJoinTokenAuthorized;`, context);
         return context.isJoinTokenAuthorized;
@@ -203,9 +267,19 @@ describe('isJoinTokenAuthorized', () => {
 
     it('accepts only a valid token whose credentials authenticate', async () => {
         const creds = { username: 'alice', password: 'pw' };
-        assert.equal(await load({ valid: true, creds, authOk: true })('t'), true);
+        assert.equal(await load({ valid: true, creds, authOk: true })('t', 'r'), true);
         assert.equal(await load({ valid: true, creds, authOk: false })('t'), false);
         assert.equal(await load({ valid: false, creds, authOk: true })('t'), false);
         assert.equal(await load({ valid: true, creds, authOk: true })(''), false);
+    });
+
+    it('requires presenter tokens to be allowed for the room unless users come from the DB', async () => {
+        const presenter = { username: 'alice', password: 'pw', presenter: 'true' };
+        assert.equal(await load({ valid: true, creds: presenter, authOk: true, roomOk: false })('t', 'r'), false);
+        assert.equal(await load({ valid: true, creds: presenter, authOk: true, roomOk: true })('t', 'r'), true);
+        const guest = { username: 'alice', password: 'pw', presenter: 'false' };
+        assert.equal(await load({ valid: true, creds: guest, authOk: true, roomOk: false })('t', 'r'), true);
+        const dbUsers = { valid: true, creds: presenter, authOk: true, roomOk: false, usersFromDb: true };
+        assert.equal(await load(dbUsers)('t', 'r'), true);
     });
 });
