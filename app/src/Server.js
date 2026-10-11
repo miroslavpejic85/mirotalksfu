@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.97
+ * @version 2.5.98
  *
  */
 
@@ -2381,7 +2381,22 @@ function startServer() {
     // SOCKET IO
     // ####################################################
 
+    const PRE_JOIN_EVENTS = new Set(['createRoom', 'join', 'clientError', 'error']);
+
     io.on('connection', (socket) => {
+        // Security: only sockets that were admitted to the room (join accepted, lobby included) may use
+        // room events. Rejected/unjoined sockets can still be bound to a room id by 'createRoom'.
+        socket.use((packet, next) => {
+            const [event, payload] = packet;
+            if (PRE_JOIN_EVENTS.has(event)) return next();
+            if (event === 'roomAction' && payload?.action === 'checkPassword') return next();
+            if (roomExists(socket) && getPeer(socket)) return next();
+
+            log.warn('Blocked event from a socket that is not a room member', { event, peer_id: socket.id });
+            const ack = packet[packet.length - 1];
+            if (typeof ack === 'function') ack({ error: 'Not in room' });
+        });
+
         socket.on('clientError', (error) => {
             try {
                 log.error('Client error', error.message);
@@ -2580,6 +2595,18 @@ function startServer() {
                 }
             }
 
+            // Security: admission checks must run BEFORE the peer is added to the room, otherwise a
+            // rejected peer would keep access to the media plane and room broadcasts.
+            if (room.isJoinLocked() && !isPresenter) {
+                log.debug('The user was rejected because the room is locked for new participants');
+                return cb('isJoinLocked');
+            }
+
+            if (room.isLocked() && !isPresenter && !isSocketUnlocked(socket, room)) {
+                log.debug('The user was rejected because the room is locked, and they are not a presenter');
+                return cb('isLocked');
+            }
+
             // Remove old peer with same socket.id before adding new one
             const existingPeer = room.getPeer(socket.id);
             if (existingPeer) {
@@ -2633,16 +2660,6 @@ function startServer() {
             });
 
             peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
-
-            if (room.isJoinLocked() && !isPresenter) {
-                log.debug('The user was rejected because the room is locked for new participants');
-                return cb('isJoinLocked');
-            }
-
-            if (room.isLocked() && !isPresenter) {
-                log.debug('The user was rejected because the room is locked, and they are not a presenter');
-                return cb('isLocked');
-            }
 
             if ((room.isLobbyEnabled() || room.isGlobalLobbyEnabled()) && !isPresenter) {
                 log.debug(
@@ -3332,13 +3349,15 @@ function startServer() {
                     if (room.isLocked() && !RoomPassword.isBlocked(ip, room.id)) {
                         if (RoomPassword.passwordMatches(data.password, room.getPassword())) {
                             RoomPassword.recordSuccess(ip, room.id);
-                            roomData.room = room.toJson();
+                            // The client must re-send 'join': the password only unlocks admission for this socket
+                            socket.roomUnlock = { room_id: room.id, password: room.getPassword() };
                             roomData.password = 'OK';
                         } else {
                             RoomPassword.recordFailure(ip, room.id);
                         }
                     }
-                    room.sendTo(socket.id, 'roomPassword', roomData);
+                    // The sender is not a room member yet, so reply directly on the socket
+                    socket.emit('roomPassword', roomData);
                     break;
                 }
                 case 'unlock':
@@ -5294,7 +5313,7 @@ function startServer() {
 
             log.debug('[Disconnect] - peer name', { peer_name, reason });
 
-            if (webhook.enabled) {
+            if (webhook.enabled && peer) {
                 const data = {
                     timestamp: log.getDateTime(false),
                     room_id: socket.room_id,
@@ -5311,10 +5330,11 @@ function startServer() {
 
             room.removePeer(socket.id);
 
-            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
+            // Sockets that never joined (e.g. rejected by a lock) are not announced to the room
+            if (peer) room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
             // Notify main room when a peer leaves a breakout room
-            if (socket.room_id.includes('_breakout_')) {
+            if (peer && socket.room_id.includes('_breakout_')) {
                 notifyMainRoomBreakoutCountChanged(socket.room_id);
             }
 
@@ -5482,6 +5502,16 @@ function startServer() {
 
         function roomExists(socket) {
             return roomList.has(socket.room_id);
+        }
+
+        // Security: true only if this socket proved the current room password via checkPassword
+        function isSocketUnlocked(socket, room) {
+            const unlock = socket.roomUnlock;
+            return Boolean(
+                unlock &&
+                unlock.room_id === room.id &&
+                RoomPassword.passwordMatches(unlock.password, room.getPassword())
+            );
         }
 
         // Security: block lobby-waiting peers from WebRTC/media handlers.

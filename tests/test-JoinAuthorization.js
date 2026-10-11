@@ -203,4 +203,29 @@ describe('Socket.IO join authorization', () => {
         assert.equal(result.id, 'room-b');
         assert.equal(state.presenters['room-b'][state.socket.id].is_configured_presenter, true);
     });
+
+    for (const [lockFlag, expected] of [
+        ['isLocked', 'isLocked'],
+        ['isJoinLocked', 'isJoinLocked'],
+    ]) {
+        it(`rejects a non-presenter before adding the peer when the room is ${lockFlag}`, async () => {
+            const state = setup({ protected: false, user_auth: false });
+            state.room[lockFlag] = () => true;
+            state.context.isSocketUnlocked = () => false;
+            state.data.peer_info.peer_token = '';
+            assert.equal(await joinExistingRoom(state), expected);
+            assert.equal(state.room.addPeer.callCount, 0);
+            assert.equal(Object.keys(state.presenters).length, 0);
+        });
+    }
+
+    it('admits a socket that already proved the room password', async () => {
+        const state = setup({ protected: false, user_auth: false });
+        state.room.isLocked = () => true;
+        state.context.isSocketUnlocked = () => true;
+        state.data.peer_info.peer_token = '';
+        const result = await joinExistingRoom(state);
+        assert.equal(result.id, 'room-b');
+        assert.equal(state.room.addPeer.callCount, 1);
+    });
 });

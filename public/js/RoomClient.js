@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.97
+ * @version 2.5.98
  *
  */
 
@@ -632,6 +632,7 @@ class RoomClient {
     }
 
     async join(data) {
+        this.joinData = data;
         this.socket
             .request('join', data)
             .then(async (room) => {
@@ -10901,7 +10902,8 @@ class RoomClient {
         switch (data.password) {
             case 'OK':
                 this.RoomPasswordValid = true;
-                await this.joinAllowed(data.room);
+                // The server admits the peer only on 'join', the password just unlocks it for this socket
+                await this.join(this.joinData);
                 break;
             case 'KO':
                 this.RoomPasswordValid = false;
