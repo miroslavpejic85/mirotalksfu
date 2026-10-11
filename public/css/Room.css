@@ -630,8 +630,34 @@ body {
 /* Larger preview in the dedicated Virtual Background settings tab */
 #tabVirtualBackground #imageGridVideo {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    max-height: 70vh;
+    align-content: start;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
     overflow-y: auto;
+}
+
+/* Let the backgrounds grid fill the remaining height of the tab (display is toggled inline by openTab) */
+#tabVirtualBackground[style*='block'] {
+    display: flex !important;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#tabVirtualBackground #videoVirtualBackground:not(.hidden) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#tabVirtualBackground #imageGridVideoControls {
+    flex: 0 0 auto;
+}
+
+#tabVirtualBackground #videoVirtualBackground > br,
+#tabVirtualBackground #errorMessage:empty {
+    display: none;
 }
 
 #tabVirtualBackground #imageGridVideo img {
