@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.99
+ * @version 2.6.10
  *
  */
 
@@ -621,10 +621,30 @@ class RoomClient {
     // GET STARTED
     // ####################################################
 
+    // Short-lived token proving the HTTP room creation policy (e.g. OIDC) allows this user to create the room
+    async getCreateRoomToken(room_id) {
+        try {
+            const headers = {};
+            if (this.peer_info?.peer_token) headers.Authorization = `Bearer ${this.peer_info.peer_token}`;
+            const response = await fetch(`/createRoomToken?room=${encodeURIComponent(room_id)}`, {
+                headers,
+                credentials: 'same-origin',
+            });
+            if (!response.ok) return null;
+            const data = await response.json();
+            return data?.token || null;
+        } catch (err) {
+            console.warn('Create room token not available', err);
+            return null;
+        }
+    }
+
     async createRoom(room_id) {
+        const token = await this.getCreateRoomToken(room_id);
         await this.socket
             .request('createRoom', {
                 room_id,
+                token,
             })
             .catch((err) => {
                 console.log('Create room:', err);

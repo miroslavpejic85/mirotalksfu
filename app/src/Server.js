@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.99
+ * @version 2.6.10
  *
  */
 
@@ -343,6 +343,27 @@ function createRtmpStreamToken(roomId) {
     return jwt.sign({ scope: 'rtmp-stream', roomId: String(roomId) }, jwtKeys.rtmp, {
         expiresIn: `${hours}h`,
     });
+}
+
+// Short-lived token bound to a room, issued by GET /createRoomToken only to requesters the HTTP
+// policy allows to create rooms. The Socket.IO `createRoom` event requires it when OIDC is enabled,
+// because the socket carries no OIDC session of its own.
+const CREATE_ROOM_TOKEN_EXP = '2m';
+
+function createCreateRoomToken(roomId) {
+    return jwt.sign({ scope: 'create-room', roomId: String(roomId) }, jwtKeys.createRoom, {
+        expiresIn: CREATE_ROOM_TOKEN_EXP,
+    });
+}
+
+function isCreateRoomTokenValid(token, roomId) {
+    if (!token || typeof token !== 'string') return false;
+    try {
+        const decoded = jwt.verify(token, jwtKeys.createRoom, JWT_VERIFY_OPTIONS);
+        return decoded?.scope === 'create-room' && decoded.roomId === String(roomId);
+    } catch {
+        return false;
+    }
 }
 
 const hostCfg = {
@@ -1088,6 +1109,38 @@ function startServer() {
             });
             res.status(500).json({ message: 'Failed to send meeting invitations' });
         }
+    });
+
+    // Issue a short-lived token that authorizes the Socket.IO `createRoom` event for this room.
+    // It applies the same room creation policy as the HTTP join routes (OIDC session or valid join token).
+    app.get('/createRoomToken', async (req, res) => {
+        const { room } = checkXSS(req.query);
+
+        if (!room || !Validator.isValidRoomName(room)) {
+            return res.status(400).json({ message: 'Invalid room' });
+        }
+
+        if (!OIDC.enabled) {
+            return res.json({ required: false, token: null });
+        }
+
+        // Creation policy only: ignore whether the room currently exists
+        const creationRoomList = { has: () => false, size: roomList.size };
+        let allowed = isAllowedRoomAccess('/createRoomToken', req, hostCfg, creationRoomList, room);
+
+        if (!allowed) {
+            const authHeader = req.headers.authorization || '';
+            const joinToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+            allowed = await isJoinTokenAuthorized(joinToken);
+        }
+
+        if (!allowed) {
+            log.warn('Room creation token denied', { room });
+            return res.status(403).json({ required: true, token: null });
+        }
+
+        res.set('Cache-Control', 'no-store');
+        return res.json({ required: true, token: createCreateRoomToken(room) });
     });
 
     // Handle Direct join room with params
@@ -2415,7 +2468,7 @@ function startServer() {
             }
         });
 
-        socket.on('createRoom', async ({ room_id }, callback) => {
+        socket.on('createRoom', async ({ room_id, token }, callback) => {
             // Security: reject invalid room ids (XSS / path traversal / empty).
             if (!Validator.isValidRoomName(room_id)) {
                 log.warn('[createRoom] - Invalid room name', { room_id });
@@ -2431,21 +2484,28 @@ function startServer() {
                 });
             }
 
+            if (roomList.has(room_id)) {
+                socket.room_id = room_id;
+                return callback({ error: 'already exists' });
+            }
+
+            // Security: enforce the room creation policy (OIDC) that the HTTP routes apply.
+            if (config?.security?.oidc?.enabled && !isCreateRoomTokenValid(token, room_id)) {
+                log.warn('[createRoom] - Room creation not authorized', { ip, room_id });
+                return callback({ error: 'Room creation not authorized' });
+            }
+
             socket.room_id = room_id;
 
-            if (roomList.has(socket.room_id)) {
-                callback({ error: 'already exists' });
-            } else {
-                try {
-                    const worker = await getMediasoupWorker();
-                    const room = await new Room(socket.room_id, worker, io).ready();
-                    roomList.set(socket.room_id, room);
-                    log.debug('Created room', { room_id: socket.room_id });
-                    callback({ room_id: socket.room_id });
-                } catch (error) {
-                    log.error('Create room failed', { room_id: socket.room_id, error: error.message });
-                    callback({ error: 'Failed to initialize room' });
-                }
+            try {
+                const worker = await getMediasoupWorker();
+                const room = await new Room(socket.room_id, worker, io).ready();
+                roomList.set(socket.room_id, room);
+                log.debug('Created room', { room_id: socket.room_id });
+                callback({ room_id: socket.room_id });
+            } catch (error) {
+                log.error('Create room failed', { room_id: socket.room_id, error: error.message });
+                callback({ error: 'Failed to initialize room' });
             }
         });
 
@@ -5703,6 +5763,17 @@ function startServer() {
             return (
                 hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password)
             );
+        }
+    }
+
+    // A valid API/login join token carrying valid peer credentials may create the room it opens
+    async function isJoinTokenAuthorized(token) {
+        try {
+            if (!token || !(await isValidToken(token))) return false;
+            const { username, password } = checkXSS(decodeToken(token));
+            return await isAuthPeer(username, password);
+        } catch {
+            return false;
         }
     }
 
