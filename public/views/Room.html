@@ -1725,26 +1725,44 @@
                                 </span>
                                 <div>
                                     <h3>Broadcast with RTMP</h3>
-                                    <p>Choose a destination, then select one source to send live.</p>
+                                    <p>Pick a source, confirm the destination, then go live.</p>
                                 </div>
+                            </div>
+
+                            <div id="rtmpLiveStatus" class="rtmp-live-status hidden" role="status" aria-live="polite">
+                                <span class="rtmp-live-dot" aria-hidden="true"></span>
+                                <span class="rtmp-live-text">
+                                    <strong>LIVE</strong>
+                                    <small id="rtmpLiveStatusSource"></small>
+                                </span>
+                                <button id="rtmpStopAllButton" type="button" class="rtmp-stop-button">
+                                    <i class="fas fa-stop-circle"></i>&nbsp;Stop
+                                </button>
                             </div>
 
                             <section class="rtmp-section" aria-labelledby="rtmpDestinationTitle">
                                 <div class="rtmp-section-heading">
-                                    <span class="rtmp-step">1</span>
                                     <div>
-                                        <h4 id="rtmpDestinationTitle">Confirm destination</h4>
-                                        <p>The room RTMP server is used unless you choose an override.</p>
+                                        <h4 id="rtmpDestinationTitle">Destination</h4>
                                     </div>
                                 </div>
                                 <div class="rtmp-default-destination">
-                                    <i class="fa-solid fa-server" aria-hidden="true"></i>
+                                    <i id="rtmpDestinationIcon" class="fa-solid fa-server" aria-hidden="true"></i>
                                     <span
-                                        ><strong>Room default</strong
-                                        ><small>Configured by your administrator</small></span
+                                        ><strong id="rtmpDestinationName">Room default</strong
+                                        ><small id="rtmpDestinationHint">Configured by your administrator</small></span
                                     >
+                                    <button
+                                        id="rtmpDestinationToggle"
+                                        type="button"
+                                        class="rtmp-destination-toggle"
+                                        aria-expanded="false"
+                                        aria-controls="rtmpCustomDestination"
+                                    >
+                                        Change
+                                    </button>
                                 </div>
-                                <div id="rtmpCustomDestination">
+                                <div id="rtmpCustomDestination" class="rtmp-collapsed">
                                     <p class="rtmp-override-label">Override destination</p>
                                     <div class="rtmp-preset-buttons">
                                         <button
@@ -1802,14 +1820,52 @@
 
                             <div class="rtmp-section rtmp-sources" aria-labelledby="rtmpSourceTitle">
                                 <div class="rtmp-section-heading">
-                                    <span class="rtmp-step">2</span>
                                     <div>
-                                        <h4 id="rtmpSourceTitle">Choose one source</h4>
-                                        <p>Only one RTMP source can be active at a time.</p>
+                                        <h4 id="rtmpSourceTitle">Source</h4>
                                     </div>
                                 </div>
+                                <div class="rtmp-mode-tabs" role="tablist" aria-labelledby="rtmpSourceTitle">
+                                    <button
+                                        id="rtmpTabFile"
+                                        type="button"
+                                        role="tab"
+                                        class="rtmp-mode-tab"
+                                        data-mode="file"
+                                        data-target="rtmpFromFile"
+                                        aria-controls="rtmpFromFile"
+                                    >
+                                        <i class="fa-solid fa-file-video" aria-hidden="true"></i><span>File</span>
+                                    </button>
+                                    <button
+                                        id="rtmpTabUrl"
+                                        type="button"
+                                        role="tab"
+                                        class="rtmp-mode-tab"
+                                        data-mode="url"
+                                        data-target="rtmpFromUrl"
+                                        aria-controls="rtmpFromUrl"
+                                    >
+                                        <i class="fa-solid fa-link" aria-hidden="true"></i><span>URL</span>
+                                    </button>
+                                    <button
+                                        id="rtmpTabStream"
+                                        type="button"
+                                        role="tab"
+                                        class="rtmp-mode-tab"
+                                        data-mode="stream"
+                                        data-target="rtmpFromStream"
+                                        aria-controls="rtmpFromStream"
+                                    >
+                                        <i class="fa-solid fa-video" aria-hidden="true"></i><span>Camera / Screen</span>
+                                    </button>
+                                </div>
 
-                                <section id="rtmpFromFile" class="rtmp-source" aria-labelledby="rtmpFileTitle">
+                                <section
+                                    id="rtmpFromFile"
+                                    class="rtmp-source"
+                                    role="tabpanel"
+                                    aria-labelledby="rtmpFileTitle"
+                                >
                                     <div class="rtmp-source-heading">
                                         <span class="rtmp-source-icon"><i class="fa-solid fa-file-video"></i></span>
                                         <div>
@@ -1840,14 +1896,19 @@
                                     <div id="file-name"></div>
                                     <!-- <hr /> -->
                                     <button id="startRtmpButton" class="hidden btn-custom">
-                                        <i class="fa-solid fa-play"></i>&nbsp;Start RTMP File Streaming
+                                        <i class="fa-solid fa-play"></i>&nbsp;Go live
                                     </button>
                                     <button id="stopRtmpButton" class="hidden btn-custom rtmp-stop-button">
-                                        <i class="fas fa-stop-circle"></i>&nbsp;Stop RTMP File Streaming
+                                        <i class="fas fa-stop-circle"></i>&nbsp;Stop streaming
                                     </button>
                                 </section>
 
-                                <section id="rtmpFromUrl" class="rtmp-source" aria-labelledby="rtmpUrlTitle">
+                                <section
+                                    id="rtmpFromUrl"
+                                    class="rtmp-source"
+                                    role="tabpanel"
+                                    aria-labelledby="rtmpUrlTitle"
+                                >
                                     <div class="rtmp-source-heading">
                                         <span class="rtmp-source-icon"><i class="fa-solid fa-link"></i></span>
                                         <div>
@@ -1865,14 +1926,19 @@
                                         />
                                     </div>
                                     <button id="startRtmpURLButton" class="hidden btn-custom">
-                                        <i class="fa-solid fa-play"></i>&nbsp;Start RTMP URL Streaming
+                                        <i class="fa-solid fa-play"></i>&nbsp;Go live
                                     </button>
                                     <button id="stopRtmpURLButton" class="hidden btn-custom rtmp-stop-button">
-                                        <i class="fas fa-stop-circle"></i>&nbsp;Stop RTMP URL Streaming
+                                        <i class="fas fa-stop-circle"></i>&nbsp;Stop streaming
                                     </button>
                                 </section>
 
-                                <section id="rtmpFromStream" class="rtmp-source" aria-labelledby="rtmpLiveTitle">
+                                <section
+                                    id="rtmpFromStream"
+                                    class="rtmp-source"
+                                    role="tabpanel"
+                                    aria-labelledby="rtmpLiveTitle"
+                                >
                                     <div class="rtmp-source-heading">
                                         <span class="rtmp-source-icon"><i class="fa-solid fa-video"></i></span>
                                         <div>
@@ -1889,7 +1955,6 @@
 
                             <section class="rtmp-section rtmp-output" aria-labelledby="rtmpOutputTitle">
                                 <div class="rtmp-section-heading">
-                                    <span class="rtmp-step">3</span>
                                     <div>
                                         <h4 id="rtmpOutputTitle">Live output</h4>
                                         <p>The active RTMP address appears here after streaming starts.</p>

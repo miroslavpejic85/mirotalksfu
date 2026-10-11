@@ -2270,19 +2270,6 @@ body {
     margin-bottom: 14px;
 }
 
-.rtmp-step {
-    width: 24px;
-    height: 24px;
-    flex: 0 0 24px;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--border-strong);
-    border-radius: 50%;
-    color: var(--fg-2);
-    font-size: 10px;
-    font-weight: 700;
-}
-
 .rtmp-section-heading h4 {
     font-size: 13px;
 }
@@ -2316,7 +2303,7 @@ body {
     padding: 10px 14px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 11px;
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -2376,11 +2363,11 @@ body {
 
 .rtmp-sources {
     display: grid;
-    gap: 10px;
+    gap: 0;
 }
 
 .rtmp-sources > .rtmp-section-heading {
-    margin-bottom: 4px;
+    margin-bottom: 10px;
 }
 
 .rtmp-source {
@@ -2456,12 +2443,36 @@ body {
     background: #888;
     border-radius: 8px;
 }
+/* tbody is display:block, so rows must be block too or they shrink to the filename width */
+.file-table tbody tr {
+    display: block;
+    width: 100%;
+}
 .file-item {
+    display: block;
+    position: relative;
+    padding-left: 32px !important;
     cursor: pointer;
 }
 .file-item:hover,
 .file-item.selected {
     background: var(--body-bg);
+}
+/* Check mark space is always reserved so names stay aligned when selecting */
+.file-item::before {
+    content: '\f00c';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgb(8, 189, 89);
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 11px;
+    opacity: 0;
+}
+.file-item.selected::before {
+    opacity: 1;
 }
 
 #file-name {
@@ -2512,22 +2523,31 @@ body {
     text-overflow: ellipsis;
 }
 
+/* `.tabcontent button` sets min-height, margin and left alignment, undo them so the icon stays centered */
 #refreshVideoFiles {
     width: 28px;
     height: 28px;
+    min-width: 28px;
+    min-height: 28px;
     margin: 0;
     padding: 0;
+    flex: 0 0 28px;
     display: grid;
     place-items: center;
+    justify-content: center;
+    align-content: center;
+    line-height: 1;
     cursor: pointer;
     border: 0;
     border-radius: 6px;
     color: var(--fg-2);
     background: transparent;
+    box-shadow: none;
     text-align: center;
 }
 #refreshVideoFiles:hover {
     color: #fff;
+    box-shadow: none;
     background: var(--btns-bg-color) !important;
 }
 
@@ -2548,6 +2568,8 @@ body {
     padding: 0;
     display: grid;
     place-items: center;
+    justify-content: center;
+    align-content: center;
     flex: 0 0 40px;
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -2678,13 +2700,184 @@ body {
     background: rgba(210, 35, 48, 0.82);
 }
 
+/* Keep the live address visible while the source panel scrolls */
 .rtmp-output {
-    padding-bottom: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin: 14px -14px 0;
+    padding: 16px 14px 10px;
+    background: var(--room-panel-raised);
+    box-shadow: 0 -10px 14px -8px rgba(0, 0, 0, 0.35);
+}
+
+.rtmp-output .rtmp-section-heading {
+    margin-bottom: 10px;
+}
+
+.rtmp-section-heading h4 {
+    text-transform: uppercase;
+    color: var(--fg-3);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* `#mySettings p` adds inline-flex, auto margin and padding that misalign the descriptions */
+#mySettings .rtmp-intro p,
+#mySettings .rtmp-section-heading p,
+#mySettings .rtmp-source-heading p {
+    display: block;
+    margin: 3px 0 0;
+    padding: 0;
+}
+
+#rtmpDestinationToggle {
+    display: none;
+    width: auto;
+    min-height: 30px;
+    margin: 0 0 0 auto;
+    padding: 5px 12px;
+    flex: 0 0 auto;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 10px;
+}
+
+#rtmpCustomDestination.rtmp-collapsed {
+    display: none !important;
+}
+
+.rtmp-mode-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--surface-1);
+}
+
+/* `.tabcontent button` forces full width and left alignment, undo it so the tabs share one row */
+.rtmp-mode-tabs .rtmp-mode-tab {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    min-height: 36px;
+    margin: 0;
+    padding: 7px 10px;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--fg-3);
+    font-size: 11px;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: none;
+}
+
+.rtmp-mode-tabs .rtmp-mode-tab span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rtmp-mode-tabs .rtmp-mode-tab:hover {
+    color: var(--fg-1);
+    background: var(--room-control-hover);
+    box-shadow: none;
+}
+
+.rtmp-mode-tabs .rtmp-mode-tab[aria-selected='true'] {
+    color: #fff;
+    border-color: var(--border-strong);
+    background: var(--btns-bg-color);
+}
+
+.rtmp-mode-tabs .rtmp-mode-tab[aria-disabled='true'] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.rtmp-source-inactive {
+    display: none !important;
+}
+
+.rtmp-source {
+    margin-top: 10px;
+}
+
+.rtmp-live-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 8px 8px 8px 14px;
+    border: 1px solid rgba(255, 75, 75, 0.5);
+    border-radius: 10px;
+    background: rgba(210, 35, 48, 0.1);
+}
+
+.rtmp-live-dot {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    border-radius: 50%;
+    background: rgb(255, 75, 75);
+    animation: rtmpLivePulse 1.4s ease-in-out infinite;
+}
+
+.rtmp-live-text {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.rtmp-live-text strong {
+    color: var(--fg-1);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+}
+
+.rtmp-live-text small {
+    color: var(--fg-3);
+    font-size: 10px;
+}
+
+.rtmp-live-status .rtmp-stop-button {
+    width: auto;
+    min-height: 32px;
+    margin: 0;
+    padding: 6px 14px;
+    flex: 0 0 auto;
+    justify-content: center;
+    font-size: 11px;
+}
+
+@keyframes rtmpLivePulse {
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.55);
+    }
+    50% {
+        opacity: 0.6;
+        box-shadow: 0 0 0 6px rgba(255, 75, 75, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rtmp-live-dot {
+        animation: none;
+    }
 }
 
 @media (max-width: 480px) {
     .rtmp-preset-buttons .btn-rtmp-preset {
         flex-basis: calc(50% - 3px);
+    }
+    .rtmp-mode-tabs .rtmp-mode-tab i {
+        display: none;
     }
 }
 
@@ -3037,6 +3230,8 @@ body {
     min-width: 0;
     flex: 1 1 0;
     overflow: hidden;
+    /* `clip` keeps the rounded corners without making this a scroll container, so sticky children follow #mySettings */
+    overflow: clip;
     display: flex;
     flex-direction: column;
     margin-left: 10px;

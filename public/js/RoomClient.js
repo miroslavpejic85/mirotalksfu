@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.5.95
+ * @version 2.5.96
  *
  */
 
@@ -910,6 +910,8 @@ class RoomClient {
                 elemDisplay('rtmpFromUrl', fromUrl);
                 elemDisplay('rtmpFromStream', fromStream);
                 elemDisplay('rtmpCustomDestination', allowCustomUrl);
+                elemDisplay('rtmpDestinationToggle', allowCustomUrl, 'inline-flex');
+                initRtmpModeTabs({ fromFile, fromUrl, fromStream });
                 if (allowCustomUrl) this.initRtmpCustomDestination();
                 if (!fromFile && !fromUrl && !fromStream) {
                     elemDisplay('tabRTMPStreamingBtn', false);
@@ -14890,9 +14892,44 @@ class RoomClient {
         const rtmpCustomStreamKey = this.getId('rtmpCustomStreamKey');
         const rtmpCustomClear = this.getId('rtmpCustomClear');
 
+        const rtmpDestinationToggle = this.getId('rtmpDestinationToggle');
+        const rtmpCustomDestination = this.getId('rtmpCustomDestination');
+
+        const setDestinationEditorOpen = (open) => {
+            rtmpCustomDestination.classList.toggle('rtmp-collapsed', !open);
+            rtmpDestinationToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            rtmpDestinationToggle.textContent = open ? 'Done' : 'Change';
+        };
+
+        // Keep the collapsed summary row in sync with the override fields
+        const updateDestinationSummary = () => {
+            const url = rtmpCustomUrl.value.trim();
+            const key = rtmpCustomStreamKey.value.trim();
+            const activePreset = document.querySelector('.btn-rtmp-preset.active');
+            const icon = this.getId('rtmpDestinationIcon');
+            const name = this.getId('rtmpDestinationName');
+            const hint = this.getId('rtmpDestinationHint');
+
+            if (!url && !key) {
+                icon.className = 'fa-solid fa-server';
+                name.textContent = 'Room default';
+                hint.textContent = 'Configured by your administrator';
+                return;
+            }
+            icon.className = activePreset?.querySelector('i')?.className || 'fa-solid fa-globe';
+            name.textContent = activePreset ? activePreset.textContent.trim() : 'Custom server';
+            hint.textContent =
+                url && key ? 'Stream key set' : 'Server URL and stream key are both required, room default is used';
+        };
+
         const showClearButton = () => {
             elemDisplay('rtmpCustomClear', rtmpCustomUrl.value || rtmpCustomStreamKey.value ? true : false);
+            updateDestinationSummary();
         };
+
+        rtmpDestinationToggle.addEventListener('click', () => {
+            setDestinationEditorOpen(rtmpCustomDestination.classList.contains('rtmp-collapsed'));
+        });
 
         const setActivePreset = (activeBtn) => {
             document.querySelectorAll('.btn-rtmp-preset').forEach((btn) => btn.classList.remove('active'));
@@ -14943,6 +14980,7 @@ class RoomClient {
             rtmpCustomStreamKey.placeholder = 'Stream key';
             document.querySelectorAll('.btn-rtmp-preset').forEach((btn) => btn.classList.remove('active'));
             showClearButton();
+            setDestinationEditorOpen(false);
         });
     }
 
@@ -14974,6 +15012,11 @@ class RoomClient {
             const fileListTbody = rc.getId('file-list');
             fileListTbody.innerHTML = '';
 
+            // The list is rebuilt on every open/refresh, so drop a selection that no longer exists
+            const previousSelection = filenames.includes(rc.selectedRtmpFilename) ? rc.selectedRtmpFilename : '';
+            rc.selectedRtmpFilename = '';
+            if (filenames.length) rc.getId('file-name').textContent = '';
+
             filenames.forEach((filename) => {
                 const fileRow = document.createElement('tr');
                 const fileCell = document.createElement('td');
@@ -14982,6 +15025,7 @@ class RoomClient {
                 fileCell.onclick = () => showFilename(fileCell, filename);
                 fileRow.appendChild(fileCell);
                 fileListTbody.appendChild(fileRow);
+                if (filename === previousSelection) showFilename(fileCell, filename);
             });
 
             function showFilename(clickedItem, filename) {
