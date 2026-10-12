@@ -3788,6 +3788,47 @@ body {
     text-align: left;
 }
 
+.remote-control__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--room-switch-accent);
+}
+
+.remote-control__brand .remote-control__icon {
+    width: 84px;
+    height: 84px;
+    font-size: 38px;
+    color: var(--room-switch-accent);
+}
+
+.remote-control__target {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    gap: 8px;
+    max-width: 100%;
+    margin: 0;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.remote-control__target i {
+    color: var(--room-switch-accent);
+}
+
+.remote-control__target b {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .remote-control__icon {
     display: flex;
     align-items: center;

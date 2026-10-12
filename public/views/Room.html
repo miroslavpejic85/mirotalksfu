@@ -3745,6 +3745,30 @@ Note</textarea>
             <div data-template-text="message"></div>
         </template>
 
+        <template id="popupRemoteControlConfirmTemplate">
+            <div class="remote-control">
+                <div class="remote-control__brand">
+                    <div class="remote-control__icon"><i class="fas fa-desktop" aria-hidden="true"></i></div>
+                    <span class="notranslate" translate="no">RustDesk</span>
+                </div>
+                <p class="remote-control__target">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                    <b data-template-text="name"></b>
+                </p>
+                <p class="remote-control__text">Ask permission to control their mouse and keyboard.</p>
+                <ol class="remote-control__steps">
+                    <li>They can accept or decline your request.</li>
+                    <li>If they accept, they share their RustDesk ID and one-time password.</li>
+                    <li>Open RustDesk to connect. Both of you need the RustDesk app.</li>
+                </ol>
+                <p class="remote-control__warning">
+                    <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                    Sending a request does not start remote control. The participant stays in control and can end the
+                    session anytime.
+                </p>
+            </div>
+        </template>
+
         <template id="popupRemoteControlPromptTemplate">
             <div class="remote-control">
                 <div class="remote-control__icon"><i class="fas fa-computer-mouse"></i></div>

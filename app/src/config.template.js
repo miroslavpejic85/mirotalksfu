@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.15 - Configuration File
+ * MiroTalk SFU v2.6.16 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1660,7 +1660,7 @@ module.exports = {
          * Remote Control (RustDesk)
          * -------------------------
          * Optional, disabled by default. Browsers cannot inject OS-level mouse/keyboard input,
-         * so MiroTalk only brokers the consent handshake: a presenter requests control, the
+         * so MiroTalk only brokers the consent handshake: a presenter confirms before sending a request, the
          * participant accepts and shares their RustDesk ID + one-time password, and the presenter
          * opens the RustDesk client (https://rustdesk.com). No input data goes through this server.
          * - enabled: Show "Remote control" in the presenter's participants menu

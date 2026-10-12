@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.15
+ * @version 2.6.16
  *
  */
 
@@ -13924,8 +13924,29 @@ class RoomClient {
     // HANDLE REMOTE CONTROL (RustDesk handshake)
     // ####################################################
 
-    askPeerRemoteControl(peer_id) {
+    getRemotePeerName(peer_id) {
+        // this.peers is only filled at join time, so peers who joined later are read from the DOM
+        const name = this.getId(peer_id + '__name')?.textContent || this.peers.get(peer_id)?.peer_info?.peer_name;
+        return name?.trim() || 'Participant';
+    }
+
+    async askPeerRemoteControl(peer_id) {
         if (!this.remoteControlEnabled || !isPresenter) return;
+        const result = await Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            title: 'Request remote control?',
+            html: renderRoomTemplate('popupRemoteControlConfirmTemplate', {
+                text: { name: this.getRemotePeerName(peer_id) },
+            }),
+            showCancelButton: true,
+            confirmButtonText: 'Send request',
+            cancelButtonText: 'Cancel',
+            focusCancel: true,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        });
+        if (!result.isConfirmed || !this.remoteControlEnabled || !isPresenter) return;
         this.remoteControlPeerId = peer_id;
         this.emitCmd({
             type: 'remoteControl',
@@ -13935,7 +13956,7 @@ class RoomClient {
             peer_id: peer_id,
             broadcast: false,
         });
-        this.peerActionProgress('Remote control', 'Requested. Please wait for confirmation...', 6000);
+        this.userLog('success', 'Remote control requested. Waiting for confirmation...', 'top-end', 6000);
     }
 
     sendPeerRemoteControl(peer_id, type, data) {
