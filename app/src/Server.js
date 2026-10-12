@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.11
+ * @version 2.6.12
  *
  */
 
@@ -217,6 +217,7 @@ const createRoomLimiterWindowMs = createRoomLimiterCfg.windowMs || 60 * 1000;
 const createRoomLimiterMax = createRoomLimiterCfg.max || 10;
 const createRoomLimiterMinutes = Math.ceil(createRoomLimiterWindowMs / (60 * 1000));
 const createRoomHits = new Map(); // ip -> number[] (timestamps)
+
 function checkCreateRoomLimit(ip) {
     const now = Date.now();
     const windowStart = now - createRoomLimiterWindowMs;
@@ -229,6 +230,20 @@ function checkCreateRoomLimit(ip) {
     createRoomHits.set(ip, hits);
     return true;
 }
+
+// HTTP /createRoomToken rate limiter (per IP) — shares the createRoomRateLimit settings.
+// The endpoint runs the room creation policy (join token / user lookups), so cap request volume.
+const createRoomTokenLimiter = rateLimit({
+    windowMs: createRoomLimiterWindowMs,
+    max: createRoomLimiterMax,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        message: `Too many room token requests. Please try again after ${minutesLabel(createRoomLimiterMinutes)}.`,
+    },
+    keyGenerator: (req) => ipKeyGenerator(req),
+});
+
 // Periodic cleanup to bound memory.
 setInterval(
     () => {
@@ -1118,7 +1133,7 @@ function startServer() {
     // Issue a short-lived token that authorizes the Socket.IO `createRoom` event for this room.
     // It applies the same room creation policy as the HTTP join routes (OIDC session, host login,
     // valid join token or an allowed user name).
-    app.get('/createRoomToken', async (req, res) => {
+    app.get('/createRoomToken', createRoomTokenLimiter, async (req, res) => {
         const { room, name } = checkXSS(req.query);
 
         if (!room || !Validator.isValidRoomName(room)) {

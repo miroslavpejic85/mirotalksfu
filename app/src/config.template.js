@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.11 - Configuration File
+ * MiroTalk SFU v2.6.12 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1671,10 +1671,11 @@ module.exports = {
         },
 
         /**
-         * Socket.IO createRoom rate limit (per IP)
-         * ----------------------------------------
+         * Socket.IO createRoom and HTTP /createRoomToken rate limit (per IP)
+         * -------------------------------------------------------------------
          * Prevents unauthenticated sockets from spamming arbitrary entries
-         * into the in-memory roomList (which feeds /api/v1/activeRooms).
+         * into the in-memory roomList (which feeds /api/v1/activeRooms),
+         * and throttles room creation token requests.
          */
         createRoomRateLimit: {
             windowMs: Math.max(parseInt(process.env.CREATE_ROOM_RATE_LIMIT_WINDOW_MINUTES, 10) || 1, 1) * 60 * 1000,
