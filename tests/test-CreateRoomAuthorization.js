@@ -117,7 +117,8 @@ describe('GET /createRoomToken', () => {
     function setupRoute({ oidc, roomList = new Map(), joinTokenOk = false, hostCfg, nameAllowed = false }) {
         let handler;
         const context = vm.createContext({
-            app: { get: (route, fn) => (handler = fn) },
+            app: { get: (route, ...fns) => (handler = fns[fns.length - 1]) },
+            createRoomTokenLimiter: (req, res, next) => next(),
             OIDC: oidc,
             hostCfg: hostCfg || { protected: false, authenticated: true },
             roomList,
