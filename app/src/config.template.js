@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.14 - Configuration File
+ * MiroTalk SFU v2.6.15 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1565,6 +1565,7 @@ module.exports = {
                 chatSpeechStartButton: process.env.SHOW_CHAT_SPEECH !== 'false',
                 chatGPT: process.env.ENABLE_CHAT_GPT !== 'false',
                 deepSeek: process.env.ENABLE_DEEP_SEEK !== 'false',
+                chatTyping: process.env.ENABLE_CHAT_TYPING !== 'false',
             },
 
             // Poll interface controls

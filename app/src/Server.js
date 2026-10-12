@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.14
+ * @version 2.6.15
  *
  */
 
@@ -4602,6 +4602,46 @@ function startServer() {
             data.to_peer_id == 'all'
                 ? room.broadCast(socket.id, 'message', data)
                 : room.sendTo(data.to_peer_id, 'message', data);
+        });
+
+        socket.on('chatTyping', (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            if (config.ui?.buttons?.chat?.chatTyping === false) return;
+
+            if (!dataObject || typeof dataObject.to_peer_id !== 'string' || typeof dataObject.isTyping !== 'boolean') {
+                return;
+            }
+
+            const { to_peer_id, isTyping } = dataObject;
+
+            if (['ChatGPT', 'DeepSeek'].includes(to_peer_id)) return;
+
+            // Throttle "typing" signals per socket, "stopped" signals are always relayed
+            const now = Date.now();
+            if (isTyping) {
+                if (now - (socket._lastChatTyping || 0) < 1000) return;
+                socket._lastChatTyping = now;
+            }
+
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!room || !peer) return;
+
+            const isPublic = to_peer_id === 'all';
+
+            if (room._moderator) {
+                if (isPublic ? room._moderator.chat_cant_publicly : room._moderator.chat_cant_privately) return;
+            }
+
+            const data = {
+                peer_id: socket.id,
+                peer_name: peer.peer_name,
+                peer_avatar: peer.peer_avatar || false,
+                to_peer_id: isPublic ? 'all' : to_peer_id,
+                isTyping,
+            };
+
+            isPublic ? room.broadCast(socket.id, 'chatTyping', data) : room.sendTo(to_peer_id, 'chatTyping', data);
         });
 
         socket.on('chatReaction', (dataObject) => {

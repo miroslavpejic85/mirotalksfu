@@ -1068,6 +1068,98 @@ input[type='text'] {
     }
 }
 
+/* Chat typing indicator (space is reserved so the chat doesn't jump) */
+.chat-typing-indicator {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 24px;
+    padding: 0 20px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    opacity: 0;
+    transform: translateY(4px);
+    pointer-events: none;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.chat-typing-indicator.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.chat-typing-avatars {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+}
+
+.chat-typing-avatars:empty {
+    display: none;
+}
+
+.chat-typing-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(24, 24, 27, 0.9);
+    box-sizing: content-box;
+}
+
+.chat-typing-avatar + .chat-typing-avatar {
+    margin-left: -8px;
+}
+
+.chat-typing-text {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-typing-dots {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin: 3px 0 0 -4px;
+}
+
+.chat-typing-dots span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.chat-typing-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.chat-typing-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+.chat-typing-dots span:nth-child(3) {
+    animation-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chat-typing-indicator {
+        transition: none;
+    }
+    .chat-typing-dots span {
+        animation: none;
+        opacity: 0.7;
+    }
+}
+
 /* AI Typing Indicator */
 .ai-typing-indicator {
     display: flex;

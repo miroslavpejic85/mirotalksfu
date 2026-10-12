@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.14
+ * @version 2.6.15
  *
  */
 
@@ -341,7 +341,16 @@ class RoomClient {
         this.chatPeerAvatar = '';
         this.unreadMessageCounts = {};
 
-        // LiveAvatar Video AI
+        // Chat typing indicator
+        this.chatTypingIndicator = typeof BUTTONS !== 'undefined' ? BUTTONS.chat?.chatTyping !== false : true;
+        this.chatTypingEmitInterval = 2000; // ms
+        this.chatTypingIdleTimeout = 3000; // ms
+        this.chatTypingExpire = 5000; // ms
+        this.chatTypingActive = false;
+        this.chatTypingTo = null;
+        this.chatTypingLastEmit = 0;
+        this.chatTypingStopTimer = null;
+        this.chatTypingPeers = new Map();
         this.videoAIContainer = null;
         this.videoAIElement = null;
         this.videoAIRecognitionPersistent = false;
@@ -1419,6 +1428,7 @@ class RoomClient {
         this.socket.on('breakoutRoomHelp', this.handleBreakoutRoomHelp);
         this.socket.on('followMe', this.handleFollowMeData);
         this.socket.on('chatReaction', this.handleChatReaction);
+        this.socket.on('chatTyping', this.handleChatTyping);
     }
 
     // ####################################################
@@ -4872,6 +4882,7 @@ class RoomClient {
                 this.socket.off('removeMe');
                 this.socket.off('refreshParticipantsCount');
                 this.socket.off('message');
+                this.socket.off('chatTyping');
                 this.socket.off('roomAction');
                 this.socket.off('roomPassword');
                 this.socket.off('roomLobby');
@@ -6917,6 +6928,7 @@ class RoomClient {
     }
 
     cleanMessage() {
+        this.stopChatTyping();
         chatMessage.value = '';
         chatMessage.setAttribute('rows', '1');
         const charCount = this.getId('chatCharCount');
@@ -7242,6 +7254,8 @@ class RoomClient {
     async showMessage(data, toggleChat = true) {
         const isPublicMessage = data.to_peer_id === 'all';
         const messagePeerId = isPublicMessage ? 'all' : data.peer_id;
+
+        this.clearChatTyping(data.peer_id, messagePeerId);
 
         if (toggleChat && !this.isChatOpen && this.showChatOnMessage) {
             // Auto-switch to the correct tab before opening the chat panel
@@ -7614,6 +7628,121 @@ class RoomClient {
     hideAITypingIndicator(aiName) {
         const indicator = this.getId(`ai-typing-${aiName}`);
         if (indicator) indicator.remove();
+    }
+
+    // ####################################################
+    // CHAT TYPING INDICATOR
+    // ####################################################
+
+    emitChatTyping() {
+        if (!this.chatTypingIndicator || !this.socket) return;
+        if (isChatGPTOn || isDeepSeekOn || ['ChatGPT', 'DeepSeek'].includes(this.chatPeerId)) return;
+
+        if (!chatMessage.value.trim()) return this.stopChatTyping();
+
+        const isPublic = this.chatPeerId === 'all';
+        if (isPublic ? this._moderator.chat_cant_publicly : this._moderator.chat_cant_privately) return;
+
+        const now = Date.now();
+        if (
+            !this.chatTypingActive ||
+            this.chatTypingTo !== this.chatPeerId ||
+            now - this.chatTypingLastEmit >= this.chatTypingEmitInterval
+        ) {
+            if (this.chatTypingActive && this.chatTypingTo !== this.chatPeerId) this.stopChatTyping();
+            this.socket.emit('chatTyping', { to_peer_id: this.chatPeerId, isTyping: true });
+            this.chatTypingActive = true;
+            this.chatTypingTo = this.chatPeerId;
+            this.chatTypingLastEmit = now;
+        }
+
+        clearTimeout(this.chatTypingStopTimer);
+        this.chatTypingStopTimer = setTimeout(() => this.stopChatTyping(), this.chatTypingIdleTimeout);
+    }
+
+    stopChatTyping() {
+        clearTimeout(this.chatTypingStopTimer);
+        this.chatTypingStopTimer = null;
+        if (!this.chatTypingActive) return;
+        this.chatTypingActive = false;
+        this.chatTypingLastEmit = 0;
+        if (this.socket && this.chatTypingTo) {
+            this.socket.emit('chatTyping', { to_peer_id: this.chatTypingTo, isTyping: false });
+        }
+        this.chatTypingTo = null;
+    }
+
+    handleChatTyping = (data) => {
+        if (!this.chatTypingIndicator || !data) return;
+        const peer_id = String(data.peer_id || '');
+        const peer_name = String(data.peer_name || '');
+        const peer_avatar = typeof data.peer_avatar === 'string' ? data.peer_avatar : false;
+        if (!peer_id || peer_id === this.peer_id) return;
+
+        // Private typing is shown in the sender's conversation, public typing in the room one
+        const context = data.to_peer_id === 'all' ? 'all' : peer_id;
+        const key = `${context}:${peer_id}`;
+
+        const existing = this.chatTypingPeers.get(key);
+        if (existing) clearTimeout(existing.timer);
+
+        if (data.isTyping === true) {
+            const timer = setTimeout(() => this.clearChatTyping(peer_id, context), this.chatTypingExpire);
+            this.chatTypingPeers.set(key, { context, peer_name, peer_avatar, timer });
+        } else {
+            this.chatTypingPeers.delete(key);
+        }
+        this.renderChatTyping();
+    };
+
+    clearChatTyping(peer_id, context) {
+        const key = `${context}:${peer_id}`;
+        const existing = this.chatTypingPeers.get(key);
+        if (!existing) return;
+        clearTimeout(existing.timer);
+        this.chatTypingPeers.delete(key);
+        this.renderChatTyping();
+    }
+
+    renderChatTyping() {
+        const el = this.getId('chatTypingIndicator');
+        const text = this.getId('chatTypingText');
+        const avatars = this.getId('chatTypingAvatars');
+        if (!el || !text || !avatars) return;
+        const typers = [];
+        if (this.isChatOpen) {
+            this.chatTypingPeers.forEach((p) => {
+                if (p.context === this.chatPeerId) typers.push(p);
+            });
+        }
+        if (!typers.length) {
+            el.classList.remove('is-visible');
+            return;
+        }
+
+        // Rebuild avatars only when the set of typers changes to avoid image flicker
+        const signature = typers.map((p) => p.peer_name).join('|');
+        if (avatars.dataset.signature !== signature) {
+            avatars.dataset.signature = signature;
+            avatars.replaceChildren(
+                ...typers.slice(0, 3).map((p) => {
+                    const img = document.createElement('img');
+                    img.className = 'chat-typing-avatar';
+                    img.alt = '';
+                    img.src = getParticipantAvatar(p.peer_name, p.peer_avatar);
+                    return img;
+                })
+            );
+        }
+
+        const names = typers.map((p) => p.peer_name);
+        text.textContent =
+            names.length === 1
+                ? `${names[0]} is typing`
+                : names.length === 2
+                  ? `${names[0]} and ${names[1]} are typing`
+                  : 'Several people are typing';
+        el.classList.add('is-visible');
     }
 
     streamMessage(element, message, speed = 100) {
@@ -13032,9 +13161,12 @@ class RoomClient {
 
         this.hidePeerMessages();
 
+        this.stopChatTyping();
+
         this.chatPeerId = peer_id;
         this.chatPeerName = peer_name;
         this.chatPeerAvatar = peer_avatar;
+        this.renderChatTyping();
 
         const chatAbout = this.getId('chatAbout');
         const participant = this.getId(peer_id);

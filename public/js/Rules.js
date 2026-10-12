@@ -124,6 +124,7 @@ let BUTTONS = {
         chatSpeechStartButton: true,
         chatGPT: true,
         deepSeek: true,
+        chatTyping: true,
     },
     poll: {
         pollPinButton: true,
