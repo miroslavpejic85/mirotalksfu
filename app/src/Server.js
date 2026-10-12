@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.12
+ * @version 2.6.13
  *
  */
 
@@ -113,19 +113,8 @@ const { applyEmbedHeaders, embedAllowedOrigins, embedCsp } = require('./middlewa
 const { createVideoAIService } = require('./videoai/service');
 const packageJson = require('../../package.json');
 
-// Login attempts limit
-const rateLimit = require('express-rate-limit');
-const maxAttempts = config?.security?.host?.maxAttempts || 5;
-const minBlockTime = config?.security?.host?.minBlockTime || 15; // minutes
-// Extract client IP (only trust X-Forwarded-For when behind a trusted reverse proxy)
-const ipKeyGenerator = (req) => {
-    const forwarded = Boolean(config?.server?.trustProxy)
-        ? req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For']
-        : null;
-    return (forwarded || '').split(',')[0].trim() || req.socket?.remoteAddress || req.ip;
-};
-// Pluralize "N minute(s)" consistently across limiter messages
-const minutesLabel = (n) => `${n} minute${n === 1 ? '' : 's'}`;
+// Rate limiters
+const { createRateLimiters, ipKeyGenerator, minutesLabel } = require('./middleware/RateLimiters');
 
 // Derive a stable per-requester rate-limit key (OIDC user > bearer-token user > IP)
 const getRequesterKey = (req) => {
@@ -147,115 +136,20 @@ const getRequesterKey = (req) => {
     return ipKeyGenerator(req);
 };
 
-// Create login rate limiter
-const loginLimiter = rateLimit({
-    windowMs: minBlockTime * 60 * 1000,
-    max: maxAttempts,
-    message: {
-        message: `Too many login attempts. Please try again after ${minutesLabel(minBlockTime)}.`,
-    },
-    keyGenerator: (req) => req.body?.username || ipKeyGenerator(req),
-});
+const {
+    loginLimiter,
+    scheduleMeetingLimiter,
+    activeRoomsLimiter,
+    recSyncLimiter,
+    createRoomTokenLimiter,
+    checkCreateRoomLimit,
+    createRoomLimiterMinutes,
+} = createRateLimiters({ getRequesterKey });
 
-// Room scheduler configuration and rate limiter
+// Room scheduler configuration
 const scheduleMeetingCfg = config.features?.scheduleMeeting || {};
 const scheduleMeetingAllowedDomains = scheduleMeetingCfg.allowedDomains || [];
-const scheduleMeetingLimiterWindowMs = scheduleMeetingCfg.rateLimit?.windowMs || 60 * 60 * 1000;
-const scheduleMeetingLimiterMax = scheduleMeetingCfg.rateLimit?.max || 5;
-const scheduleMeetingLimiterMinutes = Math.ceil(scheduleMeetingLimiterWindowMs / (60 * 1000));
 const scheduleMeetingMaxRecipients = scheduleMeetingCfg.maxRecipients || 20;
-
-const scheduleMeetingLimiter = rateLimit({
-    windowMs: scheduleMeetingLimiterWindowMs,
-    max: scheduleMeetingLimiterMax,
-    message: {
-        message: `Too many schedule meeting requests. Please try again after ${minutesLabel(scheduleMeetingLimiterMinutes)}.`,
-    },
-    keyGenerator: getRequesterKey,
-});
-
-// Active rooms endpoint rate limiter (per IP) — public endpoint, so prevent
-// enumeration / scraping abuse without breaking the public "event zone" UX.
-const activeRoomsLimiterCfg = config.ui?.rooms?.activeRoomsRateLimit || {};
-const activeRoomsLimiterWindowMs = activeRoomsLimiterCfg.windowMs || 60 * 1000;
-const activeRoomsLimiterMax = activeRoomsLimiterCfg.max || 60;
-const activeRoomsLimiterMinutes = Math.ceil(activeRoomsLimiterWindowMs / (60 * 1000));
-const activeRoomsLimiter = rateLimit({
-    windowMs: activeRoomsLimiterWindowMs,
-    max: activeRoomsLimiterMax,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        error: `Too many requests. Please try again after ${minutesLabel(activeRoomsLimiterMinutes)}.`,
-    },
-    keyGenerator: (req) => ipKeyGenerator(req),
-});
-
-// Server recording chunk upload rate limiter (per IP). The /recSync* endpoints
-// accept binary writes to disk, so cap request volume to mitigate flooding and
-// disk exhaustion even from an authenticated/joined peer.
-const recSyncLimiterCfg = config.media?.recording?.rateLimit || {};
-const recSyncLimiterWindowMs = recSyncLimiterCfg.windowMs || 60 * 1000;
-const recSyncLimiterMax = recSyncLimiterCfg.max || 300;
-const recSyncLimiterMinutes = Math.ceil(recSyncLimiterWindowMs / (60 * 1000));
-const recSyncLimiter = rateLimit({
-    windowMs: recSyncLimiterWindowMs,
-    max: recSyncLimiterMax,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        error: `Too many recording upload requests. Please try again after ${minutesLabel(recSyncLimiterMinutes)}.`,
-    },
-    keyGenerator: (req) => ipKeyGenerator(req),
-});
-
-// Socket.IO createRoom rate limiter (per IP) — sliding window in memory.
-// Prevents unauthenticated sockets from spamming arbitrary room entries
-// into the in-memory roomList (which feeds /api/v1/activeRooms).
-const createRoomLimiterCfg = config.features?.createRoomRateLimit || {};
-const createRoomLimiterWindowMs = createRoomLimiterCfg.windowMs || 60 * 1000;
-const createRoomLimiterMax = createRoomLimiterCfg.max || 10;
-const createRoomLimiterMinutes = Math.ceil(createRoomLimiterWindowMs / (60 * 1000));
-const createRoomHits = new Map(); // ip -> number[] (timestamps)
-
-function checkCreateRoomLimit(ip) {
-    const now = Date.now();
-    const windowStart = now - createRoomLimiterWindowMs;
-    const hits = (createRoomHits.get(ip) || []).filter((t) => t > windowStart);
-    if (hits.length >= createRoomLimiterMax) {
-        createRoomHits.set(ip, hits);
-        return false;
-    }
-    hits.push(now);
-    createRoomHits.set(ip, hits);
-    return true;
-}
-
-// HTTP /createRoomToken rate limiter (per IP) — shares the createRoomRateLimit settings.
-// The endpoint runs the room creation policy (join token / user lookups), so cap request volume.
-const createRoomTokenLimiter = rateLimit({
-    windowMs: createRoomLimiterWindowMs,
-    max: createRoomLimiterMax,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        message: `Too many room token requests. Please try again after ${minutesLabel(createRoomLimiterMinutes)}.`,
-    },
-    keyGenerator: (req) => ipKeyGenerator(req),
-});
-
-// Periodic cleanup to bound memory.
-setInterval(
-    () => {
-        const cutoff = Date.now() - createRoomLimiterWindowMs;
-        for (const [ip, hits] of createRoomHits) {
-            const kept = hits.filter((t) => t > cutoff);
-            if (kept.length === 0) createRoomHits.delete(ip);
-            else createRoomHits.set(ip, kept);
-        }
-    },
-    Math.max(createRoomLimiterWindowMs, 60 * 1000)
-).unref?.();
 
 // Branding configuration
 const brandHtmlInjection = config?.ui?.brand?.htmlInjection ?? true;
@@ -338,6 +232,23 @@ const jwtCfg = {
 };
 
 const JWT_VERIFY_OPTIONS = { algorithms: ['HS256'] };
+
+// Verify an auth JWT and return its decrypted payload (module scope, also used by getRequesterKey)
+function decodeToken(jwtToken) {
+    if (!jwtToken) return null;
+
+    // Verify and decode the JWT token
+    const decodedToken = jwt.verify(jwtToken, jwtKeys.auth, JWT_VERIFY_OPTIONS);
+    if (!decodedToken || !decodedToken.data) {
+        throw new Error('Invalid token');
+    }
+
+    // Decrypt the payload using AES decryption
+    const decryptedPayload = CryptoJS.AES.decrypt(decodedToken.data, jwtKeys.auth).toString(CryptoJS.enc.Utf8);
+
+    // Parse the decrypted payload as JSON
+    return JSON.parse(decryptedPayload);
+}
 
 // Lifetime of the per-session server recording upload token (must outlive long recordings)
 const recUploadTokenExp = config?.media?.recording?.uploadTokenExp || '24h';
@@ -5844,24 +5755,6 @@ function startServer() {
         const jwtToken = jwt.sign({ data: encryptedPayload }, jwtKeys.auth, { expiresIn: expireValue });
 
         return jwtToken;
-    }
-
-    function decodeToken(jwtToken) {
-        if (!jwtToken) return null;
-
-        // Verify and decode the JWT token
-        const decodedToken = jwt.verify(jwtToken, jwtKeys.auth, JWT_VERIFY_OPTIONS);
-        if (!decodedToken || !decodedToken.data) {
-            throw new Error('Invalid token');
-        }
-
-        // Decrypt the payload using AES decryption
-        const decryptedPayload = CryptoJS.AES.decrypt(decodedToken.data, jwtKeys.auth).toString(CryptoJS.enc.Utf8);
-
-        // Parse the decrypted payload as JSON
-        const payload = JSON.parse(decryptedPayload);
-
-        return payload;
     }
 
     function getActiveRooms() {
