@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(le télécharger ici)",
+        "{first} and {second} are typing": "{first} et {second} sont en train d’écrire",
+        "{name} is typing": "{name} est en train d’écrire",
         "= Arrow": "= Flèche",
         "= Circle": "= Cercle",
         "= Clear all": "= Tout effacer",
@@ -881,6 +883,7 @@
         "Server video file": "Fichier vidéo du serveur",
         "Set as presenter": "Définir comme présentateur",
         "Set how everyone enters and what participants can do in this room.": "Définissez la manière dont tout le monde entre et ce que les participants peuvent faire dans cette salle.",
+        "Several people are typing": "Plusieurs personnes écrivent",
         "Share": "Partager",
         "Share and stream": "Partager et diffuser",
         "Share media": "Partager des médias",

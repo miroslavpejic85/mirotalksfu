@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(یہاں سے حاصل کریں)",
+        "{first} and {second} are typing": "{first} اور {second} ٹائپ کر رہے ہیں",
+        "{name} is typing": "{name} ٹائپ کر رہا ہے",
         "= Arrow": "= تیر",
         "= Circle": "= دائرہ",
         "= Clear all": "= سب صاف کریں",
@@ -881,6 +883,7 @@
         "Server video file": "سرور ویڈیو فائل",
         "Set as presenter": "پریزنٹر بنائیں",
         "Set how everyone enters and what participants can do in this room.": "سیٹ کریں کہ ہر کوئی کیسے داخل ہوتا ہے اور اس کمرے میں شرکاء کیا کر سکتے ہیں.",
+        "Several people are typing": "کئی لوگ ٹائپ کر رہے ہیں",
         "Share": "شیئر کریں",
         "Share and stream": "شیئر اور اسٹریم کریں",
         "Share media": "میڈیا شیئر کریں",

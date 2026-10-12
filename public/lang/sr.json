@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(преузмите овде)",
+        "{first} and {second} are typing": "{first} i {second} kucaju",
+        "{name} is typing": "{name} kuca",
         "= Arrow": "= Strelica",
         "= Circle": "= Krug",
         "= Clear all": "= Obriši sve",
@@ -881,6 +883,7 @@
         "Server video file": "Video datoteka na serveru",
         "Set as presenter": "Postavi kao voditelja",
         "Set how everyone enters and what participants can do in this room.": "Podesite kako svi ulaze i šta učesnici mogu da rade u ovoj sobi.",
+        "Several people are typing": "Više osoba kuca",
         "Share": "Podeli",
         "Share and stream": "Podeli i strimuj",
         "Share media": "Podeli medije",

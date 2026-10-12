@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(از اینجا دریافت کنید)",
+        "{first} and {second} are typing": "{first} و {second} در حال تایپ هستند",
+        "{name} is typing": "{name} در حال تایپ است",
         "= Arrow": "= فلش",
         "= Circle": "= دایره",
         "= Clear all": "= همه را پاک کنید",
@@ -881,6 +883,7 @@
         "Server video file": "فایل ویدئویی سرور",
         "Set as presenter": "تعیین به‌عنوان ارائه‌دهنده",
         "Set how everyone enters and what participants can do in this room.": "نحوه ورود همه و کارهایی که شرکت‌کنندگان می‌توانند در این اتاق انجام دهند را تنظیم کنید.",
+        "Several people are typing": "چند نفر در حال تایپ هستند",
         "Share": "اشتراک‌گذاری",
         "Share and stream": "به اشتراک بگذارید و پخش کنید",
         "Share media": "رسانه را به اشتراک بگذارید",

@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(buradan edinin)",
+        "{first} and {second} are typing": "{first} ve {second} yazıyor",
+        "{name} is typing": "{name} yazıyor",
         "= Arrow": "= Ok",
         "= Circle": "= Daire",
         "= Clear all": "= Tümünü temizle",
@@ -881,6 +883,7 @@
         "Server video file": "Sunucu video dosyası",
         "Set as presenter": "Sunumcu yap",
         "Set how everyone enters and what participants can do in this room.": "Herkesin bu odaya nasıl gireceğini ve katılımcıların bu odada neler yapabileceğini ayarlayın.",
+        "Several people are typing": "Birkaç kişi yazıyor",
         "Share": "Paylaş",
         "Share and stream": "Paylaş ve yayınla",
         "Share media": "Medyayı paylaş",

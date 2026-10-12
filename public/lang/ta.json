@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(இங்கே பெறுங்கள்)",
+        "{first} and {second} are typing": "{first} மற்றும் {second} தட்டச்சு செய்கிறார்கள்",
+        "{name} is typing": "{name} தட்டச்சு செய்கிறார்",
         "= Arrow": "= அம்பு",
         "= Circle": "= வட்டம்",
         "= Clear all": "= அனைத்தையும் அழி",
@@ -881,6 +883,7 @@
         "Server video file": "சர்வர் வீடியோ கோப்பு",
         "Set as presenter": "வழங்குபவராக அமை",
         "Set how everyone enters and what participants can do in this room.": "இந்த அறையில் அனைவரும் எப்படி நுழைகிறார்கள் மற்றும் பங்கேற்பாளர்கள் என்ன செய்யலாம் என்பதை அமைக்கவும்.",
+        "Several people are typing": "பலர் தட்டச்சு செய்கிறார்கள்",
         "Share": "பகிர்",
         "Share and stream": "பகிர் மற்றும் நேரலை செய்",
         "Share media": "மீடியாவைப் பகிர்",

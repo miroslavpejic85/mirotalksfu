@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(在此获取)",
+        "{first} and {second} are typing": "{first} 和 {second} 正在输入",
+        "{name} is typing": "{name} 正在输入",
         "= Arrow": "= 箭头",
         "= Circle": "= 圆形",
         "= Clear all": "= 全部清除",
@@ -881,6 +883,7 @@
         "Server video file": "服务器上的视频文件",
         "Set as presenter": "设为主持人",
         "Set how everyone enters and what participants can do in this room.": "设置加入方式以及参会者在此房间中的权限.",
+        "Several people are typing": "多人正在输入",
         "Share": "分享",
         "Share and stream": "分享与推流",
         "Share media": "分享媒体",

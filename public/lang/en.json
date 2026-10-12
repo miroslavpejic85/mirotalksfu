@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(get it here)",
+        "{first} and {second} are typing": "{first} and {second} are typing",
+        "{name} is typing": "{name} is typing",
         "= Arrow": "= Arrow",
         "= Circle": "= Circle",
         "= Clear all": "= Clear all",
@@ -881,6 +883,7 @@
         "Server video file": "Server video file",
         "Set as presenter": "Set as presenter",
         "Set how everyone enters and what participants can do in this room.": "Set how everyone enters and what participants can do in this room.",
+        "Several people are typing": "Several people are typing",
         "Share": "Share",
         "Share and stream": "Share and stream",
         "Share media": "Share media",

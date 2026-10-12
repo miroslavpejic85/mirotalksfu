@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(tải tại đây)",
+        "{first} and {second} are typing": "{first} và {second} đang nhập",
+        "{name} is typing": "{name} đang nhập",
         "= Arrow": "= Mũi tên",
         "= Circle": "= Vòng tròn",
         "= Clear all": "= Xóa tất cả",
@@ -881,6 +883,7 @@
         "Server video file": "Tệp video trên máy chủ",
         "Set as presenter": "Đặt làm người trình bày",
         "Set how everyone enters and what participants can do in this room.": "Thiết lập cách mọi người vào phòng và những gì người tham gia được phép làm.",
+        "Several people are typing": "Nhiều người đang nhập",
         "Share": "Chia sẻ",
         "Share and stream": "Chia sẻ và truyền phát",
         "Share media": "Chia sẻ phương tiện",

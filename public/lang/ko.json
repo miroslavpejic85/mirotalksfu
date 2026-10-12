@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(여기에서 받기)",
+        "{first} and {second} are typing": "{first}님과 {second}님이 입력 중",
+        "{name} is typing": "{name}님이 입력 중",
         "= Arrow": "= 화살표",
         "= Circle": "= 원",
         "= Clear all": "= 모두 지우기",
@@ -881,6 +883,7 @@
         "Server video file": "서버 비디오 파일",
         "Set as presenter": "발표자로 설정",
         "Set how everyone enters and what participants can do in this room.": "모든 사람이 이 방에 입장하는 방법과 참가자가 이 방에서 할 수 있는 작업을 설정합니다.",
+        "Several people are typing": "여러 명이 입력 중",
         "Share": "공유",
         "Share and stream": "공유 및 스트리밍",
         "Share media": "미디어 공유",

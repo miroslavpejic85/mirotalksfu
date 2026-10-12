@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(احصل عليه من هنا)",
+        "{first} and {second} are typing": "{first} و{second} يكتبان",
+        "{name} is typing": "{name} يكتب",
         "= Arrow": "= سهم",
         "= Circle": "= دائرة",
         "= Clear all": "= مسح الكل",
@@ -881,6 +883,7 @@
         "Server video file": "ملف فيديو الخادم",
         "Set as presenter": "تعيين مقدّم عرض",
         "Set how everyone enters and what participants can do in this room.": "حدد كيفية دخول الجميع وما يمكن للمشاركين القيام به في هذه الغرفة.",
+        "Several people are typing": "عدة أشخاص يكتبون",
         "Share": "مشاركة",
         "Share and stream": "المشاركة والبث",
         "Share media": "مشاركة الوسائط",

@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(innen szerezheti be)",
+        "{first} and {second} are typing": "{first} és {second} éppen ír",
+        "{name} is typing": "{name} éppen ír",
         "= Arrow": "= Nyíl",
         "= Circle": "= Kör",
         "= Clear all": "= Összes törlése",
@@ -881,6 +883,7 @@
         "Server video file": "Szerver videofájl",
         "Set as presenter": "Előadóvá tétel",
         "Set how everyone enters and what participants can do in this room.": "Állítsd be, hogyan léphetnek be mások, és mit tehetnek a résztvevők ebben a szobában.",
+        "Several people are typing": "Többen is írnak",
         "Share": "Megosztás",
         "Share and stream": "Megosztás és közvetítés",
         "Share media": "Média megosztása",

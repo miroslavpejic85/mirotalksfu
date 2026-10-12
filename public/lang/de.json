@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(hier herunterladen)",
+        "{first} and {second} are typing": "{first} und {second} schreiben",
+        "{name} is typing": "{name} schreibt",
         "= Arrow": "= Pfeil",
         "= Circle": "= Kreis",
         "= Clear all": "= Alles löschen",
@@ -881,6 +883,7 @@
         "Server video file": "Server-Videodatei",
         "Set as presenter": "Als Moderator festlegen",
         "Set how everyone enters and what participants can do in this room.": "Legen Sie fest, wie alle beitreten und was Teilnehmer in diesem Raum tun dürfen.",
+        "Several people are typing": "Mehrere Personen schreiben",
         "Share": "Teilen",
         "Share and stream": "Teilen und streamen",
         "Share media": "Medien teilen",

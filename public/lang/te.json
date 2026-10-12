@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(ఇక్కడ పొందండి)",
+        "{first} and {second} are typing": "{first} మరియు {second} టైప్ చేస్తున్నారు",
+        "{name} is typing": "{name} టైప్ చేస్తున్నారు",
         "= Arrow": "= బాణం",
         "= Circle": "= సర్కిల్",
         "= Clear all": "= అన్నీ క్లియర్ చేయి",
@@ -881,6 +883,7 @@
         "Server video file": "సర్వర్ వీడియో ఫైల్",
         "Set as presenter": "ప్రెజెంటర్‌గా సెట్ చేయండి",
         "Set how everyone enters and what participants can do in this room.": "ఈ గదిలో అందరూ ఎలా చేరాలి, ఏమి చేయగలరు అన్నది సెట్ చేయండి.",
+        "Several people are typing": "చాలా మంది టైప్ చేస్తున్నారు",
         "Share": "షేర్ చేయండి",
         "Share and stream": "షేర్ చేసి ప్రసారం చేయండి",
         "Share media": "మీడియాను భాగస్వామ్యం చేయండి",

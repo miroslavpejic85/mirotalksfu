@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(скачать здесь)",
+        "{first} and {second} are typing": "{first} и {second} печатают",
+        "{name} is typing": "{name} печатает",
         "= Arrow": "= Стрелка",
         "= Circle": "= Круг",
         "= Clear all": "= Очистить всё",
@@ -881,6 +883,7 @@
         "Server video file": "Видеофайл на сервере",
         "Set as presenter": "Назначить ведущим",
         "Set how everyone enters and what participants can do in this room.": "Настройте, как участники входят и что они могут делать в этой комнате.",
+        "Several people are typing": "Несколько человек печатают",
         "Share": "Поделиться",
         "Share and stream": "Общий доступ и трансляция",
         "Share media": "Поделиться медиа",

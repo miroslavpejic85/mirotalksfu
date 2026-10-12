@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(ดาวน์โหลดที่นี่)",
+        "{first} and {second} are typing": "{first} และ {second} กำลังพิมพ์",
+        "{name} is typing": "{name} กำลังพิมพ์",
         "= Arrow": "= ลูกศร",
         "= Circle": "= วงกลม",
         "= Clear all": "= ล้างทั้งหมด",
@@ -881,6 +883,7 @@
         "Server video file": "ไฟล์วิดีโอเซิร์ฟเวอร์",
         "Set as presenter": "ตั้งเป็นผู้นำเสนอ",
         "Set how everyone enters and what participants can do in this room.": "กำหนดวิธีที่ทุกคนจะเข้ามาและสิ่งที่ผู้เข้าร่วมสามารถทำได้ในห้องนี้",
+        "Several people are typing": "หลายคนกำลังพิมพ์",
         "Share": "แชร์",
         "Share and stream": "แบ่งปันและสตรีม",
         "Share media": "แชร์สื่อ",

@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(dapatkan di sini)",
+        "{first} and {second} are typing": "{first} dan {second} sedang mengetik",
+        "{name} is typing": "{name} sedang mengetik",
         "= Arrow": "= Panah",
         "= Circle": "= Lingkaran",
         "= Clear all": "= Hapus semua",
@@ -881,6 +883,7 @@
         "Server video file": "File video server",
         "Set as presenter": "Jadikan presenter",
         "Set how everyone enters and what participants can do in this room.": "Atur cara semua orang masuk dan apa yang dapat dilakukan peserta di ruang ini.",
+        "Several people are typing": "Beberapa orang sedang mengetik",
         "Share": "Bagikan",
         "Share and stream": "Bagikan dan streaming",
         "Share media": "Bagikan media",

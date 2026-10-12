@@ -7736,12 +7736,20 @@ class RoomClient {
         }
 
         const names = typers.map((p) => p.peer_name);
-        text.textContent =
-            names.length === 1
-                ? `${names[0]} is typing`
-                : names.length === 2
-                  ? `${names[0]} and ${names[1]} are typing`
-                  : 'Several people are typing';
+        let label;
+        if (names.length === 1) {
+            label = (window.i18n?.t('{name} is typing', 'labels') || '{name} is typing').replace(
+                '{name}',
+                () => names[0]
+            );
+        } else if (names.length === 2) {
+            label = (window.i18n?.t('{first} and {second} are typing', 'labels') || '{first} and {second} are typing')
+                .replace('{first}', () => names[0])
+                .replace('{second}', () => names[1]);
+        } else {
+            label = window.i18n?.t('Several people are typing', 'labels') || 'Several people are typing';
+        }
+        text.textContent = label;
         el.classList.add('is-visible');
     }
 

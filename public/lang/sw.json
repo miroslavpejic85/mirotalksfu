@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(pata hapa)",
+        "{first} and {second} are typing": "{first} na {second} wanaandika",
+        "{name} is typing": "{name} anaandika",
         "= Arrow": "= Mshale",
         "= Circle": "= Mduara",
         "= Clear all": "= Futa yote",
@@ -881,6 +883,7 @@
         "Server video file": "Faili ya video ya seva",
         "Set as presenter": "Mweke kuwa mwasilishaji",
         "Set how everyone enters and what participants can do in this room.": "Amua jinsi kila mtu ataingia na kile washiriki wanaweza kufanya kwenye chumba hiki.",
+        "Several people are typing": "Watu kadhaa wanaandika",
         "Share": "Shiriki",
         "Share and stream": "Shiriki na utiririshe",
         "Share media": "Shiriki midia",

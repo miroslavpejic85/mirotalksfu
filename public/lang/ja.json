@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(こちらから入手)",
+        "{first} and {second} are typing": "{first}さんと{second}さんが入力中",
+        "{name} is typing": "{name}さんが入力中",
         "= Arrow": "= 矢印",
         "= Circle": "= 円",
         "= Clear all": "= すべてクリア",
@@ -881,6 +883,7 @@
         "Server video file": "サーバービデオファイル",
         "Set as presenter": "プレゼンターに設定",
         "Set how everyone enters and what participants can do in this room.": "全員の入室方法と、このルームで参加者ができることを設定します.",
+        "Several people are typing": "複数の人が入力中",
         "Share": "共有",
         "Share and stream": "共有とストリーミング",
         "Share media": "メディアを共有する",

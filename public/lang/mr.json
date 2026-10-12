@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(येथून मिळवा)",
+        "{first} and {second} are typing": "{first} आणि {second} टाइप करत आहेत",
+        "{name} is typing": "{name} टाइप करत आहेत",
         "= Arrow": "= बाण",
         "= Circle": "= वर्तुळ",
         "= Clear all": "= सर्व साफ करा",
@@ -881,6 +883,7 @@
         "Server video file": "सर्व्हर व्हिडिओ फाइल",
         "Set as presenter": "प्रस्तुतकर्ता म्हणून सेट करा",
         "Set how everyone enters and what participants can do in this room.": "प्रत्येकजण कसा प्रवेश करेल आणि या रूममध्ये सहभागी काय करू शकतील ते सेट करा.",
+        "Several people are typing": "अनेक जण टाइप करत आहेत",
         "Share": "शेअर करा",
         "Share and stream": "शेअर करा आणि स्ट्रीम करा",
         "Share media": "मीडिया शेअर करा",

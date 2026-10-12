@@ -444,6 +444,8 @@
     },
     "labels": {
         "(get it here)": "(download het hier)",
+        "{first} and {second} are typing": "{first} en {second} zijn aan het typen",
+        "{name} is typing": "{name} is aan het typen",
         "= Arrow": "= Pijl",
         "= Circle": "= Cirkel",
         "= Clear all": "= Alles wissen",
@@ -881,6 +883,7 @@
         "Server video file": "Videobestand op de server",
         "Set as presenter": "Tot presentator maken",
         "Set how everyone enters and what participants can do in this room.": "Bepaal hoe mensen binnenkomen en wat deelnemers in deze ruimte mogen.",
+        "Several people are typing": "Meerdere mensen zijn aan het typen",
         "Share": "Delen",
         "Share and stream": "Delen en streamen",
         "Share media": "Media delen",
