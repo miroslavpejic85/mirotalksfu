@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex" />
+        <meta name="color-scheme" content="dark light" />
+        <title>{{APP_NAME}} - Remote control setup</title>
+        <link rel="shortcut icon" href="/images/logo.svg" />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=IBM+Plex+Sans:wght@400;600&display=swap"
+        />
+        <link rel="stylesheet" href="/css/RemoteControlSetup.css" />
+        <script defer src="/js/RemoteControlSetup.js"></script>
+    </head>
+    <body>
+        <header class="site-header">
+            <img src="/images/logo.svg" alt="" width="36" height="36" />
+            <span>{{APP_NAME}}</span>
+        </header>
+
+        <main>
+            <h1>Connect RustDesk to {{ID_SERVER}}</h1>
+            <p class="intro">
+                RustDesk is a free app that lets the presenter help you on your computer, only after you allow it.
+            </p>
+            <p class="muted">
+                Both sides of a remote-control session must use this server, otherwise the RustDesk ID will not resolve.
+            </p>
+
+            <section class="step">
+                <h2><span class="badge">1</span> Install RustDesk</h2>
+                <p>
+                    Download the client from
+                    <a href="https://rustdesk.com/" target="_blank" rel="noopener noreferrer">rustdesk.com</a>
+                    or the
+                    <a
+                        href="https://github.com/rustdesk/rustdesk/releases/latest"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >GitHub releases</a
+                    >.
+                </p>
+                <p class="os-hint" id="os-hint" hidden></p>
+            </section>
+
+            <section class="step">
+                <h2><span class="badge">2</span> Copy the configuration</h2>
+                <div class="card hero">
+                    <label class="label" for="import-config">Configuration</label>
+                    <textarea class="import" id="import-config" readonly rows="3">{{IMPORT_CONFIG}}</textarea>
+                    <div class="actions">
+                        <button type="button" class="primary" data-copy-target="import-config">
+                            Copy configuration
+                        </button>
+                        <a class="button secondary" href="rustdesk://">Already installed? Open RustDesk</a>
+                    </div>
+                </div>
+
+                <h3>Then paste it in RustDesk</h3>
+                <ol class="crumbs" aria-label="Where to paste it">
+                    <li>Settings</li>
+                    <li>Network</li>
+                    <li>ID/Relay server</li>
+                    <li>Paste &amp; OK</li>
+                </ol>
+
+                <details class="manual">
+                    <summary>Or enter the values manually</summary>
+                    <div class="card">
+                        <div class="row">
+                            <div class="label">ID Server</div>
+                            <code title="{{ID_SERVER}}">{{ID_SERVER}}</code>
+                            <button type="button" data-copy-text="{{ID_SERVER}}">Copy</button>
+                        </div>
+                        <div class="row">
+                            <div class="label">Relay Server</div>
+                            <!--IF:RELAY_SERVER-->
+                            <code title="{{RELAY_SERVER}}">{{RELAY_SERVER}}</code>
+                            <button type="button" data-copy-text="{{RELAY_SERVER}}">Copy</button>
+                            <!--ELSE-->
+                            <span class="empty">leave empty</span>
+                            <!--ENDIF-->
+                        </div>
+                        <div class="row">
+                            <div class="label">API Server</div>
+                            <!--IF:API_SERVER-->
+                            <code title="{{API_SERVER}}">{{API_SERVER}}</code>
+                            <button type="button" data-copy-text="{{API_SERVER}}">Copy</button>
+                            <!--ELSE-->
+                            <span class="empty">leave empty</span>
+                            <!--ENDIF-->
+                        </div>
+                        <div class="row">
+                            <div class="label">Key</div>
+                            <!--IF:KEY-->
+                            <code title="{{KEY}}">{{KEY_SHORT}}</code>
+                            <button type="button" data-copy-text="{{KEY}}">Copy</button>
+                            <!--ELSE-->
+                            <span class="empty">not set by the administrator</span>
+                            <!--ENDIF-->
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <section class="step">
+                <h2><span class="badge">3</span> Check it works</h2>
+                <p>
+                    Close the dialog with OK. The status at the bottom of the main RustDesk window should show
+                    <b>Ready</b>.
+                </p>
+                <details>
+                    <summary>It doesn't say Ready?</summary>
+                    <ul>
+                        <li>Check your internet connection, then reopen RustDesk.</li>
+                        <li>Make sure the ID server and key were pasted completely, with no extra spaces.</li>
+                        <li>Ask the administrator to confirm the server is running.</li>
+                    </ul>
+                </details>
+                <details>
+                    <summary>The ID is not found during a session?</summary>
+                    <ul>
+                        <li>Both people must use this same server. Compare the ID server in both RustDesk apps.</li>
+                        <li>The one-time password changes. Share the current one shown in RustDesk.</li>
+                    </ul>
+                </details>
+            </section>
+
+            <section class="step">
+                <h2>Using it in a {{APP_NAME}} call</h2>
+                <ol class="flow">
+                    <li>
+                        <span class="badge small">1</span>
+                        <p>The presenter sends you a <b>Remote control</b> request.</p>
+                    </li>
+                    <li>
+                        <span class="badge small">2</span>
+                        <p>Enter your <b>ID</b> and <b>one-time password</b> from RustDesk and allow it.</p>
+                    </li>
+                    <li>
+                        <span class="badge small">3</span>
+                        <p>The presenter connects. You can end the session anytime from RustDesk.</p>
+                    </li>
+                </ol>
+                <p class="callout">Only share your ID and password with people you trust.</p>
+                <p class="callout done">All set? Go back to your meeting tab and allow the request.</p>
+                <p class="callout mac-only" hidden>
+                    macOS: allow RustDesk under <b>Privacy &amp; Security</b> (Screen Recording and Accessibility) when
+                    asked.
+                </p>
+            </section>
+        </main>
+        <div id="copy-status" class="sr-only" role="status" aria-live="polite"></div>
+    </body>
+</html>

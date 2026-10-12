@@ -1,0 +1,368 @@
+:root {
+    --bg: linear-gradient(135deg, #0e0e14, #1e1e28);
+    --surface: #161622;
+    --surface-2: #0e0e14;
+    --border: rgb(255 255 255 / 14%);
+    --text: #e8eaf0;
+    --muted: #9aa0b4;
+    --accent: #66beff;
+    --accent-text: #06121f;
+    --ok: #34d399;
+    --warn: #fbbf24;
+    color-scheme: dark light;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #f4f6fb;
+        --surface: #ffffff;
+        --surface-2: #eef1f8;
+        --border: rgb(15 23 42 / 14%);
+        --text: #131827;
+        --muted: #566079;
+        --accent: #1d6fd1;
+        --accent-text: #ffffff;
+        --ok: #059669;
+        --warn: #b45309;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font:
+        16px/1.6 'IBM Plex Sans',
+        system-ui,
+        sans-serif;
+    background: var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px 20px 0;
+    font:
+        600 1rem 'Montserrat',
+        system-ui,
+        sans-serif;
+}
+
+main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px 20px 64px;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Montserrat', system-ui, sans-serif;
+}
+
+h1 {
+    font-size: 1.6rem;
+    line-height: 1.3;
+    margin: 12px 0 8px;
+    overflow-wrap: anywhere;
+}
+
+h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.15rem;
+    margin: 0 0 12px;
+}
+
+h3 {
+    font-size: 0.95rem;
+    margin: 20px 0 10px;
+}
+
+a {
+    color: var(--accent);
+}
+
+.step {
+    margin-top: 36px;
+}
+
+.badge {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-text);
+    font:
+        600 0.95rem 'Montserrat',
+        system-ui,
+        sans-serif;
+}
+
+.badge.small {
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+}
+
+.card.hero {
+    border-color: var(--accent);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+    border-bottom: 0;
+}
+
+.label {
+    flex: 0 0 130px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.card > .label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+code {
+    flex: 1 1 220px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    background: var(--surface-2);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.empty {
+    color: var(--muted);
+    font-style: italic;
+}
+
+button,
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+button:hover,
+.button:hover {
+    border-color: var(--accent);
+}
+
+button:focus-visible,
+.button:focus-visible,
+summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+button.primary {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+}
+
+button.copied {
+    background: var(--ok);
+    border-color: var(--ok);
+    color: #fff;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.import {
+    display: block;
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    resize: vertical;
+    font:
+        0.8rem/1.4 ui-monospace,
+        SFMono-Regular,
+        monospace;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+/* Where to paste it */
+.crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.crumbs li {
+    margin: 0;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.85rem;
+}
+
+.crumbs li:not(:last-child)::after {
+    content: '\203A';
+    margin-left: 10px;
+    color: var(--muted);
+}
+
+details {
+    margin-top: 14px;
+}
+
+summary {
+    cursor: pointer;
+    padding: 6px 0;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+details > .card,
+details > ul {
+    margin-top: 8px;
+}
+
+ul,
+ol {
+    padding-left: 22px;
+}
+
+li {
+    margin: 6px 0;
+}
+
+.flow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.flow li {
+    margin: 0;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.flow p {
+    margin: 8px 0 0;
+    font-size: 0.92rem;
+}
+
+.callout {
+    margin: 12px 0 0;
+    padding: 10px 14px;
+    border-left: 3px solid var(--warn);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.92rem;
+}
+
+.callout[hidden] {
+    display: none;
+}
+
+.intro {
+    margin: 0 0 6px;
+    font-size: 1.02rem;
+}
+
+.os-hint {
+    margin: 0;
+    padding: 10px 14px;
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 0.92rem;
+}
+
+.os-hint[hidden] {
+    display: none;
+}
+
+.callout.done {
+    border-left-color: var(--ok);
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .flow {
+        grid-template-columns: 1fr;
+    }
+    .label {
+        flex-basis: 100%;
+    }
+    .actions > * {
+        flex: 1 1 100%;
+    }
+}

@@ -25,7 +25,7 @@ describe('JwtSecret', () => {
 
     it('derives distinct, deterministic keys per purpose', () => {
         const keys = getJwtKeys(strong);
-        new Set([keys.auth, keys.recUpload, keys.rtmp]).size.should.equal(3);
+        new Set(Object.values(keys)).size.should.equal(Object.keys(keys).length);
         Object.values(keys).forEach((k) => k.should.not.equal(strong));
         getJwtKeys(strong).should.deepEqual(keys);
     });

@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.13 - Configuration File
+ * MiroTalk SFU v2.6.14 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1663,11 +1663,25 @@ module.exports = {
          * participant accepts and shares their RustDesk ID + one-time password, and the presenter
          * opens the RustDesk client (https://rustdesk.com). No input data goes through this server.
          * - enabled: Show "Remote control" in the presenter's participants menu
-         * - downloadUrl: Where participants can get the RustDesk client
+         * - downloadUrl: Where participants can get the RustDesk client. Defaults to the built-in
+         *   setup page (/remote-control/setup) when server.idServer is set, else rustdesk.com
+         * - downloadUrlPublic: false = /remote-control/setup needs the short-lived token sent with a request;
+         *   true = open to anyone with the URL
+         * - server: Your self-hosted RustDesk server, shown on the public setup page
+         *   (key = contents of id_ed25519.pub, never the private key)
          */
         remoteControl: {
             enabled: process.env.REMOTE_CONTROL_ENABLED === 'true',
-            downloadUrl: process.env.REMOTE_CONTROL_DOWNLOAD_URL || 'https://rustdesk.com/',
+            downloadUrl:
+                process.env.REMOTE_CONTROL_DOWNLOAD_URL ||
+                (process.env.REMOTE_CONTROL_SERVER_HOST ? '/remote-control/setup' : 'https://rustdesk.com/'),
+            downloadUrlPublic: process.env.REMOTE_CONTROL_DOWNLOAD_URL_PUBLIC === 'true',
+            server: {
+                idServer: process.env.REMOTE_CONTROL_SERVER_HOST || '',
+                relayServer: process.env.REMOTE_CONTROL_SERVER_RELAY || '',
+                apiServer: process.env.REMOTE_CONTROL_SERVER_API || '',
+                key: process.env.REMOTE_CONTROL_SERVER_KEY || '',
+            },
         },
 
         /**

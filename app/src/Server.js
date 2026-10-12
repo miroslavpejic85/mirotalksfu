@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.13
+ * @version 2.6.14
  *
  */
 
@@ -90,6 +90,7 @@ const sanitizeFilename = require('sanitize-filename');
 const helmet = require('helmet');
 const config = require('./config');
 const checkXSS = require('./XSS');
+const { createSetupToken, isSetupTokenValid, resolveSetupConfig, renderSetupPage } = require('./RemoteControlSetup');
 const mime = require('mime-types');
 const Host = require('./Host');
 const Room = require('./Room');
@@ -1231,6 +1232,16 @@ function startServer() {
     // privacy policy
     app.get('/privacy', (req, res) => {
         res.sendFile(views.privacy);
+    });
+
+    // RustDesk client setup page: needs remote control + a RustDesk server, and a room token unless downloadUrlPublic
+    app.get('/remote-control/setup', (req, res) => {
+        const remoteControl = config?.features?.remoteControl;
+        const setup = remoteControl?.enabled ? resolveSetupConfig(remoteControl.server) : null;
+        const allowed = setup && (remoteControl.downloadUrlPublic || isSetupTokenValid(jwtKeys.rcSetup, req.query.t));
+        if (!allowed) return res.status(404).sendFile(views.notFound);
+        res.set({ 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' });
+        res.type('html').send(renderSetupPage(setup, { appName: config?.app?.name }));
     });
 
     // Get stats endpoint
@@ -3283,10 +3294,15 @@ function startServer() {
                     if (!config?.features?.remoteControl?.enabled) return;
                     data.from_peer_id = socket.id;
                     data.broadcast = false;
+                    delete data.setup_token; // never trust a client supplied token
                     if (data.type === 'remoteControl') {
                         // Only presenters can request remote control
                         if (!isPeerPresenter(socket.room_id, socket.id, data.from_peer_name, data.from_peer_uuid))
                             return;
+                        // Lets the participant open the setup page (see /remote-control/setup)
+                        if (resolveSetupConfig(config.features.remoteControl.server)) {
+                            data.setup_token = createSetupToken(jwtKeys.rcSetup, socket.room_id);
+                        }
                     } else if (data.type === 'remoteControlOK') {
                         const { id, password } = data.data || {};
                         if (typeof id !== 'string' || !/^[\w.@:-]{6,64}$/.test(id)) return;

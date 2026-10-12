@@ -9,7 +9,13 @@ const KNOWN_DEFAULT_SECRETS = ['mirotalksfu_jwt_secret'];
 
 // Purposes get independent keys derived from the master secret (HKDF), so a token
 // minted for one purpose can never be replayed for another.
-const PURPOSES = { auth: 'auth', recUpload: 'rec-upload', rtmp: 'rtmp-stream', createRoom: 'create-room' };
+const PURPOSES = {
+    auth: 'auth',
+    recUpload: 'rec-upload',
+    rtmp: 'rtmp-stream',
+    createRoom: 'create-room',
+    rcSetup: 'rc-setup',
+};
 
 let cached = null;
 
@@ -44,6 +50,7 @@ function getJwtKeys(rawSecret = process.env.JWT_SECRET) {
                 recUpload: deriveKey(secret, PURPOSES.recUpload),
                 rtmp: deriveKey(secret, PURPOSES.rtmp),
                 createRoom: deriveKey(secret, PURPOSES.createRoom),
+                rcSetup: deriveKey(secret, PURPOSES.rcSetup),
             }),
         };
     }

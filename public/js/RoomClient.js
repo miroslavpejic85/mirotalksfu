@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.13
+ * @version 2.6.14
  *
  */
 
@@ -13812,7 +13812,13 @@ class RoomClient {
     confirmPeerRemoteControl(cmd) {
         if (!this.remoteControlEnabled) return;
         this.sound('notify');
-        const downloadUrl = /^https?:\/\//i.test(this.remoteControlDownloadUrl) ? this.remoteControlDownloadUrl : null;
+        let downloadUrl = /^(https?:\/\/|\/(?!\/))/i.test(this.remoteControlDownloadUrl)
+            ? this.remoteControlDownloadUrl
+            : null;
+        // The built-in setup page requires the room token sent with the request
+        if (downloadUrl === '/remote-control/setup' && typeof cmd.setup_token === 'string') {
+            downloadUrl += `?t=${encodeURIComponent(cmd.setup_token)}`;
+        }
         Swal.fire({
             allowOutsideClick: false,
             allowEscapeKey: false,
