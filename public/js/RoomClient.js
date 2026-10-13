@@ -17,6 +17,20 @@ const cfg = {
     useAvatarSvg: true,
 };
 
+// Gravatar URL -> initials avatar, used when the email has no Gravatar (see genGravatar)
+const gravatarFallbacks = new Map();
+
+document.addEventListener(
+    'error',
+    (e) => {
+        const img = e.target;
+        if (!(img instanceof HTMLImageElement)) return;
+        const fallback = gravatarFallbacks.get(img.src);
+        if (fallback) img.src = fallback;
+    },
+    true
+);
+
 const html = {
     newline: '\n', //'<br />',
     hideMeOn: 'fas fa-user-slash',
@@ -5161,7 +5175,12 @@ class RoomClient {
 
     genGravatar(email, size = false) {
         const hash = md5(email.toLowerCase().trim());
-        const gravatarURL = `https://www.gravatar.com/avatar/${hash}` + (size ? `?s=${size}` : '?s=250') + '?d=404';
+        const avatarSize = size || 250;
+        const gravatarURL = `https://www.gravatar.com/avatar/${hash}?s=${avatarSize}&d=404`;
+        // d=404: no Gravatar for this email -> the image errors and is swapped to the initials avatar
+        if (!gravatarFallbacks.has(gravatarURL)) {
+            gravatarFallbacks.set(gravatarURL, this.genAvatarSvg(email, avatarSize));
+        }
         return gravatarURL;
         function md5(input) {
             return CryptoJS.MD5(input).toString();

@@ -387,6 +387,8 @@ let isJoinLocked = false;
 
 let initStream = null;
 let isInitVideoLoaded = false;
+let initGravatarTimer = null;
+let initGravatarToken = 0;
 
 let audioContext = null;
 let workletNode = null;
@@ -1728,6 +1730,9 @@ function updateInitVideoOffAvatar() {
     const hasCamera = !!initVideoSelect && initVideoSelect.options.length > 0;
     const name = (getId('usernameInput')?.value || '').trim();
 
+    clearTimeout(initGravatarTimer);
+    const gravatarToken = ++initGravatarToken;
+
     avatar.replaceChildren();
     avatar.style.backgroundColor = '';
     avatar.classList.remove('initials');
@@ -1746,6 +1751,18 @@ function updateInitVideoOffAvatar() {
     avatar.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
     avatar.classList.add('initials');
     avatar.textContent = name.substring(0, 2).toUpperCase();
+
+    // Same as in-room: use the Gravatar for emails, keeping initials until it loads (or if there is none)
+    const isPlaceholderVisible = getId('initVideoOff')?.style.display === 'flex';
+    if (!cfg.useAvatarSvg || !isValidEmail(name) || !isPlaceholderVisible) return;
+    initGravatarTimer = setTimeout(() => {
+        const img = new Image();
+        img.alt = '';
+        img.onload = () => {
+            if (gravatarToken === initGravatarToken) avatar.replaceChildren(img);
+        };
+        img.src = RoomClient.prototype.genGravatar(name, 176);
+    }, 400);
 }
 
 function handleInitVideoOffClick() {
