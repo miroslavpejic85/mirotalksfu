@@ -709,6 +709,25 @@ body {
     }
 }
 
+/* Pre-join: background images sit next to the devices, so give them room instead of an inner scrollbar */
+@media screen and (min-width: 1025px) {
+    .initComands > #imageGrid {
+        flex: 1 1 100%;
+        grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+        max-height: 200px;
+        margin-top: var(--space-2);
+        padding: 4px;
+    }
+    .initComands > #imageGrid img {
+        max-width: 100%;
+        height: 56px;
+    }
+    .initComands > #imageGrid .image-wrapper {
+        display: block;
+        min-width: 0;
+    }
+}
+
 /*---------------------------
 <= 1024px SCREEN */
 @media screen and (max-width: 1024px) {

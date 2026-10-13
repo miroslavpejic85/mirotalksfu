@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.18
+ * @version 2.6.19
  *
  */
 
@@ -947,7 +947,7 @@ function setupInitButtons() {
     initVirtualBackgroundButton.onclick = () => {
         const imageGrid = getId('imageGrid');
         const imageGridVisible = imageGrid && getComputedStyle(imageGrid).display !== 'none';
-        imageGridVisible ? elemDisplay('imageGrid', false) : showImageSelector();
+        imageGridVisible ? hideInitImageGrids() : showImageSelector();
     };
     initUsernameEmojiButton.onclick = () => {
         getId('usernameInput').value = '';
@@ -1625,7 +1625,7 @@ function handleVideo() {
     checkInitVideo(isVideoAllowed);
     lS.setInitConfig(lS.MEDIA_TYPE.video, isVideoAllowed);
 
-    elemDisplay('imageGrid', false);
+    hideInitImageGrids();
 
     isVideoAllowed &&
     isMediaStreamTrackAndTransformerSupported &&
@@ -1658,7 +1658,7 @@ async function handleAudioVideo() {
     await checkInitVideo(isVideoAllowed);
     checkInitAudio(isAudioAllowed);
 
-    elemDisplay('imageGrid', false);
+    hideInitImageGrids();
 
     isVideoAllowed &&
     isMediaStreamTrackAndTransformerSupported &&
@@ -8962,19 +8962,44 @@ function adaptAspectRatio(participantsCount) {
 // HANDLE INIT VIRTUAL BACKGROUND AND BLUR
 // ####################################################
 
+// Desktop: action buttons stay under the video (left), background images move next to the devices (right)
+const initImageGridDesktopQuery = window.matchMedia('(min-width: 1025px)');
+
+function placeInitImageGrid() {
+    const imageGrid = getId('imageGrid');
+    const controlsGrid = getId('initImageGridControls');
+    const devices = initUser.querySelector('.initComands');
+    if (!imageGrid || !controlsGrid || !devices) return;
+    if (initImageGridDesktopQuery.matches) {
+        if (imageGrid.parentElement !== devices) devices.appendChild(imageGrid);
+    } else if (imageGrid.previousElementSibling !== controlsGrid) {
+        controlsGrid.after(imageGrid);
+    }
+}
+
+initImageGridDesktopQuery.addEventListener('change', placeInitImageGrid);
+placeInitImageGrid();
+
+function hideInitImageGrids() {
+    elemDisplay('initImageGridControls', false);
+    elemDisplay('imageGrid', false);
+}
+
 function showImageSelector() {
+    elemDisplay('initImageGridControls', true, 'grid');
     elemDisplay('imageGrid', true, 'grid');
     if (imageGrid.innerHTML !== '') return;
 
     imageGrid.innerHTML = ''; // Clear previous images
+    initImageGridControls.innerHTML = '';
 
-    function createImage(id, src, tooltip, index, clickHandler) {
+    function createImage(id, src, tooltip, index, clickHandler, target = imageGrid) {
         const img = document.createElement('img');
         img.id = id;
         img.src = src;
         img.dataset.index = index;
         img.addEventListener('click', clickHandler);
-        imageGrid.appendChild(img);
+        target.appendChild(img);
         if (tooltip) {
             setTippy(img.id, tooltip, 'top');
         }
@@ -8986,25 +9011,49 @@ function showImageSelector() {
             virtualBackgroundBlurLevel = null;
             virtualBackgroundSelectedImage = null;
             virtualBackgroundTransparent = null;
-            elemDisplay('imageGrid', false);
+            hideInitImageGrids();
         }
         await applyVirtualBackground(initVideo, initStream, blurLevel, imgSrc, bgTransparent);
     }
 
     // Create clean virtual bg Image
-    createImage('initCleanVbImg', image.user, 'Remove virtual background', 'cleanVb', () =>
-        handleVirtualBackground(null, null)
+    createImage(
+        'initCleanVbImg',
+        image.user,
+        'Remove virtual background',
+        'cleanVb',
+        () => handleVirtualBackground(null, null),
+        initImageGridControls
     );
 
     // Create High Blur Image
-    createImage('initHighBlurImg', image.blurHigh, 'High Blur', 'high', () => handleVirtualBackground(20));
+    createImage(
+        'initHighBlurImg',
+        image.blurHigh,
+        'High Blur',
+        'high',
+        () => handleVirtualBackground(20),
+        initImageGridControls
+    );
 
     // Create Low Blur Image
-    createImage('initLowBlurImg', image.blurLow, 'Low Blur', 'low', () => handleVirtualBackground(10));
+    createImage(
+        'initLowBlurImg',
+        image.blurLow,
+        'Low Blur',
+        'low',
+        () => handleVirtualBackground(10),
+        initImageGridControls
+    );
 
     // Create transparent virtual bg Image
-    createImage('initTransparentBg', image.transparentBg, 'Transparent Virtual background', 'transparentVb', () =>
-        handleVirtualBackground(null, null, true)
+    createImage(
+        'initTransparentBg',
+        image.transparentBg,
+        'Transparent Virtual background',
+        'transparentVb',
+        () => handleVirtualBackground(null, null, true),
+        initImageGridControls
     );
 
     // Handle file upload (common logic for file selection)
@@ -9013,7 +9062,7 @@ function showImageSelector() {
         imgButton.id = buttonId;
         imgButton.src = sourceImg;
         imgButton.addEventListener('click', handler);
-        imageGrid.appendChild(imgButton);
+        initImageGridControls.appendChild(imgButton);
         setTippy(imgButton.id, tooltip, 'top');
     }
 
@@ -9127,21 +9176,23 @@ function showImageSelector() {
     indexedDBHelper.getAllImages().then((images) => images.forEach(addImageToUI));
 
     // Upload image with drag and drop
-    imageGrid.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        imageGrid.classList.add('drag-over');
-    });
+    [imageGrid, initImageGridControls].forEach((grid) => {
+        grid.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            grid.classList.add('drag-over');
+        });
 
-    imageGrid.addEventListener('dragleave', () => {
-        imageGrid.classList.remove('drag-over');
-    });
+        grid.addEventListener('dragleave', () => {
+            grid.classList.remove('drag-over');
+        });
 
-    imageGrid.addEventListener('drop', (event) => {
-        event.preventDefault();
-        imageGrid.classList.remove('drag-over');
-        if (event.dataTransfer.files.length > 0) {
-            handleFileUpload(event.dataTransfer.files[0]);
-        }
+        grid.addEventListener('drop', (event) => {
+            event.preventDefault();
+            grid.classList.remove('drag-over');
+            if (event.dataTransfer.files.length > 0) {
+                handleFileUpload(event.dataTransfer.files[0]);
+            }
+        });
     });
 }
 
@@ -9372,7 +9423,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.18',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.19',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
