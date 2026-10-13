@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.17
+ * @version 2.6.18
  *
  */
 
@@ -949,11 +949,22 @@ function setupInitButtons() {
     };
     initUsernameEmojiButton.onclick = () => {
         getId('usernameInput').value = '';
+        updateInitVideoOffAvatar();
         toggleUsernameEmoji();
     };
     initExitButton.onclick = () => {
         initLeaveMeeting();
     };
+    const initVideoOff = getId('initVideoOff');
+    if (initVideoOff) {
+        initVideoOff.onclick = handleInitVideoOffClick;
+        initVideoOff.onkeydown = (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            e.stopPropagation();
+            handleInitVideoOffClick();
+        };
+    }
 }
 
 // ####################################################
@@ -1497,6 +1508,7 @@ async function whoAreYou() {
             const usernameInput = Swal.getInput();
             if (usernameInput) {
                 usernameInput.id = 'usernameInput';
+                usernameInput.addEventListener('input', updateInitVideoOffAvatar);
                 const label = popup.querySelector('.swal2-input-label');
                 if (label) label.htmlFor = 'usernameInput';
             }
@@ -1548,7 +1560,7 @@ async function whoAreYou() {
 
     if (!isVideoAllowed) {
         elemDisplay('initVideo', false);
-        initVideoContainerShow(false);
+        initVideoOffShow();
         hide(initVideoSelect);
     }
     if (!isAudioAllowed) {
@@ -1656,6 +1668,7 @@ async function handleAudioVideo() {
 async function checkInitVideo(isVideoAllowed) {
     if (isVideoAllowed && BUTTONS.main.startVideoButton) {
         if (initVideoSelect.value) {
+            initVideoOffShow(false);
             initVideoContainerShow();
             await changeCamera(initVideoSelect.value);
             isInitVideoLoaded = true;
@@ -1666,12 +1679,78 @@ async function checkInitVideo(isVideoAllowed) {
             stopTracks(initStream);
             elemDisplay('initVideo', false);
             elemDisplay('initVideoLoader', false);
-            initVideoContainerShow(false);
             sound('left');
         }
+        initVideoOffShow();
         isInitVideoLoaded = !isVideoAllowed;
     }
     initVideoSelect.disabled = !isVideoAllowed;
+}
+
+function initVideoOffShow(show = true) {
+    // Keep the preview area when video is enabled in config: "Camera is off" if a camera exists, else "No camera available"
+    const canShow = show && BUTTONS.main.startVideoButton;
+    elemDisplay('initVideoOff', canShow, 'flex');
+    if (show) initVideoContainerShow(canShow);
+    if (canShow) {
+        elemDisplay('initVideoLoader', false);
+        updateInitVideoOff();
+    }
+}
+
+function updateInitVideoOff() {
+    const initVideoOff = getId('initVideoOff');
+    const initVideoOffText = getId('initVideoOffText');
+    if (!initVideoOff || !initVideoOffText) return;
+
+    const hasCamera = !!initVideoSelect && initVideoSelect.options.length > 0;
+    const canToggle =
+        hasCamera && !joinRoomWithScreen && initVideoButton.offsetParent !== null && !initVideoButton.disabled;
+
+    initVideoOffText.textContent = hasCamera
+        ? window.i18n?.t('Camera is off', 'labels') || 'Camera is off'
+        : window.i18n?.t('No camera available', 'labels') || 'No camera available';
+
+    initVideoOff.classList.toggle('clickable', canToggle);
+    if (canToggle) {
+        initVideoOff.setAttribute('role', 'button');
+        initVideoOff.setAttribute('tabindex', '0');
+    } else {
+        initVideoOff.removeAttribute('role');
+        initVideoOff.removeAttribute('tabindex');
+    }
+    updateInitVideoOffAvatar();
+}
+
+function updateInitVideoOffAvatar() {
+    const avatar = getId('initVideoOffAvatar');
+    if (!avatar) return;
+    const hasCamera = !!initVideoSelect && initVideoSelect.options.length > 0;
+    const name = (getId('usernameInput')?.value || '').trim();
+
+    avatar.replaceChildren();
+    avatar.style.backgroundColor = '';
+    avatar.classList.remove('initials');
+
+    if (!hasCamera || !name) {
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-video-slash';
+        avatar.appendChild(icon);
+        return;
+    }
+
+    // Same initials and color as the in-room avatar (RoomClient.genAvatarSvg)
+    const red = Math.pow(name.charCodeAt(0), 7) % 200;
+    const green = Math.pow(name.charCodeAt(1) || name.charCodeAt(0), 7) % 200;
+    const blue = (red + green) % 200;
+    avatar.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
+    avatar.classList.add('initials');
+    avatar.textContent = name.substring(0, 2).toUpperCase();
+}
+
+function handleInitVideoOffClick() {
+    const initVideoOff = getId('initVideoOff');
+    if (initVideoOff?.classList.contains('clickable') && !isVideoAllowed) initVideoButton.click();
 }
 
 function checkInitAudio(isAudioAllowed) {
@@ -3355,6 +3434,7 @@ function refreshLsDevices() {
 }
 
 async function changeCamera(deviceId) {
+    initVideoOffShow(false);
     if (initStream) {
         await stopTracks(initStream);
         elemDisplay('initVideo', true);
@@ -3521,6 +3601,9 @@ async function toggleScreenSharing() {
     }
     joinRoomWithScreen = !joinRoomWithScreen;
     if (joinRoomWithScreen) {
+        initVideoOffShow(false);
+        elemDisplay('initVideo', true);
+        initVideoContainerShow();
         const defaultFrameRate = { ideal: 30 };
         const selectedValue = getId('videoFps').options[localStorageSettings.screen_fps].value;
         const customFrameRate = parseInt(selectedValue, 10);
@@ -4411,6 +4494,7 @@ function handleUsernameEmojiPicker() {
 
     function addEmojiToUsername(data) {
         getId('usernameInput').value += data.native;
+        updateInitVideoOffAvatar();
         toggleUsernameEmoji();
     }
 
@@ -9271,7 +9355,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.17',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.18',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
