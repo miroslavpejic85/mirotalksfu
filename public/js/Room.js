@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.19
+ * @version 2.6.20
  *
  */
 
@@ -1729,40 +1729,64 @@ function updateInitVideoOffAvatar() {
     if (!avatar) return;
     const hasCamera = !!initVideoSelect && initVideoSelect.options.length > 0;
     const name = (getId('usernameInput')?.value || '').trim();
+    const customAvatar = peer_avatar && isValidAvatarURL(peer_avatar) ? peer_avatar : null;
+
+    // Already showing the custom avatar: typing the name must not make it flicker
+    if (hasCamera && customAvatar && avatar.querySelector('img')?.src === customAvatar) return;
 
     clearTimeout(initGravatarTimer);
-    const gravatarToken = ++initGravatarToken;
+    const avatarToken = ++initGravatarToken;
 
     avatar.replaceChildren();
     avatar.style.backgroundColor = '';
     avatar.classList.remove('initials');
 
-    if (!hasCamera || !name) {
+    if (!hasCamera || (!name && !customAvatar)) {
         const icon = document.createElement('i');
         icon.className = 'fas fa-video-slash';
         avatar.appendChild(icon);
         return;
     }
 
-    // Same initials and color as the in-room avatar (RoomClient.genAvatarSvg)
-    const red = Math.pow(name.charCodeAt(0), 7) % 200;
-    const green = Math.pow(name.charCodeAt(1) || name.charCodeAt(0), 7) % 200;
-    const blue = (red + green) % 200;
-    avatar.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
-    avatar.classList.add('initials');
-    avatar.textContent = name.substring(0, 2).toUpperCase();
+    if (name) {
+        // Same initials and color as the in-room avatar (RoomClient.genAvatarSvg)
+        const red = Math.pow(name.charCodeAt(0), 7) % 200;
+        const green = Math.pow(name.charCodeAt(1) || name.charCodeAt(0), 7) % 200;
+        const blue = (red + green) % 200;
+        avatar.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
+        avatar.classList.add('initials');
+        avatar.textContent = name.substring(0, 2).toUpperCase();
+    } else {
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-video-slash';
+        avatar.appendChild(icon);
+    }
 
-    // Same as in-room: use the Gravatar for emails, keeping initials until it loads (or if there is none)
     const isPlaceholderVisible = getId('initVideoOff')?.style.display === 'flex';
-    if (!cfg.useAvatarSvg || !isValidEmail(name) || !isPlaceholderVisible) return;
-    initGravatarTimer = setTimeout(() => {
+    if (!isPlaceholderVisible) return;
+
+    // Keep the fallback (initials/icon) until the image loads, and if it fails
+    const loadAvatarImage = (src, onError) => {
         const img = new Image();
         img.alt = '';
         img.onload = () => {
-            if (gravatarToken === initGravatarToken) avatar.replaceChildren(img);
+            if (avatarToken !== initGravatarToken) return;
+            avatar.style.backgroundColor = '';
+            avatar.classList.remove('initials');
+            avatar.replaceChildren(img);
         };
-        img.src = RoomClient.prototype.genGravatar(name, 176);
-    }, 400);
+        img.onerror = () => {
+            if (avatarToken === initGravatarToken) onError?.();
+        };
+        img.src = src;
+    };
+
+    // Same priority as in-room: custom avatar, then Gravatar for emails, then initials
+    const loadGravatar = () => {
+        if (!cfg.useAvatarSvg || !isValidEmail(name)) return;
+        initGravatarTimer = setTimeout(() => loadAvatarImage(RoomClient.prototype.genGravatar(name, 176)), 400);
+    };
+    customAvatar ? loadAvatarImage(customAvatar, loadGravatar) : loadGravatar();
 }
 
 function handleInitVideoOffClick() {
@@ -9423,7 +9447,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.19',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.20',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
