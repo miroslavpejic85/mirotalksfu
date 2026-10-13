@@ -74,15 +74,18 @@
                                     allow it.
                                 </p>
                                 <div class="hero-cta">
-                                    <a
-                                        class="button button-primary pulse"
-                                        onclick="
-                                            room_id
-                                                ? (window.location.href = '/join/?room=' + room_id)
-                                                : (window.location.href = '/newroom')
-                                        "
+                                    <a id="tryAgainButton" class="button button-primary pulse" href="/newroom"
                                         >TRY AGAIN</a
                                     >
+                                    <script>
+                                        (function () {
+                                            const roomId = new URLSearchParams(window.location.search).get('room_id');
+                                            if (roomId) {
+                                                document.getElementById('tryAgainButton').href =
+                                                    '/join/?room=' + encodeURIComponent(roomId);
+                                            }
+                                        })();
+                                    </script>
                                 </div>
                             </div>
                             <div class="hero-figure anime-element">

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.16
+ * @version 2.6.17
  *
  */
 
@@ -5119,8 +5119,11 @@ class RoomClient {
     // ####################################################
 
     setTippy(elem, content, placement, allowHTML = false) {
-        if (this.isMobileDevice) return;
         const element = this.getId(elem);
+        if (element && typeof syncTooltipAriaLabel === 'function') {
+            syncTooltipAriaLabel(element, content, allowHTML);
+        }
+        if (this.isMobileDevice) return;
         if (element) {
             if (element._tippy) {
                 element._tippy.destroy();

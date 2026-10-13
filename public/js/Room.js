@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.16
+ * @version 2.6.17
  *
  */
 
@@ -689,9 +689,20 @@ function setTippy(elem, content, placement, allowHTML = false) {
         } catch (err) {
             console.error('setTippy error', err.message);
         }
+        syncTooltipAriaLabel(element, content, allowHTML);
     } else {
         console.warn('setTippy element not found with content', content);
     }
+}
+
+// Give icon-only controls an accessible name that follows their tooltip text.
+function syncTooltipAriaLabel(element, content, allowHTML) {
+    if (allowHTML || typeof content !== 'string' || !content.trim()) return;
+    const ownedByTooltip = element.dataset.ariaFromTooltip === 'true';
+    if (!ownedByTooltip && (element.hasAttribute('aria-label') || element.textContent.trim())) return;
+    const label = window.i18n?.t ? window.i18n.t(content, 'tooltips') : content;
+    element.setAttribute('aria-label', label);
+    element.dataset.ariaFromTooltip = 'true';
 }
 
 // ####################################################
@@ -1471,6 +1482,7 @@ async function whoAreYou() {
         background: swalBackground,
         title: BRAND.app?.name,
         input: 'text',
+        inputLabel: 'Display name',
         inputPlaceholder: 'Enter your email or name',
         inputAttributes: { maxlength: 254, id: 'usernameInput' },
         inputValue: default_name,
@@ -1479,8 +1491,15 @@ async function whoAreYou() {
         customClass: { popup: 'init-modal-size' },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        willOpen: () => {
+        willOpen: (popup) => {
             hide(loadingDiv);
+            // SweetAlert2 replaces the input id when inputLabel is set; restore it for existing lookups.
+            const usernameInput = Swal.getInput();
+            if (usernameInput) {
+                usernameInput.id = 'usernameInput';
+                const label = popup.querySelector('.swal2-input-label');
+                if (label) label.htmlFor = 'usernameInput';
+            }
         },
         didOpen: () => {
             showMobileAudioGuidance();
@@ -9252,7 +9271,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.16',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.17',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

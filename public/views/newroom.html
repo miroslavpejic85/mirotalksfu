@@ -118,7 +118,7 @@
                             </h3>
                             <div>
                                 <div class="mb-24">
-                                    <label for="roomName"></label>
+                                    <label for="roomName" class="screen-reader-text">Room name</label>
                                     <div class="form-group-desktop">
                                         <div class="room-input-wrapper">
                                             <input
@@ -131,6 +131,9 @@
                                             <button
                                                 id="genRoomButton"
                                                 class="button button-primary br-6 fas fa-arrows-rotate gen-room-btn"
+                                                type="button"
+                                                aria-label="Generate a new room name"
+                                                title="Generate a new room name"
                                             ></button>
                                         </div>
                                         <button id="joinRoomButton" class="button button-primary pulse">

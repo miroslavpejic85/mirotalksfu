@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap');
 
 :root {
     --room-stage-bg: var(--body-bg);
@@ -471,23 +471,32 @@ body {
 --------------------------------------------------------------*/
 
 .init-modal-size {
-    width: 1024px !important;
+    width: min(1024px, calc(100vw - 32px)) !important;
     height: auto !important;
+}
+
+.init-modal-size .swal2-title {
+    padding-top: var(--space-6);
+    font-size: var(--font-xl);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-tight);
+    letter-spacing: -0.01em;
 }
 
 .init-user {
     z-index: 9999;
     display: flex;
-    padding: 5px;
+    gap: var(--space-4);
+    padding: var(--space-1);
+    text-align: left;
 }
 
 .init-video-container {
     position: relative;
     width: 100%;
-    margin-right: 10px;
     overflow: hidden;
     border: none;
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     background: var(--room-stage-bg);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
@@ -495,72 +504,63 @@ body {
 .init-video-container video {
     z-index: 0;
     position: relative;
+    display: block;
     width: 100%;
     height: 240px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
 }
 
 .initComands {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 6px;
     width: 100%;
-}
-
-/*---------------------------
-> 1024px SCREEN */
-@media screen and (min-width: 1025px) {
-    .init-modal-size {
-        width: 1024px !important;
-    }
-    .init-user {
-        display: flex;
-    }
-    .init-video-container {
-        padding: 10px;
-    }
-}
-
-/*---------------------------
-<= 1024px SCREEN */
-@media screen and (max-width: 1024px) {
-    .init-modal-size {
-        width: auto !important;
-    }
-    .init-user {
-        display: block;
-    }
-    .init-video-container {
-        padding: 0px;
-    }
-    .init-modal-size {
-        width: 480px !important;
-    }
-    .init-user button {
-        width: 42px !important;
-        height: 42px !important;
-    }
 }
 
 .init-user select {
+    flex: 1 1 100%;
     width: 100%;
-    margin-top: 15px;
-    padding: 10px;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 36px 10px 12px;
     background-color: var(--select-bg) !important;
     color: white;
-    border: var(--border);
-    border-radius: 10px;
+    font-size: var(--font-sm);
+    border: 1px solid var(--room-border);
+    border-radius: var(--radius-md);
     box-shadow: none;
     cursor: pointer;
+    transition: border-color var(--motion-base) ease;
+}
+
+.init-user select:first-of-type {
+    margin-top: var(--space-2);
+}
+
+.init-user select:hover {
+    border-color: var(--room-border-strong);
+}
+
+.init-user select:focus {
+    border-color: var(--room-switch-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--room-switch-accent) 28%, transparent);
 }
 
 .init-user button {
-    width: 48px;
-    height: 48px;
-    padding: 10px;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    margin: 0;
+    padding: 0;
+    font-size: 1.1rem;
     border: 1px solid var(--room-border);
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     background: var(--room-control-bg);
+    cursor: pointer;
     transition:
         background-color var(--motion-base) ease,
         border-color var(--motion-base) ease,
@@ -572,6 +572,79 @@ body {
     border-color: var(--room-border-strong);
     background: var(--room-control-hover);
     transform: translateY(-2px);
+}
+
+.init-user button:active {
+    transform: translateY(0);
+}
+
+/* Muted / disabled media */
+.init-user button:is(.fa-microphone-slash, .fa-video-slash, .fa-eye-slash) {
+    border-color: rgba(255, 75, 75, 0.45);
+    background: var(--room-danger-soft);
+}
+
+.init-user #initExitButton:hover {
+    border-color: rgba(255, 75, 75, 0.45);
+    background: var(--room-danger-soft);
+}
+
+.init-modal-size .swal2-input-label {
+    margin: var(--space-6) auto 0;
+    color: var(--fg-3);
+    font-size: var(--font-sm);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.02em;
+}
+
+.init-modal-size #usernameInput {
+    height: 48px;
+    margin-top: var(--space-2);
+    font-size: var(--font-md);
+    transition: border-color var(--motion-base) ease;
+}
+
+.init-modal-size #usernameInput:focus {
+    border-color: var(--room-switch-accent) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--room-switch-accent) 28%, transparent) !important;
+}
+
+.swal2-popup.init-modal-size .swal2-actions .swal2-confirm {
+    min-width: min(100%, 240px);
+    min-height: 48px;
+    font-size: var(--font-md);
+    font-weight: var(--fw-semibold);
+    border-radius: var(--radius-md);
+}
+
+/*---------------------------
+> 1024px SCREEN */
+@media screen and (min-width: 1025px) {
+    .init-video-container {
+        padding: 10px;
+    }
+}
+
+/*---------------------------
+<= 1024px SCREEN */
+@media screen and (max-width: 1024px) {
+    .init-modal-size {
+        width: min(520px, calc(100vw - 24px)) !important;
+    }
+    .init-user {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    .init-video-container {
+        padding: 0px;
+    }
+    .initComands {
+        justify-content: center;
+    }
+    .init-user button {
+        width: 42px !important;
+        height: 42px !important;
+    }
 }
 
 /*--------------------------------------------------------------
@@ -1575,8 +1648,10 @@ body {
 }
 
 .qr-room-copy--body {
-    color: #fff;
-    font-family: Arial, Helvetica, sans-serif;
+    max-width: 440px;
+    margin-inline: auto;
+    color: var(--fg-2);
+    line-height: var(--lh-base);
 }
 
 #qrRoomPopupContainer {
@@ -7037,7 +7112,7 @@ button:hover {
 
 .wb-shortcuts-container {
     text-align: left;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: var(--font-sans);
     background: var(--body-bg);
     padding: 0.5rem 0.7rem;
     border-radius: 14px;
@@ -7150,7 +7225,7 @@ button:hover {
     background: rgba(255, 235, 59, 0.07);
     color: var(--text-color, #ffffff);
     font-size: 1rem;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: var(--font-sans);
     resize: vertical;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.08);

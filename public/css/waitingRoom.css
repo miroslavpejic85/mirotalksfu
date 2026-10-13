@@ -251,7 +251,7 @@
 }
 @media (max-width: 640px) {
     .waiting-card {
-        margin: 0 16px;
+        margin: 0;
         padding: 44px 28px 36px;
     }
     .waiting-title {

@@ -202,20 +202,56 @@
                     <div id="imageGrid" class="image-grid fadein"></div>
                     <span id="initErrorMessage" class="show-error"></span>
                 </div>
-                <div class="initComands">
-                    <button id="initVideoAudioRefreshButton" class="fas fa-rotate"></button>
-                    <button id="initAudioVideoButton" class="fas fa-eye"></button>
-                    <button id="initAudioButton" class="fas fa-microphone"></button>
-                    <button id="initVideoButton" class="fas fa-video"></button>
-                    <button id="initVirtualBackgroundButton" class="fa-solid fa-image hidden"></button>
-                    <button id="initVideoMirrorButton" class="fas fa-arrow-right-arrow-left"></button>
-                    <button id="initStartScreenButton" class="fas fa-desktop hidden"></button>
-                    <button id="initStopScreenButton" class="fas fa-stop-circle orange hidden"></button>
-                    <button id="initUsernameEmojiButton" class="fas fa-smile"></button>
-                    <button id="initExitButton" class="fas fa-sign-out-alt red"></button>
-                    <select id="initVideoSelect" class="form-select text-light bg-dark"></select>
-                    <select id="initMicrophoneSelect" class="form-select text-light bg-dark"></select>
-                    <select id="initSpeakerSelect" class="form-select text-light bg-dark"></select>
+                <div class="initComands" role="group" aria-label="Devices">
+                    <button
+                        id="initVideoAudioRefreshButton"
+                        class="fas fa-rotate"
+                        aria-label="Refresh audio/video devices"
+                    ></button>
+                    <button id="initAudioVideoButton" class="fas fa-eye" aria-label="Toggle the audio & video"></button>
+                    <button id="initAudioButton" class="fas fa-microphone" aria-label="Toggle the audio"></button>
+                    <button id="initVideoButton" class="fas fa-video" aria-label="Toggle the video"></button>
+                    <button
+                        id="initVirtualBackgroundButton"
+                        class="fa-solid fa-image hidden"
+                        aria-label="Set Virtual Background or Blur"
+                    ></button>
+                    <button
+                        id="initVideoMirrorButton"
+                        class="fas fa-arrow-right-arrow-left"
+                        aria-label="Toggle video mirror"
+                    ></button>
+                    <button
+                        id="initStartScreenButton"
+                        class="fas fa-desktop hidden"
+                        aria-label="Toggle screen sharing"
+                    ></button>
+                    <button
+                        id="initStopScreenButton"
+                        class="fas fa-stop-circle orange hidden"
+                        aria-label="Toggle screen sharing"
+                    ></button>
+                    <button
+                        id="initUsernameEmojiButton"
+                        class="fas fa-smile"
+                        aria-label="Toggle username emoji"
+                    ></button>
+                    <button id="initExitButton" class="fas fa-sign-out-alt red" aria-label="Leave meeting"></button>
+                    <select
+                        id="initVideoSelect"
+                        class="form-select text-light bg-dark"
+                        aria-label="Select camera"
+                    ></select>
+                    <select
+                        id="initMicrophoneSelect"
+                        class="form-select text-light bg-dark"
+                        aria-label="Select microphone"
+                    ></select>
+                    <select
+                        id="initSpeakerSelect"
+                        class="form-select text-light bg-dark"
+                        aria-label="Speakers"
+                    ></select>
                 </div>
             </div>
             <div id="usernameEmoji" class="usernameEmoji fadein center hidden"></div>

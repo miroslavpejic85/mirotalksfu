@@ -1820,7 +1820,7 @@ main {
 
 /*Pulse Button*/
 .pulse {
-    box-shadow: 0 0 0 rgba(120, 120, 120, 0.4);
+    box-shadow: 0 0 0 rgba(22, 140, 255, 0.4);
     animation: pulse 4s infinite;
 }
 .pulse:hover {
@@ -1829,27 +1829,36 @@ main {
 
 @-webkit-keyframes pulse {
     0% {
-        -webkit-box-shadow: 0 0 0 0 rgba(120, 120, 120, 0.4);
+        -webkit-box-shadow:
+            0 10px 26px rgba(22, 140, 255, 0.24),
+            0 0 0 0 rgba(22, 140, 255, 0.4);
     }
     70% {
-        -webkit-box-shadow: 0 0 0 15px rgba(120, 120, 120, 0);
+        -webkit-box-shadow:
+            0 10px 26px rgba(22, 140, 255, 0.24),
+            0 0 0 12px rgba(22, 140, 255, 0);
     }
     100% {
-        -webkit-box-shadow: 0 0 0 0 rgba(120, 120, 120, 0);
+        -webkit-box-shadow:
+            0 10px 26px rgba(22, 140, 255, 0.24),
+            0 0 0 0 rgba(22, 140, 255, 0);
     }
 }
 @keyframes pulse {
     0% {
-        -moz-box-shadow: 0 0 0 0 rgba(120, 120, 120, 0.4);
-        box-shadow: 0 0 0 0 rgba(120, 120, 120, 0.4);
+        box-shadow:
+            0 10px 26px rgba(22, 140, 255, 0.24),
+            0 0 0 0 rgba(22, 140, 255, 0.4);
     }
     70% {
-        -moz-box-shadow: 0 0 0 10px rgba(120, 120, 120, 0);
-        box-shadow: 0 0 0 15px rgba(120, 120, 120, 0);
+        box-shadow:
+            0 10px 26px rgba(22, 140, 255, 0.24),
+            0 0 0 12px rgba(22, 140, 255, 0);
     }
     100% {
-        -moz-box-shadow: 0 0 0 0 rgba(120, 120, 120, 0);
-        box-shadow: 0 0 0 0 rgba(120, 120, 120, 0);
+        box-shadow:
+            0 10px 26px rgba(22, 140, 255, 0.24),
+            0 0 0 0 rgba(22, 140, 255, 0);
     }
 }
 /*Pulse Button*/
@@ -2926,6 +2935,10 @@ body {
     line-height: 1.65;
 }
 
+.hero-paragraph + .hero-cta {
+    margin-top: 32px;
+}
+
 .hero-figure {
     filter: saturate(0.9) contrast(1.06);
 }
@@ -3203,13 +3216,13 @@ a:focus-visible {
         line-height: 1.6;
     }
 
+    /* Decorative only: on phones, keep the primary "join a room" action above the fold. */
     .hero-figure {
-        width: min(68%, 280px);
-        margin: 22px auto 0;
+        display: none;
     }
 
     .cta:not(#supportUs) {
-        margin-top: -12px;
+        margin-top: 0;
     }
 
     .cta:not(#supportUs) .section-inner {
