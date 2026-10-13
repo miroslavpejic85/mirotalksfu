@@ -67,9 +67,32 @@ describe('mobile wake-lock lifecycle', () => {
         context.setTimeout = setTimeout;
         context.clearTimeout = clearTimeout;
         vm.runInContext(source, context);
+        // Listeners are bound on DOMContentLoaded, once Room.js (loaded after WakeLock.js) defined its globals
+        documentEvents.DOMContentLoaded();
     });
 
     afterEach(() => clock.restore());
+
+    it('binds lifecycle listeners only after DOMContentLoaded', () => {
+        const early = {};
+        const earlyContext = vm.createContext({
+            document: { addEventListener: (name, handler) => (early[name] = handler) },
+            window: { addEventListener: (name, handler) => (early[name] = handler) },
+            navigator: {},
+        });
+        vm.runInContext(source, earlyContext);
+        assert.deepEqual(Object.keys(early), ['DOMContentLoaded']);
+        early.DOMContentLoaded();
+        for (const name of [
+            'visibilitychange',
+            'enterpictureinpicture',
+            'leavepictureinpicture',
+            'pagehide',
+            'pageshow',
+        ]) {
+            assert.equal(typeof early[name], 'function', name);
+        }
+    });
 
     it('does not queue routine acquisition, release, or empty-release notifications', async () => {
         await context.releaseWakeLock();

@@ -20,16 +20,21 @@ const cfg = {
 // Gravatar URL -> initials avatar, used when the email has no Gravatar (see genGravatar)
 const gravatarFallbacks = new Map();
 
-document.addEventListener(
-    'error',
-    (e) => {
-        const img = e.target;
-        if (!(img instanceof HTMLImageElement)) return;
-        const fallback = gravatarFallbacks.get(img.src);
-        if (fallback) img.src = fallback;
-    },
-    true
-);
+// Lazily installed on the first Gravatar URL, so loading this file has no side effects on document
+function installGravatarFallback() {
+    if (installGravatarFallback.done) return;
+    installGravatarFallback.done = true;
+    document.addEventListener(
+        'error',
+        (e) => {
+            const img = e.target;
+            if (!(img instanceof HTMLImageElement)) return;
+            const fallback = gravatarFallbacks.get(img.src);
+            if (fallback) img.src = fallback;
+        },
+        true
+    );
+}
 
 const html = {
     newline: '\n', //'<br />',
@@ -5179,6 +5184,7 @@ class RoomClient {
         const gravatarURL = `https://www.gravatar.com/avatar/${hash}?s=${avatarSize}&d=404`;
         // d=404: no Gravatar for this email -> the image errors and is swapped to the initials avatar
         if (!gravatarFallbacks.has(gravatarURL)) {
+            installGravatarFallback();
             gravatarFallbacks.set(gravatarURL, this.genAvatarSvg(email, avatarSize));
         }
         return gravatarURL;
