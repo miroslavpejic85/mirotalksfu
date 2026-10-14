@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.20
+ * @version 2.6.21
  *
  */
 
@@ -272,7 +272,45 @@ const exitLeaveAllBtn = getId('exitLeaveAllBtn');
 // VIRTUAL BACKGROUND DEFAULT IMAGES AND INIT CLASS
 // ####################################################
 
-const virtualBackgrounds = Object.values(image.virtualBackground);
+const fallbackVirtualBackgrounds = Object.values(image.virtualBackground);
+let virtualBackgrounds = [...fallbackVirtualBackgrounds];
+
+const defaultVirtualBackgroundManifestPath = '../images/virtual-background/default/manifest.json';
+const defaultVirtualBackgroundPathPattern =
+    /^\.\.\/images\/virtual-background\/default\/[A-Za-z0-9._-]+\.(?:jpe?g|png|gif|webp)$/i;
+
+loadVirtualBackgroundsFromManifest();
+
+async function loadVirtualBackgroundsFromManifest() {
+    try {
+        const response = await fetch(defaultVirtualBackgroundManifestPath, { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error(`Status ${response.status}`);
+        }
+
+        const manifest = await response.json();
+        const manifestBackgrounds = Array.isArray(manifest?.backgrounds) ? manifest.backgrounds : [];
+        const validBackgrounds = [
+            ...new Set(
+                manifestBackgrounds.filter(
+                    (backgroundPath) =>
+                        typeof backgroundPath === 'string' && defaultVirtualBackgroundPathPattern.test(backgroundPath)
+                )
+            ),
+        ];
+
+        if (!validBackgrounds.length) {
+            throw new Error('No valid background paths found');
+        }
+
+        virtualBackgrounds = validBackgrounds;
+        return virtualBackgrounds;
+    } catch (error) {
+        console.warn('Unable to load default virtual backgrounds manifest, using fallback list.', error);
+        virtualBackgrounds = [...fallbackVirtualBackgrounds];
+        return virtualBackgrounds;
+    }
+}
 
 const virtualBackground = new VirtualBackground();
 
@@ -9447,7 +9485,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.20',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.21',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
