@@ -133,6 +133,10 @@ module.exports = class Room {
                 fromUrl: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.fromUrl,
                 fromStream: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.fromStream,
                 allowCustomUrl: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.allowCustomUrl,
+                allowQualitySelection:
+                    this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.allowQualitySelection !== false,
+                videoQuality: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.videoQuality,
+                maxVideoQuality: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.maxVideoQuality,
             },
             hostProtected: this.isHostProtected,
             moderator: this._moderator,

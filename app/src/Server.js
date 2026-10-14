@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.24
+ * @version 2.6.25
  *
  */
 
@@ -1733,14 +1733,22 @@ function startServer() {
             });
         }
 
-        const stream = new RtmpStreamer(rtmp, rtmpStreamKey);
+        const stream = new RtmpStreamer(rtmp, rtmpStreamKey, {
+            quality: req.body?.quality,
+            hasAudio: req.body?.hasAudio !== false,
+        });
         stream.lastActivity = Date.now();
         stream.ownerRoomId = req.rtmpRoomId || null;
         streams[rtmpStreamKey] = stream;
 
         log.info('Active RTMP Streams', { total: getRtmpTotalActiveStreamsCount() });
 
-        return res.json({ rtmp, rtmpStreamKey });
+        const { quality, width, height, fps, videoBitrate, audioBitrate } = stream.settings;
+        return res.json({
+            rtmp,
+            rtmpStreamKey,
+            video: { quality, width, height, fps, videoBitrate, audioBitrate },
+        });
     });
 
     app.post('/streamRTMP', checkRTMPApiSecret, (req, res) => {

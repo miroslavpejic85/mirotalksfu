@@ -3,6 +3,7 @@
 const config = require('./config');
 const ffmpegPath = config.media?.rtmp?.ffmpegPath || '/usr/bin/ffmpeg';
 const { spawnFfmpeg } = require('./FfmpegProcess');
+const { resolveRtmpVideoSettings, buildFileStreamArgs } = require('./RtmpQuality');
 
 const fs = require('node:fs');
 const http = require('http');
@@ -111,24 +112,8 @@ class RtmpUrl {
                 return false;
             }
 
-            const args = [
-                '-re',
-                '-i',
-                inputFilePath,
-                '-c:a',
-                'aac',
-                '-b:a',
-                '128k',
-                '-c:v',
-                'libx264',
-                '-b:v',
-                '3000k',
-                '-s',
-                '1280x720',
-                '-f',
-                'flv',
-                rtmpUrl,
-            ];
+            const settings = resolveRtmpVideoSettings(config.media?.rtmp);
+            const args = buildFileStreamArgs(settings, inputFilePath, rtmpUrl);
             this.ffmpegProcess = spawnFfmpeg(ffmpegPath, args, null, {
                 onStart: (commandLine) => log.debug('ffmpeg process starting with command:', commandLine),
                 onError: (err, stdout, stderr) => {

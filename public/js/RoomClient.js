@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.24
+ * @version 2.6.25
  *
  */
 
@@ -956,6 +956,7 @@ class RoomClient {
             if (room.rtmp) {
                 console.log('RTMP config', room.rtmp);
                 const { enabled, fromFile, fromUrl, fromStream, allowCustomUrl } = room.rtmp;
+                this.initRtmpQualitySelect(room.rtmp);
                 elemDisplay('tabRTMPStreamingBtn', enabled, 'flex');
                 elemDisplay('rtmpFromFile', fromFile);
                 elemDisplay('rtmpFromUrl', fromUrl);
@@ -15395,6 +15396,21 @@ class RoomClient {
     // RTMP common
     // ##############################################
 
+    initRtmpQualitySelect({ allowQualitySelection, videoQuality, maxVideoQuality }) {
+        const qualities = ['480p', '720p', '1080p', '1440p'];
+        const select = this.getId('rtmpQuality');
+        const field = this.getId('rtmpQualityField');
+        if (!select || !field) return;
+
+        field.style.display = allowQualitySelection ? '' : 'none';
+        const maxIndex = qualities.includes(maxVideoQuality) ? qualities.indexOf(maxVideoQuality) : 2; // 1080p
+        const defaultQuality = qualities.includes(videoQuality) ? videoQuality : '720p';
+
+        select.innerHTML = '';
+        select.appendChild(new Option(`Server default (${defaultQuality})`, ''));
+        qualities.slice(0, maxIndex + 1).forEach((q) => select.appendChild(new Option(q, q)));
+    }
+
     openRTMPStreamer() {
         const themeColor = encodeURIComponent(themeCustom.color);
 
@@ -15408,6 +15424,7 @@ class RoomClient {
             `&vf=${videoFps.value}` +
             `&sf=${screenFps.value}` +
             `&ts=${selectTheme.value}` +
+            (this.getId('rtmpQuality')?.value ? `&rq=${encodeURIComponent(this.getId('rtmpQuality').value)}` : '') +
             (themeCustom.keep ? `&tc=${themeColor}` : '') +
             (customRtmpUrl ? `&customRtmpUrl=${encodeURIComponent(customRtmpUrl)}` : '') +
             (streamType ? `&st=${encodeURIComponent(streamType)}` : '') +

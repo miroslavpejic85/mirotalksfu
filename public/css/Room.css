@@ -2494,6 +2494,17 @@ body {
     font-weight: 600;
 }
 
+/* Beat the generic `#mySettings select` margin so the label sits right above its select */
+#mySettings .rtmp-field select {
+    margin-top: 0;
+    height: 36px;
+    font-size: 12px;
+}
+
+#rtmpQualityField {
+    margin: 14px 0 12px;
+}
+
 .rtmp-field small {
     display: block;
     margin: 5px 2px 0;

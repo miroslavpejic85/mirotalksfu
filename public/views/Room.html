@@ -1870,6 +1870,17 @@
                                 </div>
                                 <div class="rtmp-mode-tabs" role="tablist" aria-labelledby="rtmpSourceTitle">
                                     <button
+                                        id="rtmpTabStream"
+                                        type="button"
+                                        role="tab"
+                                        class="rtmp-mode-tab"
+                                        data-mode="stream"
+                                        data-target="rtmpFromStream"
+                                        aria-controls="rtmpFromStream"
+                                    >
+                                        <i class="fa-solid fa-video" aria-hidden="true"></i><span>Camera / Screen</span>
+                                    </button>
+                                    <button
                                         id="rtmpTabFile"
                                         type="button"
                                         role="tab"
@@ -1891,19 +1902,31 @@
                                     >
                                         <i class="fa-solid fa-link" aria-hidden="true"></i><span>URL</span>
                                     </button>
-                                    <button
-                                        id="rtmpTabStream"
-                                        type="button"
-                                        role="tab"
-                                        class="rtmp-mode-tab"
-                                        data-mode="stream"
-                                        data-target="rtmpFromStream"
-                                        aria-controls="rtmpFromStream"
-                                    >
-                                        <i class="fa-solid fa-video" aria-hidden="true"></i><span>Camera / Screen</span>
-                                    </button>
                                 </div>
 
+                                <section
+                                    id="rtmpFromStream"
+                                    class="rtmp-source"
+                                    role="tabpanel"
+                                    aria-labelledby="rtmpLiveTitle"
+                                >
+                                    <div class="rtmp-source-heading">
+                                        <span class="rtmp-source-icon"><i class="fa-solid fa-video"></i></span>
+                                        <div>
+                                            <h5 id="rtmpLiveTitle">Camera or screen</h5>
+                                            <p>Open the broadcast studio and stream live from this device.</p>
+                                        </div>
+                                    </div>
+                                    <div id="rtmpQualityField" class="rtmp-field">
+                                        <label for="rtmpQuality">Stream quality</label>
+                                        <select id="rtmpQuality" class="form-select text-light bg-dark"></select>
+                                        <small>Higher quality uses more bandwidth and server CPU.</small>
+                                    </div>
+                                    <button id="streamerRtmpButton" class="hidden btn-custom">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>&nbsp;Open broadcast
+                                        studio
+                                    </button>
+                                </section>
                                 <section
                                     id="rtmpFromFile"
                                     class="rtmp-source"
@@ -1974,25 +1997,6 @@
                                     </button>
                                     <button id="stopRtmpURLButton" class="hidden btn-custom rtmp-stop-button">
                                         <i class="fas fa-stop-circle"></i>&nbsp;Stop streaming
-                                    </button>
-                                </section>
-
-                                <section
-                                    id="rtmpFromStream"
-                                    class="rtmp-source"
-                                    role="tabpanel"
-                                    aria-labelledby="rtmpLiveTitle"
-                                >
-                                    <div class="rtmp-source-heading">
-                                        <span class="rtmp-source-icon"><i class="fa-solid fa-video"></i></span>
-                                        <div>
-                                            <h5 id="rtmpLiveTitle">Camera or screen</h5>
-                                            <p>Open the broadcast studio and stream live from this device.</p>
-                                        </div>
-                                    </div>
-                                    <button id="streamerRtmpButton" class="hidden btn-custom">
-                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>&nbsp;Open broadcast
-                                        studio
                                     </button>
                                 </section>
                             </div>

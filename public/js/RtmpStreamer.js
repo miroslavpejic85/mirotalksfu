@@ -24,6 +24,7 @@ const theme = filterXSS(qs.get('ts'));
 const color = filterXSS(qs.get('tc'));
 const customRtmpUrl = qs.get('customRtmpUrl') || null;
 const streamType = filterXSS(qs.get('st'));
+const requestedQuality = filterXSS(qs.get('rq')) || null;
 
 // Per-session token issued on room join. Removed from the URL right away so it is not
 // kept in browser history or leaked via the Referer of any later request.
@@ -50,8 +51,9 @@ console.log('RTMP settings', {
 });
 
 const chunkDuration = 1000;
-const videoBitsPerSecond = 4000000;
-const audioBitsPerSecond = 128000;
+const defaultVideoBitsPerSecond = 4000000;
+let videoBitsPerSecond = defaultVideoBitsPerSecond;
+let audioBitsPerSecond = 128000;
 
 let mediaRecorder = null;
 let rtmpKey = null; // To store the RTMP key
@@ -158,15 +160,30 @@ function attachMediaStream(stream) {
 
 async function initRTMP(stream) {
     const apiSecret = getAuthorization();
+    const hasAudio = stream.getAudioTracks().length > 0;
+    if (!hasAudio) {
+        showPopup(
+            'No audio captured. When sharing a screen, window or tab, enable "Share audio" in the browser picker (system audio is only available when sharing the entire screen or a tab).',
+            'warning'
+        );
+    }
     try {
-        const response = await axios.post(`/initRTMP`, customRtmpUrl ? { customRtmpUrl } : null, {
-            headers: {
-                authorization: apiSecret,
-                ...(customRtmpUrl ? { 'Content-Type': 'application/json' } : {}),
+        const response = await axios.post(
+            `/initRTMP`,
+            {
+                ...(customRtmpUrl ? { customRtmpUrl } : {}),
+                ...(requestedQuality ? { quality: requestedQuality } : {}),
+                hasAudio,
             },
-        });
-        const { rtmp, rtmpStreamKey } = response.data;
-        console.log('initRTMP response:', { res: response, rtmp: rtmp });
+            { headers: { authorization: apiSecret, 'Content-Type': 'application/json' } }
+        );
+        const { rtmp, rtmpStreamKey, video } = response.data;
+        console.log('initRTMP response:', { res: response, rtmp: rtmp, video });
+        if (video) {
+            // Capture at 1.5x the output bitrate so the server re-encode starts from a clean source
+            videoBitsPerSecond = Math.max(defaultVideoBitsPerSecond, Math.round(video.videoBitrate * 1500));
+            audioBitsPerSecond = Math.max(128000, video.audioBitrate * 1000);
+        }
         rtmpInput.value = rtmp;
         rtmpKey = rtmpStreamKey || new URL(rtmp).pathname.split('/').pop();
         toggleButtons(true);
@@ -382,7 +399,13 @@ function getRTMPScreenConstraints(screenFrameRate) {
     const customFrameRate = screenFrameRate ? parseInt(screenFrameRate, 10) : 30;
     const frameRate = screenFrameRate === 'max' ? defaultFrameRate : customFrameRate;
     return {
-        audio: true,
+        // Raw audio: echo cancellation / noise suppression / gain control mute or distort shared system and tab audio
+        audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+        },
+        systemAudio: 'include',
         video: {
             width: { ideal: 1920 },
             height: { ideal: 1080 },

@@ -4,14 +4,17 @@ const config = require('./config');
 const { PassThrough } = require('stream');
 const ffmpegPath = config.media?.rtmp?.ffmpegPath || '/usr/bin/ffmpeg';
 const { spawnFfmpeg } = require('./FfmpegProcess');
+const { resolveRtmpVideoSettings, buildLiveStreamArgs } = require('./RtmpQuality');
 
 const Logger = require('./Logger');
 const log = new Logger('RtmpStreamer');
 
 class RtmpStreamer {
-    constructor(rtmpUrl, rtmpKey) {
+    constructor(rtmpUrl, rtmpKey, options = {}) {
         this.rtmpUrl = rtmpUrl;
         this.rtmpKey = rtmpKey;
+        this.settings = resolveRtmpVideoSettings(config.media?.rtmp, options.quality);
+        this.hasAudio = options.hasAudio !== false;
         this.log = log;
         this.stream = new PassThrough();
         this.ffmpegStream = null;
@@ -21,42 +24,7 @@ class RtmpStreamer {
     }
 
     initFFmpeg() {
-        const args = [
-            '-f',
-            'webm',
-            '-re',
-            '-i',
-            'pipe:0',
-            '-c:a',
-            'aac',
-            '-b:a',
-            '128k',
-            '-c:v',
-            'libx264',
-            '-preset',
-            'veryfast',
-            '-tune',
-            'zerolatency',
-            '-b:v',
-            '3000k',
-            '-maxrate',
-            '3000k',
-            '-bufsize',
-            '6000k',
-            '-g',
-            '60',
-            '-keyint_min',
-            '60',
-            '-sc_threshold',
-            '0',
-            '-pix_fmt',
-            'yuv420p',
-            '-filter:v',
-            'scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2',
-            '-f',
-            'flv',
-            this.rtmpUrl,
-        ];
+        const args = buildLiveStreamArgs(this.settings, this.rtmpUrl, { hasAudio: this.hasAudio });
         this.ffmpegStream = spawnFfmpeg(ffmpegPath, args, this.stream, {
             onStart: (commandLine) => this.log.debug('ffmpeg command', { id: this.rtmpKey, cmd: commandLine }),
             onError: (err, stdout, stderr) => {

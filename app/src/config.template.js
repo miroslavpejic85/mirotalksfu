@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.24 - Configuration File
+ * MiroTalk SFU v2.6.25 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -250,6 +250,19 @@ module.exports = {
          * - ffmpegPath         : FFmpeg binary path (auto-detected)
          * - platform           : Current OS platform (auto-detected)
          *
+         * Output Quality (applies to live, file and URL streams)
+         * ------------------------------------------------------
+         * - videoQuality          : Default output profile: 480p | 720p | 1080p | 1440p (default: 720p)
+         * - maxVideoQuality       : Highest profile presenters may pick from the RTMP tab (default: 1080p)
+         * - allowQualitySelection : Let presenters pick the quality from the RTMP tab (default: true)
+         * - videoBitrate          : Video bitrate in kbps for the default profile, 0 = profile default
+         *                           (480p: 1500, 720p: 3000, 1080p: 4500, 1440p: 9000)
+         * - videoFps              : Output frame rate (default: 30, max: 60)
+         * - videoPreset           : x264 preset, ultrafast..veryslow (default: veryfast, slower = better quality, more CPU)
+         * - audioBitrate          : AAC audio bitrate in kbps (default: 128)
+         * YouTube recommends 1080p30 at 4500-9000 kbps; raise RTMP_VIDEO_QUALITY / RTMP_VIDEO_BITRATE for sharper
+         * streams (1080p needs roughly twice the CPU of 720p).
+         *
          * Server Management
          * ----------------
          * NodeMediaServer (mirotalk/nms:latest):
@@ -357,6 +370,13 @@ module.exports = {
             dir: process.env.RTMP_DIR || '../rtmp',
             ffmpegPath: RTMP_FFMPEG_PATH,
             platform: PLATFORM,
+            videoQuality: process.env.RTMP_VIDEO_QUALITY || '720p',
+            maxVideoQuality: process.env.RTMP_MAX_VIDEO_QUALITY || '1080p',
+            allowQualitySelection: process.env.RTMP_ALLOW_QUALITY_SELECTION !== 'false',
+            videoBitrate: parseInt(process.env.RTMP_VIDEO_BITRATE) || 0,
+            videoFps: parseInt(process.env.RTMP_VIDEO_FPS) || 30,
+            videoPreset: process.env.RTMP_VIDEO_PRESET || 'veryfast',
+            audioBitrate: parseInt(process.env.RTMP_AUDIO_BITRATE) || 128,
         },
     },
 
