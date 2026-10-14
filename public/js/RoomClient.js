@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.23
+ * @version 2.6.24
  *
  */
 
@@ -5675,7 +5675,17 @@ class RoomClient {
                 dropdown.classList.toggle('dropend', position === 'horizontal');
             });
             bottomButtons.dataset.position = position;
+            this.btnsBarPosition = position;
+            this.updateButtonsBarPinnedOffset();
         }
+    }
+
+    // Center the horizontal buttons bar over the video area when a side panel is pinned
+    updateButtonsBarPinnedOffset() {
+        if (this.isMobileDevice || this.btnsBarPosition !== 'vertical') return;
+        const panelWidth = this.getPinnedSidePanelWidth();
+        const left = panelWidth ? `${(100 - panelWidth) / 2}%` : '50%';
+        document.documentElement.style.setProperty('--bottom-btns-left', left);
     }
 
     // ####################################################
@@ -6136,6 +6146,7 @@ class RoomClient {
     }
 
     refreshVideoPinLayout() {
+        this.updateButtonsBarPinnedOffset();
         if (this.isVideoPinned) this.toggleVideoPin(pinVideoPosition.value);
     }
 
