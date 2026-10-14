@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.29
+ * @version 2.6.30
  *
  */
 
@@ -912,6 +912,7 @@ async function enumerateVideoDevices(stream) {
             selectStreamDevice(stream, [videoSelect, initVideoSelect]);
             await stopTracks(stream);
             isEnumerateVideoDevices = true;
+            updateDeviceSettingsVisibility();
         });
 }
 
@@ -965,6 +966,7 @@ async function enumerateAudioDevices(stream) {
                 hide(initSpeakerSelect);
                 hide(speakerSelectDiv);
             }
+            updateDeviceSettingsVisibility();
         });
 }
 
@@ -1530,7 +1532,6 @@ async function whoAreYou() {
         elemDisplay('initAudioVideoButton', false);
         elemDisplay('initVideoAudioRefreshButton', false);
         elemDisplay('initVideoSelect', false);
-        elemDisplay('tabVideoDevicesBtn', false);
         initVideoContainerShow(false);
     }
     if (!BUTTONS.main.startAudioButton) {
@@ -1540,7 +1541,6 @@ async function whoAreYou() {
         elemDisplay('initVideoAudioRefreshButton', false);
         elemDisplay('initMicrophoneSelect', false);
         elemDisplay('initSpeakerSelect', false);
-        elemDisplay('tabAudioDevicesBtn', false);
     }
     if (!BUTTONS.main.startScreenButton) {
         hide(initStartScreenButton);
@@ -2190,8 +2190,6 @@ function roomIsReady() {
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             if (BUTTONS.main.startScreenButton) {
                 show(startScreenButton);
-                show(ScreenQualityDiv);
-                show(ScreenFpsDiv);
             }
             BUTTONS.main.snapshotRoomButton && show(snapshotRoomButton);
         }
@@ -2226,16 +2224,7 @@ function roomIsReady() {
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     // Hide device tabs when disabled by config or when mic/camera permission was denied/unavailable
-    if (!BUTTONS.main.startAudioButton || !isEnumerateAudioDevices) {
-        elemDisplay('tabAudioDevicesBtn', false);
-        elemDisplay('tabAudioDevices', false);
-    }
-    if (!BUTTONS.main.startVideoButton || !isEnumerateVideoDevices) {
-        elemDisplay('tabVideoDevicesBtn', false);
-        elemDisplay('tabVideoDevices', false);
-        elemDisplay('tabVirtualBackgroundBtn', false);
-        elemDisplay('tabVirtualBackground', false);
-    }
+    updateDeviceSettingsVisibility();
     BUTTONS.settings.activeRooms && show(activeRoomsButton);
     BUTTONS.settings.fileSharing && show(fileShareButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
@@ -9469,6 +9458,45 @@ function showVirtualBackgroundTab() {
     updateDevicesNavLabel();
 }
 
+/**
+ * Camera/mic specific controls follow device availability, while screen sharing and
+ * speaker/output controls stay reachable even when the camera or microphone is unavailable.
+ */
+function updateDeviceSettingsVisibility() {
+    const cameraAvailable = BUTTONS.main.startVideoButton && isEnumerateVideoDevices;
+    const screenAvailable =
+        BUTTONS.main.startScreenButton && !!(navigator.getDisplayMedia || navigator.mediaDevices?.getDisplayMedia);
+    const micAvailable = BUTTONS.main.startAudioButton && isEnumerateAudioDevices;
+
+    const setVisible = (id, visible) => {
+        const el = getId(id);
+        if (!el) return;
+        el.style.display = '';
+        el.classList.toggle('hidden', !visible);
+    };
+
+    setVisible('cameraSettingsDiv', cameraAvailable);
+    setVisible('screenSettingsDivider', cameraAvailable);
+    setVisible('ScreenSettingsDiv', screenAvailable);
+    setVisible('tabVideoDevicesBtn', cameraAvailable || screenAvailable);
+    if (!cameraAvailable && !screenAvailable) elemDisplay('tabVideoDevices', false);
+    if (!cameraAvailable) {
+        elemDisplay('tabVirtualBackgroundBtn', false);
+        elemDisplay('tabVirtualBackground', false);
+    } else {
+        tabVirtualBackgroundBtn.style.display = '';
+    }
+
+    setVisible('micSettingsDiv', micAvailable);
+    setVisible(
+        'speakerSelectDiv',
+        isEnumerateAudioDevices && sinkId && speakerSelect && speakerSelect.options.length > 0
+    );
+    if (BUTTONS.settings.pushToTalk) setVisible('pushToTalkDiv', micAvailable);
+
+    updateDevicesNavLabel();
+}
+
 // Hide the "Devices" settings nav label when none of its tabs are visible
 function updateDevicesNavLabel() {
     const label = getId('settingsNavDevicesLabel');
@@ -9604,7 +9632,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.29',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.30',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
