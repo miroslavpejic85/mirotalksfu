@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.28
+ * @version 2.6.29
  *
  */
 
@@ -1503,10 +1503,7 @@ async function whoAreYou() {
     // Virtual Background if supported (Chrome/Edge/Opera/Vivaldi/...)
     // Note: the settings section (#videoVirtualBackground label + grid) visibility is owned by
     // rc.showVideoImageSelector(), so the label is only revealed once the image grid is populated.
-    if (
-        isMediaStreamTrackAndTransformerSupported &&
-        (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
-    ) {
+    if (isVirtualBackgroundAvailable()) {
         show(initVirtualBackgroundButton);
     }
 
@@ -1724,9 +1721,7 @@ function handleVideo() {
 
     hideInitImageGrids();
 
-    isVideoAllowed &&
-    isMediaStreamTrackAndTransformerSupported &&
-    (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
+    isVideoAllowed && isVirtualBackgroundAvailable()
         ? show(initVirtualBackgroundButton)
         : hide(initVirtualBackgroundButton);
 }
@@ -1757,9 +1752,7 @@ async function handleAudioVideo() {
 
     hideInitImageGrids();
 
-    isVideoAllowed &&
-    isMediaStreamTrackAndTransformerSupported &&
-    (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
+    isVideoAllowed && isVirtualBackgroundAvailable()
         ? show(initVirtualBackgroundButton)
         : hide(initVirtualBackgroundButton);
 }
@@ -2232,11 +2225,12 @@ function roomIsReady() {
     updateParticipantViewButtonVisibility();
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
-    if (!BUTTONS.main.startAudioButton) {
+    // Hide device tabs when disabled by config or when mic/camera permission was denied/unavailable
+    if (!BUTTONS.main.startAudioButton || !isEnumerateAudioDevices) {
         elemDisplay('tabAudioDevicesBtn', false);
         elemDisplay('tabAudioDevices', false);
     }
-    if (!BUTTONS.main.startVideoButton) {
+    if (!BUTTONS.main.startVideoButton || !isEnumerateVideoDevices) {
         elemDisplay('tabVideoDevicesBtn', false);
         elemDisplay('tabVideoDevices', false);
         elemDisplay('tabVirtualBackgroundBtn', false);
@@ -2264,13 +2258,8 @@ function roomIsReady() {
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!isMobileDevice) show(pinUnpinGridDiv);
     if (!isSpeechSynthesisSupported) hide(speechMsgDiv);
-    if (
-        isMediaStreamTrackAndTransformerSupported &&
-        (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
-    ) {
-        show(tabVirtualBackgroundBtn);
-        rc.showVideoImageSelector();
-    }
+    showVirtualBackgroundTab();
+    updateDevicesNavLabel();
     handleButtons();
     handleSelects();
     handleInputs();
@@ -3229,7 +3218,10 @@ function handleButtons() {
             return userLog('warning', 'The moderator does not allow you to unhide', 'top-end', 6000);
         }
         setVideoButtonsDisabled(true);
-        if (!isEnumerateVideoDevices) await initEnumerateVideoDevices();
+        if (!isEnumerateVideoDevices) {
+            await initEnumerateVideoDevices();
+            showVirtualBackgroundTab();
+        }
         await rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // await rc.resumeProducer(RoomClient.mediaType.video);
     };
@@ -6138,11 +6130,7 @@ function setupQuickDeviceSwitchDropdowns() {
 
         appendMenuDivider(videoMenu);
 
-        const virtualBackgroundEnabled =
-            isMediaStreamTrackAndTransformerSupported &&
-            (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true);
-
-        if (virtualBackgroundEnabled) {
+        if (isVirtualBackgroundAvailable()) {
             appendMenuToggle(
                 videoMenu,
                 'deviceMenuVirtualBackgroundBlur',
@@ -9464,6 +9452,32 @@ function saveVirtualBackgroundSettings(blurLevel, imageUrl, transparent) {
     localStorage.setItem('virtualBackgroundSettings', JSON.stringify(settings));
 }
 
+// Requires browser support, config enabled, and a camera that was actually granted/enumerated
+function isVirtualBackgroundAvailable() {
+    return (
+        isMediaStreamTrackAndTransformerSupported &&
+        (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true) &&
+        BUTTONS.main.startVideoButton &&
+        isEnumerateVideoDevices
+    );
+}
+
+function showVirtualBackgroundTab() {
+    if (!isVirtualBackgroundAvailable()) return;
+    show(tabVirtualBackgroundBtn);
+    rc.showVideoImageSelector();
+    updateDevicesNavLabel();
+}
+
+// Hide the "Devices" settings nav label when none of its tabs are visible
+function updateDevicesNavLabel() {
+    const label = getId('settingsNavDevicesLabel');
+    if (!label) return;
+    const isTabVisible = (btn) => btn && !btn.classList.contains('hidden') && btn.style.display !== 'none';
+    const anyVisible = [tabVideoDevicesBtn, tabVirtualBackgroundBtn, tabAudioDevicesBtn].some(isTabVisible);
+    elemDisplay(label, anyVisible, '');
+}
+
 async function loadVirtualBackgroundSettings() {
     if (!isMediaStreamTrackAndTransformerSupported) return;
 
@@ -9590,7 +9604,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.28',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.29',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

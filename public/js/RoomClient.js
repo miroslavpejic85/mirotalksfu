@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.28
+ * @version 2.6.29
  *
  */
 
@@ -924,6 +924,7 @@ class RoomClient {
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
                 if (this._moderator.video_cant_unhide) hide(tabVirtualBackgroundBtn);
+                updateDevicesNavLabel();
             }
             // Handle Follow Me state for late joiners
             if (room.followMe && room.followMe.enabled && !isPresenter) {
@@ -13507,12 +13508,14 @@ class RoomClient {
             case 'audio_cant_unmute':
                 this._moderator.audio_cant_unmute = data.status;
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
+                updateDevicesNavLabel();
                 rc.roomMessage('audio_cant_unmute', data.status);
                 break;
             case 'video_cant_unhide':
                 this._moderator.video_cant_unhide = data.status;
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
                 if (this._moderator.video_cant_unhide) hide(tabVirtualBackgroundBtn);
+                updateDevicesNavLabel();
                 rc.roomMessage('video_cant_unhide', data.status);
                 break;
             case 'screen_cant_share':
