@@ -2285,30 +2285,43 @@ class RoomClient {
     async startLocalMedia() {
         console.log('08 ----> START LOCAL MEDIA...');
         const audioProducerExist = this.producerExist(mediaType.audio);
-        if (this.isAudioAllowed) {
-            if (!audioProducerExist) {
-                await this.produce(mediaType.audio, microphoneSelect.value);
-                console.log('09 ----> START AUDIO MEDIA');
-            }
-            if (this._moderator.audio_start_muted) {
-                await this.sleep(300);
-                await this.pauseAudioProducer();
-            }
-        } else {
-            if (isEnumerateAudioDevices && !audioProducerExist) {
-                await this.produce(mediaType.audio, microphoneSelect.value);
-                console.log('09 ----> START AUDIO MEDIA');
-                await this.sleep(300);
-                await this.pauseAudioProducer();
+        // A busy/unavailable device must not abort the rest of the local media startup
+        try {
+            if (this.isAudioAllowed) {
+                if (!audioProducerExist) {
+                    await this.produce(mediaType.audio, microphoneSelect.value);
+                    console.log('09 ----> START AUDIO MEDIA');
+                }
+                if (this._moderator.audio_start_muted) {
+                    await this.sleep(300);
+                    await this.pauseAudioProducer();
+                }
             } else {
-                setColor(startAudioButton, 'red');
+                if (isEnumerateAudioDevices && !audioProducerExist) {
+                    await this.produce(mediaType.audio, microphoneSelect.value);
+                    console.log('09 ----> START AUDIO MEDIA');
+                    await this.sleep(300);
+                    await this.pauseAudioProducer();
+                } else {
+                    setColor(startAudioButton, 'red');
+                }
             }
+        } catch (err) {
+            console.error('09 ----> START AUDIO MEDIA FAILED', err);
+            setColor(startAudioButton, 'red');
         }
 
+        let videoStarted = false;
         if (this.isVideoAllowed && !this._moderator.video_start_hidden) {
-            await this.produce(mediaType.video, videoSelect.value);
-            console.log('10 ----> START VIDEO MEDIA');
-        } else {
+            try {
+                await this.produce(mediaType.video, videoSelect.value);
+                videoStarted = true;
+                console.log('10 ----> START VIDEO MEDIA');
+            } catch (err) {
+                console.error('10 ----> START VIDEO MEDIA FAILED', err);
+            }
+        }
+        if (!videoStarted) {
             setColor(startVideoButton, 'red');
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
@@ -2622,7 +2635,15 @@ class RoomClient {
                 if (audioProcessor && this.RNNoiseProcessor === audioProcessor) this.disableRNNoiseSuppression();
                 microphoneStream?.getAudioTracks().forEach((track) => track.stop());
                 if (audioRequest !== this.microphoneRequest) return;
+                // Device busy/unavailable: re-enable the buttons so the user can pick another mic and retry
+                this.peer_info.peer_audio = false;
+                setAudioButtonsDisabled(false);
             }
+            if (video) {
+                this.peer_info.peer_video = false;
+                setVideoButtonsDisabled(false);
+            }
+            if (screen) this.peer_info.peer_screen = false;
             console.error('Produce error:', err);
             handleMediaError(type, err);
         }
