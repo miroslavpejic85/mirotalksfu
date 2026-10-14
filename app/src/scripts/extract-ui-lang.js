@@ -171,6 +171,11 @@ function scanJs(file) {
         add('tooltips', unescapeJs(m[4]));
     }
 
+    // Tooltips: virtual background helpers pass the tooltip as an argument to setTippy()
+    // createImage(id, src, '<tooltip>', ...) and setupFileUploadButton(id, src, '<tooltip>', ...)
+    const vbTooltipRe = /\b(?:createImage|setupFileUploadButton)\(\s*[^,]+,\s*[^,]+,\s*(['"])((?:\\.|(?!\1).)*)\1\s*,/g;
+    while ((m = vbTooltipRe.exec(src))) add('tooltips', unescapeJs(m[2]));
+
     // Toasts: userLog(<type>, '<text>', ...) - only plain string literals (skip templates)
     const logRe = /userLog\(\s*[^,]+?,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
     while ((m = logRe.exec(src))) add('toasts', unescapeJs(m[2]));

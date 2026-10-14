@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.22
+ * @version 2.6.23
  *
  */
 
@@ -2714,7 +2714,7 @@ class RoomClient {
         createImage(
             'cleanVbImg',
             image.user,
-            'Remove virtual background',
+            'Original video (no virtual background)',
             'cleanVb',
             (e) => {
                 setSelectedVb(e.currentTarget);
