@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <title>Noise suppression</title>
+    <circle cx="64" cy="64" r="54" />
+    <path d="M34 64v0M49 50v28M64 36v56M79 50v28M94 64v0" />
+</svg>

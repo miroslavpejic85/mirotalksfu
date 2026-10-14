@@ -194,6 +194,19 @@ describe('test-ServerAPI', () => {
             tokenStub.restore();
         });
 
+        it('should add noiseSuppression only when provided', () => {
+            const ServerApi = proxyquire('../app/src/ServerApi', {
+                uuid: { v4: sinon.stub().returns('room1') },
+            });
+            serverApi = new ServerApi(host, authorization);
+
+            serverApi
+                .getJoinURL({ room: 'room1', noiseSuppression: false })
+                .should.containEql('&noiseSuppression=false');
+            serverApi.getJoinURL({ room: 'room1', noiseSuppression: '1' }).should.containEql('&noiseSuppression=1');
+            serverApi.getJoinURL({ room: 'room1' }).should.not.containEql('noiseSuppression');
+        });
+
         it('should use default values when data is not provided', () => {
             const randomStub = sinon.stub().returns('123456');
             const uuidV4Stub = sinon.stub().returns('room1');

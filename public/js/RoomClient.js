@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.25
+ * @version 2.6.26
  *
  */
 
@@ -127,6 +127,7 @@ const image = {
     about: '../images/mirotalk-logo.gif',
     avatar: '../images/mirotalksfu-logo.png',
     audio: '../images/audio.gif',
+    noiseSuppression: '../images/noise-suppression.svg',
     rec: '../images/rec.png',
     recording: '../images/recording.png',
     delete: '../images/delete.png',
@@ -335,6 +336,7 @@ class RoomClient {
             video_start_privacy: false,
             audio_start_muted: false,
             video_start_hidden: false,
+            noise_suppression_start_off: false,
             audio_cant_unmute: false,
             video_cant_unhide: false,
             screen_cant_share: false,
@@ -914,6 +916,9 @@ class RoomClient {
                     if (!this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                         this.userLog('warning', 'The Moderator disabled your video', 'top-end');
                     }
+                }
+                if (this._moderator.noise_suppression_start_off) {
+                    this.applyPeerNoiseSuppression(false, 'The Moderator starts your noise suppression off');
                 }
                 //
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
@@ -11052,6 +11057,9 @@ class RoomClient {
             case 'video_start_hidden':
                 notifySwitch(`${icons.moderator} Moderator: everyone starts hidden ${status}`);
                 break;
+            case 'noise_suppression_start_off':
+                notifySwitch(`${icons.moderator} Moderator: everyone starts without noise suppression ${status}`);
+                break;
             case 'audio_cant_unmute':
                 notifySwitch(`${icons.moderator} Moderator: everyone can't unmute themselves ${status}`);
                 break;
@@ -12843,11 +12851,39 @@ class RoomClient {
                         );
                     }
                     break;
+                case 'noiseOn':
+                case 'noiseOff':
+                    if (peerActionAllowed) {
+                        const enabled = action === 'noiseOn';
+                        this.applyPeerNoiseSuppression(
+                            enabled,
+                            `${from_peer_name} has ${enabled ? 'enabled' : 'disabled'} your noise suppression`
+                        );
+                    }
+                    break;
+                case 'noiseToggle':
+                    if (peerActionAllowed) {
+                        const enabled = !localStorageSettings.mic_noise_suppression;
+                        this.applyPeerNoiseSuppression(
+                            enabled,
+                            `${from_peer_name} has ${enabled ? 'enabled' : 'disabled'} your noise suppression`
+                        );
+                    }
+                    break;
                 default:
                     break;
                 //...
             }
         }
+    }
+
+    // Presenter-set state: not marked as the user's own choice, participants can still change it
+    applyPeerNoiseSuppression(enabled, message) {
+        if (!BUTTONS.settings.customNoiseSuppression || !this.isRNNoiseSupported) return;
+        localStorageSettings.mic_noise_suppression = enabled;
+        if (switchNoiseSuppression) switchNoiseSuppression.checked = enabled;
+        this.RNNoiseProcessor?.setNoiseSuppression(enabled);
+        this.userLog(enabled ? 'success' : 'warning', message, 'top-end', 6000);
     }
 
     peerMediaStartConfirm(type, imageUrl, title, text) {
@@ -13111,6 +13147,48 @@ class RoomClient {
                         if (muteHideStopConfirmed)
                             this.peerActionProgress(action, 'In progress, wait...', 2000, 'refresh');
                     });
+                break;
+            case 'noiseOn':
+            case 'noiseOff':
+                const noiseEnabled = action === 'noiseOn';
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    imageUrl: image.noiseSuppression,
+                    title: noiseEnabled
+                        ? 'Enable noise suppression for everyone except yourself?'
+                        : 'Disable noise suppression for everyone except yourself?',
+                    text: 'Participants can still change it from their audio settings',
+                    showCancelButton: true,
+                    confirmButtonText: noiseEnabled ? 'Enable' : 'Disable',
+                    cancelButtonText: 'Cancel',
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.socket.emit('peerAction', data);
+                        this.userLog('success', `Noise suppression ${noiseEnabled ? 'enabled' : 'disabled'} for all`);
+                    }
+                });
+                break;
+            case 'noiseToggle':
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    imageUrl: image.noiseSuppression,
+                    title: 'Toggle noise suppression for the current participant?',
+                    text: 'The participant can still change it from their audio settings',
+                    showCancelButton: true,
+                    confirmButtonText: 'Toggle',
+                    cancelButtonText: 'Cancel',
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.socket.emit('peerAction', data);
+                        this.userLog('success', 'Noise suppression toggled for the participant');
+                    }
+                });
                 break;
             default:
                 break;
@@ -13399,6 +13477,11 @@ class RoomClient {
             case 'video_start_hidden':
                 this._moderator.video_start_hidden = data.status;
                 if (isPresenter) rc.roomMessage('video_start_hidden', data.status);
+                break;
+            case 'noise_suppression_start_off':
+                // Policy flag only: applied when someone joins, current peers use the "all participants" action
+                this._moderator.noise_suppression_start_off = data.status;
+                if (isPresenter) rc.roomMessage('noise_suppression_start_off', data.status);
                 break;
             case 'audio_cant_unmute':
                 this._moderator.audio_cant_unmute = data.status;

@@ -15,6 +15,15 @@ describe('test-Room', () => {
         room._moderator.screen_annotations_cant_draw.should.equal(true);
     });
 
+    it('persists the start-without-noise-suppression moderation for late joiners', () => {
+        const room = Object.create(Room.prototype);
+        room._moderator = { noise_suppression_start_off: false };
+
+        room.updateRoomModerator({ type: 'noise_suppression_start_off', status: true });
+
+        room._moderator.noise_suppression_start_off.should.equal(true);
+    });
+
     it('includes persistent annotations with an existing screen producer', () => {
         const room = Object.create(Room.prototype);
         const textAnnotation = {

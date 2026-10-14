@@ -399,4 +399,47 @@ describe('RoomClient RNNoise lifecycle', () => {
         assert.equal(raw.getAudioTracks()[0].readyState, 'ended');
         assert.equal(client.producerTransport.produce.called, false);
     });
+
+    it('applies a presenter noise suppression action without marking it as the user choice', async () => {
+        const { client, context, processor } = createRoomEnvironment();
+        context.userLog = sinon.spy();
+        processor.setNoiseSuppression = sinon.spy();
+        client.RNNoiseProcessor = processor;
+        client.userLog = context.userLog;
+        context.localStorageSettings.mic_noise_suppression_user_set = false;
+
+        await client.peerAction('Host', 'all', 'noiseOff', false, true);
+        assert.equal(processor.setNoiseSuppression.calledOnceWithExactly(false), true);
+        assert.equal(context.localStorageSettings.mic_noise_suppression, false);
+        assert.equal(context.localStorageSettings.mic_noise_suppression_user_set, false);
+        assert.equal(context.switchNoiseSuppression.checked, false);
+
+        await client.peerAction('Host', 'all', 'noiseOn', false, true);
+        assert.equal(processor.setNoiseSuppression.lastCall.args[0], true);
+        assert.equal(context.localStorageSettings.mic_noise_suppression, true);
+    });
+
+    it('toggles noise suppression for a single participant on a presenter action', async () => {
+        const { client, context, processor } = createRoomEnvironment();
+        processor.setNoiseSuppression = sinon.spy();
+        client.RNNoiseProcessor = processor;
+        client.userLog = sinon.spy();
+        client.peer_id = 'me';
+
+        await client.peerAction('Host', 'me', 'noiseToggle', false, false);
+        assert.equal(context.localStorageSettings.mic_noise_suppression, false);
+        await client.peerAction('Host', 'me', 'noiseToggle', false, false);
+        assert.equal(context.localStorageSettings.mic_noise_suppression, true);
+        await client.peerAction('Host', 'someone-else', 'noiseToggle', false, false);
+        assert.equal(processor.setNoiseSuppression.callCount, 2);
+    });
+
+    it('ignores presenter noise suppression actions when RNNoise is unavailable', async () => {
+        const { client, context } = createRoomEnvironment();
+        client.userLog = sinon.spy();
+        client.isRNNoiseSupported = false;
+        await client.peerAction('Host', 'all', 'noiseOff', false, true);
+        assert.equal(context.localStorageSettings.mic_noise_suppression, true);
+        assert.equal(client.userLog.called, false);
+    });
 });

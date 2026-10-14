@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.25
+ * @version 2.6.26
  *
  */
 
@@ -76,6 +76,8 @@ const _PEER = {
     videoOff: '<i class="fas fa-video-slash red"></i>',
     screenOn: '<i class="fas fa-desktop"></i>',
     screenOff: '<i class="fas fa-desktop red"></i>',
+    noiseSuppressionOn: '<i class="fas fa-ear-listen"></i>',
+    noiseSuppressionOff: '<i class="fas fa-ear-listen red"></i>',
     raiseHand: '<i style="color: #FFD700;" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
     acceptPeer: '<i class="fas fa-check"></i>',
@@ -1139,6 +1141,22 @@ function getChat() {
     return chat;
 }
 
+// Priority: URL param (?noiseSuppression=0|1), then the user's own saved choice, then the server default
+function applyNoiseSuppressionDefault() {
+    let enabled;
+    const queryValue = getQueryParam('noiseSuppression');
+    if (queryValue) {
+        const value = queryValue.toLowerCase();
+        enabled = value === '1' || value === 'true';
+    } else if (!localStorageSettings.mic_noise_suppression_user_set) {
+        enabled = BUTTONS.settings.customNoiseSuppressionDefault !== false;
+    } else {
+        return;
+    }
+    localStorageSettings.mic_noise_suppression = enabled;
+    console.log('Noise suppression default', { enabled });
+}
+
 function getHideMeActive() {
     let hide = getQueryParam('hide');
     let queryHideMe = false;
@@ -1436,6 +1454,8 @@ async function whoAreYou() {
     } catch (error) {
         console.error('04 ----> AXIOS GET CONFIG ERROR', error.message);
     }
+
+    applyNoiseSuppressionDefault();
 
     if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
         BUTTONS.main.startScreenButton && show(initStartScreenButton);
@@ -2191,6 +2211,7 @@ function roomIsReady() {
     updateJoinLockButtons();
     BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
     !BUTTONS.settings.customNoiseSuppression && hide(noiseSuppressionButton);
+    !BUTTONS.settings.customNoiseSuppression && hide(everyoneNoiseSuppressionBtn);
     BUTTONS.settings.tabNotificationsBtn && show(tabNotificationsBtn);
     (BUTTONS.settings.tabSipPhoneBtn !== undefined ? BUTTONS.settings.tabSipPhoneBtn : true) && show(tabSipPhoneBtn);
     (BUTTONS.settings.tabNetworkBtn !== undefined ? BUTTONS.settings.tabNetworkBtn : true) && show(tabNetworkBtn);
@@ -3944,6 +3965,7 @@ function handleSelects() {
     switchNoiseSuppression.onchange = (e) => {
         const enabled = e.currentTarget.checked;
         localStorageSettings.mic_noise_suppression = enabled;
+        localStorageSettings.mic_noise_suppression_user_set = true;
         lS.setSettings(localStorageSettings);
         if (rc.RNNoiseProcessor) rc.RNNoiseProcessor.setNoiseSuppression(enabled);
         userLog(enabled ? 'success' : 'info', `Noise suppression ${enabled ? 'enabled' : 'disabled'}`, 'top-end', 1800);
@@ -4206,6 +4228,14 @@ function handleSelects() {
         rc.updateRoomModerator({ type: 'video_start_hidden', status: videoStartHidden });
         rc.roomMessage('video_start_hidden', videoStartHidden);
         localStorageSettings.moderator_video_start_hidden = videoStartHidden;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
+    switchEveryoneNoiseSuppressionOff.onchange = (e) => {
+        const noiseSuppressionStartOff = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'noise_suppression_start_off', status: noiseSuppressionStartOff });
+        rc.roomMessage('noise_suppression_start_off', noiseSuppressionStartOff);
+        localStorageSettings.moderator_noise_suppression_start_off = noiseSuppressionStartOff;
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
@@ -8064,6 +8094,25 @@ function getParticipantsList(peers) {
             })
         );
 
+        if (BUTTONS.settings.customNoiseSuppression) {
+            publicMenuItems += renderParticipantMenuItem(
+                renderParticipantActionButton({
+                    buttonId: 'noiseOnAllParticipantsButton',
+                    onClick: `rc.peerAction('me','${socket.id}','noiseOn',true,true)`,
+                    iconHtml: _PEER.noiseSuppressionOn,
+                    label: 'Enable noise suppression for all',
+                })
+            );
+            publicMenuItems += renderParticipantMenuItem(
+                renderParticipantActionButton({
+                    buttonId: 'noiseOffAllParticipantsButton',
+                    onClick: `rc.peerAction('me','${socket.id}','noiseOff',true,true)`,
+                    iconHtml: _PEER.noiseSuppressionOff,
+                    label: 'Disable noise suppression for all',
+                })
+            );
+        }
+
         publicMenuItems += renderParticipantMenuGroup('Share');
 
         if (BUTTONS.participantsList.sendFileAllButton) {
@@ -8255,6 +8304,16 @@ function getParticipantsList(peers) {
                         label: 'Toggle screen',
                     })
                 );
+                if (BUTTONS.settings.customNoiseSuppression) {
+                    menuItems += renderParticipantMenuItem(
+                        renderParticipantActionButton({
+                            buttonId: `${peer_id}___pNoiseToggle`,
+                            onClick: `rc.peerAction('me','${peer_id}','noiseToggle')`,
+                            iconHtml: _PEER.noiseSuppressionOn,
+                            label: 'Toggle noise suppression',
+                        })
+                    );
+                }
 
                 menuItems += renderParticipantMenuGroup('Share');
 
@@ -9492,7 +9551,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.25',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.26',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

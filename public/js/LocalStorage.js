@@ -24,6 +24,7 @@ class LocalStorage {
             moderator_video_start_privacy: false, // Everyone starts video in privacy mode
             moderator_audio_start_muted: false, // Everyone starts muted in the room
             moderator_video_start_hidden: false, // Everyone starts hidden in the room
+            moderator_noise_suppression_start_off: false, // Everyone starts with noise suppression off
             moderator_audio_cant_unmute: false, // Everyone can't unmute themselves
             moderator_video_cant_unhide: false, // Everyone can't unhide themselves
             moderator_screen_cant_share: false, // Everyone can't share screen
@@ -37,6 +38,7 @@ class LocalStorage {
             moderator_disconnect_all_on_leave: false, // Disconnect all participants on leave room
             dominant_speaker_focus: false, // Focus on dominant speaker
             mic_noise_suppression: true, // Noise suppression using RNNoise
+            mic_noise_suppression_user_set: false, // user explicitly toggled it, so the server default no longer applies
             speaker_volume: 100, // master output volume 0-100
             video_fps: 0, // default 1280x768 30fps
             aspect_ratio: 0, // default (adaptive)

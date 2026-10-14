@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.25 - Configuration File
+ * MiroTalk SFU v2.6.26 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1516,6 +1516,7 @@ module.exports = {
                 keyboardShortcuts: process.env.SHOW_KEYBOARD_SHORTCUTS !== 'false',
                 virtualBackground: process.env.SHOW_VIRTUAL_BACKGROUND !== 'false',
                 customNoiseSuppression: process.env.CUSTOM_NOISE_SUPPRESSION_ENABLED !== 'false',
+                customNoiseSuppressionDefault: process.env.CUSTOM_NOISE_SUPPRESSION_DEFAULT !== 'false', // initial state, users can still toggle it
             },
 
             // Video controls for producer (local user)

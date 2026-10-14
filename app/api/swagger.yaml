@@ -219,6 +219,9 @@ definitions:
             duration:
                 type: string
                 default: 'unlimited'
+            noiseSuppression:
+                type: boolean
+                description: Optional initial noise suppression state, omit to use the server default
             token:
                 $ref: '#/definitions/TokenRequest'
     TokenRequest:

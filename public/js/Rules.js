@@ -65,6 +65,7 @@ let BUTTONS = {
         keyboardShortcuts: true,
         virtualBackground: true,
         customNoiseSuppression: true, // use RNNoise else WebRTC built-in
+        customNoiseSuppressionDefault: true, // initial RNNoise state for users without a saved choice
     },
     producerVideo: {
         videoPictureInPicture: true,
@@ -316,6 +317,7 @@ function loadModeratorData() {
     switchEveryonePrivacy.checked = localStorageSettings.moderator_video_start_privacy;
     switchEveryoneMute.checked = localStorageSettings.moderator_audio_start_muted;
     switchEveryoneHidden.checked = localStorageSettings.moderator_video_start_hidden;
+    switchEveryoneNoiseSuppressionOff.checked = localStorageSettings.moderator_noise_suppression_start_off;
     switchEveryoneCantUnmute.checked = localStorageSettings.moderator_audio_cant_unmute;
     switchEveryoneCantUnhide.checked = localStorageSettings.moderator_video_cant_unhide;
     switchEveryoneCantShareScreen.checked = localStorageSettings.moderator_screen_cant_share;
@@ -340,6 +342,7 @@ function loadModeratorDataFromRoom() {
     switchEveryonePrivacy.checked = !!moderator.video_start_privacy;
     switchEveryoneMute.checked = !!moderator.audio_start_muted;
     switchEveryoneHidden.checked = !!moderator.video_start_hidden;
+    switchEveryoneNoiseSuppressionOff.checked = !!moderator.noise_suppression_start_off;
     switchEveryoneCantUnmute.checked = !!moderator.audio_cant_unmute;
     switchEveryoneCantUnhide.checked = !!moderator.video_cant_unhide;
     switchEveryoneCantShareScreen.checked = !!moderator.screen_cant_share;
@@ -360,6 +363,7 @@ function updateModeratorSwitchUI(type, status) {
         video_start_privacy: switchEveryonePrivacy,
         audio_start_muted: switchEveryoneMute,
         video_start_hidden: switchEveryoneHidden,
+        noise_suppression_start_off: switchEveryoneNoiseSuppressionOff,
         audio_cant_unmute: switchEveryoneCantUnmute,
         video_cant_unhide: switchEveryoneCantUnhide,
         screen_cant_share: switchEveryoneCantShareScreen,
@@ -380,6 +384,7 @@ function getModeratorData() {
         video_start_privacy: switchEveryonePrivacy.checked,
         audio_start_muted: switchEveryoneMute.checked,
         video_start_hidden: switchEveryoneHidden.checked,
+        noise_suppression_start_off: switchEveryoneNoiseSuppressionOff.checked,
         audio_cant_unmute: switchEveryoneCantUnmute.checked,
         video_cant_unhide: switchEveryoneCantUnhide.checked,
         screen_cant_share: switchEveryoneCantShareScreen.checked,

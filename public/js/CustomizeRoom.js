@@ -4,7 +4,7 @@
  * Custom Room page: build /join URL from form settings.
  *
  * Query params used by client.js:
- * - room, roomPassword, name, avatar, audio, video, screen, chat, hide, notify, duration, token
+ * - room, roomPassword, name, avatar, audio, video, screen, chat, hide, notify, duration, token, noiseSuppression (optional)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tokenEl = document.getElementById('token');
 
     const durationEl = document.getElementById('duration');
+    const noiseSuppressionEl = document.getElementById('noiseSuppression');
 
     const audioEl = document.getElementById('audio');
     const videoEl = document.getElementById('video');
@@ -117,6 +118,12 @@ document.addEventListener('DOMContentLoaded', () => {
         url.searchParams.set('notify', boolToFlag(!!notifyEl?.checked));
 
         url.searchParams.set('duration', duration);
+
+        // Empty means use the server default
+        const noiseSuppression = noiseSuppressionEl?.value;
+        if (noiseSuppression === '0' || noiseSuppression === '1') {
+            url.searchParams.set('noiseSuppression', noiseSuppression);
+        }
 
         if (token) url.searchParams.set('token', token);
 
@@ -245,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePreview();
 
     const inputs = [roomEl, nameEl, avatarEl, tokenEl, audioEl, videoEl, screenEl, chatEl, hideEl, notifyEl];
-    inputs.push(roomPasswordEl, durationEl);
+    inputs.push(roomPasswordEl, durationEl, noiseSuppressionEl);
     inputs.forEach((el) => {
         if (!el) return;
         el.addEventListener('input', updatePreview);

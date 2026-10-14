@@ -59,6 +59,7 @@ module.exports = class Room {
             video_start_privacy: false,
             audio_start_muted: false,
             video_start_hidden: false,
+            noise_suppression_start_off: false,
             audio_cant_unmute: false,
             video_cant_unhide: false,
             screen_cant_share: false,
@@ -468,6 +469,9 @@ module.exports = class Room {
                 break;
             case 'video_start_hidden':
                 this._moderator.video_start_hidden = data.status;
+                break;
+            case 'noise_suppression_start_off':
+                this._moderator.noise_suppression_start_off = data.status;
                 break;
             case 'audio_cant_unmute':
                 this._moderator.audio_cant_unmute = data.status;

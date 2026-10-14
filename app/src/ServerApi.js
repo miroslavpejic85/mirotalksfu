@@ -106,6 +106,7 @@ module.exports = class ServerApi {
     getJoinURL(data) {
         // Get data
         const { room, roomPassword, name, avatar, audio, video, screen, chat, hide, notify, duration, token } = data;
+        const { noiseSuppression } = data;
 
         const roomValue = room || uuidV4();
         const roomPasswordValue = roomPassword || false;
@@ -118,6 +119,11 @@ module.exports = class ServerApi {
         const hideValue = hide || false;
         const notifyValue = notify || false;
         const durationValue = duration || 'unlimited';
+        // Optional: omitted means the server default applies
+        const noiseSuppressionParam =
+            noiseSuppression === undefined || noiseSuppression === null || noiseSuppression === ''
+                ? ''
+                : `&noiseSuppression=${encodeURIComponent(noiseSuppression)}`;
         const jwtToken = token ? '&token=' + this.getToken(token) : '';
 
         const joinURL =
@@ -135,6 +141,7 @@ module.exports = class ServerApi {
             `&hide=${hideValue}` +
             `&notify=${notifyValue}` +
             `&duration=${durationValue}` +
+            noiseSuppressionParam +
             jwtToken;
 
         return joinURL;
