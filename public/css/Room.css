@@ -729,7 +729,7 @@ body {
 }
 
 /*---------------------------
-<= 1024px SCREEN */
+<= 1024px SCREEN, or no camera available (compact stacked card on every screen size) */
 @media screen and (max-width: 1024px) {
     .init-modal-size {
         width: min(520px, calc(100vw - 24px)) !important;
@@ -747,6 +747,26 @@ body {
     .init-user button {
         width: 42px !important;
         height: 42px !important;
+    }
+}
+
+@media screen and (min-width: 1025px) {
+    .init-modal-size:has(.init-user.no-camera) {
+        width: min(520px, calc(100vw - 24px)) !important;
+    }
+    .init-user.no-camera {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    .init-user.no-camera .init-video-container {
+        padding: 0px;
+    }
+    .init-user.no-camera .initComands {
+        justify-content: center;
+    }
+    .init-user.no-camera button {
+        width: 42px;
+        height: 42px;
     }
 }
 

@@ -77,6 +77,7 @@ describe('busy or broken default media devices', () => {
             isEnumerateVideoDevices: false,
             isEnumerateAudioDevices: false,
             hide() {},
+            updateDeviceSettingsVisibility() {},
             getMicrophoneVolumeIndicator: async () => {},
         });
         vm.runInContext(deviceSource, context);
