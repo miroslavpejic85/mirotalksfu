@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.21
+ * @version 2.6.22
  *
  */
 
@@ -9128,15 +9128,21 @@ function showImageSelector() {
         setTippy(imgButton.id, tooltip, 'top');
     }
 
-    function handleFileUpload(file) {
-        if (file && file.type.startsWith('image/')) {
+    async function handleFileUpload(files) {
+        const imageFiles = Array.from(files || []).filter((file) => file?.type?.startsWith('image/'));
+
+        for (const file of imageFiles) {
             const reader = new FileReader();
-            reader.onload = async (e) => {
-                const imgData = e.target.result;
-                await indexedDBHelper.saveImage(imgData);
-                addImageToUI(imgData);
-            };
-            reader.readAsDataURL(file);
+            await new Promise((resolve) => {
+                reader.onload = async (e) => {
+                    const imgData = e.target.result;
+                    await indexedDBHelper.saveImage(imgData);
+                    addImageToUI(imgData);
+                    resolve();
+                };
+                reader.onerror = resolve;
+                reader.readAsDataURL(file);
+            });
         }
     }
 
@@ -9144,9 +9150,10 @@ function showImageSelector() {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
+        fileInput.multiple = true;
         fileInput.style.display = 'none';
-        fileInput.addEventListener('change', (event) => {
-            handleFileUpload(event.target.files[0]);
+        fileInput.addEventListener('change', async (event) => {
+            await handleFileUpload(event.target.files);
         });
 
         setupFileUploadButton('initUploadImg', image.upload, 'Upload your custom image', () => fileInput.click());
@@ -9252,7 +9259,7 @@ function showImageSelector() {
             event.preventDefault();
             grid.classList.remove('drag-over');
             if (event.dataTransfer.files.length > 0) {
-                handleFileUpload(event.dataTransfer.files[0]);
+                handleFileUpload(event.dataTransfer.files);
             }
         });
     });
@@ -9485,7 +9492,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.21',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.22',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
