@@ -815,37 +815,76 @@ async function refreshMyAudioVideoDevices() {
 
 async function refreshMyVideoDevices() {
     if (!isVideoAllowed) return;
-    const initVideoSelectIndex = initVideoSelect ? initVideoSelect.selectedIndex : 0;
-    const videoSelectIndex = videoSelect ? videoSelect.selectedIndex : 0;
+    const selects = [initVideoSelect, videoSelect].filter(Boolean);
+    const previous = selects.map((el) => el.value);
     await initEnumerateVideoDevices();
-    if (initVideoSelect) initVideoSelect.selectedIndex = initVideoSelectIndex;
-    if (videoSelect) videoSelect.selectedIndex = videoSelectIndex;
+    // Restore by deviceId: indexes shift when devices are added/removed (e.g. OBS virtual camera)
+    selects.forEach((el, i) => restoreSelectValue(el, previous[i]));
 }
 
 async function refreshMyAudioDevices() {
     if (!isAudioAllowed) return;
-    const initMicrophoneSelectIndex = initMicrophoneSelect ? initMicrophoneSelect.selectedIndex : 0;
-    const initSpeakerSelectIndex = initSpeakerSelect ? initSpeakerSelect.selectedIndex : 0;
-    const microphoneSelectIndex = microphoneSelect ? microphoneSelect.selectedIndex : 0;
-    const speakerSelectIndex = speakerSelect ? speakerSelect.selectedIndex : 0;
+    const selects = [initMicrophoneSelect, initSpeakerSelect, microphoneSelect, speakerSelect].filter(Boolean);
+    const previous = selects.map((el) => el.value);
     await initEnumerateAudioDevices();
-    if (initMicrophoneSelect) initMicrophoneSelect.selectedIndex = initMicrophoneSelectIndex;
-    if (initSpeakerSelect) initSpeakerSelect.selectedIndex = initSpeakerSelectIndex;
-    if (microphoneSelect) microphoneSelect.selectedIndex = microphoneSelectIndex;
-    if (speakerSelect) speakerSelect.selectedIndex = speakerSelectIndex;
+    // Restore by deviceId: indexes shift when devices are added/removed (e.g. OBS virtual mic)
+    selects.forEach((el, i) => restoreSelectValue(el, previous[i]));
+}
+
+function restoreSelectValue(selectElement, value) {
+    if (!value || !selectOptionByValueExist(selectElement, value)) selectElement.selectedIndex = 0;
+}
+
+async function getUserMediaWithFallback(type) {
+    try {
+        return await navigator.mediaDevices.getUserMedia({ [type]: true });
+    } catch (err) {
+        if (['NotAllowedError', 'PermissionDeniedError', 'SecurityError'].includes(err.name)) {
+            console.warn(`Permission denied for ${type}`, err);
+            return null;
+        }
+        // Default device busy or broken (e.g. held by OBS or another app): try the other devices
+        console.warn(`Default ${type} device not usable [${err.name}], trying other devices`, err);
+        const kind = type === 'audio' ? 'audioinput' : 'videoinput';
+        let devices = [];
+        try {
+            devices = (await navigator.mediaDevices.enumerateDevices()).filter(
+                (d) => d.kind === kind && d.deviceId && !['default', 'communications'].includes(d.deviceId)
+            );
+        } catch (enumErr) {
+            console.warn('enumerateDevices failed', enumErr);
+        }
+        for (const device of devices) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    [type]: { deviceId: { exact: device.deviceId } },
+                });
+                console.log(`Using fallback ${type} device`, device.label);
+                return stream;
+            } catch (deviceErr) {
+                console.warn(`${type} device not usable [${deviceErr.name}]`, device.label);
+            }
+        }
+        return null;
+    }
+}
+
+function selectStreamDevice(stream, selects) {
+    const track = stream.getTracks()[0];
+    const deviceId = track?.getSettings?.().deviceId;
+    if (!deviceId) return;
+    selects.filter(Boolean).forEach((el) => selectOptionByValueExist(el, deviceId));
 }
 
 async function initEnumerateVideoDevices() {
     // allow the video
-    await navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then(async (stream) => {
-            await enumerateVideoDevices(stream);
-            isVideoAllowed = true;
-        })
-        .catch(() => {
-            isVideoAllowed = false;
-        });
+    const stream = await getUserMediaWithFallback('video');
+    if (!stream) {
+        isVideoAllowed = false;
+        return;
+    }
+    await enumerateVideoDevices(stream);
+    isVideoAllowed = true;
 }
 
 async function enumerateVideoDevices(stream) {
@@ -870,6 +909,7 @@ async function enumerateVideoDevices(stream) {
             })
         )
         .then(async () => {
+            selectStreamDevice(stream, [videoSelect, initVideoSelect]);
             await stopTracks(stream);
             isEnumerateVideoDevices = true;
         });
@@ -877,16 +917,14 @@ async function enumerateVideoDevices(stream) {
 
 async function initEnumerateAudioDevices() {
     // allow the audio
-    await navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then(async (stream) => {
-            await enumerateAudioDevices(stream);
-            await getMicrophoneVolumeIndicator(stream);
-            isAudioAllowed = true;
-        })
-        .catch(() => {
-            isAudioAllowed = false;
-        });
+    const stream = await getUserMediaWithFallback('audio');
+    if (!stream) {
+        isAudioAllowed = false;
+        return;
+    }
+    await enumerateAudioDevices(stream);
+    await getMicrophoneVolumeIndicator(stream);
+    isAudioAllowed = true;
 }
 
 async function enumerateAudioDevices(stream) {
@@ -918,6 +956,7 @@ async function enumerateAudioDevices(stream) {
             })
         )
         .then(async () => {
+            selectStreamDevice(stream, [microphoneSelect, initMicrophoneSelect]);
             await stopTracks(stream);
             isEnumerateAudioDevices = true;
             speakerSelect.disabled = !sinkId;
@@ -942,13 +981,13 @@ async function addChild(device, els) {
         option.value = device.deviceId;
         switch (kind) {
             case 'videoinput':
-                option.innerText = `📹 ` + device.label || `📹 camera ${el.length + 1}`;
+                option.innerText = `📹 ` + (device.label || `camera ${el.length + 1}`);
                 break;
             case 'audioinput':
-                option.innerText = `🎤 ` + device.label || `🎤 microphone ${el.length + 1}`;
+                option.innerText = `🎤 ` + (device.label || `microphone ${el.length + 1}`);
                 break;
             case 'audiooutput':
-                option.innerText = `🔈 ` + device.label || `🔈 speaker ${el.length + 1}`;
+                option.innerText = `🔈 ` + (device.label || `speaker ${el.length + 1}`);
                 break;
             default:
                 break;

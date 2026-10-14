@@ -2290,30 +2290,42 @@ class RoomClient {
     async startLocalMedia() {
         console.log('08 ----> START LOCAL MEDIA...');
         const audioProducerExist = this.producerExist(mediaType.audio);
+        // produce() handles its own errors and returns the producer only on success,
+        // so a busy/unavailable device is detected by its return value
         if (this.isAudioAllowed) {
+            let audioStarted = audioProducerExist;
             if (!audioProducerExist) {
-                await this.produce(mediaType.audio, microphoneSelect.value);
-                console.log('09 ----> START AUDIO MEDIA');
+                audioStarted = !!(await this.produce(mediaType.audio, microphoneSelect.value));
+                console.log(audioStarted ? '09 ----> START AUDIO MEDIA' : '09 ----> START AUDIO MEDIA FAILED');
             }
-            if (this._moderator.audio_start_muted) {
+            if (!audioStarted) {
+                setColor(startAudioButton, 'red');
+            } else if (this._moderator.audio_start_muted) {
                 await this.sleep(300);
                 await this.pauseAudioProducer();
             }
         } else {
             if (isEnumerateAudioDevices && !audioProducerExist) {
-                await this.produce(mediaType.audio, microphoneSelect.value);
-                console.log('09 ----> START AUDIO MEDIA');
-                await this.sleep(300);
-                await this.pauseAudioProducer();
+                const audioStarted = !!(await this.produce(mediaType.audio, microphoneSelect.value));
+                if (audioStarted) {
+                    console.log('09 ----> START AUDIO MEDIA');
+                    await this.sleep(300);
+                    await this.pauseAudioProducer();
+                } else {
+                    console.log('09 ----> START AUDIO MEDIA FAILED');
+                    setColor(startAudioButton, 'red');
+                }
             } else {
                 setColor(startAudioButton, 'red');
             }
         }
 
+        let videoStarted = false;
         if (this.isVideoAllowed && !this._moderator.video_start_hidden) {
-            await this.produce(mediaType.video, videoSelect.value);
-            console.log('10 ----> START VIDEO MEDIA');
-        } else {
+            videoStarted = !!(await this.produce(mediaType.video, videoSelect.value));
+            console.log(videoStarted ? '10 ----> START VIDEO MEDIA' : '10 ----> START VIDEO MEDIA FAILED');
+        }
+        if (!videoStarted) {
             setColor(startVideoButton, 'red');
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
@@ -2627,7 +2639,16 @@ class RoomClient {
                 if (audioProcessor && this.RNNoiseProcessor === audioProcessor) this.disableRNNoiseSuppression();
                 microphoneStream?.getAudioTracks().forEach((track) => track.stop());
                 if (audioRequest !== this.microphoneRequest) return;
+                // Device busy/unavailable: re-enable the buttons so the user can pick another mic and retry
+                this.peer_info.peer_audio = false;
+                setAudioButtonsDisabled(false);
             }
+            if (video) {
+                // Only reset if the producer was never created (a later setup step may have thrown)
+                if (!this.producerExist(type)) this.peer_info.peer_video = false;
+                setVideoButtonsDisabled(false);
+            }
+            if (screen) this.peer_info.peer_screen = false;
             console.error('Produce error:', err);
             handleMediaError(type, err);
         }
