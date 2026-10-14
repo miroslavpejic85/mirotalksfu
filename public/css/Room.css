@@ -803,6 +803,21 @@ body {
     transition: box-shadow 0.2s ease-in-out;
 }
 
+/* Pre-join background action icons kept on a single row */
+#initImageGridControls {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+    max-height: none;
+    overflow: visible;
+}
+
+#initImageGridControls img {
+    max-width: 100%;
+    height: 36px;
+    object-fit: contain;
+}
+
 /* Larger preview in the dedicated Virtual Background settings tab */
 #tabVirtualBackground #imageGridVideo {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
