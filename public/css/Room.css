@@ -818,6 +818,17 @@ body {
     object-fit: contain;
 }
 
+/* Bigger action icons on desktop, mobile keeps the compact size */
+@media screen and (min-width: 1025px) {
+    #initImageGridControls {
+        gap: 10px;
+        padding: 10px 6px;
+    }
+    #initImageGridControls img {
+        height: 52px;
+    }
+}
+
 /* Larger preview in the dedicated Virtual Background settings tab */
 #tabVirtualBackground #imageGridVideo {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
