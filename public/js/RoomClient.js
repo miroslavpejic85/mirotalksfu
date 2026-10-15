@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.31
+ * @version 2.6.32
  *
  */
 
@@ -19,6 +19,8 @@ const cfg = {
 
 // Gravatar URL -> initials avatar, used when the email has no Gravatar (see genGravatar)
 const gravatarFallbacks = new Map();
+
+const PANEL_SLIDE_OUT_MS = 200; // keep in sync with .panel-slide-out in Room.css
 
 // Lazily installed on the first Gravatar URL, so loading this file has no side effects on document
 function installGravatarFallback() {
@@ -437,6 +439,7 @@ class RoomClient {
         this.participantViewRestoreTimer = null;
         this.isFollowMeActive = false;
         this.isChatPinned = false;
+        this.chatSlideOutTimer = null;
         this.isChatMaximized = false;
         this.isToggleUnreadMsg = false;
         this.isToggleRaiseHand = false;
@@ -6736,7 +6739,13 @@ class RoomClient {
     async toggleChat(fromParticipants = false) {
         if (!fromParticipants && !BUTTONS.main.chatButton) return;
         const chatRoom = this.getId('chatRoom');
-        chatRoom.classList.toggle('show');
+        // a pinned chat slides away while the video grid glides back; it is hidden when done
+        const slideOut = this.isChatOpen && this.isChatPinned && !this.isMobileDevice && !prefersReducedMotion();
+        if (this.cancelChatSlideOut()) {
+            chatRoom.classList.add('show'); // re-opened while closing: it is still visible
+        } else if (!slideOut) {
+            chatRoom.classList.toggle('show');
+        }
         if (!this.isChatOpen) {
             await getRoomParticipants();
             hide(chatMinButton);
@@ -6767,7 +6776,7 @@ class RoomClient {
         this.syncChatToolbarButtons();
         this.updateUnreadCountBadge(this.chatPeerId || 'all');
 
-        if (this.isChatPinned) this.chatUnpin();
+        if (this.isChatPinned) this.chatUnpin(slideOut);
 
         if (!this.isMobileDevice && this.isChatOpen && this.canBePinned() && isChatPinEnabled) {
             this.toggleChatPin();
@@ -6926,6 +6935,7 @@ class RoomClient {
     }
 
     chatPin() {
+        animateVideoLayout();
         if (!this.isVideoPinned) {
             this.videoMediaContainerPin();
         }
@@ -6941,21 +6951,52 @@ class RoomClient {
         if (this.isPlistOpen()) this.toggleShowParticipants();
     }
 
-    chatUnpin() {
+    chatUnpin(slideOut = false) {
+        animateVideoLayout();
         if (!this.isVideoPinned) {
             this.videoMediaContainerUnpin();
         }
-        chatRoom.classList.remove('panel-slide-in');
-        document.documentElement.style.setProperty('--msger-width', '800px');
-        document.documentElement.style.setProperty('--msger-height', '700px');
-        hide(chatMinButton);
-        BUTTONS.chat.chatMaxButton && show(chatMaxButton);
-        this.chatCenter();
         this.isChatPinned = false;
         this.refreshVideoPinLayout();
         this.setChatControlState(chatTogglePin, false);
         this.resizeVideoMenuBar();
         resizeVideoMedia();
+        if (slideOut) {
+            // keep the pinned look while the panel slides away, then finish (and hide it)
+            chatRoom.classList.remove('panel-slide-in');
+            chatRoom.classList.add('panel-slide-out');
+            this.chatSlideOutTimer = setTimeout(() => {
+                this.chatSlideOutTimer = null;
+                this.finishChatUnpin();
+                if (!this.isChatOpen) chatRoom.classList.remove('show');
+            }, PANEL_SLIDE_OUT_MS);
+            return;
+        }
+        this.finishChatUnpin();
+    }
+
+    /**
+     * Cancel a pending chat slide-out (e.g. chat re-opened while it is closing)
+     * @returns {boolean} true if a slide-out was pending
+     */
+    cancelChatSlideOut() {
+        if (!this.chatSlideOutTimer) return false;
+        clearTimeout(this.chatSlideOutTimer);
+        this.chatSlideOutTimer = null;
+        this.finishChatUnpin();
+        return true;
+    }
+
+    /**
+     * Restore the floating (unpinned) chat panel
+     */
+    finishChatUnpin() {
+        chatRoom.classList.remove('panel-slide-in', 'panel-slide-out');
+        document.documentElement.style.setProperty('--msger-width', '800px');
+        document.documentElement.style.setProperty('--msger-height', '700px');
+        hide(chatMinButton);
+        BUTTONS.chat.chatMaxButton && show(chatMaxButton);
+        this.chatCenter();
         if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
         if (!this.isPlistOpen()) this.toggleShowParticipants();
         if (!chatRoom.classList.contains('container')) chatRoom.classList.add('container');
@@ -8252,6 +8293,7 @@ class RoomClient {
     }
 
     pollPin() {
+        animateVideoLayout();
         if (!this.isVideoPinned) {
             this.videoMediaContainerPin();
         }
@@ -8270,6 +8312,7 @@ class RoomClient {
     }
 
     pollUnpin() {
+        animateVideoLayout();
         if (!this.isVideoPinned) {
             this.videoMediaContainerUnpin();
         }
@@ -8360,6 +8403,7 @@ class RoomClient {
     }
 
     breakoutPin() {
+        animateVideoLayout();
         if (!this.isVideoPinned) {
             this.videoMediaContainer.style.top = 0;
             this.videoMediaContainer.style.width = '70%';
@@ -8379,6 +8423,7 @@ class RoomClient {
     }
 
     breakoutUnpin() {
+        animateVideoLayout();
         if (!this.isVideoPinned) {
             this.videoMediaContainerUnpin();
         }
@@ -8891,6 +8936,7 @@ class RoomClient {
     }
 
     editorPin() {
+        animateVideoLayout();
         if (!this.isVideoPinned) {
             this.videoMediaContainer.style.top = 0;
             this.videoMediaContainer.style.width = '70%';
@@ -8907,6 +8953,7 @@ class RoomClient {
     }
 
     editorUnpin() {
+        animateVideoLayout();
         if (!this.isVideoPinned) {
             this.videoMediaContainerUnpin();
         }

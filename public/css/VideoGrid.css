@@ -62,7 +62,7 @@
     border-radius: 14px;
     background: var(--body-bg);
     box-shadow: var(--box-shadow);
-    animation: show 0.4s ease;
+    animation: show 0.24s var(--ease-standard) backwards;
     container-type: inline-size;
     container-name: camera;
 }
@@ -508,7 +508,7 @@ input[type='range'] {
 @keyframes show {
     0% {
         opacity: 0;
-        transform: scale(0.4) translateY(20px);
+        transform: scale(0.88) translateY(10px);
     }
     100% {
         opacity: 1;
@@ -1290,4 +1290,25 @@ input[type='range'] {
 .video-drawing-text-delete:focus-visible {
     background: rgba(255, 82, 82, 0.24);
     color: #fff;
+}
+
+/*--------------------------------------------------------------
+# Smooth layout when a side panel (chat, transcription, polls, editor, breakout) is pinned/unpinned
+# (toggled by animateVideoLayout in VideoGrid.js)
+--------------------------------------------------------------*/
+
+.layout-animating #videoMediaContainer,
+.layout-animating #videoPinMediaContainer {
+    transition:
+        width 0.24s var(--ease-standard),
+        height 0.24s var(--ease-standard),
+        top 0.24s var(--ease-standard),
+        left 0.24s var(--ease-standard),
+        right 0.24s var(--ease-standard),
+        opacity 500ms,
+        background 0.2s;
+}
+
+.layout-animating #bottomButtons {
+    transition: left 0.24s var(--ease-standard);
 }

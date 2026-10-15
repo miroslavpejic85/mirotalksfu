@@ -9328,7 +9328,7 @@ hr {
 --------------------------------------------------------------*/
 @keyframes slideInFromRight {
     from {
-        transform: translateX(110vw);
+        transform: translateX(100%);
         opacity: 0;
     }
     to {
@@ -9337,9 +9337,27 @@ hr {
     }
 }
 
+@keyframes slideOutToRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
 .panel-slide-in {
-    animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+    animation: slideInFromRight 0.26s var(--ease-standard) both !important;
     transition: none !important; /* suppress width/size transitions while slide is playing */
+}
+
+/* Keep the duration in sync with PANEL_SLIDE_OUT_MS in RoomClient.js */
+.panel-slide-out {
+    animation: slideOutToRight 0.2s cubic-bezier(0.4, 0, 1, 1) both !important;
+    transition: none !important;
+    pointer-events: none;
 }
 
 /*--------------------------------------------------------------

@@ -84,6 +84,7 @@ class Transcription {
         this.transcripts = [];
         this.isBgTransparent = false;
         this.isPinned = false;
+        this.slideOutTimer = null;
         this.isHidden = true;
         this.isPersistentMode = true; // Prevent stopping due to extended periods of silence
         this.isPersistent = false;
@@ -260,22 +261,38 @@ class Transcription {
     }
 
     toggle() {
-        if (this.isHidden) {
+        // a pinned panel slides away while the video grid glides back; it is hidden when done
+        const slideOut = !this.isHidden && this.isPinned && !rc.isMobileDevice && !prefersReducedMotion();
+        const reopened = this.cancelSlideOut();
+        if (this.isHidden || reopened) {
             this.center();
             transcriptionRoom.style.display = 'block';
             rc.sound('open');
+            this.isHidden = false;
         } else {
-            transcriptionRoom.style.display = 'none';
+            if (!slideOut) transcriptionRoom.style.display = 'none';
+            this.isHidden = true;
         }
-        this.isHidden = !this.isHidden;
 
-        if (this.isPinned) this.unpinned();
+        if (this.isPinned) this.unpinned(slideOut);
 
         if (!rc.isMobileDevice && !this.isHidden && rc.canBePinned()) {
             this.togglePinUnpin();
         }
 
         resizeTranscriptionRoom();
+    }
+
+    /**
+     * Cancel a pending slide-out (e.g. transcription re-opened while it is closing)
+     * @returns {boolean} true if a slide-out was pending
+     */
+    cancelSlideOut() {
+        if (!this.slideOutTimer) return false;
+        clearTimeout(this.slideOutTimer);
+        this.slideOutTimer = null;
+        this.finishUnpinned();
+        return true;
     }
 
     toggleBg() {
@@ -358,6 +375,7 @@ class Transcription {
     }
 
     pinned() {
+        animateVideoLayout();
         if (!rc.isVideoPinned) {
             rc.videoMediaContainer.style.top = 0;
             rc.videoMediaContainer.style.width = '75%';
@@ -386,24 +404,43 @@ class Transcription {
         transcriptionRoom.classList.add('panel-slide-in');
     }
 
-    unpinned() {
+    unpinned(slideOut = false) {
+        animateVideoLayout();
         if (!rc.isVideoPinned) {
             rc.videoMediaContainer.style.top = 0;
             rc.videoMediaContainer.style.right = null;
             rc.videoMediaContainer.style.width = '100%';
             rc.videoMediaContainer.style.height = '100%';
         }
-        transcriptionRoom.classList.remove('panel-slide-in');
-        document.documentElement.style.setProperty('--transcription-width', '420px');
-        document.documentElement.style.setProperty('--transcription-height', '680px');
-        hide(transcriptionMinBtn);
-        show(transcriptionMaxBtn);
-        this.center();
         this.isPinned = false;
         rc.refreshVideoPinLayout();
         this.setPinControlState(false);
         rc.resizeVideoMenuBar();
         resizeVideoMedia();
+        if (slideOut) {
+            // keep the pinned look while the panel slides away, then finish (and hide it)
+            transcriptionRoom.classList.remove('panel-slide-in');
+            transcriptionRoom.classList.add('panel-slide-out');
+            this.slideOutTimer = setTimeout(() => {
+                this.slideOutTimer = null;
+                this.finishUnpinned();
+                if (this.isHidden) transcriptionRoom.style.display = 'none';
+            }, PANEL_SLIDE_OUT_MS);
+            return;
+        }
+        this.finishUnpinned();
+    }
+
+    /**
+     * Restore the floating (unpinned) transcription panel
+     */
+    finishUnpinned() {
+        transcriptionRoom.classList.remove('panel-slide-in', 'panel-slide-out');
+        document.documentElement.style.setProperty('--transcription-width', '420px');
+        document.documentElement.style.setProperty('--transcription-height', '680px');
+        hide(transcriptionMinBtn);
+        show(transcriptionMaxBtn);
+        this.center();
         resizeTranscriptionRoom();
         transcriptionRoom.style.resize = 'both';
         if (!rc.isMobileDevice) rc.makeDraggable(transcriptionRoom, transcriptionHeader);
