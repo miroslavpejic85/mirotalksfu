@@ -2053,34 +2053,124 @@ body {
     color: var(--fg-1);
 }
 
-#myProfileAvatarControls {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+.profile-card {
+    margin-bottom: 12px;
+    padding: 14px;
+    border: 1px solid var(--room-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--select-bg) 64%, transparent);
 }
 
-#myProfileAvatarButtons {
+.profile-identity-card {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
 }
 
 #myProfileAvatar {
-    padding: 5px;
-    width: 100px;
-    height: 100px;
-    border-radius: 50px;
+    flex: 0 0 72px;
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    border: 2px solid var(--room-border);
+    border-radius: 50%;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.06);
 }
 
-#myProfileAvatarUploadBtn,
-#myProfileAvatarResetBtn {
-    margin-top: 6px;
+.profile-identity {
+    display: flex;
+    flex: 1 1 180px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
 }
 
-#myProfileAvatarButtons > :first-child {
-    margin-top: 0;
+.profile-field-label {
+    color: color-mix(in srgb, var(--fg-1) 55%, transparent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.profile-name {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--fg-1);
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-role-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    padding: 3px 10px;
+    border: 1px solid var(--room-border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--fg-1);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+#isUserPresenter[data-presenter='true'] .profile-role-presenter,
+#isUserPresenter[data-presenter='false'] .profile-role-guest {
+    display: inline-flex;
+}
+
+.profile-role-presenter {
+    border-color: color-mix(in srgb, var(--room-accent) 45%, transparent);
+    background: var(--room-accent-soft);
+}
+
+#mySettings .profile-role-badge i,
+#mySettings .profile-card-header i {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font-size: 0.8rem;
+}
+
+.profile-avatar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: auto;
+}
+
+#mySettings .profile-avatar-actions button {
+    width: auto;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.profile-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: color-mix(in srgb, var(--fg-1) 80%, transparent);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+@media screen and (max-width: 500px) {
+    .profile-avatar-actions {
+        flex-direction: row;
+        width: 100%;
+        margin-left: 0;
+    }
+    #mySettings .profile-avatar-actions button {
+        flex: 1 1 0;
+        justify-content: center;
+    }
 }
 
 .form-check-input {
@@ -3424,8 +3514,67 @@ body {
     text-transform: uppercase;
 }
 
-.settings-nav-label:first-child {
+.settings-nav-empty + .settings-nav-label {
     margin-top: 4px;
+}
+
+.settings-nav-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 2px 2px 4px;
+}
+
+#mySettings .settings-nav-search i {
+    position: absolute;
+    inset-inline-start: 11px;
+    margin: 0;
+    padding: 0;
+    color: color-mix(in srgb, var(--fg-1) 50%, transparent);
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+#mySettings .settings-nav-search input {
+    width: 100%;
+    height: 36px;
+    box-sizing: border-box;
+    padding: 0 10px 0 32px;
+    border: 1px solid var(--room-border);
+    border-radius: 10px;
+    background: var(--select-bg) !important;
+    color: var(--fg-1);
+    font-size: 0.82rem;
+    box-shadow: none;
+}
+
+#mySettings .settings-nav-search input:focus {
+    outline: none;
+    border-color: var(--room-accent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--room-accent) 24%, transparent);
+}
+
+#mySettings .settings-nav-search input::placeholder {
+    color: color-mix(in srgb, var(--fg-1) 50%, transparent);
+}
+
+.settings-nav-empty {
+    padding: 12px 10px;
+    color: color-mix(in srgb, var(--fg-1) 55%, transparent);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+#mySettingsNav .settings-nav-filtered {
+    display: none !important;
+}
+
+/* 16px avoids iOS auto-zoom on focus */
+@media screen and (max-width: 830px) {
+    #mySettings .settings-nav-search input {
+        height: 40px;
+        font-size: 16px;
+    }
 }
 
 .settings-section-intro {

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.32
+ * @version 2.6.33
  *
  */
 
@@ -844,7 +844,7 @@ class RoomClient {
             console.log('07.1 ----> My Peer info', my_peer_info);
             isPresenter = my_peer_info.peer_presenter;
             this.peer_info.peer_presenter = isPresenter;
-            this.getId('isUserPresenter').innerText = isPresenter;
+            this.getId('isUserPresenter').dataset.presenter = String(!!isPresenter);
             window.localStorage.isReconnected = false;
 
             // GLOBAL LOBBY ENABLED
@@ -5606,6 +5606,7 @@ class RoomClient {
         if (!this.isMySettingsOpen) {
             this.closeMobileSettingsNav();
             this.stopNetworkMonitor(true);
+            if (typeof resetSettingsNavSearch === 'function') resetSettingsNavSearch();
             return;
         }
 
@@ -5623,10 +5624,14 @@ class RoomClient {
         }
         tablinks = this.getEcN('tablinks');
         for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(' active', '');
+            tablinks[i].classList.remove('active');
+            tablinks[i].setAttribute('aria-selected', 'false');
+            tablinks[i].tabIndex = -1;
         }
         this.getId(tabName).style.display = 'block';
-        evt.currentTarget.className += ' active';
+        evt.currentTarget.classList.add('active');
+        evt.currentTarget.setAttribute('aria-selected', 'true');
+        evt.currentTarget.tabIndex = 0;
         this.closeMobileSettingsNav();
 
         if (tabName === 'tabNetwork') {
@@ -10936,7 +10941,7 @@ class RoomClient {
                                 if (isPresenter || res.peerCounts == 1) {
                                     isPresenter = true;
                                     this.peer_info.peer_presenter = isPresenter;
-                                    this.getId('isUserPresenter').innerText = isPresenter;
+                                    this.getId('isUserPresenter').dataset.presenter = String(!!isPresenter);
                                     data.password = room_password;
                                     this.socket.emit('roomAction', data);
                                     if (popup) this.roomStatus(action);
@@ -12193,7 +12198,7 @@ class RoomClient {
             isPresenter = is_presenter;
             this.peer_info.peer_presenter = is_presenter;
             const presenterEl = this.getId('isUserPresenter');
-            if (presenterEl) presenterEl.innerText = is_presenter;
+            if (presenterEl) presenterEl.dataset.presenter = String(!!is_presenter);
             // Apply presenter/guest permissions without re-running the room auto-setup, so the
             // room state (broadcasting, lobby, recording, moderator) set by the original presenter
             // is preserved instead of being reset to this peer's local defaults.

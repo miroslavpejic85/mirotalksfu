@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.32
+ * @version 2.6.33
  *
  */
 
@@ -2076,7 +2076,7 @@ function joinRoom(peer_name, room_id) {
         console.log('05 ----> join Room ' + room_id);
         roomId.innerText = room_id;
         userName.innerText = peer_name;
-        isUserPresenter.innerText = isPresenter;
+        isUserPresenter.dataset.presenter = String(!!isPresenter);
         rc = new RoomClient(
             localAudio,
             remoteAudios,
@@ -2811,6 +2811,7 @@ function handleButtons() {
             rc.closeMobileSettingsNav();
         };
     }
+    initSettingsNav();
     myProfileAvatarUploadBtn.onclick = async () => {
         await updateMyPeerAvatarByUrl();
     };
@@ -4382,6 +4383,8 @@ function handleKeyboardShortcuts() {
                 (!isPresenter && isBroadcastingEnabled)
             )
                 return;
+
+            if (isTextEntryTarget(event.target)) return;
 
             const key = event.key.toLowerCase(); // Convert to lowercase for simplicity
             console.log(`Detected shortcut: ${key}`);
@@ -9507,6 +9510,176 @@ function updateDevicesNavLabel() {
     elemDisplay(label, anyVisible, '');
 }
 
+// ####################################################
+// SETTINGS NAV: search + keyboard navigation
+// ####################################################
+
+const SETTINGS_SEARCH_TEXT_SELECTOR =
+    '.settings-section-intro, .title p, label, .settings-option-copy, .profile-card-header, summary, h4';
+const SETTINGS_NAV_FILTERED_CLASS = 'settings-nav-filtered';
+
+function isTextEntryTarget(target) {
+    if (!target || !target.tagName) return false;
+    if (target.isContentEditable || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return true;
+    if (target.tagName !== 'INPUT') return false;
+    const nonTextTypes = ['checkbox', 'radio', 'range', 'button', 'submit', 'reset', 'color', 'file', 'image'];
+    return !nonTextTypes.includes((target.type || 'text').toLowerCase());
+}
+
+function getSettingsNavTabs() {
+    const nav = getId('mySettingsNav');
+    return nav ? [...nav.querySelectorAll('.tablinks')] : [];
+}
+
+function isSettingsNavTabAvailable(btn) {
+    return !btn.classList.contains('hidden') && btn.style.display !== 'none' && !btn.disabled;
+}
+
+function getNavigableSettingsTabs() {
+    return getSettingsNavTabs().filter(
+        (btn) => isSettingsNavTabAvailable(btn) && !btn.classList.contains(SETTINGS_NAV_FILTERED_CLASS)
+    );
+}
+
+function isHiddenWithin(el, root) {
+    for (let node = el; node && node !== root; node = node.parentElement) {
+        if (node.classList.contains('hidden') || node.style.display === 'none') return true;
+    }
+    return false;
+}
+
+function getSettingsTabSearchText(btn) {
+    const parts = [btn.textContent];
+    const panel = getId(btn.getAttribute('aria-controls'));
+    if (panel) {
+        panel.querySelectorAll(SETTINGS_SEARCH_TEXT_SELECTOR).forEach((el) => {
+            if (!isHiddenWithin(el, panel)) parts.push(el.textContent);
+        });
+    }
+    return parts.join(' ').replace(/\s+/g, ' ').toLowerCase();
+}
+
+function updateSettingsNavTabStops() {
+    const tabs = getNavigableSettingsTabs();
+    const current = tabs.find((btn) => btn.classList.contains('active')) || tabs[0];
+    getSettingsNavTabs().forEach((btn) => {
+        btn.tabIndex = btn === current ? 0 : -1;
+    });
+}
+
+function filterSettingsNav(query) {
+    const nav = getId('mySettingsNav');
+    if (!nav) return;
+    const terms = String(query || '')
+        .trim()
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    let matches = 0;
+    getSettingsNavTabs().forEach((btn) => {
+        const text = terms.length ? getSettingsTabSearchText(btn) : '';
+        const isMatch = terms.every((term) => text.includes(term));
+        btn.classList.toggle(SETTINGS_NAV_FILTERED_CLASS, !isMatch);
+        if (isMatch && isSettingsNavTabAvailable(btn)) matches++;
+    });
+
+    // Hide group labels whose tabs are all filtered out
+    nav.querySelectorAll('.settings-nav-label').forEach((label) => {
+        let hasMatch = false;
+        for (let el = label.nextElementSibling; el && !el.classList.contains('settings-nav-label');) {
+            if (
+                el.classList.contains('tablinks') &&
+                isSettingsNavTabAvailable(el) &&
+                !el.classList.contains(SETTINGS_NAV_FILTERED_CLASS)
+            ) {
+                hasMatch = true;
+                break;
+            }
+            el = el.nextElementSibling;
+        }
+        label.classList.toggle(SETTINGS_NAV_FILTERED_CLASS, terms.length > 0 && !hasMatch);
+    });
+
+    const empty = getId('settingsNavEmpty');
+    if (empty) empty.classList.toggle('hidden', matches > 0);
+    updateSettingsNavTabStops();
+}
+
+function resetSettingsNavSearch() {
+    const search = getId('settingsNavSearch');
+    if (!search || !search.value) return;
+    search.value = '';
+    filterSettingsNav('');
+}
+
+function initSettingsNav() {
+    const nav = getId('mySettingsNav');
+    const search = getId('settingsNavSearch');
+    if (!nav || nav.dataset.navReady) return;
+    nav.dataset.navReady = 'true';
+
+    getSettingsNavTabs().forEach((btn) => {
+        const panel = getId(btn.id.replace(/Btn$/, ''));
+        const isActive = btn.classList.contains('active');
+        btn.type = 'button';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', String(isActive));
+        if (panel) {
+            btn.setAttribute('aria-controls', panel.id);
+            panel.setAttribute('role', 'tabpanel');
+            panel.setAttribute('aria-labelledby', btn.id);
+        }
+    });
+    updateSettingsNavTabStops();
+
+    if (search) {
+        search.addEventListener('input', () => filterSettingsNav(search.value));
+        search.addEventListener('keydown', (e) => {
+            const tabs = getNavigableSettingsTabs();
+            if (e.key === 'ArrowDown' && tabs.length) {
+                e.preventDefault();
+                tabs[0].focus();
+            } else if (e.key === 'Enter' && tabs.length) {
+                e.preventDefault();
+                tabs[0].click();
+                tabs[0].focus();
+            } else if (e.key === 'Escape' && search.value) {
+                e.preventDefault();
+                e.stopPropagation();
+                resetSettingsNavSearch();
+            }
+        });
+    }
+
+    // Arrow keys move focus between tabs; Enter/Space activates (native button behavior)
+    nav.addEventListener('keydown', (e) => {
+        if (!e.target.classList || !e.target.classList.contains('tablinks')) return;
+        const tabs = getNavigableSettingsTabs();
+        const index = tabs.indexOf(e.target);
+        if (index === -1 || !tabs.length) return;
+        let next;
+        switch (e.key) {
+            case 'ArrowDown':
+                next = tabs[(index + 1) % tabs.length];
+                break;
+            case 'ArrowUp':
+                next = index === 0 && search ? search : tabs[(index - 1 + tabs.length) % tabs.length];
+                break;
+            case 'Home':
+                next = tabs[0];
+                break;
+            case 'End':
+                next = tabs[tabs.length - 1];
+                break;
+            default:
+                return;
+        }
+        e.preventDefault();
+        next.focus();
+    });
+}
+
 async function loadVirtualBackgroundSettings() {
     if (!isMediaStreamTrackAndTransformerSupported) return;
 
@@ -9633,7 +9806,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.32',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.33',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

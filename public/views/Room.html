@@ -580,9 +580,21 @@
                     type="button"
                     aria-label="Close settings navigation"
                 ></button>
-                <div id="mySettingsNav" class="tab">
+                <div id="mySettingsNav" class="tab" role="tablist" aria-orientation="vertical" aria-label="Settings">
+                    <div class="settings-nav-search">
+                        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                        <input
+                            id="settingsNavSearch"
+                            type="search"
+                            placeholder="Search settings"
+                            aria-label="Search settings"
+                            autocomplete="off"
+                            spellcheck="false"
+                        />
+                    </div>
+                    <span id="settingsNavEmpty" class="settings-nav-empty hidden" role="status">No settings found</span>
                     <span class="settings-nav-label">Meeting</span>
-                    <button id="tabRoomBtn" class="fas fa-home tablinks">
+                    <button id="tabRoomBtn" class="fas fa-home tablinks active">
                         <p class="tabButtonText">Room</p>
                     </button>
                     <button id="tabModeratorBtn" class="fas fa-user-shield tablinks">
@@ -2060,50 +2072,40 @@
                             <h3>Your profile</h3>
                             <p>Review your meeting identity and update your avatar.</p>
                         </div>
-                        <div id="myProfileAvatarControls">
-                            <img id="myProfileAvatar" />
-                            <div id="myProfileAvatarButtons">
-                                <button id="myProfileAvatarUploadBtn">
-                                    <i class="fas fa-image"></i>&nbsp;Set avatar
+                        <div class="profile-card profile-identity-card">
+                            <img id="myProfileAvatar" alt="Your avatar" />
+                            <div class="profile-identity">
+                                <span class="profile-field-label">Display name</span>
+                                <span id="userName" class="profile-name notranslate" translate="no">UserName</span>
+                                <span id="isUserPresenter" class="profile-role" data-presenter="false">
+                                    <span class="profile-role-badge profile-role-presenter">
+                                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                                        <span>Presenter</span>
+                                    </span>
+                                    <span class="profile-role-badge profile-role-guest">
+                                        <i class="fa-solid fa-user" aria-hidden="true"></i>
+                                        <span>Participant</span>
+                                    </span>
+                                </span>
+                            </div>
+                            <div id="myProfileAvatarButtons" class="profile-avatar-actions">
+                                <button id="myProfileAvatarUploadBtn" type="button">
+                                    <i class="fas fa-image" aria-hidden="true"></i>
+                                    <span>Set avatar</span>
                                 </button>
-                                <button id="myProfileAvatarResetBtn" class="hidden">
-                                    <i class="fas fa-rotate-left"></i>&nbsp;Reset avatar
+                                <button id="myProfileAvatarResetBtn" class="hidden" type="button">
+                                    <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                                    <span>Reset avatar</span>
                                 </button>
                             </div>
                         </div>
-                        <table id="shortcutsTable">
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-user"></i>
-                                        <p>Username:</p>
-                                        <p id="userName">UserName</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-user-shield"></i>
-                                        <p>Presenter:</p>
-                                        <p id="isUserPresenter">true</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                        <p>Extra info:</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div id="extraInfo"></div>
-                                </td>
-                            </tr>
-                        </table>
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                <span>Device details</span>
+                            </div>
+                            <div id="extraInfo"></div>
+                        </div>
                     </div>
 
                     <div id="tabShortcuts" class="tabcontent">
