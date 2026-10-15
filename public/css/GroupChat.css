@@ -650,6 +650,15 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* Show the hint and counter only while composing; keep their space to avoid layout shift. */
+.chat-toolbar-hint > * {
+    transition: opacity var(--motion-base) var(--ease-standard);
+}
+
+.chat-input-wrapper:not(:focus-within):has(.chat-input-textarea:placeholder-shown) .chat-toolbar-hint > * {
+    opacity: 0;
+}
+
 /* Input hint text */
 .chat-toolbar-hint {
     display: flex;
@@ -830,13 +839,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 15px;
     padding: 0;
     flex-shrink: 0;
     transition:
         color 0.2s ease,
         background 0.2s ease,
         transform 0.15s ease;
+}
+
+/* The speech button is a tool, not a muted-state indicator. */
+.chat-toolbar-btn > .fa-microphone-slash {
+    color: inherit !important;
+}
+
+@media (pointer: coarse) {
+    .chat-toolbar-btn {
+        width: 38px;
+        height: 38px;
+    }
 }
 
 .chat-toolbar-btn:hover {

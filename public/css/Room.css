@@ -1624,17 +1624,40 @@ body {
     outline-offset: 2px;
 }
 
+/* Leave: a distinct red pill so it is instantly recognizable and hard to confuse with mute. */
 #bottomButtons #exitButton {
     border-color: transparent !important;
-    background: var(--btns-bg-color) !important;
+    background: var(--color-danger-strong) !important;
 }
 
-#bottomButtons > #exitDropdown > #exitButton:hover {
-    border-color: var(--room-border-strong) !important;
-    background: var(--room-control-hover) !important;
+#bottomButtons:not([data-position='horizontal']) #exitButton {
+    width: 64px;
+}
+
+#bottomButtons #exitButton i {
+    color: #fff !important;
+}
+
+#bottomButtons > #exitDropdown > #exitButton:hover,
+#bottomButtons > #exitDropdown > #exitButton[aria-expanded='true'] {
+    border-color: transparent !important;
+    background: #bb2d3b !important;
     box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        0 8px 20px rgba(220, 53, 69, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Muted mic / camera off: tint the whole button, not only the icon. */
+#bottomButtons #startAudioButton,
+#bottomButtons #startVideoButton {
+    border-color: color-mix(in srgb, var(--color-danger) 40%, transparent) !important;
+    background: color-mix(in srgb, var(--color-danger-strong) 28%, var(--btns-bg-color));
+}
+
+#bottomButtons .split-btn > #startAudioButton:hover,
+#bottomButtons .split-btn > #startVideoButton:hover {
+    border-color: color-mix(in srgb, var(--color-danger) 60%, transparent) !important;
+    background: color-mix(in srgb, var(--color-danger-strong) 40%, var(--btns-bg-color)) !important;
 }
 
 @media screen and (max-width: 500px) {
@@ -1644,6 +1667,16 @@ body {
         gap: 3px;
         border-radius: 14px;
     }
+    /* Wrap onto a second row instead of squeezing buttons or pushing Leave off-screen. */
+    #bottomButtons:not([data-position='horizontal']) {
+        flex-wrap: wrap;
+        width: max-content;
+        row-gap: 6px;
+    }
+    #bottomButtons > *,
+    #bottomButtons .split-btn > button {
+        flex-shrink: 0;
+    }
     #bottomButtons button {
         width: 40px;
         height: 40px;
@@ -1651,6 +1684,9 @@ body {
         padding: 0;
         font-size: 1rem;
         border-radius: 10px;
+    }
+    #bottomButtons:not([data-position='horizontal']) #exitButton {
+        width: 52px;
     }
     #bottomButtons .split-btn > button:not(.device-dropdown-toggle) {
         border-radius: 10px 0 0 10px;
@@ -2506,6 +2542,24 @@ body {
 .settingsTable i {
     border: none;
     border-radius: 10px;
+}
+
+/* Fixed icon column so every row label starts at the same x. */
+.settingsTable .title > i:first-child,
+.settingsTable .title > svg:first-child {
+    flex: 0 0 1.25em;
+    width: 1.25em;
+    text-align: center;
+}
+
+/* Settings icons are decorative; don't inherit the global "muted" red. */
+.settingsTable .title > i:is(.fa-microphone-slash, .fa-video-slash):not(.red) {
+    color: inherit !important;
+}
+
+/* Keep ON/OFF switches flush to the row's trailing edge. */
+.settingsTable td:last-child:has(> .form-switch:only-child) {
+    text-align: right;
 }
 
 .settingsTable select {
@@ -5688,6 +5742,18 @@ body {
 
 .swal2-timer-progress-bar {
     background-color: #1d8ecd !important;
+}
+
+/* In-room toasts: top-center keeps them in view and off the right-side chat/participants panels. */
+html body.swal2-toast-shown .swal2-container.swal2-top-end {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+html body.swal2-toast-shown .swal2-container.swal2-top-end > .swal2-popup {
+    grid-column: 2;
+    justify-self: center;
 }
 
 .img-about {
