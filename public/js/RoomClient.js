@@ -1119,11 +1119,12 @@ class RoomClient {
 
         if (producerTransportData.error) {
             console.error('Producer Transport creation failed', producerTransportData.error);
-            return;
+            return null;
         }
 
         this.producerTransport = device.createSendTransport(producerTransportData);
         this.setupProducerTransportHandlers();
+        return this.producerTransport;
     }
 
     setupProducerTransportHandlers() {
@@ -1193,6 +1194,7 @@ class RoomClient {
                     break;
                 case 'failed':
                     console.warn('❌ Producer Transport failed', { id: this.producerTransport.id });
+                    this.handleTransportLost('producer');
                     break;
                 default:
                     console.log('Producer transport connection state changed', {
@@ -1229,11 +1231,12 @@ class RoomClient {
 
         if (consumerTransportData.error) {
             console.error('Consumer Transport creation failed', consumerTransportData.error);
-            return;
+            return null;
         }
 
         this.consumerTransport = device.createRecvTransport(consumerTransportData);
         this.setupConsumerTransportHandlers();
+        return this.consumerTransport;
     }
 
     setupConsumerTransportHandlers() {
@@ -1271,6 +1274,7 @@ class RoomClient {
                     break;
                 case 'failed':
                     console.warn('❌ Consumer Transport failed', { id: this.consumerTransport.id });
+                    this.handleTransportLost('consumer');
                     break;
                 default:
                     console.log('Consumer transport connection state changed', {
@@ -1353,18 +1357,9 @@ class RoomClient {
             }
         }
 
-        console.error('❌ Failed to reconnect after multiple attempts.');
+        console.error('❌ Failed to reconnect after multiple attempts, escalating to transport recovery.');
         transport.close();
-
-        popupHtmlMessage(
-            null,
-            image.network,
-            `${transportType} Transport`,
-            'Unable to reconnect. Please check your network.',
-            'center',
-            false,
-            true
-        );
+        this.handleTransportLost(transportType === 'Producer' ? 'producer' : 'consumer');
 
         return false;
     }
@@ -1395,6 +1390,170 @@ class RoomClient {
         } finally {
             this.iceRestarting = false;
         }
+    }
+
+    // ####################################################
+    // TRANSPORT RECOVERY (after DTLS close / ICE consent timeout)
+    //
+    // When mediasoup closes a transport server-side (dtlsState 'closed' or ICE consent
+    // timeout after a connectivity gap), the socket connection may still be alive while
+    // the media path is permanently dead: the participant looks connected but no audio
+    // or video flows, until a manual page reload. Instead of leaving the client in this
+    // zombie state, rebuild the transport and re-establish producers/consumers.
+    // ####################################################
+
+    handleTransportClosed = async ({ transport_id }) => {
+        const isProducer = this.producerTransport?.id === transport_id;
+        const isConsumer = this.consumerTransport?.id === transport_id;
+        const transport = [this.producerTransport, this.consumerTransport].find(
+            (candidate) => candidate?.id === transport_id
+        );
+        if (transport && !transport.closed) {
+            console.warn('SocketOn Closing transport', { transport_id });
+            transport.close();
+        }
+        if (isProducer) await this.handleTransportLost('producer');
+        if (isConsumer) await this.handleTransportLost('consumer');
+    };
+
+    async handleTransportLost(kind, maxAttempts = 3, initialDelay = 1000) {
+        if (kind !== 'producer' && kind !== 'consumer') return;
+
+        // Never recover when we are leaving the room or the server closed it (e.g. meeting
+        // ended via API, server shutdown): the socket is gone and recovery attempts would
+        // only end in a pointless "Unable to restore media connection" popup.
+        if (!this._isConnected) {
+            console.warn(`↩️ ${kind} transport lost while not connected, skipping recovery`);
+            return;
+        }
+
+        const recoveringFlag = kind === 'producer' ? 'recoveringProducer' : 'recoveringConsumer';
+        if (this[recoveringFlag]) return;
+        this[recoveringFlag] = true;
+
+        console.warn(`🔄 ${kind} transport lost, attempting recovery...`);
+        this.userLog('warning', `${icons.refresh} Media connection lost, reconnecting...`, 'top-end', 8000);
+
+        let delay = initialDelay;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            // abort if the room was exited / closed / the socket dropped while recovering
+            if (!this._isConnected) {
+                console.warn(`↩️ ${kind} recovery aborted: no longer connected`);
+                this[recoveringFlag] = false;
+                return;
+            }
+            try {
+                if (kind === 'producer') {
+                    await this.recoverProducerTransport();
+                } else {
+                    await this.recoverConsumerTransport();
+                }
+                console.info(`✅ ${kind} transport recovered on attempt ${attempt}`);
+                this.userLog('info', 'Media reconnected', 'top-end', 4000);
+                this[recoveringFlag] = false;
+                return;
+            } catch (error) {
+                console.error(`❌ ${kind} transport recovery attempt ${attempt} failed`, error);
+                if (attempt < maxAttempts) {
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+                    delay *= 2; // exponential backoff: 1s -> 2s -> 4s
+                }
+            }
+        }
+
+        this[recoveringFlag] = false;
+        if (!this._isConnected) return;
+        popupHtmlMessage(
+            null,
+            image.network,
+            'Media connection',
+            'Unable to restore media connection. Please reload the page to rejoin.',
+            'center',
+            false,
+            true
+        );
+    }
+
+    async recoverProducerTransport() {
+        const previousTransportId = this.producerTransport?.id;
+
+        // Snapshot the active producers BEFORE touching any state. Tracks are intentionally
+        // kept alive (not stopped) so they can be re-produced on the fresh transport.
+        const snapshot = [];
+        for (const [type, producer_id] of [...this.producerLabel]) {
+            const producer = this.producers.get(producer_id);
+            if (!producer || !producer.track || producer.track.ended) continue;
+            snapshot.push({
+                type,
+                paused: producer.paused,
+                stream: type === mediaType.audio ? this.localAudioStream : this.localVideoStream,
+                track: producer.track,
+            });
+        }
+
+        // Drop the dead local producer state (maps + UI). We intentionally do NOT call
+        // closeProducer(): the server-side producers are already gone, closeProducer()
+        // stops the tracks we want to reuse, and it would emit stale producerClosed events.
+        for (const [type, producer_id] of [...this.producerLabel]) {
+            const producer = this.producers.get(producer_id);
+            if (producer) {
+                producer.close();
+                this.producers.delete(producer_id);
+            }
+            this.producerLabel.delete(type);
+            const elem = this.getId(producer_id);
+            if (elem) {
+                // detach the element without stopping the shared stream/track
+                elem.srcObject = null;
+                elem.parentNode?.removeChild(elem);
+                if (type === mediaType.video || type === mediaType.screen) {
+                    const d = this.getId(producer_id + '__video');
+                    const vb = this.getId(producer_id + '__vb');
+                    d?.parentNode?.removeChild(d);
+                    vb?.parentNode?.removeChild(vb);
+                    handleAspectRatio();
+                }
+            }
+        }
+
+        const transport = await this.initProducerTransport(this.device);
+        if (!transport || transport.id === previousTransportId) {
+            throw new Error('Producer transport creation failed');
+        }
+
+        // Re-establish the media we had before the transport died, including muted state
+        for (const item of snapshot) {
+            try {
+                await this.produce(item.type, null, false, false, item);
+                if (item.paused) await this.pauseProducer(item.type);
+            } catch (error) {
+                console.error(`Producer recovery failed for type ${item.type}`, error);
+            }
+        }
+        console.log('[recoverProducerTransport] - PRODUCER LABEL', this.producerLabel);
+    }
+
+    async recoverConsumerTransport() {
+        if (this.consumerReconcileInProgress) {
+            // let handleTransportLost retry with backoff instead of racing the in-flight run
+            throw new Error('Consumer reconcile already in progress');
+        }
+
+        // All consumers belonged to the dead transport: drop stale local state (tiles and
+        // dedup maps) so reconcile can re-consume cleanly
+        for (const [consumer_id, consumer] of [...this.consumers]) {
+            this.removeConsumer(consumer_id, consumer?.kind ?? 'other');
+        }
+
+        const transport = await this.initConsumerTransport(this.device);
+        if (!transport) {
+            throw new Error('Consumer transport creation failed');
+        }
+
+        // Re-consume everyone using the existing reconcile logic (getProducers +
+        // handleNewProducers(reconcile=true)), which also keeps working with the periodic
+        // consumer reconcile already in place
+        await this.reconcileConsumers();
     }
 
     // ####################################################
@@ -1493,16 +1652,6 @@ class RoomClient {
     handleConsumerClosed = ({ consumer_id, consumer_kind }) => {
         console.log('SocketOn Closing consumer', { consumer_id, consumer_kind });
         this.removeConsumer(consumer_id, consumer_kind);
-    };
-
-    handleTransportClosed = ({ transport_id }) => {
-        const transport = [this.producerTransport, this.consumerTransport].find(
-            (candidate) => candidate?.id === transport_id
-        );
-        if (transport && !transport.closed) {
-            console.warn('SocketOn Closing transport', { transport_id });
-            transport.close();
-        }
     };
 
     handleSetVideoOff = (data) => {
@@ -2371,7 +2520,7 @@ class RoomClient {
     // PRODUCER
     // ####################################################
 
-    async produce(type, deviceId = null, swapCamera = false, init = false) {
+    async produce(type, deviceId = null, swapCamera = false, init = false, recovery = null) {
         let mediaConstraints = {};
         let elem;
         let stream;
@@ -2422,7 +2571,12 @@ class RoomClient {
 
         if (audio) audioRequest = ++this.microphoneRequest;
         try {
-            if (init) {
+            if (recovery?.track || recovery?.stream) {
+                // Transport recovery: reuse the existing local stream/track (already processed
+                // by virtual background / noise suppression), never re-prompt the devices
+                stream =
+                    recovery.stream && recovery.stream.active ? recovery.stream : new MediaStream([recovery.track]);
+            } else if (init) {
                 stream = initStream;
             } else {
                 stream = screen
@@ -2460,7 +2614,7 @@ class RoomClient {
                 }
             }
 
-            if (audio && BUTTONS.settings.customNoiseSuppression) {
+            if (audio && !recovery && BUTTONS.settings.customNoiseSuppression) {
                 /*
                  * Initialize RNNoise Suppression if enabled and supported
                  * This will only apply to audio tracks
