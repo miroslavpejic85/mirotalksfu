@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.34
+ * @version 2.6.40
  *
  */
 
@@ -2336,17 +2336,19 @@ class RoomClient {
             console.log('10 ----> VIDEO IS OFF');
         }
 
+        // Unavailable devices keep their start button (marked as unavailable) so the user can see why and retry
         if (!isEnumerateAudioDevices) {
-            hide(startAudioButton);
+            BUTTONS.main.startAudioButton ? show(startAudioButton) : hide(startAudioButton);
             hide(stopAudioButton);
             hide(startAudioDeviceDropdown);
         }
 
         if (!isEnumerateVideoDevices) {
-            hide(startVideoButton);
+            BUTTONS.main.startVideoButton ? show(startVideoButton) : hide(startVideoButton);
             hide(stopVideoButton);
             hide(startVideoDeviceDropdown);
         }
+        updateMediaUnavailableUI();
 
         if (this.joinRoomWithScreen && !this._moderator.screen_cant_share) {
             await this.produce(mediaType.screen, null, false, true);

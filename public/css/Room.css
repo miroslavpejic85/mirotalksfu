@@ -673,6 +673,110 @@ body {
     background: var(--room-danger-soft);
 }
 
+/* Camera / microphone blocked or unavailable: still clickable, explains why and offers a retry. */
+.init-media-notice {
+    --media-warning: #ffc107;
+    display: flex;
+    flex: 1 1 100%;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    margin-bottom: 4px;
+    padding: 10px 12px;
+    color: #fff;
+    font-size: var(--font-sm);
+    line-height: 1.35;
+    border: 1px solid color-mix(in srgb, var(--media-warning) 55%, transparent);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--media-warning) 14%, transparent);
+}
+
+.init-media-notice[hidden] {
+    display: none;
+}
+
+.init-media-notice > i {
+    flex: 0 0 auto;
+    color: var(--media-warning);
+}
+
+.init-media-notice > span {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.init-user .init-media-notice button {
+    width: auto !important;
+    height: auto !important;
+    padding: 6px 12px;
+    font-size: var(--font-sm);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.init-media-notice.attention {
+    animation: mediaNoticeAttention 0.9s ease;
+}
+
+@keyframes mediaNoticeAttention {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+    30% {
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--media-warning) 45%, transparent);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .init-media-notice.attention {
+        animation: none;
+    }
+}
+
+/* Unavailable mic / camera buttons: dimmed with a warning badge, but still clickable. */
+:is(#bottomButtons, .init-user)
+    :is(#startAudioButton, #startVideoButton, #initAudioButton, #initVideoButton)[data-media-unavailable='true'] {
+    position: relative;
+    opacity: 0.6;
+    cursor: help;
+}
+
+:is(#bottomButtons, .init-user)
+    :is(#startAudioButton, #startVideoButton, #initAudioButton, #initVideoButton)[data-media-unavailable='true']:hover {
+    opacity: 0.85;
+}
+
+:is(#bottomButtons, .init-user)
+    :is(
+        #startAudioButton,
+        #startVideoButton,
+        #initAudioButton,
+        #initVideoButton
+    )[data-media-unavailable='true']::after {
+    content: '!';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 16px;
+    height: 16px;
+    color: #1a1d27;
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 50%;
+    background: #ffc107;
+    pointer-events: none;
+}
+
+/* The device arrow is hidden while unavailable, so the main button keeps all its corners rounded. */
+#bottomButtons .split-btn > button[data-media-unavailable='true']:not(.device-dropdown-toggle) {
+    border-radius: 12px;
+}
+
 .init-modal-size .swal2-input-label {
     margin: var(--space-6) auto 0;
     color: var(--fg-3);

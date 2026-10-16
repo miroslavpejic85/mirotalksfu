@@ -76,6 +76,7 @@ describe('busy or broken default media devices', () => {
             isAudioAllowed: false,
             isEnumerateVideoDevices: false,
             isEnumerateAudioDevices: false,
+            mediaErrors: { audio: null, video: null },
             hide() {},
             updateDeviceSettingsVisibility() {},
             getMicrophoneVolumeIndicator: async () => {},
@@ -153,6 +154,49 @@ describe('busy or broken default media devices', () => {
         assert.equal(context.isAudioAllowed, true);
         assert.equal(context.microphoneSelect.value, 'mic-2');
         assert.equal(context.speakerSelect.options.length, 1);
+    });
+
+    it('remembers why a device is unavailable and clears it once it works', async () => {
+        setup({
+            devices: [{ kind: 'audioinput', deviceId: 'mic-1', label: 'Mic' }],
+            getUserMediaImpl: async () => {
+                throw domError('NotAllowedError');
+            },
+        });
+        await context.initEnumerateAudioDevices();
+        assert.equal(context.mediaErrors.audio, 'NotAllowedError');
+        assert.equal(context.getMediaUnavailableInfo('audio').type, 'blocked');
+
+        context.navigator.mediaDevices.getUserMedia = async () => createStream('mic-1');
+        await context.initEnumerateAudioDevices();
+        assert.equal(context.isAudioAllowed, true);
+        assert.equal(context.mediaErrors.audio, null);
+    });
+
+    it('keeps the last error when no fallback device can be opened', async () => {
+        setup({
+            devices: cameras,
+            getUserMediaImpl: async () => {
+                throw domError('NotReadableError');
+            },
+        });
+        await context.initEnumerateVideoDevices();
+        assert.equal(context.mediaErrors.video, 'NotReadableError');
+        assert.equal(context.getMediaUnavailableInfo('video').type, 'busy');
+    });
+
+    it('describes the unavailable device by error type', () => {
+        setup({ devices: [], getUserMediaImpl: async () => createStream('x') });
+        const cases = [
+            ['video', 'NotFoundError', 'missing'],
+            ['audio', 'NotReadableError', 'busy'],
+            ['video', 'NotAllowedError', 'blocked'],
+            ['audio', 'TypeError', 'error'],
+        ];
+        for (const [kind, name, type] of cases) {
+            context.mediaErrors[kind] = name;
+            assert.equal(context.getMediaUnavailableInfo(kind).type, type, `${kind} ${name}`);
+        }
     });
 
     it('shows a fallback name for devices without a label', async () => {
