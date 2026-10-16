@@ -1419,6 +1419,14 @@ class RoomClient {
     async handleTransportLost(kind, maxAttempts = 3, initialDelay = 1000) {
         if (kind !== 'producer' && kind !== 'consumer') return;
 
+        // Never recover when we are leaving the room or the server closed it (e.g. meeting
+        // ended via API, server shutdown): the socket is gone and recovery attempts would
+        // only end in a pointless "Unable to restore media connection" popup.
+        if (!this._isConnected) {
+            console.warn(`↩️ ${kind} transport lost while not connected, skipping recovery`);
+            return;
+        }
+
         const recoveringFlag = kind === 'producer' ? 'recoveringProducer' : 'recoveringConsumer';
         if (this[recoveringFlag]) return;
         this[recoveringFlag] = true;
@@ -1428,6 +1436,12 @@ class RoomClient {
 
         let delay = initialDelay;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            // abort if the room was exited / closed / the socket dropped while recovering
+            if (!this._isConnected) {
+                console.warn(`↩️ ${kind} recovery aborted: no longer connected`);
+                this[recoveringFlag] = false;
+                return;
+            }
             try {
                 if (kind === 'producer') {
                     await this.recoverProducerTransport();
@@ -1448,6 +1462,7 @@ class RoomClient {
         }
 
         this[recoveringFlag] = false;
+        if (!this._isConnected) return;
         popupHtmlMessage(
             null,
             image.network,
