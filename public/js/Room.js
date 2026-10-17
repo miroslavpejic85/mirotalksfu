@@ -92,6 +92,8 @@ const _PEER = {
 };
 
 const initUser = document.getElementById('initUser');
+// Keep a reference: #initUser (and this button) leaves the DOM when the join popup closes
+const initVideoAudioRefreshButton = document.getElementById('initVideoAudioRefreshButton');
 const initVideoContainerClass = document.querySelector('.init-video-container');
 const bars = document.querySelectorAll('.volume-bar');
 
