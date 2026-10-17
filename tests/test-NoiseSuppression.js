@@ -39,11 +39,7 @@ describe('RNNoise worklet readiness', () => {
     it('does not announce readiness from the module loader before context setup', async () => {
         const { processor, messages } = createWorklet();
         await processor.port.onmessage({
-            data: {
-                type: 'sync-module',
-                jsContent:
-                    'function createRNNWasmModuleSync() { return { _malloc: () => 4, _rnnoise_create: () => 0, _free() {} }; }',
-            },
+            data: { type: 'wasm-module', wasmBytes: new Uint8Array([0, 1, 2, 3]).buffer },
         });
         assert.equal(
             messages.some((message) => message.type === 'wasm-ready'),
@@ -55,12 +51,12 @@ describe('RNNoise worklet readiness', () => {
     it('reports context creation failure without announcing readiness and frees the buffer', async () => {
         const { processor, messages } = createWorklet();
         const free = sinon.spy();
-        processor.wasmInitializer.initSyncModule = async () => ({
+        processor.wasmInitializer.initModule = async () => ({
             _malloc: () => 4,
             _rnnoise_create: () => 0,
             _free: free,
         });
-        await processor.port.onmessage({ data: { type: 'sync-module', jsContent: 'module' } });
+        await processor.port.onmessage({ data: { type: 'wasm-module', wasmBytes: new ArrayBuffer(8) } });
         assert.equal(processor.initialized, false);
         assert.equal(
             messages.some((message) => message.type === 'wasm-ready'),
@@ -72,12 +68,12 @@ describe('RNNoise worklet readiness', () => {
 
     it('announces readiness only after a context exists', async () => {
         const { processor, messages } = createWorklet();
-        processor.wasmInitializer.initSyncModule = async () => ({
+        processor.wasmInitializer.initModule = async () => ({
             _malloc: () => 4,
             _rnnoise_create: () => 8,
             HEAPF32: [],
         });
-        await processor.port.onmessage({ data: { type: 'sync-module', jsContent: 'module' } });
+        await processor.port.onmessage({ data: { type: 'wasm-module', wasmBytes: new ArrayBuffer(8) } });
         assert.equal(processor.contextManager.rnnoiseContext, 8);
         assert.equal(processor.initialized, true);
         assert.equal(messages.at(-1).type, 'wasm-ready');
@@ -86,8 +82,8 @@ describe('RNNoise worklet readiness', () => {
     it('does not resurrect a worklet destroyed during initialization', async () => {
         const { processor, messages } = createWorklet();
         const loading = deferred();
-        processor.wasmInitializer.initSyncModule = () => loading.promise;
-        const starting = processor.port.onmessage({ data: { type: 'sync-module', jsContent: 'module' } });
+        processor.wasmInitializer.initModule = () => loading.promise;
+        const starting = processor.port.onmessage({ data: { type: 'wasm-module', wasmBytes: new ArrayBuffer(8) } });
         await processor.port.onmessage({ data: { type: 'destroy' } });
         loading.resolve({});
         await starting;
@@ -97,6 +93,38 @@ describe('RNNoise worklet readiness', () => {
             false
         );
         assert.equal(processor.process([], []), false);
+    });
+});
+
+describe('RNNoise worklet with the real wasm binary', () => {
+    it('instantiates rnnoise.wasm without eval and suppresses background noise', async () => {
+        const { processor, messages } = createWorklet();
+        const wasm = fs.readFileSync(path.join(__dirname, '..', 'public/js/rnnoise.wasm'));
+        const wasmBytes = wasm.buffer.slice(wasm.byteOffset, wasm.byteOffset + wasm.byteLength);
+        await processor.port.onmessage({ data: { type: 'wasm-module', wasmBytes } });
+        assert.equal(messages.at(-1).type, 'wasm-ready');
+        await processor.port.onmessage({ data: { type: 'enable', enabled: true } });
+
+        let seed = 1;
+        const noise = () => (((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * 2 - 1) * 0.05;
+        const rms = (values) => Math.sqrt(values.reduce((sum, v) => sum + v * v, 0) / values.length);
+        const inputRms = [];
+        const outputRms = [];
+        // 2 seconds of white noise in 128-sample render quanta
+        for (let block = 0; block < 750; block++) {
+            const input = Float32Array.from({ length: 128 }, noise);
+            const output = new Float32Array(128);
+            assert.equal(processor.process([[input]], [[output]]), true);
+            if (block >= 375) {
+                inputRms.push(rms(input));
+                outputRms.push(rms(output));
+            }
+        }
+        const avg = (values) => values.reduce((sum, v) => sum + v, 0) / values.length;
+        assert.ok(avg(outputRms) < avg(inputRms) * 0.1, `noise not suppressed: ${avg(outputRms)} vs ${avg(inputRms)}`);
+
+        await processor.port.onmessage({ data: { type: 'destroy' } });
+        assert.equal(processor.contextManager, null);
     });
 });
 
@@ -139,7 +167,7 @@ function createProcessorEnvironment(overrides = {}) {
         localStorageSettings: { mic_noise_suppression: true },
         lS: { setSettings() {} },
         userLog() {},
-        fetch: async () => ({ ok: true, text: async () => 'module' }),
+        fetch: async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) }),
         AudioWorkletNode: class {
             constructor() {
                 this.port = { postMessage() {} };
