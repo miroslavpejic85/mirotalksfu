@@ -25,6 +25,34 @@ describe('test-Peer', () => {
         once: () => {},
     });
 
+    it('creates a simulcast producer whose encodings have no scalabilityMode', async () => {
+        const peer = createPeer();
+        const handlers = {};
+        const producer = {
+            id: 'producer-id',
+            kind: 'video',
+            type: 'simulcast',
+            appData: {},
+            closed: false,
+            rtpParameters: { encodings: [{ ssrc: 1 }, { ssrc: 2 }] },
+            once: (event, handler) => (handlers[event] = handler),
+            close() {
+                this.closed = true;
+            },
+        };
+        peer.transports.set('transport-id', { produce: async () => producer });
+
+        const created = await peer.createProducer('transport-id', {}, 'video', 'videoType');
+
+        created.should.equal(producer);
+        created.appData.mediaType.should.equal('videoType');
+        peer.producers.has('producer-id').should.equal(true);
+        handlers.should.have.property('transportclose');
+
+        handlers.transportclose();
+        peer.producers.has('producer-id').should.equal(false);
+    });
+
     it('classifies a missing consumer transport as a transient lifecycle race', async () => {
         const peer = createPeer();
 

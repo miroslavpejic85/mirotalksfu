@@ -218,9 +218,12 @@ module.exports = class Peer {
         appData.mediaType = producer_type;
 
         if (['simulcast', 'svc'].includes(type)) {
-            const { scalabilityMode } = rtpParameters.encodings[0];
-            const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
-            const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
+            // scalabilityMode is optional in producer encodings (e.g. simulcast without it):
+            // parseScalabilityMode() handles undefined, a raw substring() would throw here and
+            // leave an orphan producer without its 'transportclose' handler.
+            const { scalabilityMode } = rtpParameters.encodings?.[0] || {};
+            const { spatialLayers: spatialLayer, temporalLayers: temporalLayer } =
+                parseScalabilityMode(scalabilityMode);
 
             log.debug(`Producer [${type}-${kind}] ----->`, {
                 scalabilityMode,

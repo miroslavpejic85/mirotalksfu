@@ -777,6 +777,7 @@ module.exports = class Room {
 
             if (iceState === 'disconnected') {
                 log.debug('ICE state disconnected for transport waiting before closing', iceLog);
+                if (iceDisconnectTimeout) clearTimeout(iceDisconnectTimeout);
                 iceDisconnectTimeout = setTimeout(() => {
                     iceDisconnectTimeout = null;
                     if (transport.iceState === 'disconnected') {
@@ -903,6 +904,12 @@ module.exports = class Room {
         }
 
         const { id } = peerProducer;
+
+        // Covers every way a producer can close (explicit, transport closed, peer left)
+        peerProducer.observer.once('close', () => {
+            this.clearVideoTextAnnotations(id);
+            this.clearVideoDrawingAnnotations(id);
+        });
 
         const producerTransport = peer.getTransport(producerTransportId);
 

@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.41
+ * @version 2.6.42
  *
  */
 
@@ -388,6 +388,7 @@ class RoomClient {
         // DataChannel chat
         this.chatDataProducer = null;
         this.chatDataConsumers = new Map();
+        this.iceRestartingTransports = new WeakSet();
         this.useDataChannel = true; // prefer DataChannel for chat
 
         this.isScreenShareSupported =
@@ -1128,10 +1129,15 @@ class RoomClient {
     }
 
     setupProducerTransportHandlers() {
-        this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+        // Bind every handler to this specific transport: after a recovery `this.producerTransport`
+        // points to a new instance and late events from the old one must not act on it.
+        const transport = this.producerTransport;
+        const isCurrent = () => transport === this.producerTransport;
+
+        transport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 await this.socket.request('connectTransport', {
-                    transport_id: this.producerTransport.id,
+                    transport_id: transport.id,
                     dtlsParameters,
                 });
                 callback();
@@ -1141,10 +1147,10 @@ class RoomClient {
             }
         });
 
-        this.producerTransport.on('produce', async ({ kind, appData, rtpParameters }, callback, errback) => {
+        transport.on('produce', async ({ kind, appData, rtpParameters }, callback, errback) => {
             try {
                 const { producer_id } = await this.socket.request('produce', {
-                    producerTransportId: this.producerTransport.id,
+                    producerTransportId: transport.id,
                     kind,
                     appData,
                     rtpParameters,
@@ -1155,68 +1161,64 @@ class RoomClient {
             }
         });
 
-        this.producerTransport.on(
-            'producedata',
-            async ({ sctpStreamParameters, label, protocol, appData }, callback, errback) => {
-                try {
-                    const { id } = await this.socket.request('produceData', {
-                        transportId: this.producerTransport.id,
-                        sctpStreamParameters,
-                        label,
-                        protocol,
-                        appData,
-                    });
-                    callback({ id });
-                } catch (err) {
-                    errback(err);
-                }
+        transport.on('producedata', async ({ sctpStreamParameters, label, protocol, appData }, callback, errback) => {
+            try {
+                const { id } = await this.socket.request('produceData', {
+                    transportId: transport.id,
+                    sctpStreamParameters,
+                    label,
+                    protocol,
+                    appData,
+                });
+                callback({ id });
+            } catch (err) {
+                errback(err);
             }
-        );
+        });
 
-        this.producerTransport.on('connectionstatechange', async (state) => {
-            console.log(`Producer Transport state changed to: ${state}`, { id: this.producerTransport.id });
+        transport.on('connectionstatechange', async (state) => {
+            console.log(`Producer Transport state changed to: ${state}`, { id: transport.id });
+
+            if (!isCurrent()) {
+                console.log('Ignoring state change of a replaced Producer Transport', { id: transport.id, state });
+                return;
+            }
 
             switch (state) {
                 case 'connecting':
                     console.log('Producer Transport connecting...');
                     break;
                 case 'connected':
-                    console.log('✅ Producer Transport connected', { id: this.producerTransport.id });
+                    console.log('✅ Producer Transport connected', { id: transport.id });
                     break;
                 case 'disconnected':
-                    console.warn('⚠️ Producer Transport disconnected', { id: this.producerTransport.id });
+                    console.warn('⚠️ Producer Transport disconnected', { id: transport.id });
                     console.warn('⚠️ Producer Attempting ICE restart...');
                     try {
-                        await this.restartProducerIce();
+                        await this.restartTransportWithRetry(transport, 'Producer');
                     } catch (error) {
                         console.error('❌ Producer ICE restart failed', error.message);
                     }
                     break;
                 case 'failed':
-                    console.warn('❌ Producer Transport failed', { id: this.producerTransport.id });
+                    console.warn('❌ Producer Transport failed', { id: transport.id });
                     this.handleTransportLost('producer');
                     break;
                 default:
-                    console.log('Producer transport connection state changed', {
-                        state,
-                        id: this.producerTransport.id,
-                    });
+                    console.log('Producer transport connection state changed', { state, id: transport.id });
                     break;
             }
         });
 
-        this.producerTransport.on('icegatheringstatechange', (state) => {
+        transport.on('icegatheringstatechange', (state) => {
             const normalStates = new Set(['new', 'gathering', 'complete']);
             normalStates.has(state)
-                ? console.log('Producer ICE gathering state', { state, id: this.producerTransport.id })
-                : console.warn('Unexpected Producer ICE gathering state', { state, id: this.producerTransport.id });
+                ? console.log('Producer ICE gathering state', { state, id: transport.id })
+                : console.warn('Unexpected Producer ICE gathering state', { state, id: transport.id });
         });
 
-        this.producerTransport.on('icecandidateerror', (error) => {
-            console.error('❌ Producer ICE candidate error', {
-                error: error,
-                id: this.producerTransport.id,
-            });
+        transport.on('icecandidateerror', (error) => {
+            console.error('❌ Producer ICE candidate error', { error: error, id: transport.id });
         });
     }
 
@@ -1240,10 +1242,14 @@ class RoomClient {
     }
 
     setupConsumerTransportHandlers() {
-        this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+        // See setupProducerTransportHandlers: handlers are bound to this specific transport.
+        const transport = this.consumerTransport;
+        const isCurrent = () => transport === this.consumerTransport;
+
+        transport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 await this.socket.request('connectTransport', {
-                    transport_id: this.consumerTransport.id,
+                    transport_id: transport.id,
                     dtlsParameters,
                 });
                 callback();
@@ -1253,50 +1259,49 @@ class RoomClient {
             }
         });
 
-        this.consumerTransport.on('connectionstatechange', async (state) => {
-            console.log(`Consumer Transport state changed to: ${state}`, { id: this.consumerTransport.id });
+        transport.on('connectionstatechange', async (state) => {
+            console.log(`Consumer Transport state changed to: ${state}`, { id: transport.id });
+
+            if (!isCurrent()) {
+                console.log('Ignoring state change of a replaced Consumer Transport', { id: transport.id, state });
+                return;
+            }
 
             switch (state) {
                 case 'connecting':
                     console.log('Consumer Transport connecting...');
                     break;
                 case 'connected':
-                    console.log('✅ Consumer Transport connected', { id: this.consumerTransport.id });
+                    console.log('✅ Consumer Transport connected', { id: transport.id });
                     break;
                 case 'disconnected':
-                    console.warn('⚠️ Consumer Transport disconnected', { id: this.consumerTransport.id });
+                    console.warn('⚠️ Consumer Transport disconnected', { id: transport.id });
                     console.warn('⚠️ Consumer Attempting ICE restart...');
                     try {
-                        await this.restartConsumerIce();
+                        await this.restartTransportWithRetry(transport, 'Consumer');
                     } catch (error) {
                         console.error('❌ Consumer ICE restart failed', error.message);
                     }
                     break;
                 case 'failed':
-                    console.warn('❌ Consumer Transport failed', { id: this.consumerTransport.id });
+                    console.warn('❌ Consumer Transport failed', { id: transport.id });
                     this.handleTransportLost('consumer');
                     break;
                 default:
-                    console.log('Consumer transport connection state changed', {
-                        state,
-                        id: this.consumerTransport.id,
-                    });
+                    console.log('Consumer transport connection state changed', { state, id: transport.id });
                     break;
             }
         });
 
-        this.consumerTransport.on('icegatheringstatechange', (state) => {
+        transport.on('icegatheringstatechange', (state) => {
             const normalStates = new Set(['new', 'gathering', 'complete']);
             normalStates.has(state)
-                ? console.log('Consumer ICE gathering state', { state, id: this.consumerTransport.id })
-                : console.warn('Unexpected Consumer ICE gathering state', { state, id: this.consumerTransport.id });
+                ? console.log('Consumer ICE gathering state', { state, id: transport.id })
+                : console.warn('Unexpected Consumer ICE gathering state', { state, id: transport.id });
         });
 
-        this.consumerTransport.on('icecandidateerror', (error) => {
-            console.error('❌ Consumer ICE candidate error', {
-                error: error,
-                id: this.consumerTransport.id,
-            });
+        transport.on('icecandidateerror', (error) => {
+            console.error('❌ Consumer ICE candidate error', { error: error, id: transport.id });
         });
     }
 
@@ -1338,30 +1343,53 @@ class RoomClient {
     }
 
     async restartTransportWithRetry(transport, transportType, maxRetries = 5, initialDelay = 1000) {
-        let delay = initialDelay;
+        const kind = transportType === 'Producer' ? 'producer' : 'consumer';
+        const isCurrent = () =>
+            transport &&
+            !transport.closed &&
+            transport === (kind === 'producer' ? this.producerTransport : this.consumerTransport);
 
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            const reconnected = await this.restartTransportIce(transport, transportType);
+        if (!isCurrent()) return false;
 
-            if (reconnected) {
-                console.info(`✅ ${transportType} reconnected successfully on attempt ${attempt}.`);
-                return true;
+        // 'disconnected' may fire repeatedly: never run two restart loops for the same transport
+        if (this.iceRestartingTransports.has(transport)) return false;
+        this.iceRestartingTransports.add(transport);
+
+        try {
+            let delay = initialDelay;
+
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                // Stop if the transport was closed or replaced by a recovery in the meantime
+                if (!isCurrent()) return false;
+
+                const reconnected = await this.restartTransportIce(transport, transportType);
+
+                if (reconnected) {
+                    console.info(`✅ ${transportType} reconnected successfully on attempt ${attempt}.`);
+                    return true;
+                }
+
+                if (attempt < maxRetries) {
+                    console.warn(
+                        `🌀 ${transportType} reconnection attempt ${attempt} failed. Retrying in ${delay}ms...`
+                    );
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+                    delay *= 2; // Exponential backoff: 1s -> 2s -> 4s -> 8s -> 16s
+                } else {
+                    console.error(`❌ ${transportType} failed to reconnect after ${maxRetries} attempts.`);
+                }
             }
 
-            if (attempt < maxRetries) {
-                console.warn(`🌀 ${transportType} reconnection attempt ${attempt} failed. Retrying in ${delay}ms...`);
-                await new Promise((resolve) => setTimeout(resolve, delay));
-                delay *= 2; // Exponential backoff: 1s -> 2s -> 4s -> 8s -> 16s
-            } else {
-                console.error(`❌ ${transportType} failed to reconnect after ${maxRetries} attempts.`);
-            }
+            if (!isCurrent()) return false;
+
+            // The recovery closes the dead transport itself, after snapshotting what it carried.
+            console.error('❌ Failed to reconnect after multiple attempts, escalating to transport recovery.');
+            this.handleTransportLost(kind);
+
+            return false;
+        } finally {
+            this.iceRestartingTransports.delete(transport);
         }
-
-        console.error('❌ Failed to reconnect after multiple attempts, escalating to transport recovery.');
-        transport.close();
-        this.handleTransportLost(transportType === 'Producer' ? 'producer' : 'consumer');
-
-        return false;
     }
 
     async restartProducerIce(retries = 5, delay = 1000) {
@@ -1402,19 +1430,32 @@ class RoomClient {
     // zombie state, rebuild the transport and re-establish producers/consumers.
     // ####################################################
 
-    handleTransportClosed = async ({ transport_id }) => {
-        const isProducer = this.producerTransport?.id === transport_id;
-        const isConsumer = this.consumerTransport?.id === transport_id;
-        const transport = [this.producerTransport, this.consumerTransport].find(
-            (candidate) => candidate?.id === transport_id
-        );
-        if (transport && !transport.closed) {
-            console.warn('SocketOn Closing transport', { transport_id });
-            transport.close();
+    handleTransportClosed = (data) => this.onTransportClosed(data);
+
+    async onTransportClosed({ transport_id } = {}) {
+        const kind =
+            this.producerTransport?.id === transport_id
+                ? 'producer'
+                : this.consumerTransport?.id === transport_id
+                  ? 'consumer'
+                  : null;
+
+        // Already replaced by a previous recovery (or unknown): nothing to do
+        if (!kind) return;
+
+        console.warn('SocketOn transport closed by the server', { transport_id, kind });
+
+        if (!this._isConnected) {
+            const transport = kind === 'producer' ? this.producerTransport : this.consumerTransport;
+            if (!transport.closed) transport.close();
+            return;
         }
-        if (isProducer) await this.handleTransportLost('producer');
-        if (isConsumer) await this.handleTransportLost('consumer');
-    };
+
+        // Do NOT close the client transport here: mediasoup-client would close its producers and fire
+        // 'transportclose', tearing down the local media the recovery is about to re-send. The recovery
+        // snapshots the media first and then closes the dead transport itself.
+        await this.handleTransportLost(kind);
+    }
 
     async handleTransportLost(kind, maxAttempts = 3, initialDelay = 1000) {
         if (kind !== 'producer' && kind !== 'consumer') return;
@@ -1431,6 +1472,19 @@ class RoomClient {
         if (this[recoveringFlag]) return;
         this[recoveringFlag] = true;
 
+        // Local tracks kept alive for re-producing must be released if the recovery is abandoned
+        const releaseProducerSnapshot = () => {
+            if (kind !== 'producer' || !this.producerRecoverySnapshot) return;
+            for (const { track } of this.producerRecoverySnapshot) {
+                try {
+                    track.stop();
+                } catch (error) {
+                    console.warn('Error stopping recovery track', error);
+                }
+            }
+            this.producerRecoverySnapshot = null;
+        };
+
         console.warn(`🔄 ${kind} transport lost, attempting recovery...`);
         this.userLog('warning', `${icons.refresh} Media connection lost, reconnecting...`, 'top-end', 8000);
 
@@ -1439,6 +1493,7 @@ class RoomClient {
             // abort if the room was exited / closed / the socket dropped while recovering
             if (!this._isConnected) {
                 console.warn(`↩️ ${kind} recovery aborted: no longer connected`);
+                releaseProducerSnapshot();
                 this[recoveringFlag] = false;
                 return;
             }
@@ -1461,6 +1516,7 @@ class RoomClient {
             }
         }
 
+        releaseProducerSnapshot();
         this[recoveringFlag] = false;
         if (!this._isConnected) return;
         popupHtmlMessage(
@@ -1474,39 +1530,49 @@ class RoomClient {
         );
     }
 
-    async recoverProducerTransport() {
-        const previousTransportId = this.producerTransport?.id;
+    closeDeadTransport(transport) {
+        if (!transport || transport.closed) return;
+        transport.close();
+        // When the transport died on the client side only ('failed' / ICE restart exhausted), the server-side
+        // transport and its producers/consumers would otherwise linger until the ICE consent timeout, showing
+        // frozen duplicate tiles to the other participants. A "not found" reply is expected and ignored.
+        this.socket
+            ?.request('closeTransport', { transport_id: transport.id })
+            .catch((error) => console.debug('closeTransport', { transport_id: transport.id, error: error.message }));
+    }
 
-        // Snapshot the active producers BEFORE touching any state. Tracks are intentionally
-        // kept alive (not stopped) so they can be re-produced on the fresh transport.
+    detachProducersForRecovery() {
+        // Producers are created with stopTracks: false, so closing them keeps the local tracks
+        // (already processed by virtual background / noise suppression) alive for re-producing.
         const snapshot = [];
         for (const [type, producer_id] of [...this.producerLabel]) {
             const producer = this.producers.get(producer_id);
-            if (!producer || !producer.track || producer.track.ended) continue;
-            snapshot.push({
-                type,
-                paused: producer.paused,
-                stream: type === mediaType.audio ? this.localAudioStream : this.localVideoStream,
-                track: producer.track,
-            });
-        }
-
-        // Drop the dead local producer state (maps + UI). We intentionally do NOT call
-        // closeProducer(): the server-side producers are already gone, closeProducer()
-        // stops the tracks we want to reuse, and it would emit stale producerClosed events.
-        for (const [type, producer_id] of [...this.producerLabel]) {
-            const producer = this.producers.get(producer_id);
-            if (producer) {
-                producer.close();
-                this.producers.delete(producer_id);
-            }
-            this.producerLabel.delete(type);
+            const track = producer?.track;
             const elem = this.getId(producer_id);
+
+            if (track && track.readyState !== 'ended') {
+                const elemStream = elem?.srcObject;
+                const stream =
+                    typeof elemStream?.getTracks === 'function' && elemStream.getTracks().includes(track)
+                        ? elemStream
+                        : new MediaStream([track]);
+                snapshot.push({ type, paused: !!producer.paused, stream, track });
+            }
+
+            // close() only emits '@close' (no app-level 'transportclose'), so closeProducer() is not triggered:
+            // the server-side producers are gone/going and their tracks must not be stopped.
+            if (producer && !producer.closed) producer.close();
+            this.producers.delete(producer_id);
+            this.producerLabel.delete(type);
+
             if (elem) {
                 // detach the element without stopping the shared stream/track
                 elem.srcObject = null;
                 elem.parentNode?.removeChild(elem);
                 if (type === mediaType.video || type === mediaType.screen) {
+                    if (this.isVideoPinned && this.pinnedVideoPlayerId == producer_id) {
+                        this.removeVideoPinMediaContainer();
+                    }
                     const d = this.getId(producer_id + '__video');
                     const vb = this.getId(producer_id + '__vb');
                     d?.parentNode?.removeChild(d);
@@ -1515,21 +1581,53 @@ class RoomClient {
                 }
             }
         }
+        // Re-produce the tab audio after the screen it belongs to
+        return snapshot.sort((a, b) => (a.type === mediaType.audioTab) - (b.type === mediaType.audioTab));
+    }
+
+    async recoverProducerTransport() {
+        // Detach once and keep the snapshot across retry attempts, so a failed attempt
+        // (e.g. transport creation timeout) can't lose the media that must be re-sent.
+        if (!this.producerRecoverySnapshot) {
+            this.producerRecoverySnapshot = this.detachProducersForRecovery();
+        }
+
+        const deadTransport = this.producerTransport;
+        this.closeDeadTransport(deadTransport);
 
         const transport = await this.initProducerTransport(this.device);
-        if (!transport || transport.id === previousTransportId) {
+        if (!transport || transport === deadTransport || transport.id === deadTransport?.id) {
             throw new Error('Producer transport creation failed');
         }
 
+        const snapshot = this.producerRecoverySnapshot;
+        this.producerRecoverySnapshot = null;
+
         // Re-establish the media we had before the transport died, including muted state
         for (const item of snapshot) {
+            if (item.track.readyState === 'ended') continue;
             try {
-                await this.produce(item.type, null, false, false, item);
-                if (item.paused) await this.pauseProducer(item.type);
+                if (item.type === mediaType.audioTab) {
+                    await this.produceScreenAudio(item.stream);
+                } else {
+                    await this.produce(item.type, null, false, false, item);
+                }
+                if (item.paused && this.producerLabel.has(item.type)) {
+                    await this.pauseProducer(item.type);
+                    if (item.type === mediaType.audio) {
+                        this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
+                    }
+                }
             } catch (error) {
                 console.error(`Producer recovery failed for type ${item.type}`, error);
             }
         }
+
+        // The chat DataProducer lived on the dead transport too
+        if (!this.chatDataProducer || this.chatDataProducer.closed) {
+            await this.initChatDataProducer();
+        }
+
         console.log('[recoverProducerTransport] - PRODUCER LABEL', this.producerLabel);
     }
 
@@ -1545,8 +1643,16 @@ class RoomClient {
             this.removeConsumer(consumer_id, consumer?.kind ?? 'other');
         }
 
+        const deadTransport = this.consumerTransport;
+        this.closeDeadTransport(deadTransport);
+        // The chat DataConsumers lived on the dead transport too
+        for (const dataConsumer of this.chatDataConsumers?.values() ?? []) {
+            if (!dataConsumer.closed) dataConsumer.close();
+        }
+        this.chatDataConsumers?.clear();
+
         const transport = await this.initConsumerTransport(this.device);
-        if (!transport) {
+        if (!transport || transport === deadTransport) {
             throw new Error('Consumer transport creation failed');
         }
 
@@ -1554,6 +1660,9 @@ class RoomClient {
         // handleNewProducers(reconcile=true)), which also keeps working with the periodic
         // consumer reconcile already in place
         await this.reconcileConsumers();
+
+        // Re-consume the chat DataProducers of the other peers on the new transport
+        this.socket.emit('getDataProducers');
     }
 
     // ####################################################
@@ -1760,7 +1869,9 @@ class RoomClient {
     handleDataConsumerClosed = (data) => {
         console.log('SocketOn Data consumer closed:', data);
         const { dataConsumer_id } = data;
-        if (this.chatDataConsumers.has(dataConsumer_id)) {
+        const dataConsumer = this.chatDataConsumers.get(dataConsumer_id);
+        if (dataConsumer) {
+            if (!dataConsumer.closed) dataConsumer.close();
             this.chatDataConsumers.delete(dataConsumer_id);
             console.log('DataConsumer removed', { dataConsumer_id });
         }
@@ -2661,6 +2772,9 @@ class RoomClient {
 
             const params = {
                 track,
+                // Track lifetime is managed by the app (closeProducer stops it explicitly), so a
+                // transport recovery can close the dead producer and re-send the very same track.
+                stopTracks: false,
                 appData: {
                     mediaType: type,
                 },
@@ -2714,6 +2828,7 @@ class RoomClient {
             }
             if (audio && audioRequest !== this.microphoneRequest) {
                 producer.close();
+                track.stop();
                 microphoneStream.getAudioTracks().forEach((track) => track.stop());
                 return;
             }
@@ -2769,10 +2884,6 @@ class RoomClient {
                 this.closeProducer(type, 'transportclose');
             });
 
-            producer.on('close', () => {
-                this.closeProducer(type, 'close');
-            });
-
             switch (type) {
                 case mediaType.audio:
                     this.setIsAudio(this.peer_id, true);
@@ -2807,6 +2918,10 @@ class RoomClient {
                 setVideoButtonsDisabled(false);
             }
             if (screen) this.peer_info.peer_screen = false;
+            // Producers use stopTracks: false, so release the capture if no producer owns it
+            if ((video || screen) && !init && !this.producerExist(type)) {
+                stream?.getTracks().forEach((track) => track.stop());
+            }
             console.error('Produce error:', err);
             handleMediaError(type, err);
         }
@@ -3227,7 +3342,10 @@ class RoomClient {
         const producer = this.producers.get(producerId);
         if (processedStream && this.localAudioStream === processedStream && producer) {
             track.enabled = !producer.paused;
+            const processedTrack = producer.track;
             await producer.replaceTrack({ track });
+            // Producers use stopTracks: false, so release the replaced processed track explicitly
+            if (processedTrack && processedTrack !== track) processedTrack.stop();
             if (!isCurrent()) return null;
             this.localAudioStream = stream;
             const audioElement = this.getId(producerId);
@@ -4037,6 +4155,7 @@ class RoomClient {
             const track = stream.getAudioTracks()[0];
             const params = {
                 track,
+                stopTracks: false, // see produce()
                 appData: {
                     mediaType: mediaType.audio,
                 },
@@ -4059,10 +4178,6 @@ class RoomClient {
 
             producerSa.on('transportclose', () => {
                 this.closeProducer(mediaType.audioTab, 'transportclose');
-            });
-
-            producerSa.on('close', () => {
-                this.closeProducer(mediaType.audioTab, 'close');
             });
         } catch (err) {
             console.error('Produce Screen Audio error:', err);
@@ -4298,14 +4413,21 @@ class RoomClient {
     }
 
     async consumeData(dataProducerId) {
-        if (!this.consumerTransport) {
+        const transport = this.consumerTransport;
+        if (!transport) {
             console.warn('Consumer transport not available, skipping DataConsumer creation');
             return;
         }
 
+        // Avoid duplicated chat messages when the same DataProducer is announced twice
+        // (e.g. getDataProducers after a recovery racing a newDataProducer broadcast)
+        for (const existing of this.chatDataConsumers.values()) {
+            if (existing.dataProducerId === dataProducerId && !existing.closed) return;
+        }
+
         try {
             const params = await this.socket.request('consumeData', {
-                consumerTransportId: this.consumerTransport.id,
+                consumerTransportId: transport.id,
                 dataProducerId,
             });
 
@@ -4314,7 +4436,7 @@ class RoomClient {
                 return;
             }
 
-            const dataConsumer = await this.consumerTransport.consumeData({
+            const dataConsumer = await transport.consumeData({
                 id: params.id,
                 dataProducerId: params.dataProducerId,
                 sctpStreamParameters: params.sctpStreamParameters,
@@ -4396,15 +4518,17 @@ class RoomClient {
             throw new Error('Device not initialized');
         }
 
-        // Check if consumer transport exists
-        if (!this.consumerTransport) {
+        // Use the same transport for the server request and the local consume, even if a
+        // recovery swaps this.consumerTransport while the request is in flight
+        const transport = this.consumerTransport;
+        if (!transport) {
             throw new Error('Consumer transport not initialized');
         }
 
         const { rtpCapabilities } = this.device;
 
         const data = await this.socket.requestWithRetry('consume', {
-            consumerTransportId: this.consumerTransport.id,
+            consumerTransportId: transport.id,
             rtpCapabilities,
             producerId,
             type,
@@ -4413,7 +4537,7 @@ class RoomClient {
         const { id, kind, rtpParameters } = data;
         const codecOptions = {};
         const streamId = peer_id + (type == mediaType.screen ? '-screen-sharing' : '-mic-webcam');
-        const consumer = await this.consumerTransport.consume({
+        const consumer = await transport.consume({
             id,
             producerId,
             kind,

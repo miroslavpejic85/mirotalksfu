@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.41
+ * @version 2.6.42
  *
  */
 
@@ -2452,7 +2452,13 @@ function startServer() {
 
             try {
                 const worker = await getMediasoupWorker();
-                const room = await new Room(socket.room_id, worker, io).ready();
+                const room = await new Room(room_id, worker, io).ready();
+                // Another socket may have created the same room while the router was being created:
+                // keep the first one and release this router instead of silently leaking it.
+                if (roomList.has(room_id)) {
+                    room.close();
+                    return callback({ error: 'already exists' });
+                }
                 roomList.set(socket.room_id, room);
                 log.debug('Created room', { room_id: socket.room_id });
                 callback({ room_id: socket.room_id });
@@ -2861,6 +2867,32 @@ function startServer() {
             }
         });
 
+        // Lets the client drop a transport it gave up on (ICE 'failed' / restart exhausted) right away,
+        // instead of leaving its producers visible to others until the ICE consent timeout.
+        socket.on('closeTransport', ({ transport_id } = {}, callback) => {
+            const peer = getPeer(socket);
+
+            if (!peer) {
+                return callback?.({ error: 'Peer not found' });
+            }
+
+            const transport = peer.getTransport(transport_id);
+
+            if (!transport) {
+                return callback?.({ error: `Transport with id "${transport_id}" not found` });
+            }
+
+            log.debug('Close transport request received', { transport_id, peerInfo: getPeerInfo(peer) });
+
+            try {
+                if (!transport.closed) transport.close();
+                callback?.('successfully');
+            } catch (err) {
+                log.warn('Close transport warning', { error: err.message, transport_id });
+                callback?.({ error: err.message });
+            }
+        });
+
         socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback, errback) => {
             if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
@@ -2878,29 +2910,28 @@ function startServer() {
 
             const peerInfo = getPeerInfo(peer);
 
-            const data = {
+            const mediaType = appData?.mediaType;
+
+            if (!mediaType) {
+                return callback({ error: 'Missing appData.mediaType' });
+            }
+
+            // Must happen before room.produce(): its 'newProducers' broadcast carries this peer_info
+            peer.updatePeerInfo({
                 room_id: room.id,
                 peer_name: peerInfo.peer_name,
                 peer_id: socket.id,
                 kind: kind,
-                type: appData.mediaType,
+                type: mediaType,
                 status: true,
-            };
-
-            peer.updatePeerInfo(data);
+            });
 
             try {
-                const producer_id = await room.produce(
-                    socket.id,
-                    producerTransportId,
-                    rtpParameters,
-                    kind,
-                    appData.mediaType
-                );
+                const producer_id = await room.produce(socket.id, producerTransportId, rtpParameters, kind, mediaType);
 
                 log.debug('Produce', {
                     kind: kind,
-                    type: appData.mediaType,
+                    type: mediaType,
                     producer_id: producer_id,
                     peer_id: socket.id,
                     peerInfo: peerInfo,

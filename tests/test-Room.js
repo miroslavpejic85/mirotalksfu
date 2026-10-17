@@ -6,6 +6,36 @@ const { EventEmitter } = require('events');
 const Room = require('../app/src/Room');
 
 describe('test-Room', () => {
+    it('clears screen annotations when a producer closes because its transport closed', async () => {
+        const room = Object.create(Room.prototype);
+        room.videoTextAnnotations = new Map([['producer-id', new Map([['a', {}]])]]);
+        room.videoDrawingAnnotations = new Map([['producer-id', new Map([['d', {}]])]]);
+        room.videoDrawingPermissions = new Map([['producer-id', false]]);
+        room.peers = new Map();
+        room.broadCast = () => {};
+
+        const observer = new EventEmitter();
+        const producer = { id: 'producer-id', paused: false, appData: {}, observer };
+        const peer = {
+            peer_name: 'Peer',
+            peer_info: {},
+            hasTransport: () => true,
+            getTransport: () => ({ iceState: 'connected', dtlsState: 'connected' }),
+            createProducer: async () => producer,
+        };
+        room.peers.set('socket-id', peer);
+
+        (await room.produce('socket-id', 'transport-id', { codecs: [] }, 'video', 'screenType')).should.equal(
+            'producer-id'
+        );
+
+        observer.emit('close');
+
+        room.videoTextAnnotations.has('producer-id').should.equal(false);
+        room.videoDrawingAnnotations.has('producer-id').should.equal(false);
+        room.videoDrawingPermissions.has('producer-id').should.equal(false);
+    });
+
     it('persists presenter-only screen annotation moderation', () => {
         const room = Object.create(Room.prototype);
         room._moderator = { screen_annotations_cant_draw: false };
