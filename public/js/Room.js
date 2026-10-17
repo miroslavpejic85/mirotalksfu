@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.42
+ * @version 2.6.43
  *
  */
 
@@ -3081,6 +3081,11 @@ function handleButtons() {
     };
     exitButton.onclick = (e) => {
         if (e && e.shiftKey) return leaveRoom();
+        // Hover opens the menu on desktop, so a click means "leave room"
+        if (isDesktopDevice && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            setExitMenuOpen(false);
+            return leaveRoom();
+        }
         toggleExitMenu();
     };
     if (exitLeaveBtn) exitLeaveBtn.onclick = handleExitLeave;
@@ -10126,7 +10131,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.42',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.43',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
