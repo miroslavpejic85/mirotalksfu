@@ -2413,6 +2413,7 @@ function startServer() {
         'updatePeerInfo',
         'setVideoOff',
         'refreshParticipantsCount',
+        'chatTyping',
         'exitRoom',
     ]);
 
