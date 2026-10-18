@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.47
+ * @version 2.6.48
  *
  */
 
@@ -303,6 +303,16 @@ class RoomClient {
         this.isMobileSafari = this.isMobileDevice && peer_info.browser_name.toLowerCase().includes('safari');
 
         this.pendingSinkId = null; // store desired sink id until next user gesture
+
+        // Remote <audio> elements whose playback was blocked by the browser autoplay policy (e.g. Safari)
+        this.blockedAudioElements = new Set();
+        this.audioUnlockPrompt = null;
+        this.audioUnlockListening = false;
+        this.onAudioUnlockGesture = () => this.unlockBlockedAudio();
+        this.onAudioVisibilityChange = () => {
+            if (!document.hidden) this.resumeInterruptedAudio();
+        };
+        document.addEventListener('visibilitychange', this.onAudioVisibilityChange);
 
         this.localAudioEl = localAudioEl;
         this.remoteAudioEl = remoteAudioEl;
@@ -4840,6 +4850,16 @@ class RoomClient {
                     this.changeAudioDestination(elem, false);
                 }
 
+                elem._peerName = peer_name;
+                // Remote audio is never paused on purpose, so a pause means the browser interrupted it
+                // (iOS call/Siri, autoplay policy). Detaching the element also pauses it: skip that case.
+                elem.addEventListener('pause', () => {
+                    if (!elem.isConnected || document.hidden || this.blockedAudioElements.has(elem)) return;
+                    this.playRemoteAudio(elem);
+                });
+                // autoplay alone fails silently when blocked (e.g. Safari with no active capture)
+                this.playRemoteAudio(elem);
+
                 //elem.addEventListener('play', () => { elem.volume = 0.1 });
                 console.log('[Add audioConsumers]', this.audioConsumers);
                 break;
@@ -4858,6 +4878,7 @@ class RoomClient {
         if (elem) {
             elem.srcObject?.getTracks().forEach((track) => track.stop());
             elem.remove();
+            if (this.blockedAudioElements.delete(elem)) this.updateAudioUnlockPrompt();
         }
 
         if (consumer_kind === 'video') {
@@ -5202,6 +5223,7 @@ class RoomClient {
 
         const clean = () => {
             this._isConnected = false;
+            this.teardownAudioUnlock();
             this.stopConsumerReconcile();
             this.stopNetworkMonitor(true);
             if (this.consumerTransport) this.consumerTransport.close();
@@ -5356,6 +5378,123 @@ class RoomClient {
 
         // Return cleanup function for manual removal if needed (e.g., component unmount)
         return cleanup;
+    }
+
+    // ####################################################
+    // REMOTE AUDIO AUTOPLAY UNLOCK
+    // ####################################################
+
+    playRemoteAudio(elem) {
+        if (!elem || !elem.isConnected) return Promise.resolve(false);
+        let playPromise;
+        try {
+            playPromise = elem.play();
+        } catch (err) {
+            playPromise = Promise.reject(err);
+        }
+        return Promise.resolve(playPromise)
+            .then(() => {
+                if (this.blockedAudioElements.delete(elem)) this.updateAudioUnlockPrompt();
+                return true;
+            })
+            .catch((err) => {
+                if (err?.name === 'NotAllowedError') {
+                    console.warn('Remote audio playback blocked by the browser autoplay policy');
+                    if (elem.isConnected) {
+                        this.blockedAudioElements.add(elem);
+                        this.updateAudioUnlockPrompt();
+                    }
+                } else if (err?.name !== 'AbortError') {
+                    console.warn('Remote audio play error', err);
+                }
+                return false;
+            });
+    }
+
+    unlockBlockedAudio() {
+        // play() must be invoked synchronously inside the user gesture handler
+        for (const elem of [...this.blockedAudioElements]) {
+            if (!elem.isConnected) {
+                this.blockedAudioElements.delete(elem);
+                continue;
+            }
+            this.playRemoteAudio(elem);
+        }
+        if (this._outputAudioContext?.state === 'suspended') {
+            this._outputAudioContext.resume().catch((err) => console.warn('Output AudioContext resume', err));
+        }
+        this.updateAudioUnlockPrompt();
+    }
+
+    resumeInterruptedAudio() {
+        const audios = this.remoteAudioEl?.querySelectorAll('audio') || [];
+        for (const elem of audios) {
+            if (elem.paused && elem.srcObject && !this.blockedAudioElements.has(elem)) {
+                this.playRemoteAudio(elem);
+            }
+        }
+    }
+
+    setAudioUnlockListeners(enabled) {
+        if (this.audioUnlockListening === enabled) return;
+        this.audioUnlockListening = enabled;
+        const method = enabled ? 'addEventListener' : 'removeEventListener';
+        // Events that grant user activation on desktop and touch devices (touchstart/pointerdown don't on iOS)
+        for (const type of ['click', 'touchend', 'pointerup', 'keydown']) {
+            window[method](type, this.onAudioUnlockGesture, true);
+        }
+    }
+
+    updateAudioUnlockPrompt() {
+        for (const elem of [...this.blockedAudioElements]) {
+            if (!elem.isConnected) this.blockedAudioElements.delete(elem);
+        }
+
+        const blocked = this.blockedAudioElements.size > 0;
+        this.setAudioUnlockListeners(blocked);
+
+        if (!blocked) {
+            this.audioUnlockPrompt?.classList.remove('is-visible');
+            return;
+        }
+
+        if (!this.audioUnlockPrompt) {
+            const btn = document.createElement('button');
+            btn.id = 'audioUnlockPrompt';
+            btn.type = 'button';
+            btn.className = 'audio-unlock-prompt';
+            btn.setAttribute('aria-live', 'polite');
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-volume-high';
+            icon.setAttribute('aria-hidden', 'true');
+            const text = document.createElement('span');
+            btn.append(icon, text);
+            // The click is also caught by the capture-phase gesture listener; this keeps the button self-contained
+            btn.addEventListener('click', () => this.unlockBlockedAudio());
+            document.body.appendChild(btn);
+            this.audioUnlockPrompt = btn;
+        }
+
+        const names = [...new Set([...this.blockedAudioElements].map((elem) => elem._peerName).filter(Boolean))];
+        const label =
+            names.length === 1
+                ? (window.i18n?.t('Enable audio to hear {name}', 'buttons') || 'Enable audio to hear {name}').replace(
+                      '{name}',
+                      () => names[0]
+                  )
+                : window.i18n?.t('Enable audio to hear participants', 'buttons') || 'Enable audio to hear participants';
+
+        this.audioUnlockPrompt.lastChild.textContent = label;
+        this.audioUnlockPrompt.setAttribute('aria-label', label);
+        this.audioUnlockPrompt.classList.add('is-visible');
+    }
+
+    teardownAudioUnlock() {
+        this.blockedAudioElements.clear();
+        this.setAudioUnlockListeners(false);
+        document.removeEventListener('visibilitychange', this.onAudioVisibilityChange);
+        this.audioUnlockPrompt?.remove();
+        this.audioUnlockPrompt = null;
     }
 
     async changeAudioDestination(audioElement = false, deferUntilUserActivation = true) {
