@@ -2390,33 +2390,6 @@ function startServer() {
 
     const PRE_JOIN_EVENTS = new Set(['createRoom', 'join', 'clientError', 'error']);
 
-    // Media/transport events a client may still send right after leaving (exit teardown, in-flight
-    // ICE restart or transport recovery, socket reconnect): expected, so blocked quietly.
-    const POST_LEAVE_EVENTS = new Set([
-        'getRouterRtpCapabilities',
-        'createWebRtcTransport',
-        'connectTransport',
-        'restartIce',
-        'closeTransport',
-        'produce',
-        'consume',
-        'produceData',
-        'consumeData',
-        'getDataProducers',
-        'producerClosed',
-        'pauseProducer',
-        'resumeProducer',
-        'resumeConsumer',
-        'getProducers',
-        'getPeerCounts',
-        'getRoomInfo',
-        'updatePeerInfo',
-        'setVideoOff',
-        'refreshParticipantsCount',
-        'chatTyping',
-        'exitRoom',
-    ]);
-
     io.on('connection', (socket) => {
         // Security: only sockets that were admitted to the room (join accepted, lobby included) may use
         // room events. Rejected/unjoined sockets can still be bound to a room id by 'createRoom'.
@@ -2426,11 +2399,18 @@ function startServer() {
             if (event === 'roomAction' && payload?.action === 'checkPassword') return next();
             if (roomExists(socket) && getPeer(socket)) return next();
 
-            const logBlocked = POST_LEAVE_EVENTS.has(event) ? log.debug : log.warn;
-            logBlocked.call(log, 'Blocked event from a socket that is not a room member', {
-                event,
-                peer_id: socket.id,
-            });
+            // Only a socket bound to a live room (via createRoom) but never admitted is a bypass attempt.
+            // A socket with no room is a harmless leftover: events buffered during a reconnect (new socket
+            // id, sent before the page reloads) or sent after exitRoom (teardown, in-flight ICE restarts).
+            if (roomExists(socket)) {
+                log.warn('Blocked event from a socket that is not a room member', {
+                    event,
+                    peer_id: socket.id,
+                    room_id: socket.room_id,
+                });
+            } else {
+                log.debug('Blocked event from a socket that is not in a room', { event, peer_id: socket.id });
+            }
             const ack = packet[packet.length - 1];
             if (typeof ack === 'function') ack({ error: 'Not in room' });
         });
