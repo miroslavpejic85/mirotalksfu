@@ -5458,7 +5458,7 @@ function startServer() {
                 hostCfg?.presenters?.join_first
             );
             if (fallbackPresenter) {
-                log.info('[Disconnect] - assigned fallback presenter', {
+                log.debug('[Disconnect] - assigned fallback presenter', {
                     room_id: socket.room_id,
                     peer_id: fallbackPresenter.id,
                     peer_name: fallbackPresenter.peer_name,
@@ -5537,7 +5537,7 @@ function startServer() {
                 hostCfg?.presenters?.join_first
             );
             if (fallbackPresenter) {
-                log.info('[REMOVE ME] - assigned fallback presenter', {
+                log.debug('[REMOVE ME] - assigned fallback presenter', {
                     room_id: socket.room_id,
                     peer_id: fallbackPresenter.id,
                     peer_name: fallbackPresenter.peer_name,
