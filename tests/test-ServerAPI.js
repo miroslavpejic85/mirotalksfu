@@ -345,6 +345,56 @@ describe('test-ServerAPI', () => {
             result.should.deepEqual({ success: false, error: 'Room not found' });
         });
 
+        it('should pass a normalized reason message to peers when provided', () => {
+            const sendToAllStub = sinon.stub();
+            const roomList = new Map([
+                [
+                    'room1',
+                    {
+                        getPeers: () => new Map([['peer1', {}]]),
+                        removePeer: sinon.stub(),
+                        sendToAll: sendToAllStub,
+                    },
+                ],
+            ]);
+
+            serverApi.endMeeting(roomList, 'room1', '', '  Session\ntime expired  ');
+
+            sendToAllStub
+                .calledWith('cmd', {
+                    type: 'ejectAll',
+                    peer_name: 'API',
+                    broadcast: true,
+                    redirect: '',
+                    message: 'Session time expired',
+                })
+                .should.be.true();
+        });
+
+        it('should omit the reason message when it is empty or not a string', () => {
+            for (const message of ['   ', 123, { text: 'x' }, null]) {
+                const sendToAllStub = sinon.stub();
+                const roomList = new Map([
+                    [
+                        'room1',
+                        {
+                            getPeers: () => new Map(),
+                            removePeer: sinon.stub(),
+                            sendToAll: sendToAllStub,
+                        },
+                    ],
+                ]);
+
+                serverApi.endMeeting(roomList, 'room1', '', message);
+
+                sendToAllStub.firstCall.args[1].should.not.have.property('message');
+            }
+        });
+
+        it('should cap the reason message length', () => {
+            ServerApi.normalizeEjectMessage('a'.repeat(500)).length.should.equal(200);
+        });
+
         it('should handle room with no peers', () => {
             const sendToAllStub = sinon.stub();
             const roomList = new Map([

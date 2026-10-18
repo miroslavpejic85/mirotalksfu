@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.46
+ * @version 2.6.47
  *
  */
 
@@ -5568,9 +5568,11 @@ function initLeaveMeeting() {
     return completeRoomExit(false, false, '/newroom');
 }
 
-async function leaveRoom(allowCancel = true, disconnectAll = false) {
+async function leaveRoom(allowCancel = true, disconnectAll = false, ejectReason = '') {
     if (isLeavingRoom || isExiting) return;
-    return survey && survey.enabled ? leaveFeedback(allowCancel, disconnectAll) : completeRoomExit(disconnectAll);
+    return survey && survey.enabled
+        ? leaveFeedback(allowCancel, disconnectAll, ejectReason)
+        : completeRoomExit(disconnectAll, false, null, ejectReason);
 }
 
 async function runRoomExit(onReady) {
@@ -5606,20 +5608,20 @@ async function runRoomExit(onReady) {
     }
 }
 
-function completeRoomExit(disconnectAll = false, rateExperience = false, exitUrl = null) {
+function completeRoomExit(disconnectAll = false, rateExperience = false, exitUrl = null, ejectReason = '') {
     return runRoomExit(() => {
         if (rateExperience || exitUrl) {
             isExiting = true;
             endRoomSession();
-            rc.exitRoom(disconnectAll);
+            rc.exitRoom(disconnectAll, ejectReason);
             openURL(exitUrl || survey.url);
         } else {
-            redirectOnLeave(disconnectAll);
+            redirectOnLeave(disconnectAll, ejectReason);
         }
     });
 }
 
-function leaveFeedback(allowCancel, disconnectAll = false) {
+function leaveFeedback(allowCancel, disconnectAll = false, ejectReason = '') {
     return Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -5643,17 +5645,17 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
-            return completeRoomExit(disconnectAll);
+            return completeRoomExit(disconnectAll, false, null, ejectReason);
         } else if (result.isDenied) {
-            return completeRoomExit(disconnectAll, true);
+            return completeRoomExit(disconnectAll, true, null, ejectReason);
         }
     });
 }
 
-function redirectOnLeave(disconnectAll = false) {
+function redirectOnLeave(disconnectAll = false, ejectReason = '') {
     isExiting = true;
     endRoomSession();
-    rc.exitRoom(disconnectAll);
+    rc.exitRoom(disconnectAll, ejectReason);
 
     const url = new URL(redirect && redirect.enabled ? redirect.url : '/newroom', window.location.href).href;
     const target = isEmbedded
@@ -10133,7 +10135,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.46',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.47',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
@@ -10987,7 +10989,25 @@ function handleExitLeave() {
 
 function handleExitLeaveForAll() {
     setExitMenuOpen(false);
-    leaveRoom(true, true);
+    Swal.fire({
+        background: swalBackground,
+        position: 'center',
+        imageUrl: image.users,
+        title: 'End meeting for everyone?',
+        text: 'All participants will be disconnected. The reason, if any, will be shown to them.',
+        input: 'text',
+        inputPlaceholder: 'Reason (optional)',
+        inputAttributes: { maxlength: 200 },
+        ...swalDestructiveOptions(),
+        confirmButtonText: 'End for everyone',
+        cancelButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+        const reason = typeof result.value === 'string' ? result.value.trim() : '';
+        return leaveRoom(false, true, reason);
+    });
 }
 
 function handleExitMenuOutsideClick(e) {

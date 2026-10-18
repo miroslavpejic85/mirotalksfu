@@ -71,7 +71,7 @@ paths:
             tags:
                 - 'meeting'
             summary: 'End meeting'
-            description: 'End an active meeting by room name. All connected peers will be disconnected and redirected to the specified URL or home page.'
+            description: 'End an active meeting by room name. All connected peers will be disconnected and redirected to the specified URL or home page. An optional message is shown to every peer as the reason before they are disconnected.'
             parameters:
                 - in: path
                   name: room
@@ -81,7 +81,7 @@ paths:
                 - in: body
                   name: body
                   required: false
-                  description: 'Optional body with redirect URL'
+                  description: 'Optional body with redirect URL and reason message'
                   schema:
                       $ref: '#/definitions/EndMeetingRequest'
             consumes:
@@ -245,6 +245,11 @@ definitions:
             redirect:
                 type: string
                 description: 'URL to redirect peers to after the meeting ends. If empty, peers are redirected to the home page.'
+                default: ''
+            message:
+                type: string
+                maxLength: 200
+                description: 'Optional plain-text reason shown to all peers in a popup before they are disconnected (max 200 characters). If empty, peers leave immediately.'
                 default: ''
     EndMeetingResponse:
         type: 'object'

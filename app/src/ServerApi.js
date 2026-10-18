@@ -8,8 +8,19 @@ const { getJwtKeys } = require('./JwtSecret');
 const { v4: uuidV4 } = require('uuid');
 
 const JWT_EXP = config.security?.jwt?.exp || '1h';
+const EJECT_MESSAGE_MAX_LENGTH = 200;
 
 module.exports = class ServerApi {
+    // Plain-text reason shown to participants when a meeting is ended (clients render it escaped)
+    static normalizeEjectMessage(message) {
+        if (typeof message !== 'string') return '';
+        return message
+            .replace(/[\u0000-\u001F\u007F]+/g, ' ')
+            .trim()
+            .slice(0, EJECT_MESSAGE_MAX_LENGTH)
+            .trim();
+    }
+
     constructor(host = null, authorization = null) {
         this._host = host;
         this._authorization = authorization;
@@ -72,20 +83,24 @@ module.exports = class ServerApi {
         return meetings;
     }
 
-    endMeeting(roomList, room, redirect = '') {
+    endMeeting(roomList, room, redirect = '', message = '') {
         if (!roomList.has(room)) {
             return { success: false, error: 'Room not found' };
         }
 
         const roomObj = roomList.get(room);
 
-        // Notify all peers to exit (clients handle 'ejectAll' by redirecting)
-        roomObj.sendToAll('cmd', {
+        const cmd = {
             type: 'ejectAll',
             peer_name: 'API',
             broadcast: true,
             redirect: redirect || '',
-        });
+        };
+        const reason = ServerApi.normalizeEjectMessage(message);
+        if (reason) cmd.message = reason;
+
+        // Notify all peers to exit (clients show the optional reason, then redirect)
+        roomObj.sendToAll('cmd', cmd);
 
         // Remove all peers and close transports
         const peers = roomObj.getPeers();

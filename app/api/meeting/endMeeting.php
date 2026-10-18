@@ -6,9 +6,10 @@ $MIROTALK_URL = "https://sfu.mirotalk.com/api/v1/meeting";
 
 $ROOM = "test";
 
-// Optional: redirect URL (leave empty for home page)
+// Optional: redirect URL (leave empty for home page) and reason message shown to all participants
 $data = json_encode([
     // 'redirect' => 'https://example.com/meeting-ended',
+    // 'message' => 'The session time has expired',
 ]);
 
 $ch = curl_init();

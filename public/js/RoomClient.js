@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.46
+ * @version 2.6.47
  *
  */
 
@@ -5267,10 +5267,10 @@ class RoomClient {
         }
     }
 
-    exitRoom(disconnectAll = false) {
+    exitRoom(disconnectAll = false, ejectReason = '') {
         const switchDisconnectAllOnLeave = getId('switchDisconnectAllOnLeave');
         if (isPresenter && (disconnectAll || (switchDisconnectAllOnLeave && switchDisconnectAllOnLeave.checked))) {
-            this.ejectAllOnLeave();
+            this.ejectAllOnLeave(ejectReason);
         }
         this.exit();
     }
@@ -5279,13 +5279,15 @@ class RoomClient {
     // EJECT ALL ON LEAVE ROOM
     // ####################################################
 
-    ejectAllOnLeave() {
+    ejectAllOnLeave(reason = '') {
         const cmd = {
             type: 'ejectAll',
             peer_name: this.peer_name,
             peer_uuid: this.peer_uuid,
             broadcast: true,
         };
+        const message = typeof reason === 'string' ? reason.trim() : '';
+        if (message) cmd.message = message;
         this.emitCmd(cmd);
     }
 
@@ -12852,23 +12854,56 @@ class RoomClient {
         }
     }
 
-    handleEjectAllFromRoom(cmd) {
-        if (cmd.redirect && this.isSafeRedirectURL(cmd.redirect)) return completeRoomExit(false, false, cmd.redirect);
-        // Detach disconnect / reconnect handlers BEFORE exiting.
-        if (this.socket) {
-            this.socket.off('disconnect');
-            this.socket.off('connect_error');
-            if (this.socket.io) {
-                this.socket.io.off('reconnect_attempt');
-                this.socket.io.off('reconnect');
-                this.socket.io.off('reconnect_failed');
+    async handleEjectAllFromRoom(cmd) {
+        const message = typeof cmd.message === 'string' ? cmd.message.trim() : '';
+        if (message) {
+            if (this._forcedExitPending || isExiting || isLeavingRoom) return;
+            this._forcedExitPending = true;
+            this.detachReconnectHandlers();
+            try {
+                this.sound('eject');
+                await this.showMeetingEndedNotice(cmd.peer_name, message);
+            } finally {
+                this._forcedExitPending = false;
             }
         }
+        if (cmd.redirect && this.isSafeRedirectURL(cmd.redirect)) return completeRoomExit(false, false, cmd.redirect);
+        // Detach disconnect / reconnect handlers BEFORE exiting.
+        this.detachReconnectHandlers();
         if (typeof leaveRoom === 'function') {
             leaveRoom(false);
         } else {
             this.exit();
         }
+    }
+
+    detachReconnectHandlers() {
+        if (!this.socket) return;
+        this.socket.off('disconnect');
+        this.socket.off('connect_error');
+        if (this.socket.io) {
+            this.socket.io.off('reconnect_attempt');
+            this.socket.io.off('reconnect');
+            this.socket.io.off('reconnect_failed');
+        }
+    }
+
+    showMeetingEndedNotice(fromPeerName, message) {
+        const byApi = !fromPeerName || fromPeerName === 'API';
+        const title = byApi ? 'Meeting ended' : `${this.sanitizeHtml(String(fromPeerName))} ended the meeting`;
+        return Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            icon: 'warning',
+            title: title,
+            html: `The meeting has been closed for everyone<br><br><span class="red">Reason: ${this.sanitizeHtml(message)}</span>`,
+            timer: 6000,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
     }
 
     getRoomEmojiPlacement() {

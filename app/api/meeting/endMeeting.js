@@ -19,6 +19,7 @@ async function endMeeting() {
             },
             body: JSON.stringify({
                 // redirect: 'https://example.com/meeting-ended', // Optional: URL to redirect peers to (if empty, peers go to home page)
+                // message: 'The session time has expired', // Optional: reason shown to all peers before they are disconnected
             }),
         });
         const data = await response.json();

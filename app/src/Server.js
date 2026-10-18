@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.46
+ * @version 2.6.47
  *
  */
 
@@ -2014,8 +2014,8 @@ function startServer() {
             }
             // End the meeting
             const { room } = req.params;
-            const { redirect } = req.body || {};
-            const result = api.endMeeting(roomList, room, redirect);
+            const { redirect, message } = req.body || {};
+            const result = api.endMeeting(roomList, room, redirect, message);
             const status = result.success ? 200 : 404;
             res.status(status).json(result);
             // log.debug the output if all done
@@ -3348,6 +3348,9 @@ function startServer() {
                     if (!isPresenter) return;
                     // Only the server API (endMeeting) may force a redirect, never a peer
                     delete data.redirect;
+                    const ejectMessage = ServerApi.normalizeEjectMessage(data.message);
+                    if (ejectMessage) data.message = ejectMessage;
+                    else delete data.message;
                     break;
                 case 'peerAudio':
                     // Keep producer volume to update consumer on join room...

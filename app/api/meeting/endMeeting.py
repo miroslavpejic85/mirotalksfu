@@ -13,9 +13,10 @@ headers = {
     "Content-Type": "application/json",
 }
 
-# Optional: redirect URL (leave empty for home page)
+# Optional: redirect URL (leave empty for home page) and reason message shown to all participants
 data = {
     # "redirect": "https://example.com/meeting-ended",
+    # "message": "The session time has expired",
 }
 
 response = requests.delete(

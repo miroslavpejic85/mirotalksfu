@@ -403,6 +403,44 @@ describe('recording finalization before room exit', () => {
         assert.deepEqual(h.events.at(-1), ['navigate', 'https://host.example/done']);
     });
 
+    it('shows the eject-all reason before following the redirect', async () => {
+        const h = createHarness();
+        h.client.mediaRecorder = null;
+        h.client._isRecording = false;
+        h.client._recordingSave = null;
+        h.client.isSafeRedirectURL = () => true;
+        await h.client.handleEjectAllFromRoom({
+            peer_name: 'API',
+            redirect: 'https://host.example/done',
+            message: '<b>Maintenance</b>',
+        });
+        const dialogIndex = h.events.findIndex((event) => event[0] === 'dialog');
+        const navigateIndex = h.events.findIndex((event) => event[0] === 'navigate');
+        assert.ok(dialogIndex !== -1 && dialogIndex < navigateIndex);
+        const { title, html } = h.events[dialogIndex][1];
+        assert.equal(title, 'Meeting ended');
+        assert.match(html, /&lt;b&gt;Maintenance&lt;&#x2F;b&gt;/);
+        assert.deepEqual(h.events.at(-1), ['navigate', 'https://host.example/done']);
+    });
+
+    it('sends the presenter end-for-all reason with the eject-all command', () => {
+        const h = createHarness();
+        const sent = [];
+        h.context.isPresenter = true;
+        h.context.getId = () => null;
+        Object.assign(h.client, {
+            peer_name: 'Host',
+            peer_uuid: 'uuid',
+            emitCmd: (cmd) => sent.push(cmd),
+            exit: () => {},
+        });
+        h.client.exitRoom = h.context.Client.prototype.exitRoom;
+        h.client.exitRoom(true, '  Out of time  ');
+        h.client.exitRoom(true);
+        assert.equal(sent[0].message, 'Out of time');
+        assert.equal('message' in sent[1], false);
+    });
+
     it('waits before reconnect navigation', async () => {
         const h = createHarness();
         const download = deferred();
