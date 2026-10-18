@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.6.45",
+    "version": "2.6.46",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -93,7 +93,7 @@
         "mediasoup-client": "3.24.5",
         "mime-types": "^3.0.2",
         "nodemailer": "^10.1.2",
-        "openai": "^7.36.0",
+        "openai": "^7.38.0",
         "qs": "6.16.1",
         "sanitize-filename": "^1.6.4",
         "socket.io": "4.8.4",

@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.45
+ * @version 2.6.46
  *
  */
 
@@ -2390,6 +2390,32 @@ function startServer() {
 
     const PRE_JOIN_EVENTS = new Set(['createRoom', 'join', 'clientError', 'error']);
 
+    // Media/transport events a client may still send right after leaving (exit teardown, in-flight
+    // ICE restart or transport recovery, socket reconnect): expected, so blocked quietly.
+    const POST_LEAVE_EVENTS = new Set([
+        'getRouterRtpCapabilities',
+        'createWebRtcTransport',
+        'connectTransport',
+        'restartIce',
+        'closeTransport',
+        'produce',
+        'consume',
+        'produceData',
+        'consumeData',
+        'getDataProducers',
+        'producerClosed',
+        'pauseProducer',
+        'resumeProducer',
+        'resumeConsumer',
+        'getProducers',
+        'getPeerCounts',
+        'getRoomInfo',
+        'updatePeerInfo',
+        'setVideoOff',
+        'refreshParticipantsCount',
+        'exitRoom',
+    ]);
+
     io.on('connection', (socket) => {
         // Security: only sockets that were admitted to the room (join accepted, lobby included) may use
         // room events. Rejected/unjoined sockets can still be bound to a room id by 'createRoom'.
@@ -2399,7 +2425,11 @@ function startServer() {
             if (event === 'roomAction' && payload?.action === 'checkPassword') return next();
             if (roomExists(socket) && getPeer(socket)) return next();
 
-            log.warn('Blocked event from a socket that is not a room member', { event, peer_id: socket.id });
+            const logBlocked = POST_LEAVE_EVENTS.has(event) ? log.debug : log.warn;
+            logBlocked.call(log, 'Blocked event from a socket that is not a room member', {
+                event,
+                peer_id: socket.id,
+            });
             const ack = packet[packet.length - 1];
             if (typeof ack === 'function') ack({ error: 'Not in room' });
         });
