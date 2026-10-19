@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.48
+ * @version 2.6.49
  *
  */
 
@@ -95,6 +95,7 @@ const initUser = document.getElementById('initUser');
 // Keep a reference: #initUser (and this button) leaves the DOM when the join popup closes
 const initVideoAudioRefreshButton = document.getElementById('initVideoAudioRefreshButton');
 const initVideoContainerClass = document.querySelector('.init-video-container');
+let onInitModalClosed = null;
 const bars = document.querySelectorAll('.volume-bar');
 
 const Base64Prefix = 'data:application/pdf;base64,';
@@ -1924,6 +1925,12 @@ async function whoAreYou() {
         didOpen: () => {
             showMobileAudioGuidance();
         },
+        didClose: () => {
+            if (onInitModalClosed) {
+                onInitModalClosed();
+                onInitModalClosed = null;
+            }
+        },
         inputValidator: (name) => {
             if (isVideoAllowed && !isInitVideoLoaded) {
                 return 'Please wait for video to initialize...';
@@ -1950,9 +1957,14 @@ async function whoAreYou() {
             usernameEmoji.classList.add('hidden');
         }
         if (initStream && !joinRoomWithScreen) {
+            // Keep the last frame at its size; collapse only after the fade-out animation ends
+            initVideo.pause();
             await stopTracks(initStream);
-            elemDisplay('initVideo', false);
-            initVideoContainerShow(false);
+            const hideInitVideo = () => {
+                elemDisplay('initVideo', false);
+                initVideoContainerShow(false);
+            };
+            Swal.isVisible() ? (onInitModalClosed = hideInitVideo) : hideInitVideo();
         }
         getPeerInfo();
         joinRoom(peer_name, room_id);
@@ -10135,7 +10147,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.48',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.49',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
