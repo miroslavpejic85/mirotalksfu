@@ -3109,6 +3109,7 @@ body {
 .button:focus-visible,
 .gen-room-btn:focus-visible,
 .schedule-meeting-btn:focus-visible,
+.back-to-top:focus-visible,
 a:focus-visible {
     outline: 3px solid rgba(53, 208, 160, 0.85);
     outline-offset: 3px;
@@ -3135,6 +3136,8 @@ a:focus-visible {
 }
 
 .feature-inner {
+    position: relative;
+    overflow: hidden;
     padding: 24px;
     border: 1px solid rgba(255, 255, 255, 0.075);
     border-radius: 8px;
@@ -3143,19 +3146,26 @@ a:focus-visible {
     transition:
         border-color 0.25s ease,
         background-color 0.25s ease,
+        box-shadow 0.25s ease,
         transform 0.25s ease;
 }
 
 .feature-inner:hover {
     border-color: rgba(50, 184, 232, 0.28);
     background-color: rgba(32, 38, 48, 0.88);
+    box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
     transform: translateY(-4px);
 }
 
 .feature-icon {
     min-height: 182px;
     border-radius: 6px;
-    background: linear-gradient(145deg, rgba(22, 140, 255, 0.2), rgba(53, 208, 160, 0.08));
+    background:
+        radial-gradient(circle at 50% 115%, rgba(22, 140, 255, 0.6), transparent 58%),
+        radial-gradient(circle at 88% 4%, rgba(53, 208, 160, 0.22), transparent 56%),
+        linear-gradient(145deg, #202633, #151a22);
 }
 
 .feature-title {
@@ -3287,5 +3297,359 @@ a:focus-visible {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/*--------------------------------------------------------------
+# Landing Page UX Polish
+# body.sticky-header: shared sticky header (landing, new room, privacy)
+# body.landing-page: landing-only nav, widget avoidance and effects
+--------------------------------------------------------------*/
+
+:root {
+    --landing-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --landing-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html:has(.sticky-header) {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    scroll-padding-top: 84px;
+    scrollbar-color: #2c3644 var(--landing-bg);
+}
+
+.sticky-header ::selection {
+    background: rgba(22, 140, 255, 0.45);
+    color: #fff;
+}
+
+.skip-link {
+    position: absolute;
+    top: -64px;
+    left: 16px;
+    z-index: 200;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--landing-primary);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    transition: top 0.2s var(--landing-ease);
+}
+
+.skip-link:focus {
+    top: 12px;
+}
+
+/* Sticky glass header */
+.sticky-header .body-wrap {
+    overflow: clip;
+}
+
+.sticky-header {
+    --landing-header-h: 68px;
+}
+
+/* Transparent over the hero with a soft scrim for nav legibility; turns into a glass bar once scrolled. */
+.sticky-header .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 12px 0;
+    border-bottom: 1px solid transparent;
+    background-color: transparent;
+    transition:
+        background-color 0.3s var(--landing-ease),
+        border-color 0.3s var(--landing-ease),
+        box-shadow 0.3s var(--landing-ease);
+}
+
+.sticky-header .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -24px;
+    z-index: -1;
+    width: auto;
+    height: auto;
+    background: linear-gradient(to bottom, rgba(13, 16, 21, 0.4), rgba(13, 16, 21, 0));
+    transform: none;
+    pointer-events: none;
+    transition: opacity 0.3s var(--landing-ease);
+}
+
+.sticky-header .site-header.is-scrolled {
+    border-bottom-color: var(--landing-border);
+    background-color: rgba(17, 21, 27, 0.82);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(14px) saturate(1.4);
+}
+
+.sticky-header .site-header.is-scrolled::before {
+    opacity: 0;
+}
+
+/* The open support panel is large, so keep it below the sticky header.
+   The small minimized/reopener buttons stay at their original top position;
+   LandingEffects.js shifts the header nav/brand so they never overlap. */
+.sticky-header .mirotalk-support-widget.top-right,
+.sticky-header .mirotalk-support-widget.top-left {
+    top: calc(var(--landing-header-h) + 12px);
+    max-height: calc(100vh - var(--landing-header-h) - 32px);
+}
+
+.landing-page .landing-nav {
+    margin-right: var(--widget-avoid-right, 0px);
+}
+
+.landing-page .header-brand {
+    margin-left: var(--widget-avoid-left, 0px);
+}
+
+.site-header-inner.is-tight .landing-nav-icon {
+    display: none;
+}
+
+.site-header-inner.is-tight .landing-nav-cta {
+    margin-left: 0;
+    padding: 0 12px;
+    font-size: 13px;
+}
+
+.sticky-header .site-header .header-logo-image {
+    width: 44px;
+    height: 44px;
+}
+
+.scroll-progress {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--landing-primary), var(--landing-primary-bright), var(--landing-accent));
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: opacity 0.25s ease;
+}
+
+.is-scrolled .scroll-progress {
+    opacity: 1;
+}
+
+.landing-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.landing-nav a {
+    text-decoration: none;
+}
+
+.landing-nav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: var(--landing-text-muted);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.landing-nav-link[hidden] {
+    display: none;
+}
+
+.landing-nav-link:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+}
+
+.landing-nav-icon {
+    font-size: 20px;
+}
+
+.landing-nav-cta {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    margin-left: 8px;
+    padding: 0 18px;
+    border-radius: 8px;
+    background: linear-gradient(100deg, var(--landing-primary), var(--landing-primary-bright));
+    box-shadow: 0 8px 20px rgba(22, 140, 255, 0.22);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 20px;
+    white-space: nowrap;
+    transition:
+        box-shadow 0.2s ease,
+        transform 0.2s var(--landing-ease);
+}
+
+.landing-nav-cta:hover {
+    box-shadow: 0 12px 28px rgba(22, 140, 255, 0.36);
+    transform: translateY(-2px);
+}
+
+.landing-nav-cta:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Keep the original hero figure's top illustration clear of the header nav. */
+@media (min-width: 641px) {
+    .landing-page .hero-figure {
+        transform: translateY(48px);
+    }
+}
+
+/* Join card, buttons and inputs */
+/* .gen-room-btn is centered with translateY(-50%), so it keeps its own transforms. */
+.landing-page .button:not(.gen-room-btn):hover {
+    transform: translateY(-1px);
+}
+
+.landing-page .button:not(.gen-room-btn):active {
+    transform: translateY(0) scale(0.985);
+}
+
+.landing-page .cta:not(#supportUs) .cta-inner {
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.landing-page .cta:not(#supportUs) .cta-inner:focus-within {
+    border-color: rgba(50, 184, 232, 0.5);
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.32),
+        0 0 0 4px rgba(22, 140, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Feature cards */
+.landing-page .feature-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 24px;
+    left: 24px;
+    z-index: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(22, 140, 255, 0.75), rgba(53, 208, 160, 0.55), transparent);
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.landing-page .feature-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        300px circle at var(--mx, 50%) var(--my, 0%),
+        rgba(50, 184, 232, 0.14),
+        transparent 62%
+    );
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.landing-page .feature-inner:hover::before {
+    opacity: 1;
+}
+
+.landing-page .feature-inner:hover::after {
+    opacity: 1;
+}
+
+.landing-page .feature-icon img {
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.28));
+    transition: transform 0.35s var(--landing-ease-spring);
+}
+
+.landing-page .feature-inner:hover .feature-icon img {
+    transform: translateY(-3px) scale(1.04);
+}
+
+/* Scroll reveal for feature cards (enabled by LandingEffects.js via html.fx) */
+.fx .feature.is-revealing {
+    transition:
+        opacity 0.7s var(--landing-ease),
+        transform 0.7s var(--landing-ease);
+}
+
+.fx .feature.is-revealing:not(.is-in) {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: landingFailsafe 0.5s ease 4s forwards;
+}
+
+.fx .feature.is-revealing.is-in {
+    opacity: 1;
+    transform: none;
+}
+
+/* Back to top */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--landing-border);
+    border-radius: 50%;
+    background: rgba(25, 30, 38, 0.82);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    color: #fff;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s var(--landing-ease);
+}
+
+.back-to-top[hidden] {
+    display: none;
+}
+
+.back-to-top:hover {
+    background: var(--landing-primary);
+    transform: translateY(-3px);
+}
+
+@media (max-width: 640px) {
+    .landing-nav-link:not(.landing-nav-icon) {
+        display: none;
+    }
+
+    .landing-nav-cta {
+        height: 38px;
+        padding: 0 14px;
+    }
+
+    .back-to-top {
+        bottom: 16px;
+        left: 16px;
+    }
+}
+
+@keyframes landingFailsafe {
+    to {
+        opacity: 1;
+        transform: none;
     }
 }

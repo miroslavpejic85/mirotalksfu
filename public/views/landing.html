@@ -12,6 +12,8 @@
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#11151b" />
+        <meta name="color-scheme" content="dark" />
 
         <meta
             id="description"
@@ -53,13 +55,18 @@
         <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8"></script>
         <script defer src="../js/Swal.js"></script>
         <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
-        <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+        <script>
+            // Enables the scroll effects only when JS runs, so content never stays hidden without it.
+            document.documentElement.classList.add('fx');
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/xss/dist/xss.min.js"></script>
     </head>
-    <body class="is-boxed has-animations">
+    <body class="is-boxed has-animations sticky-header landing-page">
+        <a class="skip-link" href="#main">Skip to main content</a>
         <div id="snow-container"></div>
         <div class="body-wrap">
             <header class="site-header">
+                <div class="scroll-progress" aria-hidden="true"></div>
                 <div class="container">
                     <div class="site-header-inner">
                         <div class="brand header-brand">
@@ -80,11 +87,26 @@
                                 </a>
                             </div>
                         </div>
+                        <nav class="landing-nav" aria-label="Primary">
+                            <a class="landing-nav-link" href="#features">Features</a>
+                            <a class="landing-nav-link" href="#supportUs">Support</a>
+                            <a
+                                id="navGithubLink"
+                                class="landing-nav-link landing-nav-icon"
+                                href="https://github.com/miroslavpejic85/mirotalksfu"
+                                target="_blank"
+                                rel="noopener"
+                                aria-label="MiroTalk SFU on GitHub"
+                            >
+                                <i class="fab fa-github" aria-hidden="true"></i>
+                            </a>
+                            <a id="startMeetingLink" class="landing-nav-cta" href="#roomName">Start a meeting</a>
+                        </nav>
                     </div>
                 </div>
             </header>
 
-            <main>
+            <main id="main">
                 <section class="hero reveal-from-bottom">
                     <div class="container">
                         <div class="hero-inner">
@@ -1039,9 +1061,14 @@
             </footer>
         </div>
 
+        <button id="backToTop" class="back-to-top" type="button" aria-label="Back to top" hidden>
+            <i class="fas fa-arrow-up" aria-hidden="true"></i>
+        </button>
+
         <script defer src="../js/Utils.js"></script>
         <script defer src="../js/Common.js"></script>
         <script defer src="../js/Landing.js"></script>
+        <script defer src="../js/LandingEffects.js"></script>
         <script defer src="../js/ScheduleMeeting.js"></script>
         <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>

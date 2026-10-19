@@ -32,9 +32,11 @@
         <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
         <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
     </head>
-    <body class="is-boxed has-animations">
+    <body class="is-boxed has-animations sticky-header">
+        <a class="skip-link" href="#main">Skip to main content</a>
         <div class="body-wrap">
             <header class="site-header">
+                <div class="scroll-progress" aria-hidden="true"></div>
                 <div class="container">
                     <div class="site-header-inner">
                         <div class="brand header-brand">
@@ -59,7 +61,7 @@
                 </div>
             </header>
 
-            <main>
+            <main id="main">
                 <section class="hero">
                     <div class="container">
                         <div class="hero-inner">
@@ -162,7 +164,7 @@
                                     as acceptance. We recommend checking back occasionally.
                                 </p>
 
-                                <div>
+                                <div class="mt-32">
                                     <a class="button button-primary button-wide-mobile pulse" href="/newroom">AGREE</a>
                                 </div>
                             </div>
@@ -280,7 +282,14 @@
             </footer>
         </div>
 
+        <button id="backToTop" class="back-to-top" type="button" aria-label="Back to top" hidden>
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 2.5 2.75 7.75l1.06 1.06L7.25 5.37V13.5h1.5V5.37l3.44 3.44 1.06-1.06Z" fill="currentColor" />
+            </svg>
+        </button>
+
         <script defer src="../js/Landing.js"></script>
+        <script defer src="../js/LandingEffects.js"></script>
         <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>
 </html>

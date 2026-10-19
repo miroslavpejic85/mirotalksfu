@@ -608,10 +608,11 @@
     }
 
     // In 'google' mode the Google combo is the switcher, so reveal it in the Language tab
-    // (Translate.css hides #google_translate_element by default).
+    // (Translate.css hides #google_translate_element by default). Pages without that tab
+    // (login, waiting room) keep it hidden: it still translates them in the background.
     function revealGoogleWidget() {
         const el = document.getElementById('google_translate_element');
-        if (el) {
+        if (el && el.closest('#tabLanguages')) {
             el.style.cssText = 'display:block !important; margin-top: 8px;';
         }
     }

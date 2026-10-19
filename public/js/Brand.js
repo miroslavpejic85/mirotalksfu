@@ -29,6 +29,7 @@ const pastSponsors = document.getElementById('pastSponsors');
 const advertisers = document.getElementById('advertisers');
 const supportUs = document.getElementById('supportUs');
 const footer = document.getElementById('footer');
+const navGithubLink = document.getElementById('navGithubLink');
 
 const waitingRoomHeading = document.getElementById('waitingRoomHeading');
 const waitingRoomDescription = document.getElementById('waitingRoomDescription');
@@ -101,7 +102,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.6.52</strong>',
+        title: '<strong>WebRTC SFU v2.6.53</strong>',
         html: `
             <div class="about-content">
                 <p class="about-description">
@@ -263,6 +264,7 @@ function checkBrand() {
     !BRAND.html.advertisers && elementDisplay(advertisers, false);
     !BRAND.html.supportUs && elementDisplay(supportUs, false);
     !BRAND.html.footer && elementDisplay(footer, false);
+    !BRAND.html.footer && elementDisplay(navGithubLink, false);
 }
 
 // ELEMENT display mode

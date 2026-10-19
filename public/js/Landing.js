@@ -1,15 +1,19 @@
 !(function () {
     window;
     const e = document.documentElement;
-    if ((e.classList.remove('no-js'), e.classList.add('js'), document.body.classList.contains('has-animations'))) {
-        ((window.sr = ScrollReveal()).reveal('.feature, .pricing-table-inner', {
+    (e.classList.remove('no-js'), e.classList.add('js'));
+    // The landing page reveals cards via LandingEffects.js and does not load ScrollReveal.
+    if (document.body.classList.contains('has-animations') && typeof ScrollReveal !== 'undefined') {
+        (window.sr = ScrollReveal()).reveal('.feature, .pricing-table-inner', {
             duration: 600,
             distance: '20px',
             easing: 'cubic-bezier(0.5, -0.01, 0, 1.005)',
             origin: 'bottom',
             interval: 100,
-        }),
-            e.classList.add('anime-ready'),
+        });
+    }
+    if (document.body.classList.contains('has-animations') && typeof anime !== 'undefined') {
+        (e.classList.add('anime-ready'),
             anime
                 .timeline({ targets: '.hero-figure-box-05' })
                 .add({
