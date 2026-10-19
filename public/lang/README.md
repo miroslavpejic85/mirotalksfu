@@ -18,6 +18,10 @@ UI_LANGUAGE=en
 | `auto`             | Use the native language file if available, otherwise Google |
 | `native`           | Use native files only; missing translations remain English  |
 
+The mode also applies to the waiting room (`/whoAreYou`), login, and RTMP streamer pages:
+in `native` mode, no page loads Google Translate. Strings that are missing from the language
+files, including custom `WHO_ARE_YOU_*` / `LOGIN_*` texts, are shown exactly as configured.
+
 The config fields are `translationMode` and `language`. In a room, users can override
 the translation mode from **Settings > Language**. The mode override is persisted in
 browser local storage and reused in subsequent rooms on the same browser.

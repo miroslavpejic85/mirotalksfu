@@ -58,16 +58,48 @@ function googleTranslateElementInit() {
     observer.observe(document.body, { childList: true, subtree: true });
 }
 
+function whenBrandReady() {
+    return new Promise((resolve) => {
+        if (window.brandReady) return resolve();
+        document.addEventListener('brand:ready', () => resolve(), { once: true });
+        // Fallback in case Brand.js is absent or slow.
+        setTimeout(resolve, 2000);
+    });
+}
+
+// UI_TRANSLATION_MODE (BRAND.app.translationMode), with the per-browser override saved by I18n.js.
+function resolveTranslationMode() {
+    const modes = ['auto', 'native', 'google'];
+    try {
+        const override = localStorage.getItem('uiTranslationModeOverride');
+        if (modes.includes(override)) return override;
+    } catch (e) {}
+    const mode = typeof BRAND !== 'undefined' && BRAND?.app?.translationMode;
+    return modes.includes(mode) ? mode : 'google';
+}
+
 (async function initGoogleTranslate() {
     // Skip the runtime machine translation when a native (human) language file is active.
     try {
-        const native = window.i18n && window.i18n.ready ? await window.i18n.ready : false;
-        const googleAllowed = !window.i18n || window.i18n.googleAllowed !== false;
-        if (native || !googleAllowed) {
-            console.log('Google Translate skipped: native file active or disabled by UI_TRANSLATION_MODE');
-            return;
+        if (window.i18n) {
+            const native = window.i18n.ready ? await window.i18n.ready : false;
+            if (native || window.i18n.googleAllowed === false) {
+                console.log('Google Translate skipped: native file active or disabled by UI_TRANSLATION_MODE');
+                return;
+            }
+        } else {
+            // Pages without I18n.js must still honor UI_TRANSLATION_MODE=native (no Google at all).
+            await whenBrandReady();
+            if (resolveTranslationMode() === 'native') {
+                console.log('Google Translate skipped: disabled by UI_TRANSLATION_MODE=native');
+                return;
+            }
         }
     } catch (error) {
+        if (resolveTranslationMode() === 'native') {
+            console.warn('i18n readiness check failed, Google Translate disabled by UI_TRANSLATION_MODE=native');
+            return;
+        }
         console.warn('i18n readiness check failed, falling back to Google Translate:', error.message);
     }
     try {

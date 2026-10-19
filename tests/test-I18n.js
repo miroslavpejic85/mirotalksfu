@@ -282,3 +282,83 @@ describe('dynamic native dropdown translations', () => {
         assert.equal(clicks(), 1);
     });
 });
+
+describe('Google Translate gating (UI_TRANSLATION_MODE)', () => {
+    const translateSource = fs.readFileSync(path.join(root, 'public/js/Translate.js'), 'utf8');
+    const GOOGLE_SRC = 'translate.google.com/translate_a/element.js';
+    let dom;
+
+    afterEach(() => dom && dom.window.close());
+
+    function createDom(brand) {
+        dom = new JSDOM('<!doctype html><html><head></head><body></body></html>', {
+            url: 'https://meet.example/whoAreYou/test',
+            runScripts: 'outside-only',
+        });
+        dom.window.BRAND = brand;
+        dom.window.fetch = async (url) => ({
+            ok: true,
+            json: async () => readLocale(path.basename(url, '.json')),
+        });
+        return dom.window;
+    }
+
+    function googleLoaded(window) {
+        return [...window.document.querySelectorAll('script')].some((s) => (s.src || '').includes(GOOGLE_SRC));
+    }
+
+    async function settle() {
+        for (let i = 0; i < 5; i++) await tick();
+    }
+
+    it('does not load Google on pages without I18n.js when the mode is native', async () => {
+        const window = createDom({ app: { language: 'nl', translationMode: 'native' } });
+        window.eval(translateSource);
+        window.document.dispatchEvent(new window.Event('brand:ready'));
+        await settle();
+        assert.equal(googleLoaded(window), false);
+    });
+
+    it('still loads Google on pages without I18n.js in the default google mode', async () => {
+        const window = createDom({ app: { language: 'nl', translationMode: 'google' } });
+        window.brandReady = true;
+        window.eval(translateSource);
+        await settle();
+        assert.equal(googleLoaded(window), true);
+    });
+
+    it('does not load Google with I18n.js in native mode, even if brand:ready fired before I18n loaded', async () => {
+        const window = createDom({ app: { language: 'nl', translationMode: 'native' } });
+        window.brandReady = true;
+        window.eval(i18nSource);
+        window.eval(translateSource);
+        const native = await window.i18n.ready;
+        await settle();
+        assert.equal(native, true);
+        assert.equal(window.i18n.googleAllowed, false);
+        assert.equal(googleLoaded(window), false);
+    });
+
+    it('loads I18n.js before Translate.js (both deferred) on every page that uses Translate.js', () => {
+        const viewsDir = path.join(root, 'public/views');
+        const pages = fs
+            .readdirSync(viewsDir)
+            .filter((file) => file.endsWith('.html'))
+            .filter((file) => fs.readFileSync(path.join(viewsDir, file), 'utf8').includes('js/Translate.js'));
+        assert.ok(pages.includes('whoAreYou.html') && pages.includes('login.html'));
+        for (const file of pages) {
+            const html = fs.readFileSync(path.join(viewsDir, file), 'utf8');
+            const tag = (name) => (html.match(new RegExp(`<script[^>]*src="\\.\\./js/${name}\\.js"[^>]*>`)) || [])[0];
+            for (const name of ['Brand', 'I18n', 'Translate']) {
+                assert.ok(tag(name), `${file}: missing ${name}.js`);
+                assert.match(tag(name), /\bdefer\b/, `${file}: ${name}.js must be deferred`);
+                assert.doesNotMatch(tag(name), /\basync\b/, `${file}: ${name}.js must not be async`);
+            }
+            assert.ok(html.indexOf(tag('Brand')) < html.indexOf(tag('I18n')), `${file}: Brand.js before I18n.js`);
+            assert.ok(
+                html.indexOf(tag('I18n')) < html.indexOf(tag('Translate')),
+                `${file}: I18n.js before Translate.js`
+            );
+        }
+    });
+});

@@ -101,7 +101,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.6.49</strong>',
+        title: '<strong>WebRTC SFU v2.6.50</strong>',
         html: `
             <div class="about-content">
                 <p class="about-description">
@@ -202,6 +202,8 @@ async function initialize() {
     checkBrand();
 
     // Notify listeners (e.g. I18n.js) that BRAND is fully resolved.
+    // The flag covers listeners attached after the event fired (e.g. cached brandData).
+    window.brandReady = true;
     document.dispatchEvent(new CustomEvent('brand:ready'));
 }
 
