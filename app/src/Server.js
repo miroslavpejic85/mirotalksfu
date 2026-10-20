@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.54
+ * @version 2.6.55
  *
  */
 
@@ -149,6 +149,7 @@ const {
 const scheduleMeetingCfg = config.features?.scheduleMeeting || {};
 const scheduleMeetingAllowedDomains = scheduleMeetingCfg.allowedDomains || [];
 const scheduleMeetingMaxRecipients = scheduleMeetingCfg.maxRecipients || 20;
+const CLIENT_BLOCKED_PEER_INFO_TYPES = new Set(['lobby', 'presenter']);
 
 // Branding configuration
 const brandHtmlInjection = config?.ui?.brand?.htmlInjection ?? true;
@@ -3803,6 +3804,15 @@ function startServer() {
             const data = checkXSS(dataObject);
 
             if (!Validator.isValidData(data)) return;
+
+            if (CLIENT_BLOCKED_PEER_INFO_TYPES.has(data.type)) {
+                log.warn('Blocked client attempt to update protected peer info field', {
+                    room_id: socket.room_id,
+                    peer_id: socket.id,
+                    type: data.type,
+                });
+                return;
+            }
 
             peer.updatePeerInfo(data);
 
