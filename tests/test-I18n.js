@@ -362,3 +362,74 @@ describe('Google Translate gating (UI_TRANSLATION_MODE)', () => {
         }
     });
 });
+
+describe('waiting room elapsed time (whoAreYou)', () => {
+    const whoAreYouSource = fs.readFileSync(path.join(root, 'public/js/WhoAreYou.js'), 'utf8');
+    let dom;
+
+    afterEach(() => dom && dom.window.close());
+
+    function load({ brand, i18n, brandReady = false }) {
+        dom = new JSDOM(
+            `<p id="waitingStatus"></p><a id="loginLink"></a>
+            <div id="waitingRoomName"><span id="waitingRoomNameText"></span></div>
+            <span id="waitingElapsedText">Just started waiting</span>`,
+            { url: 'https://meet.example/whoAreYou/test', runScripts: 'outside-only' }
+        );
+        const { window } = dom;
+        window.BRAND = brand;
+        window.i18n = i18n;
+        window.brandReady = brandReady;
+        window.filterXSS = (value) => value;
+        window.axios = { post: () => new Promise(() => {}) };
+        window.eval(`${whoAreYouSource}\nwindow.__updateElapsedTime = updateElapsedTime;`);
+        return window;
+    }
+
+    const text = (window) => window.document.getElementById('waitingElapsedText').textContent;
+
+    function elapseMinutes(window, minutes) {
+        window.__realNow = window.__realNow || window.Date.now.bind(window.Date);
+        window.Date.now = () => window.__realNow() + minutes * 60 * 1000;
+        window.__updateElapsedTime();
+    }
+
+    it('shows the configured "just started" text immediately on brand:ready', () => {
+        const window = load({ brand: { whoAreYou: { waitingRoomElapsedJust: 'Je wacht net' } } });
+        assert.equal(text(window), 'Just started waiting');
+        window.document.dispatchEvent(new window.Event('brand:ready'));
+        assert.equal(text(window), 'Je wacht net');
+    });
+
+    it('shows the configured "just started" text immediately when brand is already resolved', () => {
+        const window = load({
+            brand: { whoAreYou: { waitingRoomElapsedJust: 'Je wacht net' } },
+            brandReady: true,
+        });
+        assert.equal(text(window), 'Je wacht net');
+    });
+
+    it('localizes the minutes unit in native mode', () => {
+        const window = load({
+            brand: { whoAreYou: { waitingRoomElapsedMinutes: 'Je wacht al {minutes}' } },
+            i18n: { googleAllowed: false, isNative: () => true, getLang: () => 'nl' },
+            brandReady: true,
+        });
+        elapseMinutes(window, 3);
+        assert.equal(text(window), 'Je wacht al 3 minuten');
+        elapseMinutes(window, 1);
+        assert.equal(text(window), 'Je wacht al 1 minuut');
+    });
+
+    it('keeps the English unit when Google Translate handles the page', () => {
+        const window = load({
+            brand: { whoAreYou: { waitingRoomElapsedMinutes: 'Waiting for {minutes}' } },
+            i18n: { googleAllowed: true, isNative: () => false, getLang: () => 'nl' },
+            brandReady: true,
+        });
+        elapseMinutes(window, 1);
+        assert.equal(text(window), 'Waiting for 1 minute');
+        elapseMinutes(window, 3);
+        assert.equal(text(window), 'Waiting for 3 minutes');
+    });
+});
