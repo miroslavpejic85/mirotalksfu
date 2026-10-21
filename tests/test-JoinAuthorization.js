@@ -6,6 +6,7 @@ const path = require('path');
 const vm = require('vm');
 const sinon = require('sinon');
 const { isConfiguredPresenter } = require('../app/src/PresenterManager');
+const { findHostUser } = require('../app/src/HostUsers');
 
 const serverSource = fs.readFileSync(path.join(__dirname, '..', 'app', 'src', 'Server.js'), 'utf8');
 const handlersSource = serverSource.slice(
@@ -41,7 +42,7 @@ describe('Socket.IO join authorization', () => {
             user_auth: true,
             users_from_db: false,
             users: [
-                { username: 'alice', displayname: 'Alice', allowed_rooms: ['room-a'] },
+                { username: 'alice', password: 'alice-password', displayname: 'Alice', allowed_rooms: ['room-a'] },
                 { username: 'bob', allowed_rooms: ['room-b'] },
             ],
             presenters: { list: ['admin'], join_first: false },
@@ -70,6 +71,7 @@ describe('Socket.IO join authorization', () => {
             isValidToken: async () => true,
             decodeToken: () => token,
             isAuthPeer: async (username, password) => username === 'alice' && password === 'alice-password',
+            getAuthPeer: (username, password) => findHostUser(hostCfg.users, username, password),
             isConfiguredPresenter,
             isOidcPresenterTokenValid: () => false,
             isPeerPresenter: () => false,
@@ -248,5 +250,30 @@ describe('Socket.IO join authorization', () => {
         const result = await joinExistingRoom(state);
         assert.equal(result.id, 'room-b');
         assert.equal(state.room.addPeer.callCount, 1);
+    });
+
+    it('enforces the HOST_USERS displayname as the peer name', async () => {
+        const state = setup({}, 'room-a');
+        state.data.peer_info.peer_name = 'Mallory';
+        const result = await joinExistingRoom(state);
+        assert.equal(result.id, 'room-a');
+        assert.equal(state.room.addPeer.firstCall.args[0].peer_name, 'Alice');
+        assert.equal(state.data.peer_info.peer_name, 'Alice');
+    });
+
+    it('keeps the typed name when the HOST_USERS entry has no displayname', async () => {
+        const state = setup({}, 'room-a');
+        state.context.hostCfg.users[0].displayname = '';
+        state.data.peer_info.peer_name = 'Custom display name';
+        await joinExistingRoom(state);
+        assert.equal(state.room.addPeer.firstCall.args[0].peer_name, 'Custom display name');
+    });
+
+    it('rejects the enforced displayname when it is already in use in the room', async () => {
+        const state = setup({}, 'room-a');
+        state.room.getPeers().set('other-socket', { id: 'other-socket', peer_name: 'Alice' });
+        state.data.peer_info.peer_name = 'Someone else';
+        assert.equal(await joinExistingRoom(state), 'isNameInUse');
+        assert.equal(state.room.addPeer.callCount, 0);
     });
 });

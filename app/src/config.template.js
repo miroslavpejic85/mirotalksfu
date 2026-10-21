@@ -22,6 +22,7 @@
 
 const dotenv = require('dotenv').config();
 const packageJson = require('../../package.json');
+const { parseHostUsers } = require('./HostUsers');
 const os = require('os');
 const fs = require('fs');
 const splitChar = ',';
@@ -530,16 +531,18 @@ module.exports = {
          * Local User Configuration:
          * ------------------------
          * - users: Array of authorized users (used if users_from_db=false)
-         *   - Define via HOST_USERS env variable:
+         *   - Define via HOST_USERS env variable (same format as MiroTalk P2P):
          *     HOST_USERS=username:password:displayname:room1,room2|username2:password2:displayname2:*
          *     (Each user separated by '|', fields by ':', allowed_rooms comma-separated or '*' for all)
+         *     JSON is also accepted (use it when a value contains ':', '|' or ','):
+         *     HOST_USERS='[{"username":"alice","password":"pw","displayname":"Alice","allowed_rooms":["*"]}]'
          *   - Empty by default. Required when protected or user_auth is enabled (unless OIDC or users_from_db is used).
          *   - The server refuses to start with publicly known credentials (admin/admin, guest/guest, username/password...).
          *   - Fields:
          *     - username      : Login username
-         *     - password      : Login password
-         *     - displayname   : User's display name
-         *     - allowed_rooms : List of rooms user can access ('*' for all)
+         *     - password      : Login password (1-36 characters)
+         *     - displayname   : Optional, enforced as the user's name in the room (not editable)
+         *     - allowed_rooms : Optional, rooms the user can open/join with this login ('*' for all, default)
          *
          * Presenter Management:
          * --------------------
@@ -573,22 +576,7 @@ module.exports = {
                 process.env.USERS_ROOMS_ALLOWED_ENDPOINT || 'http://localhost:9000/api/v1/user/roomsAllowed', // 'https://webrtc.mirotalk.com/api/v1/user/roomsAllowed'
             api_room_exists: process.env.ROOM_EXISTS_ENDPOINT || 'http://localhost:9000/api/v1/room/exists', // 'https://webrtc.mirotalk.com//api/v1/room/exists'
 
-            users: process.env.HOST_USERS
-                ? process.env.HOST_USERS.split('|').map((userStr) => {
-                      const [username, password, displayname, allowedRoomsStr] = userStr.split(':');
-                      return {
-                          username: username || '',
-                          password: password || '',
-                          displayname: displayname || '',
-                          allowed_rooms: allowedRoomsStr
-                              ? allowedRoomsStr
-                                    .split(',')
-                                    .map((room) => room.trim())
-                                    .filter((room) => room !== '')
-                              : ['*'],
-                      };
-                  })
-                : [], // Empty by default: a shipped username/password is a public credential, set your own.
+            users: parseHostUsers(process.env.HOST_USERS), // Empty by default: a shipped username/password is a public credential, set your own.
 
             presenters: {
                 list: process.env.PRESENTERS

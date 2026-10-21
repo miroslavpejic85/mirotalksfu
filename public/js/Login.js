@@ -15,6 +15,9 @@ const selectRoom = document.getElementById('selectRoom');
 const joinSelectRoomBtn = document.getElementById('joinSelectRoomButton');
 const generateRoomBtn = document.getElementById('generateRoomButton');
 
+// From the /login response (HOST_USERS displayname)
+let loginDisplayName = '';
+
 const togglePasswordBtn = document.getElementById('togglePassword');
 if (togglePasswordBtn) {
     togglePasswordBtn.onclick = () => {
@@ -146,6 +149,9 @@ function login() {
                 const token = response.data.message;
                 window.sessionStorage.peer_token = token;
 
+                // HOST_USERS displayname, enforced by the server on join
+                loginDisplayName = response.data.displayname || username;
+
                 // Redirect to room if specified in URL
                 if (room) {
                     window.location.href = '/join/' + window.location.search;
@@ -190,9 +196,8 @@ function login() {
                     // Join uses the custom input + token
                     joinSelectRoomBtn.onclick = () => {
                         const roomName = filterXSS(document.getElementById('customRoomInput').value);
-                        const displayname = response.data.displayname;
                         if (roomName) {
-                            window.localStorage.peer_name = displayname;
+                            window.localStorage.peer_name = loginDisplayName;
                             window.location.href =
                                 '/join/?room=' + roomName + '&token=' + window.sessionStorage.peer_token;
                         } else {
@@ -272,7 +277,7 @@ function hideLoginError() {
 function join() {
     const username = filterXSS(document.getElementById('username').value);
     const roomId = filterXSS(document.getElementById('selectRoom').value);
-    window.localStorage.peer_name = username;
+    window.localStorage.peer_name = filterXSS(loginDisplayName || username);
     window.location.href = '/join/?room=' + roomId + '&token=' + window.sessionStorage.peer_token;
 }
 

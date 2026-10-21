@@ -91,6 +91,7 @@ const checkXSS = require('./XSS');
 const { createSetupToken, isSetupTokenValid, resolveSetupConfig, renderSetupPage } = require('./RemoteControlSetup');
 const mime = require('mime-types');
 const Host = require('./Host');
+const { parseHostUsers, findHostUser } = require('./HostUsers');
 const Room = require('./Room');
 const Peer = require('./Peer');
 const { assignFallbackPresenter, isConfiguredPresenter, isOidcConfiguredPresenter } = require('./PresenterManager');
@@ -320,7 +321,10 @@ const hostCfg = {
     protected: config?.security?.host?.protected,
     authenticated: !config?.security?.host?.protected,
     user_auth: config?.security?.host?.user_auth,
-    users: config?.security?.host?.users,
+    // Re-parsed here so an older config.js (inline compact-only parser) still gets JSON support and defaults
+    users: parseHostUsers(
+        process.env.HOST_USERS && process.env.HOST_USERS.trim() ? process.env.HOST_USERS : config?.security?.host?.users
+    ),
     users_from_db: config?.security?.host?.users_from_db,
     users_api_room_allowed: config?.security?.host?.users_api_room_allowed,
     users_api_rooms_allowed: config?.security?.host?.users_api_rooms_allowed,
@@ -349,14 +353,24 @@ const PUBLIC_DEFAULT_CREDENTIALS = [
 if (
     (hostCfg.protected || hostCfg.user_auth) &&
     !hostCfg.users_from_db &&
-    hostCfg.users.some((u) =>
-        PUBLIC_DEFAULT_CREDENTIALS.some((d) => u.username === d.username && u.password === d.password)
+    hostCfg.users.some(
+        (u) => u && PUBLIC_DEFAULT_CREDENTIALS.some((d) => u.username === d.username && u.password === d.password)
     )
 ) {
     log.error(
         'HOST_USERS contains publicly known default credentials (admin/admin, guest/guest, username/password...). Set your own in .env'
     );
     process.exit(1);
+}
+
+/**
+ * Get the local HOST_USERS entry matching the credentials
+ * @param {string} username
+ * @param {string} password
+ * @returns {object|null} user { username, password, displayname, allowed_rooms } or null
+ */
+function getAuthPeer(username, password) {
+    return findHostUser(hostCfg.users, username, password);
 }
 
 const widget = {
@@ -808,23 +822,26 @@ function startServer() {
             return res.json(user);
         }
 
-        // Host protected: return displayname from JWT token
-        if (hostCfg.protected) {
+        // Host protected / user auth: return the HOST_USERS displayname from the JWT token
+        if (hostCfg.protected || hostCfg.user_auth) {
             const authHeader = req.headers.authorization;
             const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
             if (token) {
                 try {
-                    const { username } = decodeToken(token);
-                    const user = hostCfg.users.find((u) => u.username === username || u.displayname === username);
-                    const displayname = user?.displayname || username;
-                    log.debug('Host protected get Profile', { username, displayname });
-                    return res.json({
-                        name: displayname,
-                        peer_name: {
-                            force: true,
-                            name: true,
-                        },
-                    });
+                    const { username, password } = checkXSS(decodeToken(token));
+                    const hostUser = getAuthPeer(username, password);
+                    // displayname is enforced on join; host protection also locks the login username
+                    const displayname = hostUser?.displayname || (hostCfg.protected ? username : '');
+                    if (displayname) {
+                        log.debug('Host get Profile', { username, displayname });
+                        return res.json({
+                            name: String(checkXSS(displayname)).slice(0, 254),
+                            peer_name: {
+                                force: true,
+                                name: true,
+                            },
+                        });
+                    }
                 } catch (err) {
                     log.warn('Profile token decode error', err.message);
                 }
@@ -1346,6 +1363,8 @@ function startServer() {
         }
 
         const isPeerValid = await isAuthPeer(username, password);
+        const hostUser = getAuthPeer(username, password);
+        const displayname = hostUser?.displayname || username;
 
         if (hostCfg.protected && isPeerValid && !hostCfg.authenticated) {
             const ip = getIP(req);
@@ -1361,15 +1380,12 @@ function startServer() {
                 hostCfg?.presenters?.join_first || hostCfg?.presenters?.list?.includes(username)
             );
 
-            const user = hostCfg.users.find((user) => user.displayname === username || user.username === username);
             const token = encodeToken({ username: username, password: password, presenter: isPresenter });
             const allowedRooms = await getUserAllowedRooms(username, password);
 
-            log.debug('login -------------->', { displayName: user?.displayname || username });
+            log.debug('login -------------->', { displayName: displayname });
 
-            return res
-                .status(200)
-                .json({ message: token, displayname: user?.displayname || username, allowedRooms: allowedRooms });
+            return res.status(200).json({ message: token, displayname: displayname, allowedRooms: allowedRooms });
         }
 
         if (isPeerValid) {
@@ -1377,7 +1393,7 @@ function startServer() {
             const isPresenter = hostCfg?.presenters?.list?.includes(username) || false;
             const token = encodeToken({ username: username, password: password, presenter: isPresenter });
             const allowedRooms = await getUserAllowedRooms(username, password);
-            return res.status(200).json({ message: token, allowedRooms: allowedRooms });
+            return res.status(200).json({ message: token, displayname: displayname, allowedRooms: allowedRooms });
         } else {
             return res.status(401).json({ message: 'unauthorized' });
         }
@@ -2554,7 +2570,6 @@ function startServer() {
             const room = getRoom(socket);
 
             const {
-                peer_name,
                 peer_id,
                 peer_uuid,
                 peer_token,
@@ -2564,9 +2579,11 @@ function startServer() {
                 browser_name,
                 browser_version,
             } = data.peer_info;
+            let { peer_name } = data.peer_info;
 
             let is_presenter = peer_presenter;
             let authenticatedUsername = null;
+            let authenticatedHostUser = null;
 
             // User Auth required or detect token, we check if peer valid
             if (hostCfg.user_auth || peer_token) {
@@ -2591,6 +2608,7 @@ function startServer() {
                         }
 
                         authenticatedUsername = username;
+                        authenticatedHostUser = getAuthPeer(username, password);
 
                         const tokenPresenter = presenter === '1' || presenter === 'true';
 
@@ -2630,6 +2648,12 @@ function startServer() {
                         return cb('notAllowed');
                     }
                 }
+            }
+
+            // Security: a HOST_USERS login with a configured displayname joins with it (not editable)
+            if (authenticatedHostUser?.displayname) {
+                peer_name = String(checkXSS(authenticatedHostUser.displayname)).slice(0, 254);
+                data.peer_info.peer_name = peer_name;
             }
 
             // check if banned...
@@ -5865,9 +5889,7 @@ function startServer() {
                 return false;
             }
         } else {
-            return (
-                hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password)
-            );
+            return !!getAuthPeer(username, password);
         }
     }
 
@@ -6031,14 +6053,14 @@ function startServer() {
         }
 
         // Get allowed rooms for user from config.js file
-        if (hostCfg.protected && !hostCfg.users_from_db) {
+        if ((hostCfg.protected || hostCfg.user_auth) && !hostCfg.users_from_db) {
             const isOIDCEnabled = config?.security?.oidc?.enabled;
 
-            const user = hostCfg.users.find((user) => user.displayname === username || user.username === username);
+            const user = getAuthPeer(username, password);
 
-            if (!isOIDCEnabled && !user) {
+            if (!user) {
                 log.debug('getUserAllowedRooms - user not found', username);
-                return false;
+                return isOIDCEnabled ? ['*'] : false;
             }
             log.debug('CONFIG getUserAllowedRooms', user.allowed_rooms);
             return user.allowed_rooms;
