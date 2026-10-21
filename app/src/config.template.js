@@ -543,11 +543,12 @@ module.exports = {
          *
          * Presenter Management:
          * --------------------
-         * - list        : Array of usernames who can be presenters.
-         *                 WARNING: with no auth provider enabled (protected / user_auth / OIDC),
-         *                 the display name is unverified client input, so each entry acts as a
-         *                 shared secret. Use unique, non-guessable values (never a real name or
-         *                 email) or anyone who guesses it becomes presenter. Empty by default.
+         * - list        : Array of authenticated LOGIN usernames (the `username` field of HOST_USERS,
+         *                 not the display name) who are always presenters.
+         *                 Only matched for peers authenticated via host login (protected / user_auth)
+         *                 or a valid JWT token. The join-form display name is never matched, so with
+         *                 no auth enabled this list has no effect: use join_first or a token with
+         *                 presenter=true instead. Empty by default.
          * - join_first  : First joiner becomes presenter; when the last presenter leaves,
          *                 promote the first admitted participant (default: true)
          *
