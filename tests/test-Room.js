@@ -1,11 +1,91 @@
 'use strict';
 
 require('should');
+const sinon = require('sinon');
 const { EventEmitter } = require('events');
 
 const Room = require('../app/src/Room');
 
 describe('test-Room', () => {
+    describe('room time limit', () => {
+        const makeRoom = () => {
+            const room = Object.create(Room.prototype);
+            room.id = 'room-id';
+            room.peers = new Map([
+                ['peer-1', {}],
+                ['peer-2', {}],
+            ]);
+            room._timeLimit = null;
+            room.sent = [];
+            room.disconnected = [];
+            room.send = (peer_id, action, data) => room.sent.push({ peer_id, action, data });
+            room.io = { in: (peer_id) => ({ disconnectSockets: () => room.disconnected.push(peer_id) }) };
+            return room;
+        };
+
+        let clock;
+        beforeEach(() => {
+            clock = sinon.useFakeTimers({ now: 1000000 });
+        });
+        afterEach(() => clock.restore());
+
+        it('parses only valid HH:MM:SS durations', () => {
+            Room.parseDuration('00:00:30').should.equal(30000);
+            Room.parseDuration('01:02:03').should.equal(3723000);
+            Room.parseDuration('99:59:59').should.equal(359999000);
+            Room.parseDuration('00:00:00').should.equal(0);
+            Room.parseDuration('00:60:00').should.equal(0);
+            Room.parseDuration('00:00:60').should.equal(0);
+            Room.parseDuration('1:00:00').should.equal(0);
+            Room.parseDuration('unlimited').should.equal(0);
+            Room.parseDuration(undefined).should.equal(0);
+            Room.parseDuration(3600).should.equal(0);
+        });
+
+        it('starts once, reports the remaining time and ignores later requests', () => {
+            const room = makeRoom();
+            (room.getTimeLimit() === null).should.equal(true);
+
+            room.startTimeLimit('00:10:00').should.equal(true);
+            clock.tick(60000);
+            room.getTimeLimit().should.eql({ durationMs: 600000, remainingMs: 540000, reached: false });
+
+            // A later presenter cannot shorten or extend it
+            room.startTimeLimit('00:00:05').should.equal(false);
+            room.getTimeLimit().remainingMs.should.equal(540000);
+        });
+
+        it('notifies everyone when the time is up and disconnects remaining peers after the grace period', () => {
+            const room = makeRoom();
+            room.startTimeLimit('00:00:30');
+
+            clock.tick(29999);
+            room.isTimeLimitReached().should.equal(false);
+            room.sent.length.should.equal(0);
+
+            clock.tick(1);
+            room.isTimeLimitReached().should.equal(true);
+            room.getTimeLimit().remainingMs.should.equal(0);
+            room.sent.should.eql([
+                { peer_id: 'peer-1', action: 'roomTimeLimit', data: { action: 'end' } },
+                { peer_id: 'peer-2', action: 'roomTimeLimit', data: { action: 'end' } },
+            ]);
+
+            room.peers.delete('peer-1'); // left on its own
+            clock.tick(15000);
+            room.disconnected.should.eql(['peer-2']);
+        });
+
+        it('clears the timers when the room closes', () => {
+            const room = makeRoom();
+            room.startTimeLimit('00:00:30');
+            room.clearTimeLimit();
+            clock.tick(60000);
+            (room.getTimeLimit() === null).should.equal(true);
+            room.sent.length.should.equal(0);
+            room.disconnected.length.should.equal(0);
+        });
+    });
     it('clears screen annotations when a producer closes because its transport closed', async () => {
         const room = Object.create(Room.prototype);
         room.videoTextAnnotations = new Map([['producer-id', new Map([['a', {}]])]]);

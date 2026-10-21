@@ -8,6 +8,9 @@ const log = new Logger('Room');
 
 const { audioLevelObserverEnabled, activeSpeakerObserverEnabled } = config.mediasoup.router;
 
+// Time given to clients to show the "time limit reached" notice and leave before being disconnected
+const TIME_LIMIT_GRACE_MS = 15000;
+
 module.exports = class Room {
     constructor(room_id, worker, io) {
         this.id = room_id;
@@ -109,6 +112,9 @@ module.exports = class Room {
 
         this.maxParticipants = config?.moderation?.room?.maxParticipants || 1000;
         this.globalLobby = config?.moderation?.room?.lobby || false;
+
+        // Room-wide time limit (duration=HH:MM:SS), shared by all peers
+        this._timeLimit = null;
     }
 
     // ####################################################
@@ -160,11 +166,83 @@ module.exports = class Room {
             maxParticipants: this.maxParticipants,
             maxParticipantsReached: this.peers.size > this.maxParticipants,
             globalLobby: this.globalLobby,
+            timeLimit: this.getTimeLimit(),
         };
     }
 
     getSessionId() {
         return this.sessionId;
+    }
+
+    // ####################################################
+    // ROOM TIME LIMIT
+    // ####################################################
+
+    static parseDuration(duration) {
+        if (typeof duration !== 'string') return 0;
+        const match = duration.match(/^(\d{2}):(\d{2}):(\d{2})$/);
+        if (!match) return 0;
+        const [hours, minutes, seconds] = match.slice(1).map(Number);
+        if (minutes > 59 || seconds > 59) return 0;
+        return (hours * 3600 + minutes * 60 + seconds) * 1000;
+    }
+
+    startTimeLimit(duration) {
+        if (this._timeLimit) return false;
+
+        const durationMs = Room.parseDuration(duration);
+        if (!durationMs) return false;
+
+        this._timeLimit = {
+            durationMs,
+            endsAt: Date.now() + durationMs,
+            reached: false,
+            timer: setTimeout(() => this.endTimeLimit(), durationMs),
+            graceTimer: null,
+        };
+
+        log.info('Room time limit started', { room_id: this.id, duration });
+        return true;
+    }
+
+    endTimeLimit() {
+        if (!this._timeLimit || this._timeLimit.reached) return;
+
+        this._timeLimit.reached = true;
+        this._timeLimit.timer = null;
+
+        log.info('Room time limit reached', { room_id: this.id, peers: this.getPeersCount() });
+
+        this.sendToAll('roomTimeLimit', { action: 'end' });
+
+        // Clients leave on their own, disconnect anyone still connected once the grace period is over
+        this._timeLimit.graceTimer = setTimeout(() => {
+            if (this._timeLimit) this._timeLimit.graceTimer = null;
+            for (const peer_id of [...this.peers.keys()]) {
+                this.io.in(peer_id).disconnectSockets(true);
+            }
+        }, TIME_LIMIT_GRACE_MS);
+    }
+
+    getTimeLimit() {
+        if (!this._timeLimit) return null;
+        const { durationMs, endsAt, reached } = this._timeLimit;
+        return {
+            durationMs,
+            remainingMs: reached ? 0 : Math.max(0, endsAt - Date.now()),
+            reached,
+        };
+    }
+
+    isTimeLimitReached() {
+        return Boolean(this._timeLimit?.reached);
+    }
+
+    clearTimeLimit() {
+        if (!this._timeLimit) return;
+        clearTimeout(this._timeLimit.timer);
+        clearTimeout(this._timeLimit.graceTimer);
+        this._timeLimit = null;
     }
 
     // ##############################################
@@ -290,6 +368,7 @@ module.exports = class Room {
     }
 
     async close() {
+        this.clearTimeLimit();
         this.closeAudioLevelObserver();
         this.closeActiveSpeakerObserver();
         this.rtmpStreaming.closeAll();

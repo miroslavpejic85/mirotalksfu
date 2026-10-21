@@ -34,6 +34,10 @@ describe('Socket.IO join authorization', () => {
             isLocked: () => false,
             isLobbyEnabled: () => false,
             isGlobalLobbyEnabled: () => false,
+            isTimeLimitReached: () => false,
+            startTimeLimit: sinon.stub().returns(false),
+            getTimeLimit: () => null,
+            broadCast: sinon.spy(),
             getSessionId: () => 'session-id',
             toJson: sinon.stub().returns({ id: roomId }),
         };
@@ -250,6 +254,54 @@ describe('Socket.IO join authorization', () => {
         const result = await joinExistingRoom(state);
         assert.equal(result.id, 'room-b');
         assert.equal(state.room.addPeer.callCount, 1);
+    });
+
+    it('rejects new peers once the room time limit is reached', async () => {
+        const state = setup({ protected: false, user_auth: false });
+        state.room.isTimeLimitReached = () => true;
+        state.data.peer_info.peer_token = '';
+        assert.equal(await joinExistingRoom(state), 'isTimeLimitReached');
+        assert.equal(state.room.addPeer.callCount, 0);
+    });
+
+    it('lets a presenter start the room time limit and notifies the other peers', async () => {
+        const state = setup({ protected: false, user_auth: false, presenters: { list: [], join_first: true } });
+        state.data.peer_info.peer_token = '';
+        state.data.room_duration = '00:30:00';
+        state.room.startTimeLimit = sinon.stub().returns(true);
+        state.room.getTimeLimit = () => ({ durationMs: 1800000, remainingMs: 1800000, reached: false });
+        await joinExistingRoom(state);
+        assert.equal(state.room.startTimeLimit.firstCall.args[0], '00:30:00');
+        const [peerId, action, payload] = state.room.broadCast.firstCall.args;
+        assert.equal(peerId, state.socket.id);
+        assert.equal(action, 'roomTimeLimit');
+        assert.deepEqual(JSON.parse(JSON.stringify(payload)), {
+            action: 'start',
+            durationMs: 1800000,
+            remainingMs: 1800000,
+            reached: false,
+        });
+    });
+
+    it('ignores a room time limit requested by a non-presenter', async () => {
+        const state = setup({ protected: false, user_auth: false, presenters: { list: [], join_first: false } });
+        state.data.peer_info.peer_token = '';
+        state.data.room_duration = '00:00:01';
+        await joinExistingRoom(state);
+        assert.equal(state.room.startTimeLimit.callCount, 0);
+        assert.equal(state.room.broadCast.callCount, 0);
+    });
+
+    it('ignores a room time limit requested in a breakout room', async () => {
+        const state = setup(
+            { protected: false, user_auth: false, presenters: { list: [], join_first: true } },
+            'room-b_breakout_1'
+        );
+        state.data.peer_info.peer_token = '';
+        state.data.room_duration = '00:10:00';
+        state.context.notifyMainRoomBreakoutCountChanged = () => {};
+        await joinExistingRoom(state);
+        assert.equal(state.room.startTimeLimit.callCount, 0);
     });
 
     it('enforces the HOST_USERS displayname as the peer name', async () => {

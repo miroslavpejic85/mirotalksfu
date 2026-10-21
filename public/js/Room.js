@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.70
+ * @version 2.6.71
  *
  */
 
@@ -1638,37 +1638,141 @@ function getRoomPassword() {
 function getRoomDuration() {
     const roomDuration = getQueryParam('duration');
 
-    if (isValidDuration(roomDuration)) {
-        if (roomDuration === 'unlimited') {
-            console.log('The room has no time limit');
-            return roomDuration;
-        }
-        const timeLimit = timeToMilliseconds(roomDuration);
-        setTimeout(() => {
-            sound('eject');
-            Swal.fire({
-                background: swalBackground,
-                position: 'center',
-                title: 'Time Limit Reached',
-                text: 'The room has reached its time limit and will close shortly',
-                icon: 'warning',
-                timer: 6000, // 6 seconds
-                timerProgressBar: true,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-                willClose: () => {
-                    rc.exitRoom(true);
-                },
-            });
-        }, timeLimit);
-
-        console.log('Direct join', { duration: roomDuration, timeLimit: timeLimit });
+    if (roomDuration && isValidDuration(roomDuration) && roomDuration !== 'unlimited') {
+        console.log('Direct join', { duration: roomDuration, timeLimit: timeToMilliseconds(roomDuration) });
         return roomDuration;
     }
+    console.log('The room has no time limit');
     return 'unlimited';
+}
+
+// ####################################################
+// ROOM TIME LIMIT (duration=HH:MM:SS)
+// ####################################################
+
+let roomTimeLimitInterval = null;
+let roomTimeLimitEndsAt = 0;
+let roomTimeLimitShared = false;
+let roomTimeLimitEnded = false;
+let roomTimeLimitLastWarning = Infinity;
+
+function isBreakoutSession() {
+    return !!getQueryParam('breakoutMain');
+}
+
+function initRoomTimeLimit(timeLimit) {
+    // Breakout rooms have their own countdown in the breakout toolbar
+    if (isBreakoutSession()) return;
+
+    if (timeLimit) {
+        return handleRoomTimeLimit({ action: timeLimit.reached ? 'end' : 'start', ...timeLimit });
+    }
+
+    // No room-wide limit (not set by a presenter): keep the personal limit requested via URL
+    if (room_duration !== 'unlimited') {
+        startRoomTimeLimit(timeToMilliseconds(room_duration), false);
+    }
+}
+
+function handleRoomTimeLimit(data) {
+    if (!data || isBreakoutSession()) return;
+    switch (data.action) {
+        case 'start':
+            startRoomTimeLimit(Number(data.remainingMs), true);
+            break;
+        case 'end':
+            endRoomTimeLimit(true);
+            break;
+        default:
+            break;
+    }
+}
+
+function startRoomTimeLimit(remainingMs, shared) {
+    if (roomTimeLimitEnded || !Number.isFinite(remainingMs) || remainingMs < 0) return;
+    // The room-wide limit always takes precedence over a personal one
+    if (roomTimeLimitShared && !shared) return;
+
+    roomTimeLimitShared = shared;
+    roomTimeLimitEndsAt = Date.now() + remainingMs;
+    roomTimeLimitLastWarning = Math.ceil(remainingMs / 1000);
+
+    const timerEl = getId('roomTimeLimit');
+    if (timerEl) {
+        timerEl.classList.remove('hidden');
+        shared
+            ? setTippy('roomTimeLimit', 'Meeting time remaining', 'bottom')
+            : setTippy('roomTimeLimit', 'Your time remaining', 'bottom');
+    }
+
+    clearInterval(roomTimeLimitInterval);
+    roomTimeLimitInterval = setInterval(tickRoomTimeLimit, 1000);
+    tickRoomTimeLimit();
+
+    console.log('Room time limit started', { remainingMs, shared });
+}
+
+function tickRoomTimeLimit() {
+    const remaining = Math.max(0, Math.ceil((roomTimeLimitEndsAt - Date.now()) / 1000));
+
+    const timerEl = getId('roomTimeLimit');
+    const displayEl = getId('roomTimeLimitDisplay');
+    if (displayEl) updateTimerDisplay(displayEl, remaining);
+    if (timerEl) timerEl.classList.toggle('room-time-limit-warning', remaining <= 60);
+
+    notifyRoomTimeLimit(remaining);
+
+    if (remaining <= 0) endRoomTimeLimit(roomTimeLimitShared);
+}
+
+function notifyRoomTimeLimit(remaining) {
+    // Each threshold is announced once, also when ticks are skipped (e.g. background tab)
+    const crossed = (threshold) => remaining <= threshold && roomTimeLimitLastWarning > threshold;
+    const [warn10s, warn1m, warn5m] = [crossed(10), crossed(60), crossed(300)];
+    roomTimeLimitLastWarning = remaining;
+
+    if (!rc || remaining <= 0 || !(warn10s || warn1m || warn5m)) return;
+
+    if (warn10s) {
+        rc.userLog('warning', 'The meeting ends in 10 seconds', 'top-end', 5000);
+    } else if (warn1m) {
+        rc.userLog('warning', 'The meeting ends in 1 minute', 'top-end', 6000);
+    } else {
+        rc.userLog('warning', 'The meeting ends in 5 minutes', 'top-end', 6000);
+    }
+    sound('notification');
+}
+
+function endRoomTimeLimit(shared) {
+    if (roomTimeLimitEnded) return;
+    roomTimeLimitEnded = true;
+
+    clearInterval(roomTimeLimitInterval);
+    roomTimeLimitInterval = null;
+
+    const displayEl = getId('roomTimeLimitDisplay');
+    if (displayEl) updateTimerDisplay(displayEl, 0);
+
+    sound('eject');
+    Swal.fire({
+        background: swalBackground,
+        position: 'center',
+        title: 'Time Limit Reached',
+        text: 'The room has reached its time limit and will close shortly',
+        icon: 'warning',
+        timer: 6000, // 6 seconds
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        },
+        willClose: () => {
+            if (!rc) return;
+            // The server ends a room-wide limit for everyone, a personal one ends the room from this client
+            shared ? rc.exit() : rc.exitRoom(true);
+        },
+    });
 }
 
 function timeToMilliseconds(timeString) {
@@ -10167,7 +10271,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.70',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.71',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

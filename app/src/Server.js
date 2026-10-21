@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.70
+ * @version 2.6.71
  *
  */
 
@@ -2710,6 +2710,11 @@ function startServer() {
                 return cb('isLocked');
             }
 
+            if (room.isTimeLimitReached()) {
+                log.debug('The user was rejected because the room has reached its time limit');
+                return cb('isTimeLimitReached');
+            }
+
             // Remove old peer with same socket.id before adding new one
             const existingPeer = room.getPeer(socket.id);
             if (existingPeer) {
@@ -2763,6 +2768,12 @@ function startServer() {
             });
 
             peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
+
+            // Security: only a presenter can start the room-wide time limit (first one wins, can't be changed later).
+            // Breakout rooms keep their own countdown driven by the main room.
+            if (isPresenter && !isBreakoutRoom && room.startTimeLimit(data.room_duration)) {
+                room.broadCast(socket.id, 'roomTimeLimit', { action: 'start', ...room.getTimeLimit() });
+            }
 
             if ((room.isLobbyEnabled() || room.isGlobalLobbyEnabled()) && !isPresenter) {
                 log.debug(

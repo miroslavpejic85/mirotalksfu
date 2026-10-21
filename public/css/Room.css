@@ -8714,6 +8714,48 @@ hr {
 }
 
 /* ####################################################
+   ROOM TIME LIMIT - Countdown (duration=HH:MM:SS)
+   #################################################### */
+
+.room-time-limit {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 30px;
+    background: var(--btns-bg-color);
+    border: var(--border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--box-shadow);
+    color: #66beff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+    pointer-events: auto;
+}
+
+.room-time-limit.room-time-limit-warning {
+    color: #ff5252;
+    background: rgba(255, 82, 82, 0.15);
+    animation: timerPulse 1s ease-in-out infinite;
+}
+
+@media screen and (max-width: 830px) {
+    .room-time-limit {
+        font-size: 12px;
+        padding: 4px 12px;
+    }
+}
+
+/* ####################################################
    BREAKOUT ROOMS - Return to Main Room Toolbar
    #################################################### */
 

@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.70
+ * @version 2.6.71
  *
  */
 
@@ -652,6 +652,10 @@ class RoomClient {
                 room_id: this.room_id,
                 peer_info: this.peer_info,
             };
+            // Room-wide time limit request, applied by the server only for presenters
+            if (typeof room_duration !== 'undefined' && room_duration !== 'unlimited') {
+                data.room_duration = room_duration;
+            }
             await this.join(data);
             this.initSockets();
             this._isConnected = true;
@@ -753,6 +757,11 @@ class RoomClient {
                 if (room === 'isJoinLocked') {
                     console.warn('00-WARNING ----> Room is Locked for new participants');
                     return this.roomJoinLocked();
+                }
+
+                if (room === 'isTimeLimitReached') {
+                    console.warn('00-WARNING ----> Room has reached its time limit');
+                    return this.roomTimeLimitReached();
                 }
 
                 if (room === 'isLocked') {
@@ -861,6 +870,9 @@ class RoomClient {
 
         participantsCount = this.peers.size;
         setWhiteboardParticipantNames(room.config?.whiteboardParticipantNames === true);
+
+        console.log('07.0 ----> Room Time Limit', room.timeLimit);
+        initRoomTimeLimit(room.timeLimit);
 
         // ME
         for (let peer of Array.from(this.peers.keys()).filter((id) => id == this.peer_id)) {
@@ -1746,6 +1758,7 @@ class RoomClient {
         this.socket.on('breakoutRoomEnd', this.handleBreakoutRoomEnd);
         this.socket.on('breakoutRoomCountdown', this.handleBreakoutRoomCountdown);
         this.socket.on('breakoutRoomHelp', this.handleBreakoutRoomHelp);
+        this.socket.on('roomTimeLimit', this.handleRoomTimeLimit);
         this.socket.on('followMe', this.handleFollowMeData);
         this.socket.on('chatReaction', this.handleChatReaction);
         this.socket.on('chatTyping', this.handleChatTyping);
@@ -2086,6 +2099,11 @@ class RoomClient {
         console.log('SocketOn breakoutRoomCountdown', data);
         sound('notification');
         startBreakoutEndCountdown(data.countdown);
+    };
+
+    handleRoomTimeLimit = (data) => {
+        console.log('SocketOn roomTimeLimit', data);
+        handleRoomTimeLimit(data);
     };
 
     handleBreakoutRoomHelp = (data) => {
@@ -5284,6 +5302,7 @@ class RoomClient {
                 this.socket.off('editorActions');
                 this.socket.off('editorUpdate');
                 this.socket.off('breakoutRoom');
+                this.socket.off('roomTimeLimit');
                 this.socket.io.off('reconnect_attempt');
                 this.socket.io.off('reconnect');
                 this.socket.io.off('reconnect_failed');
@@ -11944,6 +11963,23 @@ class RoomClient {
             imageUrl: image.locked,
             title: 'Oops, Room is Locked',
             text: 'The host has locked the room, new participants are not allowed to join.',
+            confirmButtonText: `OK`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            openURL('/');
+        });
+    }
+
+    roomTimeLimitReached() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            icon: 'warning',
+            title: 'Time Limit Reached',
+            text: 'The room has reached its time limit and is closing, new participants are not allowed to join.',
             confirmButtonText: `OK`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
