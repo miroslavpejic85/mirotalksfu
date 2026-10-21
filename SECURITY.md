@@ -34,5 +34,6 @@ We would like to extend our gratitude to the following individuals for their res
 | `Kevin Sanchez`                                      | [GitHub](https://github.com/kevinsocute)                                                            |
 | `28Hus`                                              | [GitHub](https://github.com/28Hus)                                                                  |
 | `Hama1cco`                                           | [GitHub](https://github.com/Hama1cco) \| [Email](mailto:limiecco@gmail.com)                         |
+| `Azzzzzqz`                                           | [GitHub](https://github.com/Azzzzzqz)                                                               |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
