@@ -3,7 +3,11 @@
 require('should');
 
 const sinon = require('sinon');
-const { assignFallbackPresenter, isConfiguredPresenter } = require('../app/src/PresenterManager');
+const {
+    assignFallbackPresenter,
+    isConfiguredPresenter,
+    isOidcConfiguredPresenter,
+} = require('../app/src/PresenterManager');
 
 describe('PresenterManager', () => {
     function createPeer(id, name, lobby = false) {
@@ -78,5 +82,21 @@ describe('PresenterManager', () => {
     it('does not grant configured presenter status from a display name', () => {
         isConfiguredPresenter(null, ['AllowlistedDisplayName']).should.be.false();
         isConfiguredPresenter('ParticipantAccount', ['AllowlistedDisplayName']).should.be.false();
+    });
+
+    it('matches an OIDC user by verified email (case-insensitive) or sub', () => {
+        const list = ['Host@Example.com', 'auth0|abc123'];
+        isOidcConfiguredPresenter({ email: 'host@example.com', email_verified: true }, list).should.be.true();
+        isOidcConfiguredPresenter({ email: 'host@example.com' }, list).should.be.true();
+        isOidcConfiguredPresenter({ sub: 'auth0|abc123' }, list).should.be.true();
+    });
+
+    it('does not match an OIDC user by unverified email, name or unlisted identity', () => {
+        const list = ['host@example.com', 'auth0|abc123'];
+        isOidcConfiguredPresenter({ email: 'host@example.com', email_verified: false }, list).should.be.false();
+        isOidcConfiguredPresenter({ name: 'host@example.com' }, list).should.be.false();
+        isOidcConfiguredPresenter({ email: 'other@example.com', sub: 'x' }, list).should.be.false();
+        isOidcConfiguredPresenter(null, list).should.be.false();
+        isOidcConfiguredPresenter({ sub: 'auth0|abc123' }, []).should.be.false();
     });
 });

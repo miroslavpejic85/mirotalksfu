@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.56
+ * @version 2.6.57
  *
  */
 
@@ -695,10 +695,25 @@ class RoomClient {
             });
     }
 
+    // Short-lived token proving the OIDC session is a configured presenter (presenters.list), null otherwise
+    async getOidcPresenterToken(room_id) {
+        try {
+            const query = new URLSearchParams({ room: room_id });
+            const response = await fetch(`/oidcPresenterToken?${query}`, { credentials: 'same-origin' });
+            if (!response.ok) return null;
+            const data = await response.json();
+            return data?.token || null;
+        } catch (err) {
+            console.warn('OIDC presenter token not available', err);
+            return null;
+        }
+    }
+
     async join(data) {
         this.joinData = data;
+        const oidc_presenter_token = await this.getOidcPresenterToken(data.room_id);
         this.socket
-            .request('join', data)
+            .request('join', oidc_presenter_token ? { ...data, oidc_presenter_token } : data)
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
 

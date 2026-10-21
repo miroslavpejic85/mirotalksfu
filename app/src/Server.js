@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.56
+ * @version 2.6.57
  *
  */
 
@@ -93,7 +93,7 @@ const mime = require('mime-types');
 const Host = require('./Host');
 const Room = require('./Room');
 const Peer = require('./Peer');
-const { assignFallbackPresenter, isConfiguredPresenter } = require('./PresenterManager');
+const { assignFallbackPresenter, isConfiguredPresenter, isOidcConfiguredPresenter } = require('./PresenterManager');
 const ServerApi = require('./ServerApi');
 const { getJwtKeys } = require('./JwtSecret');
 const Logger = require('./Logger');
@@ -291,6 +291,26 @@ function isCreateRoomTokenValid(token, roomId) {
     try {
         const decoded = jwt.verify(token, jwtKeys.createRoom, JWT_VERIFY_OPTIONS);
         return decoded?.scope === 'create-room' && decoded.roomId === String(roomId);
+    } catch {
+        return false;
+    }
+}
+
+// Short-lived token bound to a room, issued by GET /oidcPresenterToken only to an OIDC session whose
+// verified email or sub is in presenters.list. The socket carries no OIDC session, so it proves it at join.
+const OIDC_PRESENTER_TOKEN_EXP = '2m';
+
+function createOidcPresenterToken(roomId) {
+    return jwt.sign({ scope: 'oidc-presenter', roomId: String(roomId) }, jwtKeys.oidcPresenter, {
+        expiresIn: OIDC_PRESENTER_TOKEN_EXP,
+    });
+}
+
+function isOidcPresenterTokenValid(token, roomId) {
+    if (!token || typeof token !== 'string') return false;
+    try {
+        const decoded = jwt.verify(token, jwtKeys.oidcPresenter, JWT_VERIFY_OPTIONS);
+        return decoded?.scope === 'oidc-presenter' && decoded.roomId === String(roomId);
     } catch {
         return false;
     }
@@ -1040,6 +1060,28 @@ function startServer() {
             });
             res.status(500).json({ message: 'Failed to send meeting invitations' });
         }
+    });
+
+    // Issue a short-lived token proving the OIDC session is a configured presenter (presenters.list
+    // matched against the verified email or sub). The Socket.IO join validates it for this room.
+    app.get('/oidcPresenterToken', (req, res) => {
+        const { room } = checkXSS(req.query);
+
+        if (!room || !Validator.isValidRoomName(room)) {
+            return res.status(400).json({ message: 'Invalid room' });
+        }
+
+        res.set('Cache-Control', 'no-store');
+
+        if (!OIDC.enabled || !req.oidc?.isAuthenticated?.()) {
+            return res.json({ token: null });
+        }
+
+        if (!isOidcConfiguredPresenter(req.oidc.user, hostCfg?.presenters?.list)) {
+            return res.json({ token: null });
+        }
+
+        return res.json({ token: createOidcPresenterToken(room) });
     });
 
     // Issue a short-lived token that authorizes the Socket.IO `createRoom` event for this room.
@@ -2498,6 +2540,10 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            // Proof of an OIDC presenter session (presenters.list), consumed here and never stored on the peer
+            const oidcPresenter = isOidcPresenterTokenValid(data.oidc_presenter_token, socket.room_id);
+            delete data.oidc_presenter_token;
+
             log.debug('User joined', data);
 
             if (!Validator.isValidRoomName(socket.room_id)) {
@@ -2607,7 +2653,8 @@ function startServer() {
             );
             if (usernameExists) return cb('isNameInUse');
 
-            const configuredPresenter = isConfiguredPresenter(authenticatedUsername, hostCfg?.presenters?.list);
+            const configuredPresenter =
+                isConfiguredPresenter(authenticatedUsername, hostCfg?.presenters?.list) || oidcPresenter;
             const isBreakoutRoom = socket.room_id.includes('_breakout_');
             const shouldRegisterPresenter =
                 configuredPresenter ||
@@ -2616,7 +2663,7 @@ function startServer() {
                     Object.keys(presenters[socket.room_id] || {}).length === 0) ||
                 (peer_token && is_presenter);
             const isPresenter = peer_token
-                ? is_presenter
+                ? is_presenter || oidcPresenter
                 : shouldRegisterPresenter || isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
             if ((hostCfg.protected || hostCfg.user_auth) && isPresenter && !hostCfg.users_from_db) {

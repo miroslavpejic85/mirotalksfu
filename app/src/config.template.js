@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.56 - Configuration File
+ * MiroTalk SFU v2.6.57 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -543,12 +543,13 @@ module.exports = {
          *
          * Presenter Management:
          * --------------------
-         * - list        : Array of authenticated LOGIN usernames (the `username` field of HOST_USERS,
-         *                 not the display name) who are always presenters.
-         *                 Only matched for peers authenticated via host login (protected / user_auth)
-         *                 or a valid JWT token. The join-form display name is never matched, so with
-         *                 no auth enabled this list has no effect: use join_first or a token with
-         *                 presenter=true instead. Empty by default.
+         * - list        : Array of authenticated identities who are always presenters:
+         *                 - LOGIN usernames (the `username` field of HOST_USERS, not the display name)
+         *                   for host login (protected / user_auth) or a valid JWT token
+         *                 - verified email or `sub` of the OIDC user when OIDC is enabled
+         *                 The join-form display name is never matched, so with no auth enabled this
+         *                 list has no effect: use join_first or a token with presenter=true instead.
+         *                 Empty by default.
          * - join_first  : First joiner becomes presenter; when the last presenter leaves,
          *                 promote the first admitted participant (default: true)
          *

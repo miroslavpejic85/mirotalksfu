@@ -9,6 +9,24 @@ function isConfiguredPresenter(authenticatedUsername, presenterList) {
     );
 }
 
+// OIDC identities usable in presenters.list: the verified email (case-insensitive) or the stable `sub`
+function isOidcConfiguredPresenter(oidcUser, presenterList) {
+    if (!oidcUser || !Array.isArray(presenterList) || presenterList.length === 0) return false;
+
+    const { email, email_verified: emailVerified, sub } = oidcUser;
+    const lowerList = presenterList.map((entry) => String(entry).toLowerCase());
+
+    if (typeof sub === 'string' && sub.length > 0 && presenterList.includes(sub)) return true;
+
+    return (
+        typeof email === 'string' &&
+        email.length > 0 &&
+        emailVerified !== false &&
+        emailVerified !== 'false' &&
+        lowerList.includes(email.toLowerCase())
+    );
+}
+
 function assignFallbackPresenter(roomId, room, presenters, joinFirst) {
     if (!joinFirst || !room || roomId.includes('_breakout_') || room.getPeersCount() === 0) return null;
 
@@ -36,4 +54,4 @@ function assignFallbackPresenter(roomId, room, presenters, joinFirst) {
     return peer;
 }
 
-module.exports = { assignFallbackPresenter, isConfiguredPresenter };
+module.exports = { assignFallbackPresenter, isConfiguredPresenter, isOidcConfiguredPresenter };

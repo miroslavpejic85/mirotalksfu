@@ -71,6 +71,7 @@ describe('Socket.IO join authorization', () => {
             decodeToken: () => token,
             isAuthPeer: async (username, password) => username === 'alice' && password === 'alice-password',
             isConfiguredPresenter,
+            isOidcPresenterTokenValid: () => false,
             isPeerPresenter: () => false,
             Peer: class {
                 constructor(peerId, data) {
@@ -202,6 +203,26 @@ describe('Socket.IO join authorization', () => {
         const result = await joinExistingRoom(state);
         assert.equal(result.id, 'room-b');
         assert.equal(state.presenters['room-b'][state.socket.id].is_configured_presenter, true);
+    });
+
+    it('grants presenter to a tokenless peer that proves a configured OIDC presenter session', async () => {
+        const state = setup({ protected: false, user_auth: false, presenters: { list: [], join_first: false } });
+        state.data.peer_info.peer_token = '';
+        state.data.oidc_presenter_token = 'oidc-proof';
+        state.context.isOidcPresenterTokenValid = (token, roomId) => token === 'oidc-proof' && roomId === 'room-b';
+        const result = await joinExistingRoom(state);
+        assert.equal(result.id, 'room-b');
+        assert.equal(state.presenters['room-b'][state.socket.id].is_configured_presenter, true);
+        assert.equal(state.data.oidc_presenter_token, undefined);
+    });
+
+    it('does not grant presenter when the OIDC presenter proof is invalid', async () => {
+        const state = setup({ protected: false, user_auth: false, presenters: { list: [], join_first: false } });
+        state.data.peer_info.peer_token = '';
+        state.data.oidc_presenter_token = 'forged';
+        const result = await joinExistingRoom(state);
+        assert.equal(result.id, 'room-b');
+        assert.equal(state.presenters['room-b'][state.socket.id], undefined);
     });
 
     for (const [lockFlag, expected] of [

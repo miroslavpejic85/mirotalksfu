@@ -15,6 +15,7 @@ const PURPOSES = {
     rtmp: 'rtmp-stream',
     createRoom: 'create-room',
     rcSetup: 'rc-setup',
+    oidcPresenter: 'oidc-presenter',
 };
 
 let cached = null;
@@ -51,6 +52,7 @@ function getJwtKeys(rawSecret = process.env.JWT_SECRET) {
                 rtmp: deriveKey(secret, PURPOSES.rtmp),
                 createRoom: deriveKey(secret, PURPOSES.createRoom),
                 rcSetup: deriveKey(secret, PURPOSES.rcSetup),
+                oidcPresenter: deriveKey(secret, PURPOSES.oidcPresenter),
             }),
         };
     }
