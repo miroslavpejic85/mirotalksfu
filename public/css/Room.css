@@ -2195,6 +2195,437 @@ body {
     color: var(--fg-1);
 }
 
+/* SIP phone: status bar */
+#tabSipPhone .sip-status-bar {
+    --sip-state-color: color-mix(in srgb, var(--fg-1) 45%, transparent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--room-border);
+    border-left: 3px solid var(--sip-state-color);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--select-bg) 64%, transparent);
+    color: var(--fg-1);
+    font-size: 0.88rem;
+}
+
+#tabSipPhone .sip-status-bar[data-state='busy'] {
+    --sip-state-color: #f59e0b;
+}
+
+#tabSipPhone .sip-status-bar[data-state='registered'] {
+    --sip-state-color: #22c55e;
+}
+
+#tabSipPhone .sip-status-bar[data-state='incall'] {
+    --sip-state-color: #10b981;
+}
+
+#tabSipPhone .sip-status-bar[data-state='incoming'] {
+    --sip-state-color: #3b82f6;
+}
+
+#tabSipPhone .sip-status-bar[data-state='error'] {
+    --sip-state-color: #ef4444;
+}
+
+#tabSipPhone .sip-status-dot {
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--sip-state-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sip-state-color) 22%, transparent);
+}
+
+#tabSipPhone .sip-status-bar:is([data-state='busy'], [data-state='incoming'], [data-state='incall']) .sip-status-dot {
+    animation: sipPulse 1.4s ease-in-out infinite;
+}
+
+#tabSipPhone .sip-status-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+#tabSipPhone .sip-call-timer {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--sip-state-color);
+}
+
+@keyframes sipPulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
+}
+
+/* SIP phone: incoming call banner */
+#tabSipPhone .sip-incoming {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, #3b82f6 55%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, #3b82f6 14%, var(--select-bg));
+}
+
+#tabSipPhone .sip-incoming-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+#tabSipPhone .sip-incoming-info > i {
+    margin: 0;
+    padding: 0;
+    font-size: 1.4rem;
+    color: #60a5fa;
+    animation: sipPulse 1.2s ease-in-out infinite;
+}
+
+#tabSipPhone .sip-incoming-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+#tabSipPhone .sip-incoming-title {
+    margin: 0;
+    padding: 0;
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--fg-1) 70%, transparent);
+}
+
+#tabSipPhone .sip-incoming-from {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--fg-1);
+    overflow-wrap: anywhere;
+}
+
+#tabSipPhone .sip-incoming-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* SIP phone: cards */
+#tabSipPhone .sip-card {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid var(--room-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--select-bg) 40%, transparent);
+}
+
+#tabSipPhone .sip-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--fg-1);
+    font-weight: 700;
+}
+
+#tabSipPhone .sip-card-title > i {
+    margin: 0;
+    padding: 0;
+    color: var(--room-accent);
+}
+
+#tabSipPhone .sip-card-title > p {
+    margin: 0;
+    padding: 0;
+    font-weight: 700;
+}
+
+#tabSipPhone details.sip-card > summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+#tabSipPhone details.sip-card > summary::-webkit-details-marker {
+    display: none;
+}
+
+#tabSipPhone details.sip-card > summary::after {
+    content: '\f078';
+    margin-left: 8px;
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.75rem;
+    color: color-mix(in srgb, var(--fg-1) 60%, transparent);
+    transition: transform var(--motion-fast, 0.15s) ease;
+}
+
+#tabSipPhone details.sip-card[open] > summary {
+    margin-bottom: 12px;
+}
+
+#tabSipPhone details.sip-card[open] > summary::after {
+    transform: rotate(180deg);
+}
+
+#tabSipPhone .sip-account-summary {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #22c55e;
+}
+
+/* SIP phone: inputs with inline buttons */
+#tabSipPhone .sip-input-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#tabSipPhone .sip-input-group > input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+#tabSipPhone button.sip-icon-btn {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    margin: 0;
+    padding: 0;
+    justify-content: center;
+    text-align: center;
+}
+
+#tabSipPhone input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* SIP phone: dialer */
+#tabSipPhone .sip-dialer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#tabSipPhone .sip-target-row {
+    margin-top: 2px;
+}
+
+#tabSipPhone .sip-target-row > input#sipTarget {
+    min-height: 50px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-align: center;
+}
+
+#tabSipPhone .sip-target-row > input#sipTarget::placeholder {
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: normal;
+}
+
+#tabSipPhone .sip-target-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 22px;
+    font-size: 0.78rem;
+}
+
+#tabSipPhone .sip-target-type {
+    flex: 0 0 auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    color: var(--fg-1);
+    background: var(--room-accent-soft);
+}
+
+#tabSipPhone .sip-target-type[data-type='phone'] {
+    background: color-mix(in srgb, #22c55e 22%, transparent);
+}
+
+#tabSipPhone .sip-target-type[data-type='uri'] {
+    background: color-mix(in srgb, #3b82f6 22%, transparent);
+}
+
+#tabSipPhone .sip-target-preview {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: color-mix(in srgb, var(--fg-1) 60%, transparent);
+}
+
+#tabSipPhone .sip-dialpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    padding: 6px;
+    border: 1px solid transparent;
+    border-radius: 16px;
+    transition: border-color var(--motion-fast, 0.15s) ease;
+}
+
+#tabSipPhone .sip-dialpad.sip-dialpad-dtmf {
+    border-color: color-mix(in srgb, #10b981 45%, transparent);
+}
+
+#tabSipPhone button.sip-key {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    height: 58px;
+    min-height: 58px;
+    margin: 0;
+    padding: 4px 0;
+    border-radius: 14px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.1;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+}
+
+#tabSipPhone button.sip-key::after {
+    content: attr(data-letters);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: color-mix(in srgb, var(--fg-1) 55%, transparent);
+}
+
+#tabSipPhone button.sip-key:active {
+    background: var(--room-accent-soft);
+    transform: scale(0.97);
+}
+
+#tabSipPhone .sip-call-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+#tabSipPhone .sip-call-actions .btn-custom,
+#tabSipPhone .sip-incoming-buttons .btn-custom {
+    flex: 1 1 0;
+    justify-content: center;
+    margin: 0;
+    font-weight: 700;
+}
+
+#tabSipPhone :is(.sip-call-actions, .sip-incoming-buttons) .btn-custom :is(i, p) {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+}
+
+/* Beat the global `.fa-phone-slash, .fa-microphone-slash { color: red !important }` on colored buttons */
+#tabSipPhone :is(.sip-call-actions, .sip-incoming-buttons) .btn-custom i:is(.fa-phone-slash, .fa-microphone-slash) {
+    color: inherit !important;
+}
+
+#tabSipPhone :is(.sip-btn-call, .sip-btn-accept) {
+    border-color: #16a34a;
+    background: #16a34a;
+    color: #fff;
+}
+
+#tabSipPhone :is(.sip-btn-call, .sip-btn-accept):not(:disabled):hover {
+    background: #15803d !important;
+}
+
+#tabSipPhone :is(.sip-btn-hangup, .sip-btn-reject) {
+    border-color: #dc2626;
+    background: #dc2626;
+    color: #fff;
+}
+
+#tabSipPhone :is(.sip-btn-hangup, .sip-btn-reject):hover {
+    background: #b91c1c !important;
+}
+
+#tabSipPhone .sip-btn-mute.sip-btn-muted {
+    border-color: #f59e0b;
+    color: #fbbf24;
+}
+
+#tabSipPhone .sip-recent {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+#tabSipPhone .sip-recent-label {
+    margin: 0 4px 0 0;
+    padding: 0;
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--fg-1) 65%, transparent);
+}
+
+#tabSipPhone .sip-recent-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+#tabSipPhone button.sip-recent-chip {
+    width: auto;
+    max-width: 220px;
+    min-height: 28px;
+    margin: 0;
+    padding: 3px 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+#tabSipPhone .sip-dialer-help {
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #tabSipPhone .sip-status-dot,
+    #tabSipPhone .sip-incoming-info > i {
+        animation: none !important;
+    }
+}
+
 .profile-card {
     margin-bottom: 12px;
     padding: 14px;

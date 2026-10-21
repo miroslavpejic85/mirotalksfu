@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.58
+ * @version 2.6.70
  *
  */
 
@@ -253,18 +253,32 @@ const sipTarget = getId('sipTarget');
 const sipHackIpInContact = getId('sipHackIpInContact');
 const sipDisplayName = getId('sipDisplayName');
 const sipOutboundProxy = getId('sipOutboundProxy');
+const sipPhoneGateway = getId('sipPhoneGateway');
 const sipRegisterExpires = getId('sipRegisterExpires');
 const sipStatus = getId('sipStatus');
+const sipStatusBar = getId('sipStatusBar');
+const sipCallTimer = getId('sipCallTimer');
 const sipRemoteAudio = getId('sipRemoteAudio');
+const sipAccountDetails = getId('sipAccountDetails');
+const sipAccountSummary = getId('sipAccountSummary');
 const sipGenerateUserBtn = getId('sipGenerateUserBtn');
 const sipCopyUserBtn = getId('sipCopyUserBtn');
 const sipRegisterBtn = getId('sipRegisterBtn');
 const sipUnregisterBtn = getId('sipUnregisterBtn');
+const sipTargetType = getId('sipTargetType');
+const sipTargetPreview = getId('sipTargetPreview');
+const sipBackspaceBtn = getId('sipBackspaceBtn');
+const sipDialpad = getId('sipDialpad');
 const sipCallBtn = getId('sipCallBtn');
+const sipMuteBtn = getId('sipMuteBtn');
+const sipMuteLabel = getId('sipMuteLabel');
 const sipHangupBtn = getId('sipHangupBtn');
 const sipIncomingActions = getId('sipIncomingActions');
+const sipIncomingFrom = getId('sipIncomingFrom');
 const sipAcceptBtn = getId('sipAcceptBtn');
 const sipRejectBtn = getId('sipRejectBtn');
+const sipRecentCalls = getId('sipRecentCalls');
+const sipRecentList = getId('sipRecentList');
 
 const exitDropdown = getId('exitDropdown');
 const exitMenu = getId('exitMenu');
@@ -470,31 +484,37 @@ function initSipPhoneControls() {
             sipHackIpInContact,
             sipDisplayName,
             sipOutboundProxy,
+            sipPhoneGateway,
             sipRegisterExpires,
             sipStatus,
+            sipStatusBar,
+            sipCallTimer,
             sipRemoteAudio,
+            sipAccountDetails,
+            sipAccountSummary,
             sipGenerateUserBtn,
             sipCopyUserBtn,
             sipRegisterBtn,
             sipUnregisterBtn,
+            sipTargetType,
+            sipTargetPreview,
+            sipBackspaceBtn,
+            sipDialpad,
             sipCallBtn,
+            sipMuteBtn,
+            sipMuteLabel,
             sipHangupBtn,
+            sipIncomingActions,
+            sipIncomingFrom,
             sipAcceptBtn,
             sipRejectBtn,
+            sipRecentCalls,
+            sipRecentList,
         },
         getPeerName: () => peer_name,
         openSipTab: (e) => rc.openTab(e, 'tabSipPhone'),
-        setIncomingActionsVisible: (showActions) => {
-            if (!sipIncomingActions) return;
-            if (showActions) {
-                show('sipIncomingActions');
-                sipIncomingActions.style.display = 'flex';
-            } else {
-                hide('sipIncomingActions');
-                sipIncomingActions.style.display = '';
-            }
-        },
         onUsernameCopied: () => userLog('toast', 'SIP username copied', 'top-end', 2000),
+        onIncomingCall: () => userLog('info', 'Incoming SIP call', 'top-end', 6000),
     });
 }
 
@@ -10147,7 +10167,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.58',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.70',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

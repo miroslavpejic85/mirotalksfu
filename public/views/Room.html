@@ -1529,195 +1529,326 @@
                     <div id="tabSipPhone" class="tabcontent">
                         <div class="settings-section-intro">
                             <h3>SIP phone</h3>
-                            <p>Register a SIP user and call another SIP extension from this room.</p>
+                            <p>
+                                Register a SIP account, then call an extension, a phone number or a SIP address from
+                                this room.
+                            </p>
                         </div>
 
-                        <table class="settingsTable">
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-link"></i>
-                                        <p>WS server</p>
-                                    </div>
-                                </td>
-                                <td><input id="sipWsServer" type="text" placeholder="ws://127.0.0.1:5066" /></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-globe"></i>
-                                        <p>SIP domain</p>
-                                    </div>
-                                </td>
-                                <td><input id="sipDomain" type="text" placeholder="127.0.0.1" /></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-user"></i>
-                                        <p>SIP username</p>
-                                    </div>
-                                </td>
-                                <td><input id="sipUsername" type="text" placeholder="random extension" /></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-id-badge"></i>
-                                        <p>Auth username</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <input
-                                        id="sipAuthUsername"
-                                        type="text"
-                                        placeholder="optional (defaults to SIP username)"
-                                    />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-key"></i>
-                                        <p>SIP password</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <input
-                                        id="sipPassword"
-                                        type="password"
-                                        placeholder="optional / required by your SIP server"
-                                    />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-phone-volume"></i>
-                                        <p>Call target</p>
-                                    </div>
-                                </td>
-                                <td><input id="sipTarget" type="text" placeholder="target extension" /></td>
-                            </tr>
-                            <tr>
-                                <td class="sip-switch-row" colspan="2">
-                                    <div class="sip-switch-row-head">
-                                        <div class="title">
-                                            <i class="fa-solid fa-network-wired"></i>
-                                            <p>Contact IP compatibility hack</p>
-                                        </div>
-                                        <div
-                                            class="form-check form-switch form-switch-md sip-switch-cell sip-switch-no-label"
-                                        >
-                                            <input
-                                                id="sipHackIpInContact"
-                                                class="form-check-input"
-                                                type="checkbox"
-                                                checked
-                                            />
-                                        </div>
-                                    </div>
-                                    <p class="sip-help-text">
-                                        Use this if registration fails behind NAT/proxy or with strict SIP servers.
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
+                        <div id="sipStatusBar" class="sip-status-bar" data-state="idle" aria-live="polite">
+                            <span class="sip-status-dot" aria-hidden="true"></span>
+                            <span id="sipStatus" class="sip-status-text" translate="no">Idle</span>
+                            <span id="sipCallTimer" class="sip-call-timer hidden" translate="no">00:00</span>
+                        </div>
 
-                        <details class="sip-advanced-details">
-                            <summary><strong>Advanced compatibility</strong></summary>
-                            <table class="settingsTable" style="margin-top: 10px">
+                        <div id="sipIncomingActions" class="sip-incoming hidden" role="alert">
+                            <div class="sip-incoming-info">
+                                <i class="fa-solid fa-phone-volume"></i>
+                                <div class="sip-incoming-text">
+                                    <p class="sip-incoming-title">Incoming call</p>
+                                    <span id="sipIncomingFrom" class="sip-incoming-from" translate="no"></span>
+                                </div>
+                            </div>
+                            <div class="sip-incoming-buttons">
+                                <button id="sipAcceptBtn" class="btn-custom sip-btn-accept">
+                                    <i class="fa-solid fa-phone"></i>
+                                    <p>Accept</p>
+                                </button>
+                                <button id="sipRejectBtn" class="btn-custom sip-btn-reject">
+                                    <i class="fa-solid fa-phone-slash"></i>
+                                    <p>Reject</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <details id="sipAccountDetails" class="sip-card sip-account" open>
+                            <summary class="sip-card-title">
+                                <i class="fa-solid fa-user-gear"></i>
+                                <p>Account</p>
+                                <span id="sipAccountSummary" class="sip-account-summary" translate="no"></span>
+                            </summary>
+
+                            <table class="settingsTable">
                                 <tr>
                                     <td>
                                         <div class="title">
-                                            <i class="fa-solid fa-signature"></i>
-                                            <p>Display name</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input id="sipDisplayName" type="text" placeholder="optional display name" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="title">
-                                            <i class="fa-solid fa-route"></i>
-                                            <p>Outbound proxy / route set</p>
+                                            <i class="fa-solid fa-link"></i>
+                                            <p>WS server</p>
                                         </div>
                                     </td>
                                     <td>
                                         <input
-                                            id="sipOutboundProxy"
+                                            id="sipWsServer"
                                             type="text"
-                                            placeholder="sip:proxy.example.com;lr (optional)"
+                                            autocomplete="off"
+                                            spellcheck="false"
+                                            placeholder="ws://127.0.0.1:5066"
                                         />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
                                         <div class="title">
-                                            <i class="fa-solid fa-hourglass-half"></i>
-                                            <p>Register expires (s)</p>
+                                            <i class="fa-solid fa-globe"></i>
+                                            <p>SIP domain</p>
                                         </div>
                                     </td>
                                     <td>
-                                        <input id="sipRegisterExpires" type="number" min="60" max="86400" value="600" />
+                                        <input
+                                            id="sipDomain"
+                                            type="text"
+                                            autocomplete="off"
+                                            spellcheck="false"
+                                            placeholder="127.0.0.1"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="title">
+                                            <i class="fa-solid fa-user"></i>
+                                            <p>SIP username</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="sip-input-group">
+                                            <input
+                                                id="sipUsername"
+                                                type="text"
+                                                autocomplete="off"
+                                                spellcheck="false"
+                                                placeholder="random extension"
+                                            />
+                                            <button
+                                                id="sipGenerateUserBtn"
+                                                class="sip-icon-btn"
+                                                title="Random user"
+                                                aria-label="Random user"
+                                            >
+                                                <i class="fa-solid fa-shuffle"></i>
+                                            </button>
+                                            <button
+                                                id="sipCopyUserBtn"
+                                                class="sip-icon-btn"
+                                                title="Copy user"
+                                                aria-label="Copy user"
+                                            >
+                                                <i class="fa-solid fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="title">
+                                            <i class="fa-solid fa-id-badge"></i>
+                                            <p>Auth username</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input
+                                            id="sipAuthUsername"
+                                            type="text"
+                                            autocomplete="off"
+                                            spellcheck="false"
+                                            placeholder="optional (defaults to SIP username)"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="title">
+                                            <i class="fa-solid fa-key"></i>
+                                            <p>SIP password</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input
+                                            id="sipPassword"
+                                            type="password"
+                                            autocomplete="new-password"
+                                            placeholder="optional / required by your SIP server"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="sip-switch-row" colspan="2">
+                                        <div class="sip-switch-row-head">
+                                            <div class="title">
+                                                <i class="fa-solid fa-network-wired"></i>
+                                                <p>Contact IP compatibility hack</p>
+                                            </div>
+                                            <div
+                                                class="form-check form-switch form-switch-md sip-switch-cell sip-switch-no-label"
+                                            >
+                                                <input
+                                                    id="sipHackIpInContact"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </div>
+                                        <p class="sip-help-text">
+                                            Use this if registration fails behind NAT/proxy or with strict SIP servers.
+                                        </p>
                                     </td>
                                 </tr>
                             </table>
+
+                            <details class="sip-advanced-details">
+                                <summary><strong>Advanced compatibility</strong></summary>
+                                <table class="settingsTable" style="margin-top: 10px">
+                                    <tr>
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-signature"></i>
+                                                <p>Display name</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input
+                                                id="sipDisplayName"
+                                                type="text"
+                                                placeholder="optional display name"
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-route"></i>
+                                                <p>Outbound proxy / route set</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input
+                                                id="sipOutboundProxy"
+                                                type="text"
+                                                autocomplete="off"
+                                                spellcheck="false"
+                                                placeholder="sip:proxy.example.com;lr (optional)"
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-tower-cell"></i>
+                                                <p>Phone number gateway</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input
+                                                id="sipPhoneGateway"
+                                                type="text"
+                                                autocomplete="off"
+                                                spellcheck="false"
+                                                placeholder="optional (defaults to SIP domain)"
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-hourglass-half"></i>
+                                                <p>Register expires (s)</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input
+                                                id="sipRegisterExpires"
+                                                type="number"
+                                                min="60"
+                                                max="86400"
+                                                value="600"
+                                            />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </details>
                         </details>
 
-                        <hr />
-
-                        <div class="recording-controls">
-                            <button id="sipGenerateUserBtn" class="btn-custom">
-                                <i class="fa-solid fa-shuffle"></i>
-                                <p>Random user</p>
-                            </button>
-                            <button id="sipCopyUserBtn" class="btn-custom">
-                                <i class="fa-solid fa-copy"></i>
-                                <p>Copy user</p>
-                            </button>
-                        </div>
-
-                        <div class="recording-controls">
+                        <div class="recording-controls sip-register-controls">
                             <button id="sipRegisterBtn" class="btn-custom">
                                 <i class="fa-solid fa-plug-circle-check"></i>
                                 <p>Register</p>
                             </button>
-                            <button id="sipUnregisterBtn" class="btn-custom">
+                            <button id="sipUnregisterBtn" class="btn-custom hidden">
                                 <i class="fa-solid fa-plug-circle-xmark"></i>
                                 <p>Unregister</p>
                             </button>
                         </div>
 
-                        <div class="recording-controls">
-                            <button id="sipCallBtn" class="btn-custom">
+                        <section class="sip-card sip-dialer">
+                            <div class="sip-card-title">
                                 <i class="fa-solid fa-phone"></i>
-                                <p>Call</p>
-                            </button>
-                            <button id="sipHangupBtn" class="btn-custom">
-                                <i class="fa-solid fa-phone-slash red"></i>
-                                <p>Hang up</p>
-                            </button>
-                        </div>
+                                <p>Dialer</p>
+                            </div>
 
-                        <div id="sipIncomingActions" class="recording-controls hidden">
-                            <button id="sipAcceptBtn" class="btn-custom">
-                                <i class="fa-solid fa-phone-volume"></i>
-                                <p>Accept</p>
-                            </button>
-                            <button id="sipRejectBtn" class="btn-custom">
-                                <i class="fa-solid fa-ban red"></i>
-                                <p>Reject</p>
-                            </button>
-                        </div>
+                            <div class="sip-input-group sip-target-row">
+                                <input
+                                    id="sipTarget"
+                                    type="text"
+                                    inputmode="tel"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                    aria-label="Call target"
+                                    placeholder="Extension, phone number or SIP address"
+                                />
+                                <button
+                                    id="sipBackspaceBtn"
+                                    class="sip-icon-btn hidden"
+                                    title="Backspace"
+                                    aria-label="Backspace"
+                                >
+                                    <i class="fa-solid fa-delete-left"></i>
+                                </button>
+                            </div>
+                            <div class="sip-target-meta">
+                                <span id="sipTargetType" class="sip-target-type hidden"></span>
+                                <span id="sipTargetPreview" class="sip-target-preview" translate="no"></span>
+                            </div>
 
-                        <div class="recording-time" aria-live="polite">
-                            <i class="fa-solid fa-circle-info"></i>
-                            <p>Status:</p>
-                            <span id="sipStatus" translate="no">Idle</span>
-                        </div>
+                            <div id="sipDialpad" class="sip-dialpad" translate="no">
+                                <button class="sip-key" data-key="1" data-letters="&#160;">1</button>
+                                <button class="sip-key" data-key="2" data-letters="ABC">2</button>
+                                <button class="sip-key" data-key="3" data-letters="DEF">3</button>
+                                <button class="sip-key" data-key="4" data-letters="GHI">4</button>
+                                <button class="sip-key" data-key="5" data-letters="JKL">5</button>
+                                <button class="sip-key" data-key="6" data-letters="MNO">6</button>
+                                <button class="sip-key" data-key="7" data-letters="PQRS">7</button>
+                                <button class="sip-key" data-key="8" data-letters="TUV">8</button>
+                                <button class="sip-key" data-key="9" data-letters="WXYZ">9</button>
+                                <button class="sip-key" data-key="*" data-letters="&#160;">*</button>
+                                <button class="sip-key" data-key="0" data-long-key="+" data-letters="+">0</button>
+                                <button class="sip-key" data-key="#" data-letters="&#160;">#</button>
+                            </div>
+
+                            <div class="sip-call-actions">
+                                <button id="sipCallBtn" class="btn-custom sip-btn-call" disabled>
+                                    <i class="fa-solid fa-phone"></i>
+                                    <p>Call</p>
+                                </button>
+                                <button id="sipMuteBtn" class="btn-custom sip-btn-mute hidden" aria-pressed="false">
+                                    <i class="fa-solid fa-microphone"></i>
+                                    <p id="sipMuteLabel">Mute</p>
+                                </button>
+                                <button id="sipHangupBtn" class="btn-custom sip-btn-hangup hidden">
+                                    <i class="fa-solid fa-phone-slash"></i>
+                                    <p>Hang up</p>
+                                </button>
+                            </div>
+
+                            <div id="sipRecentCalls" class="sip-recent hidden">
+                                <p class="sip-recent-label">Recent</p>
+                                <div id="sipRecentList" class="sip-recent-list" translate="no"></div>
+                            </div>
+
+                            <p class="sip-help-text sip-dialer-help">
+                                Phone numbers are routed through your SIP provider or PBX gateway.
+                            </p>
+                        </section>
 
                         <audio id="sipRemoteAudio" autoplay></audio>
                     </div>
