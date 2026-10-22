@@ -2732,17 +2732,98 @@ main {
 }
 
 .support-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px 48px;
     margin-top: 32px;
     padding-top: 24px;
     border-top: 1px solid var(--landing-border) !important;
 }
 
-.support-footer a {
-    text-decoration: none;
+.support-footer-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
 
-.support-footer a:hover {
+.support-footer-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--landing-text-muted);
+}
+
+.support-footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.support-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
     color: var(--landing-text) !important;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--landing-border);
+    border-radius: 999px;
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.support-pill:hover,
+.support-pill:focus-visible {
+    color: #fff !important;
+    background: rgba(22, 140, 255, 0.15);
+    border-color: var(--landing-border-strong);
+    transform: translateY(-2px);
+}
+
+.support-pill .fa-star {
+    color: #ffc55a;
+}
+
+.support-pill .fa-bullhorn {
+    color: #ff5fa0;
+}
+
+.support-pill .fa-code {
+    color: var(--landing-primary-bright);
+}
+
+.support-pill-discord {
+    color: #fff !important;
+    background: rgba(88, 101, 242, 0.18);
+    border-color: rgba(88, 101, 242, 0.45);
+}
+
+.support-pill-discord .fa-discord {
+    color: #8b95ff;
+}
+
+.support-pill-discord:hover,
+.support-pill-discord:focus-visible {
+    background: #5865f2;
+    border-color: #5865f2;
+}
+
+.support-pill-discord:hover .fa-discord,
+.support-pill-discord:focus-visible .fa-discord {
+    color: #fff;
 }
 
 @media (max-width: 900px) {
@@ -2769,6 +2850,17 @@ main {
     .support-card {
         padding: 24px 16px;
         min-height: 140px;
+    }
+
+    .support-footer-group,
+    .support-footer-actions {
+        width: 100%;
+    }
+
+    .support-pill {
+        flex: 1 1 auto;
+        justify-content: center;
+        padding: 10px 14px;
     }
 }
 
