@@ -9,14 +9,18 @@ function isConfiguredPresenter(authenticatedUsername, presenterList) {
     );
 }
 
-// OIDC identities usable in presenters.list: the verified email (case-insensitive) or the stable `sub`
+// OIDC identities usable in presenters.list: the verified email (case-insensitive) or the stable `sub`.
+// The wildcard '*' matches any authenticated OIDC user (OIDC only, never host logins or display names).
 function isOidcConfiguredPresenter(oidcUser, presenterList) {
     if (!oidcUser || !Array.isArray(presenterList) || presenterList.length === 0) return false;
 
     const { email, email_verified: emailVerified, sub } = oidcUser;
     const lowerList = presenterList.map((entry) => String(entry).toLowerCase());
+    const hasSub = typeof sub === 'string' && sub.length > 0;
 
-    if (typeof sub === 'string' && sub.length > 0 && presenterList.includes(sub)) return true;
+    if (hasSub && presenterList.includes('*')) return true;
+
+    if (hasSub && presenterList.includes(sub)) return true;
 
     return (
         typeof email === 'string' &&

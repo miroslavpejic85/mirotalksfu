@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.72 - Configuration File
+ * MiroTalk SFU v2.6.73 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -550,6 +550,8 @@ module.exports = {
          *                 - LOGIN usernames (the `username` field of HOST_USERS, not the display name)
          *                   for host login (protected / user_auth) or a valid JWT token
          *                 - verified email or `sub` of the OIDC user when OIDC is enabled
+         *                 - '*' : any authenticated OIDC user (OIDC only); combine with
+         *                   join_first=false so guests never become presenter
          *                 The join-form display name is never matched, so with no auth enabled this
          *                 list has no effect: use join_first or a token with presenter=true instead.
          *                 Empty by default.

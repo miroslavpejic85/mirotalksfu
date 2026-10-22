@@ -99,4 +99,17 @@ describe('PresenterManager', () => {
         isOidcConfiguredPresenter(null, list).should.be.false();
         isOidcConfiguredPresenter({ sub: 'auth0|abc123' }, []).should.be.false();
     });
+
+    it('matches any authenticated OIDC user with the wildcard entry', () => {
+        isOidcConfiguredPresenter({ sub: 'auth0|anyone' }, ['*']).should.be.true();
+        isOidcConfiguredPresenter({ sub: 'auth0|anyone', email: 'x@example.com' }, ['host', '*']).should.be.true();
+        isOidcConfiguredPresenter({ email: 'x@example.com' }, ['*']).should.be.false();
+        isOidcConfiguredPresenter({ sub: '' }, ['*']).should.be.false();
+        isOidcConfiguredPresenter(null, ['*']).should.be.false();
+    });
+
+    it('does not treat the wildcard as a host login or display name match', () => {
+        isConfiguredPresenter('HostAccount', ['*']).should.be.false();
+        isConfiguredPresenter(null, ['*']).should.be.false();
+    });
 });
