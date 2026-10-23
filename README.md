@@ -118,7 +118,7 @@ Open [https://localhost:3010](https://localhost:3010) - done!
 
 <br/>
 
-Before running MiroTalk SFU, ensure you have `Node.js` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed. This project has been tested with Node version [22.X](https://nodejs.org/en/download).
+Before running MiroTalk SFU, ensure you have `Node.js` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed. This project has been tested with Node version [24.X](https://nodejs.org/en/download).
 
 Requirements install example for `Ubuntu 24.04 LTS`:
 
@@ -137,7 +137,7 @@ apt install -y ffmpeg
 
 ![nodejs](public/images/nodejs.png)
 
-Install `NodeJS 22.X` and `npm` using [Node Version Manager](https://docs.mirotalk.com/nvm/nvm/)
+Install `NodeJS 24.X` and `npm` using [Node Version Manager](https://docs.mirotalk.com/nvm/nvm/)
 
 ---
 
