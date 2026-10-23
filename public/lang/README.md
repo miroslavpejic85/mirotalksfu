@@ -72,22 +72,7 @@ and removing stale keys. Review the diff.
 
 Use machine translation to fill only missing/untranslated locale values
 (`""` or values still equal to the English key), while skipping `en.json`.
-
-Install dependency (recommended on macOS/Homebrew Python and other PEP 668 environments):
-
-```bash
-npm run lang:translate:setup
-```
-
-This creates a local `.venv` and installs `deep-translator` there.
-
-If you prefer manual setup:
-
-```bash
-python3 -m venv .venv
-.venv/bin/python3 -m pip install --upgrade pip
-.venv/bin/python3 -m pip install deep-translator
-```
+No extra dependencies are needed (plain Node `fetch` against the public Google Translate endpoint).
 
 Run translation:
 
@@ -95,16 +80,19 @@ Run translation:
 npm run lang:translate
 ```
 
-The translator now sends requests in small batches with automatic retry/backoff and
-deliberate request pacing (`sleep`) to reduce
-Google rate-limit failures. If a run still stops due temporary limits, wait a bit
-and run `npm run lang:translate` again.
-Progress is saved after each batch, so reruns resume from the already translated values.
+Requests are paced and retried with backoff on rate limits. If a run still stops due to temporary
+limits, wait a bit and run `npm run lang:translate` again. Progress is saved after each batch,
+so reruns resume from the already translated values.
 
-Optional targeted run (single locale):
+`{placeholders}` are protected during translation (a value whose placeholders would not survive
+keeps its English text), and short all-caps acronyms such as `ID`, `OK`, `URL` or `FULL HD` are left untouched.
+
+Optional targeted run:
 
 ```bash
-npm run lang:translate -- --locale it
+npm run lang:translate -- --locale it          # single locale (or --locale it,de)
+npm run lang:translate -- --max-batches 0      # no per-locale batch limit (default: 30 batches of 5 values)
+npm run lang:translate -- --help
 ```
 
 Or run both extraction/sync + translation:
