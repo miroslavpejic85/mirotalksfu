@@ -42,3 +42,7 @@ RECORDING_RATE_LIMIT_MAX=300           # max upload requests per IP per window
 
 > `JWT_SECRET` is required (min 32 characters, e.g. `openssl rand -hex 32`). Both servers refuse
 > to start if it is missing, too short, or the old published default. Use the same value on both.
+
+Put these variables in a `.env` file in this folder. `npm start` loads it automatically
+via Node's `--env-file-if-exists` flag (Node.js >= 22.9). Variables already set in the
+environment take precedence over `.env`.

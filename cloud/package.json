@@ -1,11 +1,11 @@
 {
     "name": "cloud",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Cloud server to handle MiroTalk SFU recording uploads",
     "main": "server.js",
     "scripts": {
-        "start": "node server.js",
-        "start-dev": "nodemon server.js"
+        "start": "node --env-file-if-exists=.env server.js",
+        "start-dev": "nodemon --exec \"node --env-file-if-exists=.env\" server.js"
     },
     "keywords": [
         "cloud",
@@ -15,9 +15,9 @@
     "license": "AGPLv3",
     "dependencies": {
         "cors": "2.8.6",
-        "express": "^5.2.1",
-        "express-rate-limit": "^8.5.2",
-        "helmet": "^8.2.0",
+        "express": "^5.3.0",
+        "express-rate-limit": "^8.7.1",
+        "helmet": "^8.3.0",
         "jsonwebtoken": "^9.0.3",
         "sanitize-filename": "^1.6.4"
     },
