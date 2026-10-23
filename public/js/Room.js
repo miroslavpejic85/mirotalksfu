@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.78
+ * @version 2.6.79
  *
  */
 
@@ -5914,7 +5914,10 @@ function handleDropdownHover(dropdownElement = null) {
 
         let timeoutId;
 
+        // The menu is a child of the dropdown, so the dropdown's mouseenter/mouseleave already cover it.
+        // Listening on the menu too would schedule a close when the pointer moves from the menu back onto the toggle (#282).
         const hideDropdown = () => {
+            clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
                 const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
                 if (bsDropdown) {
@@ -5930,12 +5933,6 @@ function handleDropdownHover(dropdownElement = null) {
         });
 
         dropdown.addEventListener('mouseleave', hideDropdown);
-
-        menu.addEventListener('mouseenter', () => {
-            clearTimeout(timeoutId);
-        });
-
-        menu.addEventListener('mouseleave', hideDropdown);
 
         toggle.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -10271,7 +10268,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.78',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.79',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
