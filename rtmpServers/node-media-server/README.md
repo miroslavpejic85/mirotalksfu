@@ -37,6 +37,28 @@ $ docker logs -f mirotalk-nms
 $ docker-compose down
 ```
 
+## Build and Push the Docker Image
+
+```sh
+# Reset config.js to defaults so local settings are not baked into the image
+$ cp src/config.template.js src/config.js
+
+# Build the image locally (current platform only)
+$ docker build -t mirotalk/nms:latest .
+
+# Multi-platform build requires a docker-container builder (one-time setup)
+$ docker buildx create --name multiarch --driver docker-container --use
+$ docker buildx inspect --bootstrap
+
+# Log in to your registry
+$ docker login
+
+# Build for amd64 and arm64 and push (replace mirotalk/nms with your own repository)
+$ docker buildx build --platform linux/amd64,linux/arm64 -t mirotalk/nms:latest --file Dockerfile . --push
+```
+
+> **Note:** Everything in `src/` (including `cert.pem` and `key.pem`) is copied into the image. Mount real certificates at runtime via `docker-compose.yml` instead of baking them in.
+
 ## Dashboard & API
 
 [http://localhost:8081/admin](http://localhost:8081/admin)
