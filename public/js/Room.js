@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.79
+ * @version 2.6.80
  *
  */
 
@@ -2677,6 +2677,7 @@ function roomIsReady() {
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     // Hide device tabs when disabled by config or when mic/camera permission was denied/unavailable
     updateDeviceSettingsVisibility();
+    initRoomBackground();
     BUTTONS.settings.activeRooms && show(activeRoomsButton);
     BUTTONS.settings.fileSharing && show(fileShareButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
@@ -9484,6 +9485,23 @@ function updateThemeCardsDisabled() {
 }
 
 // ####################################################
+// ROOM BACKGROUND (browser-only, see RoomBackground.js)
+// ####################################################
+
+let roomBackground = null;
+
+function initRoomBackground() {
+    if (roomBackground || BUTTONS.settings.roomBackground === false || typeof RoomBackground === 'undefined') return;
+    roomBackground = new RoomBackground({
+        roomId: room_id,
+        getPresets: () => virtualBackgrounds,
+        userLog: (icon, message) => userLog(icon, message),
+    });
+    show(getId('roomBackgroundSection'));
+    roomBackground.init();
+}
+
+// ####################################################
 // HANDLE ASPECT RATIO
 // ####################################################
 
@@ -10277,7 +10295,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.79',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.80',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

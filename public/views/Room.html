@@ -140,6 +140,7 @@
         <script defer src="../js/NodeProcessor.js"></script>
         <script defer src="../js/FixWebmDuration.js"></script>
         <script defer src="../js/WakeLock.js"></script>
+        <script defer src="../js/RoomBackground.js"></script>
         <script defer src="../js/RoomTemplate.js"></script>
         <script defer src="../js/NetworkStats.js"></script>
         <script defer src="../js/RoomClient.js"></script>
@@ -2661,6 +2662,74 @@
                             </tr>
                         </table>
                         <br />
+                        <div id="roomBackgroundSection" class="hidden">
+                            <hr />
+                            <div class="title">
+                                <i class="fa-solid fa-image"></i>
+                                <p>Room background:</p>
+                            </div>
+                            <p class="room-bg-hint">Only you can see it. Saved in this browser.</p>
+                            <div id="roomBackgroundGrid" class="room-bg-grid">
+                                <button id="roomBackgroundNone" type="button" class="room-bg-card" data-bg-type="none">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <span>None</span>
+                                </button>
+                                <button
+                                    id="roomBackgroundUpload"
+                                    type="button"
+                                    class="room-bg-card"
+                                    data-bg-type="upload"
+                                >
+                                    <i class="fa-solid fa-upload"></i>
+                                    <span>Upload</span>
+                                </button>
+                                <button
+                                    id="roomBackgroundCustom"
+                                    type="button"
+                                    class="room-bg-card room-bg-thumb hidden"
+                                    data-bg-type="custom"
+                                ></button>
+                            </div>
+                            <input id="roomBackgroundFile" type="file" accept="image/*" hidden />
+                            <br />
+                            <div class="title">
+                                <i class="fa-solid fa-circle-half-stroke"></i>
+                                <p>Background dim:</p>
+                            </div>
+                            <div class="output-volume-row">
+                                <input
+                                    id="roomBackgroundDim"
+                                    class="output-volume-slider"
+                                    type="range"
+                                    min="0"
+                                    max="80"
+                                    step="5"
+                                    value="35"
+                                />
+                                <span id="roomBackgroundDimValue" class="output-volume-value">35%</span>
+                            </div>
+                            <br />
+                            <table class="settingsTable">
+                                <tr>
+                                    <td>
+                                        <div class="title">
+                                            <i class="fa-solid fa-globe"></i>
+                                            <p>Use in all my rooms</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-switch form-switch-md title">
+                                            <input
+                                                id="roomBackgroundAllRooms"
+                                                class="form-check-input"
+                                                type="checkbox"
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br />
+                        </div>
                     </div>
 
                     <div id="tabLanguages" class="tabcontent">

@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.79 - Configuration File
+ * MiroTalk SFU v2.6.80 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1507,6 +1507,7 @@ module.exports = {
                 pushToTalk: process.env.ENABLE_PUSH_TO_TALK !== 'false',
                 keyboardShortcuts: process.env.SHOW_KEYBOARD_SHORTCUTS !== 'false',
                 virtualBackground: process.env.SHOW_VIRTUAL_BACKGROUND !== 'false',
+                roomBackground: process.env.SHOW_ROOM_BACKGROUND !== 'false', // per-user image behind the video grid, stored only in the browser
                 customNoiseSuppression: process.env.CUSTOM_NOISE_SUPPRESSION_ENABLED !== 'false',
                 customNoiseSuppressionDefault: process.env.CUSTOM_NOISE_SUPPRESSION_DEFAULT !== 'false', // initial state, users can still toggle it
             },
