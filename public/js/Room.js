@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.81
+ * @version 2.6.82
  *
  */
 
@@ -214,6 +214,7 @@ const videoFps = getId('videoFps');
 const screenQuality = getId('screenQuality');
 const screenFps = getId('screenFps');
 const screenOptimization = getId('screenOptimization');
+const screenCamLayoutSelect = getId('screenCamLayoutSelect');
 const initVideoSelect = getId('initVideoSelect');
 const microphoneSelect = getId('microphoneSelect');
 const initMicrophoneSelect = getId('initMicrophoneSelect');
@@ -4598,6 +4599,9 @@ function handleSelects() {
     participantViewMode.onchange = () => {
         setParticipantViewMode(participantViewMode.value);
     };
+    screenCamLayoutSelect.onchange = () => {
+        setScreenCameraLayout(screenCamLayoutSelect.value);
+    };
     BtnVideoObjectFit.onchange = () => {
         rc.handleVideoObjectFit(BtnVideoObjectFit.value);
         localStorageSettings.video_obj_fit = BtnVideoObjectFit.selectedIndex;
@@ -5413,6 +5417,7 @@ function loadSettingsFromLocalStorage() {
     BtnsBarPosition.selectedIndex = localStorageSettings.buttons_bar;
     pinVideoPosition.selectedIndex = localStorageSettings.pin_grid;
     participantViewMode.value = localStorageSettings.participant_view || 'grid';
+    screenCamLayoutSelect.value = ScreenCameraLayout.setMode(localStorageSettings.screen_cam_layout);
     rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     rc.handleVideoControls(BtnVideoControls.value);
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
@@ -9143,13 +9148,19 @@ function advisePersistedCameraOffSetting() {
 
 function applyParticipantGridVisibility() {
     const focusModeTile = isHideALLVideosActive ? videoMediaContainer.querySelector('[focus-mode]') : null;
+    // Cameras shown inside a screen share tile (ScreenCameraLayout) follow the same visibility rules
+    const tiles = [
+        ...videoMediaContainer.querySelectorAll('.Camera'),
+        ...document.querySelectorAll('.screen-cam-overlay[data-peer-id]'),
+    ];
 
-    videoMediaContainer.querySelectorAll('.Camera').forEach((camera) => {
+    tiles.forEach((camera) => {
         const peerId = camera.dataset.peerId;
         const isCameraOff = camera.dataset.cameraOff === 'true';
         const hiddenBySelfView = isHideMeActive && peerId === rc.peer_id;
         const hiddenByPreference = locallyHiddenPeerIds.has(peerId) || (!showCameraOffParticipants && isCameraOff);
-        const hiddenByFocusMode = focusModeTile && camera !== focusModeTile;
+        const gridTile = camera.closest('#videoMediaContainer > *');
+        const hiddenByFocusMode = focusModeTile && gridTile && gridTile !== focusModeTile;
         camera.style.display = hiddenBySelfView || hiddenByPreference || hiddenByFocusMode ? 'none' : 'block';
     });
 
@@ -9505,7 +9516,62 @@ function initRoomBackground() {
 // HANDLE ASPECT RATIO
 // ####################################################
 
+/**
+ * Get every camera (or camera-off avatar) tile paired with the screen share tile of the same participant
+ * @returns {Array<{cameraWrap: HTMLElement|null, screenWrap: HTMLElement|null}>}
+ */
+function getScreenCameraPairs() {
+    const screens = new Map();
+    const cameras = [];
+    document
+        .querySelectorAll('div[data-peer-id][data-media-type], div[data-peer-id][data-camera-off="true"]')
+        .forEach((tile) => {
+            tile.dataset.mediaType === mediaType.screen ? screens.set(tile.dataset.peerId, tile) : cameras.push(tile);
+        });
+    // One camera per screen tile: keep the one already shown inside it, any other goes back to the grid
+    cameras.sort((a, b) => ScreenCameraLayout.isOverlaid(b) - ScreenCameraLayout.isOverlaid(a));
+    const paired = new Set();
+    const pairs = cameras.map((cameraWrap) => {
+        const screenWrap = screens.get(cameraWrap.dataset.peerId);
+        if (!screenWrap || paired.has(screenWrap)) return { cameraWrap, screenWrap: null };
+        paired.add(screenWrap);
+        return { cameraWrap, screenWrap };
+    });
+    screens.forEach((screenWrap) => {
+        if (!paired.has(screenWrap)) pairs.push({ cameraWrap: null, screenWrap });
+    });
+    return pairs;
+}
+
+/**
+ * Show cameras inside screen share tiles (picture-in-picture / split) or as separate tiles
+ */
+function syncScreenCameraLayout() {
+    if (typeof ScreenCameraLayout === 'undefined' || !videoMediaContainer) return;
+    const changed = ScreenCameraLayout.sync(getScreenCameraPairs(), videoMediaContainer);
+    // Split mode resizes the screen video inside an unchanged tile, so realign the drawing canvas
+    if (changed && typeof VideoDrawingOverlay !== 'undefined') VideoDrawingOverlay.resizeAll();
+}
+
+/**
+ * Set the screen share + camera layout
+ * @param {string} requestedMode separate | pip | split
+ * @param {boolean} persist save to local storage
+ * @returns {string} applied mode
+ */
+function setScreenCameraLayout(requestedMode, persist = true) {
+    const mode = ScreenCameraLayout.setMode(requestedMode);
+    if (screenCamLayoutSelect) screenCamLayoutSelect.value = mode;
+    if (persist) {
+        localStorageSettings.screen_cam_layout = mode;
+        lS.setSettings(localStorageSettings);
+    }
+    handleAspectRatio();
+    return mode;
+}
+
 function handleAspectRatio() {
+    syncScreenCameraLayout();
     const visibleTileCount = getVisibleCameraElements().length;
     if (visibleTileCount > 1) {
         adaptAspectRatio(visibleTileCount);
@@ -10295,7 +10361,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.81',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.82',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

@@ -62,6 +62,7 @@ class LocalStorage {
             buttons_bar: 0, // vertical
             pin_grid: 0, // speaker left
             participant_view: 'grid',
+            screen_cam_layout: 'separate', // camera while screen sharing: separate | pip | split
             peer_avatar: '', // persisted avatar URL
         };
 

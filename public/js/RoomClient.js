@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.81
+ * @version 2.6.82
  *
  */
 
@@ -70,6 +70,7 @@ const html = {
     hideFromGrid: 'fas fa-eye-slash',
     mirror: 'fas fa-arrow-right-arrow-left',
     draw: 'fas fa-pencil-alt',
+    camLayout: 'fas fa-clone',
     text: 'fas fa-font',
     close: 'fas fa-times',
     stop: 'fas fa-circle-stop',
@@ -1612,6 +1613,7 @@ class RoomClient {
                     }
                     const d = this.getId(producer_id + '__video');
                     const vb = this.getId(producer_id + '__vb');
+                    this.releaseScreenCamera(d);
                     d?.parentNode?.removeChild(d);
                     vb?.parentNode?.removeChild(vb);
                     handleAspectRatio();
@@ -3812,7 +3814,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
+        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, cl, ri;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -3823,6 +3825,7 @@ class RoomClient {
                 d.className = 'Camera';
                 d.id = id + '__video';
                 d.dataset.peerId = this.peer_id;
+                d.dataset.mediaType = type;
                 d.dataset.cameraOff = 'false';
 
                 elem = document.createElement('video');
@@ -3848,6 +3851,7 @@ class RoomClient {
                 ts = this.createButton(id + '__snapshot', html.snapshot);
                 mv = this.createButton(id + '__mirror', html.mirror);
                 dw = this.createButton(id + '__draw', html.draw);
+                cl = this.createButton(id + '__camLayout', html.camLayout);
                 pn = this.createButton(id + '__pin', html.pin);
                 st = this.createElement(
                     id + '__sessionTime',
@@ -3923,6 +3927,7 @@ class RoomClient {
                 BUTTONS.producerVideo.drawingButton &&
                     isScreen &&
                     myDropdownContent.appendChild(this.createResponsiveDropdownItem(dw, 'Draw'));
+                isScreen && myDropdownContent.appendChild(this.createResponsiveDropdownItem(cl, 'Camera Layout'));
                 BUTTONS.producerVideo.videoMirrorButton &&
                     myDropdownContent.appendChild(this.createDropdownItem(mv, 'Mirror', myDropdownContent));
                 BUTTONS.producerVideo.fullScreenButton &&
@@ -3943,6 +3948,7 @@ class RoomClient {
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
                 BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
+                isScreen && vb.appendChild(cl);
                 BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
                 if (BUTTONS.producerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
 
@@ -3985,6 +3991,7 @@ class RoomClient {
                 this.handleMV(elem.id, mv.id);
                 this.handleHA(ha.id, d.id);
                 BUTTONS.producerVideo.drawingButton && isScreen && this.handleDW(dw.id, d.id);
+                isScreen && this.handleCL(cl.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
                 isScreen && this.autoPinLocalScreenShare(id);
                 this.handleZV(elem.id, d.id, this.peer_id);
@@ -4009,6 +4016,7 @@ class RoomClient {
                     BUTTONS.producerVideo.drawingButton &&
                         isScreen &&
                         this.setTippy(dw.id, 'Enable screen drawing', 'bottom');
+                    isScreen && this.setTippy(cl.id, 'Toggle camera layout', 'bottom');
                     this.setTippy(vp.id, 'Toggle video privacy', 'bottom');
                     this.setTippy(au.id, 'Audio status', 'bottom');
                 }
@@ -4255,6 +4263,7 @@ class RoomClient {
         });
         video.parentNode.removeChild(video);
 
+        this.releaseScreenCamera(d);
         d.parentNode.removeChild(d);
         vb.parentNode.removeChild(vb);
 
@@ -4600,7 +4609,33 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, rcb, ban, ko, pb, pm, pv, pn, ha, hg, mv, dw, role;
+        let elem,
+            vb,
+            d,
+            p,
+            i,
+            cm,
+            au,
+            pip,
+            fs,
+            ts,
+            sf,
+            sm,
+            sv,
+            gl,
+            rcb,
+            ban,
+            ko,
+            pb,
+            pm,
+            pv,
+            pn,
+            ha,
+            hg,
+            mv,
+            dw,
+            cl,
+            role;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -4622,6 +4657,7 @@ class RoomClient {
                 d.className = 'Camera';
                 d.id = id + '__video';
                 d.dataset.peerId = remotePeerId;
+                d.dataset.mediaType = type;
                 d.dataset.cameraOff = 'false';
 
                 elem = document.createElement('video');
@@ -4658,6 +4694,7 @@ class RoomClient {
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 ts = this.createButton(id + '__snapshot', html.snapshot);
                 dw = this.createButton(id + '__draw', html.draw);
+                cl = this.createButton(id + '__camLayout', html.camLayout);
                 pn = this.createButton(id + '__pin', html.pin);
                 ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
                 hg = this.createButton(id + '___' + remotePeerId + '___hideFromGrid', html.hideFromGrid);
@@ -4716,6 +4753,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.drawingButton &&
                     remoteIsScreen &&
                     eVc.appendChild(this.createResponsiveDropdownItem(dw, 'Draw'));
+                remoteIsScreen && eVc.appendChild(this.createResponsiveDropdownItem(cl, 'Camera Layout'));
                 BUTTONS.consumerVideo.audioVolumeInput &&
                     eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
                 BUTTONS.consumerVideo.presenterRoleButton &&
@@ -4760,6 +4798,7 @@ class RoomClient {
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(dw);
+                remoteIsScreen && vb.appendChild(cl);
                 BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
 
                 if (BUTTONS.consumerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
@@ -4790,6 +4829,7 @@ class RoomClient {
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
+                remoteIsScreen && this.handleCL(cl.id);
                 this.handleSF(sf.id, peer_name, remotePeerId);
                 this.handleHA(ha.id, d.id);
                 this.handleHFG(hg.id, remotePeerId);
@@ -4834,6 +4874,7 @@ class RoomClient {
                     BUTTONS.consumerVideo.drawingButton &&
                         remoteIsScreen &&
                         this.setTippy(dw.id, 'Enable screen drawing', 'bottom');
+                    remoteIsScreen && this.setTippy(cl.id, 'Toggle camera layout', 'bottom');
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
@@ -4939,6 +4980,7 @@ class RoomClient {
                         dhaBtn.click();
                     }
                 }
+                this.releaseScreenCamera(d);
                 d.remove();
                 vb?.remove();
 
@@ -12950,6 +12992,31 @@ class RoomClient {
                 if (typeof toggleParticipantGridVisibility === 'function') toggleParticipantGridVisibility(peerId);
             });
         }
+    }
+
+    handleCL(uid) {
+        const btnCl = this.getId(uid);
+        if (!btnCl) return;
+        btnCl.addEventListener('click', () => {
+            if (typeof ScreenCameraLayout === 'undefined' || typeof setScreenCameraLayout !== 'function') return;
+            this.sound('click');
+            switch (setScreenCameraLayout(ScreenCameraLayout.nextMode())) {
+                case 'pip':
+                    this.userLog('info', 'Camera layout: Picture in Picture', 'top-end');
+                    break;
+                case 'split':
+                    this.userLog('info', 'Camera layout: Split screen', 'top-end');
+                    break;
+                default:
+                    this.userLog('info', 'Camera layout: Separate tiles', 'top-end');
+                    break;
+            }
+        });
+    }
+
+    releaseScreenCamera(screenWrap) {
+        if (!screenWrap || typeof ScreenCameraLayout === 'undefined') return false;
+        return ScreenCameraLayout.release(screenWrap, this.videoMediaContainer);
     }
 
     handleCM(uid, peer_id) {

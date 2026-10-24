@@ -136,6 +136,7 @@
         <script defer src="../js/Transcription.js"></script>
         <script defer src="../js/VideoDrawing.js"></script>
         <script defer src="../js/VideoGrid.js"></script>
+        <script defer src="../js/ScreenCameraLayout.js"></script>
         <script defer src="../js/VirtualBackground.js"></script>
         <script defer src="../js/NodeProcessor.js"></script>
         <script defer src="../js/FixWebmDuration.js"></script>
@@ -2525,6 +2526,17 @@
                                 <option value="speaker-1:1">Full screen</option>
                             </select>
                         </div>
+                        <br />
+                        <div class="title">
+                            <i class="fa-solid fa-clone"></i>
+                            <p>Camera while screen sharing:</p>
+                        </div>
+                        <br />
+                        <select id="screenCamLayoutSelect" class="form-select text-light bg-dark">
+                            <option value="separate">Separate tiles</option>
+                            <option value="pip">Picture in Picture</option>
+                            <option value="split">Split screen</option>
+                        </select>
                         <br />
                         <div class="title">
                             <i class="fa-solid fa-up-down-left-right"></i>

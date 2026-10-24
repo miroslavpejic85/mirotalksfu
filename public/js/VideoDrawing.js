@@ -102,15 +102,19 @@ class VideoDrawingOverlay {
         this._syncTimerId = null;
 
         // Track previous dimensions for proportional scaling
-        this._prevWidth = cameraDivEl.offsetWidth;
-        this._prevHeight = cameraDivEl.offsetHeight;
+        const initialSize = this._getSplitVideoSize() || {
+            width: cameraDivEl.offsetWidth,
+            height: cameraDivEl.offsetHeight,
+        };
+        this._prevWidth = initialSize.width;
+        this._prevHeight = initialSize.height;
 
         // Create an HTML canvas element inside the .Camera div
         this.canvasEl = document.createElement('canvas');
         this.canvasEl.id = this.cameraId + '__drawCanvas';
         this.canvasEl.className = 'video-drawing-canvas';
-        this.canvasEl.width = cameraDivEl.offsetWidth;
-        this.canvasEl.height = cameraDivEl.offsetHeight;
+        this.canvasEl.width = initialSize.width;
+        this.canvasEl.height = initialSize.height;
         cameraDivEl.appendChild(this.canvasEl);
 
         // Initialize Fabric.js canvas
@@ -326,13 +330,26 @@ class VideoDrawingOverlay {
     _setupResizeObserver() {
         this._resizeObserver = new ResizeObserver((entries) => {
             for (const entry of entries) {
-                const { width, height } = entry.contentRect;
+                const { width, height } = this._getSplitVideoSize() || entry.contentRect;
                 if (width > 0 && height > 0) {
                     this._resizeTo(width, height);
                 }
             }
         });
         this._resizeObserver.observe(this.cameraDivEl);
+    }
+
+    /**
+     * In the split camera layout (ScreenCameraLayout.js) the screen video only fills part of the tile,
+     * so the drawing area must follow the video instead of the whole tile.
+     * @returns {{width: number, height: number}|null} null when the whole tile is the drawing area
+     * @private
+     */
+    _getSplitVideoSize() {
+        if (this.cameraDivEl.dataset?.camLayout !== 'split') return null;
+        const video = this.cameraDivEl.querySelector(':scope > video');
+        if (!video || !video.offsetWidth || !video.offsetHeight) return null;
+        return { width: video.offsetWidth, height: video.offsetHeight };
     }
 
     // ####################################################
@@ -2849,7 +2866,11 @@ class VideoDrawingOverlay {
         for (const [, overlay] of VideoDrawingOverlay.overlays) {
             const el = overlay.cameraDivEl;
             if (el) {
-                overlay._resizeTo(el.offsetWidth, el.offsetHeight);
+                const { width, height } = overlay._getSplitVideoSize() || {
+                    width: el.offsetWidth,
+                    height: el.offsetHeight,
+                };
+                overlay._resizeTo(width, height);
             }
         }
     }
