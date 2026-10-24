@@ -1451,6 +1451,9 @@ body {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #bottomButtons[data-position='horizontal'] .dropdown-menu {
