@@ -5914,9 +5914,12 @@ function handleDropdownHover(dropdownElement = null) {
 
         let timeoutId;
 
-        // The menu is a child of the dropdown, so the dropdown's mouseenter/mouseleave already cover it.
-        // Listening on the menu too would schedule a close when the pointer moves from the menu back onto the toggle (#282).
-        const hideDropdown = () => {
+        // The menu may be portaled to <body> while open (participants list), so it is not always inside the dropdown.
+        // Only schedule a close when the pointer really leaves both, e.g. not when moving from the menu back onto the toggle (#282).
+        const isInside = (node) => !!node && (dropdown.contains(node) || menu.contains(node));
+
+        const hideDropdown = (e) => {
+            if (isInside(e.relatedTarget)) return;
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
                 const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
@@ -5933,6 +5936,12 @@ function handleDropdownHover(dropdownElement = null) {
         });
 
         dropdown.addEventListener('mouseleave', hideDropdown);
+
+        menu.addEventListener('mouseenter', () => {
+            clearTimeout(timeoutId);
+        });
+
+        menu.addEventListener('mouseleave', hideDropdown);
 
         toggle.addEventListener('click', (e) => {
             e.stopPropagation();
