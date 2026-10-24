@@ -66,10 +66,17 @@ describe('remote control request confirmation', () => {
         assert.equal(dialog.showCancelButton, true);
         assert.equal(dialog.focusCancel, true);
         const { document } = new JSDOM(dialog.html).window;
-        assert.equal(document.querySelector('.remote-control__brand').textContent.trim(), 'RustDesk');
+        assert.equal(document.querySelector('.remote-control__brand'), null);
         assert.equal(document.querySelector('b').textContent, 'Participant');
-        assert.match(document.body.textContent, /Both of you need the RustDesk app/);
-        assert.match(document.body.textContent, /does not start remote control/);
+        assert.match(document.body.textContent, /control their mouse and keyboard with RustDesk/);
+        assert.match(
+            document.querySelector('.remote-control__note--info').textContent,
+            /Both of you need the RustDesk app/
+        );
+        assert.match(
+            document.querySelector('.remote-control__note--safe').textContent,
+            /does not start remote control/
+        );
         h.resolve({ isConfirmed: true });
         await request;
         assert.equal(h.client.remoteControlPeerId, 'participant-id');

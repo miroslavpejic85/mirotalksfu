@@ -4800,20 +4800,10 @@ body {
     text-align: left;
 }
 
-.remote-control__brand {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--room-switch-accent);
-}
-
-.remote-control__brand .remote-control__icon {
-    width: 84px;
-    height: 84px;
-    font-size: 38px;
+.remote-control--request .remote-control__icon {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
     color: var(--room-switch-accent);
 }
 
@@ -4888,6 +4878,36 @@ body {
 
 .remote-control__steps a {
     color: var(--room-accent);
+}
+
+.remote-control__steps--card {
+    padding: 10px 14px 10px 32px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.remote-control__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.remote-control__note i {
+    flex: 0 0 auto;
+    margin-top: 0.2em;
+}
+
+.remote-control__note--info i {
+    color: var(--room-switch-accent);
+}
+
+.remote-control__note--safe i {
+    color: #5ad17f;
 }
 
 .remote-control__field {
