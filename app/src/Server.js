@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.80
+ * @version 2.6.81
  *
  */
 
@@ -468,6 +468,22 @@ if (config?.integrations?.chatGPT?.enabled) {
     } else {
         log.warn('ChatGPT seems enabled, but you missing the apiKey!');
     }
+}
+
+function getChatGPTParams(messages) {
+    const chatGPTConfig = config?.integrations?.chatGPT || {};
+    const reasoningEffort = chatGPTConfig.reasoning_effort ?? 'none';
+    const params = {
+        model: chatGPTConfig.model || 'gpt-6-luna',
+        messages,
+        max_completion_tokens: chatGPTConfig.max_tokens || 1024,
+    };
+    if (reasoningEffort) params.reasoning_effort = reasoningEffort;
+    // Reasoning models reject temperature unless reasoning effort is 'none'
+    if (!reasoningEffort || reasoningEffort === 'none') {
+        params.temperature = chatGPTConfig.temperature ?? 0.7;
+    }
+    return params;
 }
 
 // OpenID Connect
@@ -4828,12 +4844,7 @@ function startServer() {
                 let completion;
                 for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
                     try {
-                        completion = await chatGPT.chat.completions.create({
-                            model: config?.integrations?.chatGPT?.model || 'gpt-3.5-turbo',
-                            messages: context,
-                            max_tokens: config?.integrations?.chatGPT?.max_tokens || 1024,
-                            temperature: config?.integrations?.chatGPT?.temperature || 0.7,
-                        });
+                        completion = await chatGPT.chat.completions.create(getChatGPTParams(context));
                         break; // success
                     } catch (retryError) {
                         const isTransient = retryError.status >= 500 && retryError.status < 600;
@@ -5133,10 +5144,11 @@ function startServer() {
 
             try {
                 const systemLimit = config?.integrations?.videoAI?.systemLimit;
-                const arr = {
-                    messages: [...context, { role: 'system', content: systemLimit }, { role: 'user', content: text }],
-                    model: 'gpt-3.5-turbo',
-                };
+                const arr = getChatGPTParams([
+                    ...context,
+                    { role: 'system', content: systemLimit },
+                    { role: 'user', content: text },
+                ]);
                 const MAX_RETRIES = 3;
                 let chatCompletion;
                 for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {

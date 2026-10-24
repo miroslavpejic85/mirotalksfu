@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.80 - Configuration File
+ * MiroTalk SFU v2.6.81 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -655,20 +655,24 @@ module.exports = {
          * - enabled    : Enable/disable ChatGPT integration [true/false] (default: false)
          * - basePath   : OpenAI API endpoint (default: 'https://api.openai.com/v1/')
          * - apiKey     : OpenAI ProjectAPI secret key (ALWAYS store in .env)
-         * - model      : GPT model version (default: 'gpt-3.5-turbo')
+         * - model      : GPT model version (default: 'gpt-6-luna')
          *
          * Advanced Settings:
          * -----------------
          * - max_tokens: Maximum response length (default: 1024 tokens)
-         * - temperature: Creativity control (0=strict, 1=creative) (default: 0)
+         * - temperature: Creativity control (0=strict, 1=creative) (default: 0.7)
+         * - reasoning_effort: Reasoning models only (none|low|medium|high|xhigh|max) (default: 'none')
+         *     temperature is only sent when reasoning_effort is 'none' or empty.
+         *     Set it to empty for non-reasoning models (e.g. gpt-4o) or other OpenAI-compatible APIs.
          *
          * Usage Example:
          * -------------
          * 1. Supported Models:
-         *    - gpt-3.5-turbo (recommended)
-         *    - gpt-4
-         *    - gpt-4-turbo
+         *    - gpt-6-luna (recommended, fast & cheap)
+         *    - gpt-6-sol
+         *    - gpt-6.1-sol
          *    - ...
+         *    See https://platform.openai.com/docs/models
          *
          * 2. Temperature Guide:
          *    - 0.0: Factual responses
@@ -679,9 +683,10 @@ module.exports = {
             enabled: process.env.CHATGPT_ENABLED === 'true',
             basePath: process.env.CHATGPT_BASE_PATH || 'https://api.openai.com/v1/',
             apiKey: process.env.CHATGPT_API_KEY || '',
-            model: process.env.CHATGPT_MODEL || 'gpt-3.5-turbo',
+            model: process.env.CHATGPT_MODEL || 'gpt-6-luna',
             max_tokens: parseInt(process.env.CHATGPT_MAX_TOKENS) || 1024,
             temperature: parseInt(process.env.CHATGPT_TEMPERATURE) || 0.7,
+            reasoning_effort: process.env.CHATGPT_REASONING_EFFORT ?? 'none',
         },
 
         /**
