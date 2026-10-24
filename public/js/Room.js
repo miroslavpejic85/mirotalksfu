@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.82
+ * @version 2.6.83
  *
  */
 
@@ -4246,6 +4246,11 @@ function setupParticipantViewDropdown() {
 
     participantViewMenu.onclick = (e) => {
         e.stopPropagation();
+        const camLayoutButton = e.target.closest('[data-screen-cam-layout]');
+        if (camLayoutButton) {
+            setScreenCameraLayout(camLayoutButton.dataset.screenCamLayout);
+            return;
+        }
         const viewButton = e.target.closest('[data-participant-view]');
         if (!viewButton) return;
         isSelectingParticipantView = true;
@@ -5417,7 +5422,7 @@ function loadSettingsFromLocalStorage() {
     BtnsBarPosition.selectedIndex = localStorageSettings.buttons_bar;
     pinVideoPosition.selectedIndex = localStorageSettings.pin_grid;
     participantViewMode.value = localStorageSettings.participant_view || 'grid';
-    screenCamLayoutSelect.value = ScreenCameraLayout.setMode(localStorageSettings.screen_cam_layout);
+    updateScreenCameraLayoutUI(ScreenCameraLayout.setMode(localStorageSettings.screen_cam_layout));
     rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     rc.handleVideoControls(BtnVideoControls.value);
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
@@ -9554,6 +9559,19 @@ function syncScreenCameraLayout() {
 }
 
 /**
+ * Reflect the screen share + camera layout in settings and the participant view menu
+ * @param {string} mode separate | pip | split
+ */
+function updateScreenCameraLayoutUI(mode) {
+    if (screenCamLayoutSelect) screenCamLayoutSelect.value = mode;
+    document.querySelectorAll('#participantViewMenu [data-screen-cam-layout]').forEach((button) => {
+        const active = button.dataset.screenCamLayout === mode;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', active);
+    });
+}
+
+/**
  * Set the screen share + camera layout
  * @param {string} requestedMode separate | pip | split
  * @param {boolean} persist save to local storage
@@ -9561,7 +9579,7 @@ function syncScreenCameraLayout() {
  */
 function setScreenCameraLayout(requestedMode, persist = true) {
     const mode = ScreenCameraLayout.setMode(requestedMode);
-    if (screenCamLayoutSelect) screenCamLayoutSelect.value = mode;
+    updateScreenCameraLayoutUI(mode);
     if (persist) {
         localStorageSettings.screen_cam_layout = mode;
         lS.setSettings(localStorageSettings);
@@ -10361,7 +10379,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.82',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.83',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
