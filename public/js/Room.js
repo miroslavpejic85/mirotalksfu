@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.84
+ * @version 2.6.85
  *
  */
 
@@ -1908,6 +1908,30 @@ function getInfo() {
 // ENTER YOUR NAME | Enable/Disable AUDIO/VIDEO
 // ####################################################
 
+// Pre-join display name check; resolves false on timeout/error so the join-time check stays the fallback
+function isPeerNameInUse(name, timeout = 3000) {
+    return new Promise((resolve) => {
+        try {
+            socket
+                .timeout(timeout)
+                .emit('checkPeerName', { room_id, peer_name: name, peer_uuid, peer_token }, (err, response) =>
+                    resolve(!err && response?.inUse === true)
+                );
+        } catch (error) {
+            console.warn('Check peer name error', error.message);
+            resolve(false);
+        }
+    });
+}
+
+async function showPeerNameInUseOnOpen(name) {
+    if (!(await isPeerNameInUse(name))) return;
+    const input = Swal.isVisible() ? Swal.getInput() : null;
+    if (!input || input.id !== 'usernameInput' || input.disabled || input.value !== name) return;
+    input.classList.add('swal2-inputerror');
+    Swal.showValidationMessage('This name is already in use in this room. Please choose another one.');
+}
+
 async function whoAreYou() {
     console.log('04 ----> Who are you?');
 
@@ -2049,6 +2073,7 @@ async function whoAreYou() {
         },
         didOpen: () => {
             showMobileAudioGuidance();
+            if (default_name && !force_peer_name) showPeerNameInUseOnOpen(default_name);
         },
         didClose: () => {
             if (onInitModalClosed) {
@@ -2067,15 +2092,20 @@ async function whoAreYou() {
             }
             name = filterXSS(name);
             if (isHtml(name)) return 'Invalid name!';
-            if (!getCookie(room_id + '_name')) {
-                window.localStorage.peer_name = name;
-            }
-            setCookie(room_id + '_name', name, 30);
-            peer_name = name;
+            // A forced (OIDC) name cannot be edited here, so the join-time check handles it
+            const nameCheck = force_peer_name ? Promise.resolve(false) : isPeerNameInUse(name);
+            return nameCheck.then((inUse) => {
+                if (inUse) return 'This name is already in use in this room. Please choose another one.';
+                if (!getCookie(room_id + '_name')) {
+                    window.localStorage.peer_name = name;
+                }
+                setCookie(room_id + '_name', name, 30);
+                peer_name = name;
 
-            if (isValidEmail(peer_name)) {
-                getId('notifyEmailInput').value = peer_name;
-            }
+                if (isValidEmail(peer_name)) {
+                    getId('notifyEmailInput').value = peer_name;
+                }
+            });
         },
     }).then(async () => {
         if (!usernameEmoji.classList.contains('hidden')) {
@@ -10379,7 +10409,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.84',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.85',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

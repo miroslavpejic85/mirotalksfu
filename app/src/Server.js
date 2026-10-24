@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.84
+ * @version 2.6.85
  *
  */
 
@@ -2463,7 +2463,9 @@ function startServer() {
     // SOCKET IO
     // ####################################################
 
-    const PRE_JOIN_EVENTS = new Set(['createRoom', 'join', 'clientError', 'error']);
+    const PRE_JOIN_EVENTS = new Set(['createRoom', 'checkPeerName', 'join', 'clientError', 'error']);
+    const PEER_NAME_CHECK_LIMIT = 20;
+    const PEER_NAME_CHECK_WINDOW_MS = 60 * 1000;
 
     io.on('connection', (socket) => {
         // Security: only sockets that were admitted to the room (join accepted, lobby included) may use
@@ -2552,6 +2554,51 @@ function startServer() {
             } catch (error) {
                 log.error('Create room failed', { room_id: socket.room_id, error: error.message });
                 callback({ error: 'Failed to initialize room' });
+            }
+        });
+
+        // Pre-join display name check: answers only { inUse } for one exact name, after the same
+        // authorization gate as 'join', so it reveals nothing a join attempt would not.
+        // The 'join' isNameInUse check stays authoritative (race between this check and the join).
+        socket.on('checkPeerName', async (dataObject, cb) => {
+            if (typeof cb !== 'function') return;
+            try {
+                const now = Date.now();
+                socket.peerNameChecks = (socket.peerNameChecks || []).filter(
+                    (time) => now - time < PEER_NAME_CHECK_WINDOW_MS
+                );
+                if (socket.peerNameChecks.length >= PEER_NAME_CHECK_LIMIT) {
+                    log.warn('[checkPeerName] - Rate limit exceeded', { peer_id: socket.id });
+                    return cb({ inUse: false });
+                }
+                socket.peerNameChecks.push(now);
+
+                const { room_id, peer_name, peer_uuid, peer_token } = dataObject || {};
+                if (
+                    !Validator.isValidRoomName(room_id) ||
+                    typeof peer_name !== 'string' ||
+                    !peer_name.trim() ||
+                    peer_name.length > 254
+                ) {
+                    return cb({ inUse: false });
+                }
+
+                const room = roomList.get(room_id);
+                if (!room) return cb({ inUse: false });
+
+                const access = await getPeerNameCheckAccess(peer_token, room_id);
+                // A HOST_USERS displayname replaces the typed name on join, so the typed one is irrelevant
+                if (!access.allowed || access.fixedName) return cb({ inUse: false });
+                if (typeof peer_uuid === 'string' && room.isBanned(peer_uuid)) return cb({ inUse: false });
+
+                const name = checkXSS(peer_name);
+                const inUse = [...room.getPeers().values()].some(
+                    (peer) => peer.id !== socket.id && peer.peer_name === name
+                );
+                cb({ inUse });
+            } catch (error) {
+                log.error('[checkPeerName] - Error', error.message);
+                cb({ inUse: false });
             }
         });
 
@@ -6172,6 +6219,34 @@ function startServer() {
             log.error('isRoomAllowedForUser - Unexpected error', error);
             return false; // Fail closed
         }
+    }
+
+    // Mirrors the 'join' authorization gate (token, host user, allowed rooms) for the pre-join name check
+    async function getPeerNameCheckAccess(peer_token, room_id) {
+        if (!hostCfg.user_auth && !peer_token) return { allowed: true };
+
+        let username = null;
+        let hostUser = null;
+
+        if (peer_token) {
+            try {
+                if (!(await isValidToken(peer_token))) return { allowed: false };
+                const decoded = checkXSS(decodeToken(peer_token));
+                if (!(await isAuthPeer(decoded.username, decoded.password))) return { allowed: false };
+                username = decoded.username;
+                hostUser = getAuthPeer(decoded.username, decoded.password);
+            } catch (error) {
+                return { allowed: false };
+            }
+        } else if (!hostCfg.users_from_db) {
+            return { allowed: false };
+        }
+
+        if (!hostCfg.users_from_db && !(await isRoomAllowedForUser('[checkPeerName]', username, room_id))) {
+            return { allowed: false };
+        }
+
+        return { allowed: true, fixedName: !!hostUser?.displayname };
     }
 
     async function getPeerGeoLocation(ip) {

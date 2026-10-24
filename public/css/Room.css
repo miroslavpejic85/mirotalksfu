@@ -799,6 +799,22 @@ body {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--room-switch-accent) 28%, transparent) !important;
 }
 
+.init-modal-size #usernameInput.swal2-inputerror,
+.init-modal-size #usernameInput.swal2-inputerror:focus {
+    border-color: #ff6b6b !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.28) !important;
+}
+
+.swal2-popup.init-modal-size .swal2-validation-message {
+    color: #ff6b6b !important;
+    font-weight: var(--fw-semibold);
+}
+
+.swal2-popup.init-modal-size .swal2-validation-message::before {
+    background-color: #ff6b6b;
+    color: #fff;
+}
+
 .swal2-popup.init-modal-size .swal2-actions .swal2-confirm {
     min-width: min(100%, 240px);
     min-height: 48px;

@@ -96,6 +96,8 @@ describe('Socket.IO join authorization', () => {
             rtmpEnabled: true,
             rtmpCfg: { fromStream: true },
             createRtmpStreamToken: sinon.stub().returns('stream-token'),
+            PEER_NAME_CHECK_LIMIT: 20,
+            PEER_NAME_CHECK_WINDOW_MS: 60000,
         });
         vm.runInContext(`${authorizationSource}\n${handlersSource}`, context);
         const data = {
@@ -327,5 +329,104 @@ describe('Socket.IO join authorization', () => {
         state.data.peer_info.peer_name = 'Someone else';
         assert.equal(await joinExistingRoom(state), 'isNameInUse');
         assert.equal(state.room.addPeer.callCount, 0);
+    });
+
+    describe('Socket.IO pre-join display name check', () => {
+        function guestState(overrides = {}) {
+            return setup({ protected: false, user_auth: false, ...overrides });
+        }
+
+        async function checkName(state, data = {}) {
+            const callback = sinon.spy();
+            await state.handlers.checkPeerName(
+                { room_id: state.room.id, peer_name: 'Alex', peer_uuid: 'alex-uuid', peer_token: '', ...data },
+                callback
+            );
+            assert.equal(callback.callCount, 1);
+            return { ...callback.firstCall.args[0] };
+        }
+
+        function addPeer(state, name, id = 'other-socket') {
+            state.room.getPeers().set(id, { id, peer_name: name });
+        }
+
+        it('reports an exact name already used in the room, without joining', async () => {
+            const state = guestState();
+            addPeer(state, 'Alex');
+            assert.deepEqual(await checkName(state), { inUse: true });
+            assert.equal(state.socket.room_id, undefined);
+            assert.equal(state.room.addPeer.callCount, 0);
+        });
+
+        it('reports a free name, using the same exact comparison as join', async () => {
+            const state = guestState();
+            addPeer(state, 'alex');
+            assert.deepEqual(await checkName(state), { inUse: false });
+        });
+
+        it('does not count the caller own socket', async () => {
+            const state = guestState();
+            addPeer(state, 'Alex', state.socket.id);
+            assert.deepEqual(await checkName(state), { inUse: false });
+        });
+
+        for (const [label, data] of [
+            ['an unknown room', { room_id: 'missing-room' }],
+            ['an empty name', { peer_name: '  ' }],
+            ['a non-string name', { peer_name: { $ne: '' } }],
+            ['a too long name', { peer_name: 'x'.repeat(255) }],
+        ]) {
+            it(`answers not in use for ${label}`, async () => {
+                const state = guestState();
+                addPeer(state, 'Alex');
+                assert.deepEqual(await checkName(state, data), { inUse: false });
+            });
+        }
+
+        it('reveals nothing to a peer that join would reject as unauthorized', async () => {
+            const state = setup({ protected: false, user_auth: true });
+            addPeer(state, 'Alex');
+            assert.deepEqual(await checkName(state), { inUse: false });
+        });
+
+        it('reveals nothing to a host user for a room they are not allowed in', async () => {
+            const state = setup({
+                users: [{ username: 'alice', password: 'alice-password', allowed_rooms: ['room-a'] }],
+            });
+            addPeer(state, 'Alex');
+            assert.deepEqual(await checkName(state, { peer_token: 'signed-alice-token' }), { inUse: false });
+        });
+
+        it('checks the typed name for an allowed host user without an enforced displayname', async () => {
+            const state = setup({}, 'room-a');
+            state.context.hostCfg.users[0].displayname = '';
+            addPeer(state, 'Alex');
+            assert.deepEqual(await checkName(state, { peer_token: 'signed-alice-token' }), { inUse: true });
+        });
+
+        it('skips the typed name when a HOST_USERS displayname will replace it on join', async () => {
+            const state = setup({}, 'room-a');
+            addPeer(state, 'Alex');
+            assert.deepEqual(await checkName(state, { peer_token: 'signed-alice-token' }), { inUse: false });
+        });
+
+        it('reveals nothing to a banned peer', async () => {
+            const state = guestState();
+            state.room.isBanned = (uuid) => uuid === 'alex-uuid';
+            addPeer(state, 'Alex');
+            assert.deepEqual(await checkName(state), { inUse: false });
+        });
+
+        it('rate limits checks per socket', async () => {
+            const state = guestState();
+            addPeer(state, 'Alex');
+            for (let i = 0; i < 20; i++) assert.deepEqual(await checkName(state), { inUse: true });
+            assert.deepEqual(await checkName(state), { inUse: false });
+        });
+
+        it('ignores calls without an acknowledgement callback', async () => {
+            const state = guestState();
+            await state.handlers.checkPeerName({ room_id: state.room.id, peer_name: 'Alex' });
+        });
     });
 });
