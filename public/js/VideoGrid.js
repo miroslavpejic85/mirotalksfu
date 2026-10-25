@@ -168,27 +168,49 @@ function setWidth(Cameras, width, bigWidth, margin, maxHeight, isOneVideoElement
 
 const MOBILE_BREAKPOINT = 500;
 const TABLET_BREAKPOINT = 580;
-const DESKTOP_BREAKPOINT = 730;
-const CUSTOM_BREAKPOINT = 680;
+// Floating panel size (800x700 chat, 420x680 transcription) + ~30px margin
+const CHAT_BREAKPOINT_WIDTH = 830;
+const CHAT_BREAKPOINT_HEIGHT = 730;
+const TRANSCRIPTION_BREAKPOINT_WIDTH = 680;
+const TRANSCRIPTION_BREAKPOINT_HEIGHT = 710;
+
+function isSmallScreen(maxWidth, maxHeight) {
+    return window.innerWidth <= maxWidth || window.innerHeight <= maxHeight;
+}
 
 // ####################################################
 // RESPONSIVE CHAT
 // ####################################################
 
-function resizeChatRoom() {
+let isChatSmallScreen = null;
+
+/**
+ * Fit the floating chat to the window.
+ * On window resize it only acts when a breakpoint is crossed, so the user's
+ * position/maximize choice is kept and the animation is not restarted every frame.
+ * @param {boolean} force apply even if no breakpoint was crossed (open/unpin)
+ */
+function resizeChatRoom(force = false) {
     if (!rc || rc.isMobileDevice || !rc.isChatOpen || rc.isChatPinned) return;
 
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+    const isSmall = isSmallScreen(CHAT_BREAKPOINT_WIDTH, CHAT_BREAKPOINT_HEIGHT);
+    if (!force && isSmall === isChatSmallScreen) return;
+    isChatSmallScreen = isSmall;
 
-    windowWidth <= DESKTOP_BREAKPOINT || windowHeight <= DESKTOP_BREAKPOINT ? rc.chatMaximize() : rc.chatMinimize();
+    isSmall ? rc.chatMaximize() : rc.chatMinimize();
 }
 
 // ####################################################
 // RESPONSIVE TRANSCRIPTION
 // ####################################################
 
-function resizeTranscriptionRoom() {
+let isTranscriptionSmallScreen = null;
+
+/**
+ * Fit the floating transcription panel to the window (see resizeChatRoom).
+ * @param {boolean} force apply even if no breakpoint was crossed (open/unpin)
+ */
+function resizeTranscriptionRoom(force = false) {
     if (
         isMobileDevice ||
         !Boolean(transcription.speechTranscription) ||
@@ -197,12 +219,11 @@ function resizeTranscriptionRoom() {
     )
         return;
 
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+    const isSmall = isSmallScreen(TRANSCRIPTION_BREAKPOINT_WIDTH, TRANSCRIPTION_BREAKPOINT_HEIGHT);
+    if (!force && isSmall === isTranscriptionSmallScreen) return;
+    isTranscriptionSmallScreen = isSmall;
 
-    windowWidth <= CUSTOM_BREAKPOINT || windowHeight <= CUSTOM_BREAKPOINT
-        ? transcription.maximize()
-        : transcription.minimize();
+    isSmall ? transcription.maximize() : transcription.minimize();
 }
 
 // ####################################################

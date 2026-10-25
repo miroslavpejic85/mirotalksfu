@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.85
+ * @version 2.6.86
  *
  */
 
@@ -7282,7 +7282,7 @@ class RoomClient {
             this.toggleChatPin();
         }
 
-        resizeChatRoom();
+        resizeChatRoom(true);
     }
 
     updateChatFooterVisibility() {
@@ -7500,7 +7500,7 @@ class RoomClient {
         if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
         if (!this.isPlistOpen()) this.toggleShowParticipants();
         if (!chatRoom.classList.contains('container')) chatRoom.classList.add('container');
-        resizeChatRoom();
+        resizeChatRoom(true);
     }
 
     chatCenter() {

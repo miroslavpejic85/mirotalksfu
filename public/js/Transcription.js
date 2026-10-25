@@ -280,7 +280,7 @@ class Transcription {
             this.togglePinUnpin();
         }
 
-        resizeTranscriptionRoom();
+        resizeTranscriptionRoom(true);
     }
 
     /**
@@ -441,7 +441,7 @@ class Transcription {
         hide(transcriptionMinBtn);
         show(transcriptionMaxBtn);
         this.center();
-        resizeTranscriptionRoom();
+        resizeTranscriptionRoom(true);
         transcriptionRoom.style.resize = 'both';
         if (!rc.isMobileDevice) rc.makeDraggable(transcriptionRoom, transcriptionHeader);
     }
