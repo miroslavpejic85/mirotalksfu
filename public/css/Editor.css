@@ -253,11 +253,85 @@
 }
 
 .ql-toolbar {
-    background: rgba(0, 0, 0, 0.4) !important;
+    background: var(--editor-toolbar-surface, rgba(18, 18, 21, 0.88)) !important;
     color: white !important;
     border-radius: 10px 10px 0px 0px; /* Top-left, top-right, bottom-right, bottom-left */
-    border: var(--border) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     margin-top: 6px;
+    padding: 8px !important;
+}
+
+/* Quill snow theme loads after this file: raise specificity so icons stay readable on dark surfaces */
+.editor-container .ql-snow.ql-toolbar .ql-formats {
+    margin-right: 10px;
+}
+
+.editor-container .ql-snow.ql-toolbar button,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label {
+    border-radius: 6px;
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
+}
+
+.editor-container .ql-snow.ql-toolbar .ql-stroke,
+.editor-container .ql-snow.ql-toolbar .ql-stroke-miter {
+    stroke: #e6e6e6;
+}
+
+.editor-container .ql-snow.ql-toolbar .ql-fill,
+.editor-container .ql-snow.ql-toolbar .ql-stroke.ql-fill {
+    fill: #e6e6e6;
+}
+
+.editor-container .ql-snow.ql-toolbar .ql-picker,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label {
+    color: #e6e6e6;
+}
+
+.editor-container .ql-snow.ql-toolbar button:hover,
+.editor-container .ql-snow.ql-toolbar button:focus,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label:hover,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label.ql-active {
+    background: rgba(255, 255, 255, 0.11) !important;
+}
+
+.editor-container .ql-snow.ql-toolbar button.ql-active {
+    background: color-mix(in srgb, var(--editor-accent) 18%, transparent) !important;
+}
+
+.editor-container .ql-snow.ql-toolbar button:hover .ql-stroke,
+.editor-container .ql-snow.ql-toolbar button:focus .ql-stroke,
+.editor-container .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,
+.editor-container .ql-snow.ql-toolbar button:hover .ql-stroke-miter,
+.editor-container .ql-snow.ql-toolbar button.ql-active .ql-stroke-miter {
+    stroke: var(--editor-accent);
+}
+
+.editor-container .ql-snow.ql-toolbar button:hover .ql-fill,
+.editor-container .ql-snow.ql-toolbar button:focus .ql-fill,
+.editor-container .ql-snow.ql-toolbar button.ql-active .ql-fill,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill {
+    fill: var(--editor-accent);
+}
+
+.editor-container .ql-snow.ql-toolbar .ql-picker-label:hover,
+.editor-container .ql-snow.ql-toolbar .ql-picker-label.ql-active,
+.editor-container .ql-snow.ql-toolbar .ql-picker-item:hover,
+.editor-container .ql-snow.ql-toolbar .ql-picker-item.ql-selected {
+    color: var(--editor-accent);
+}
+
+.editor-container .ql-snow .ql-picker.ql-expanded .ql-picker-label {
+    border-color: transparent;
+}
+
+.editor-container .ql-snow .ql-picker-options {
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Optional: Customize code block appearance */
@@ -298,10 +372,6 @@
 .editor-container.editor-private-mode .ql-toolbar .ql-formula,
 .editor-container.editor-private-mode .ql-toolbar .ql-code-block {
     display: none !important;
-}
-
-.ql-toolbar button:hover {
-    background: var(--body-bg) !important;
 }
 
 .ql-picker-options {
