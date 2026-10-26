@@ -2,6 +2,8 @@ const fs = require('fs');
 
 const chokidar = require('chokidar');
 
+const packageJson = require('../../package.json');
+
 const Logger = require('./Logger');
 
 const log = new Logger('HtmlInjector');
@@ -22,6 +24,7 @@ class HtmlInjector {
     getInjectData() {
         return {
             APP_NAME: this.config?.app?.name || 'MiroTalk SFU',
+            APP_VERSION: this.config?.html?.version === false ? '' : `v${packageJson.version}`,
             OG_TYPE: this.config?.og?.type || 'app-webrtc',
             OG_SITE_NAME: this.config?.og?.siteName || 'MiroTalk SFU',
             OG_TITLE: this.config?.og?.title || 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
@@ -32,6 +35,11 @@ class HtmlInjector {
             OG_URL: this.config?.og?.url || 'https://sfu.mirotalk.com',
             // Add more data here as needed with fallbacks
         };
+    }
+
+    // Replace visible placeholders that must never leak as raw {{...}} text
+    replaceAppVersion(html) {
+        return html.replace(/{{APP_VERSION}}/g, this.injectData.APP_VERSION);
     }
 
     // Function to load a file into the cache
@@ -75,11 +83,6 @@ class HtmlInjector {
     injectHtml(filePath, res) {
         const html = this.cache[filePath];
 
-        // Check if HTML injection is enabled in the config
-        if (!this.config?.htmlInjection) {
-            return res.send(html?.replace(/{{APP_NAME}}/g, 'MiroTalk SFU'));
-        }
-
         if (!html) {
             log.error(`File not cached: ${filePath}`);
             if (!res.headersSent) {
@@ -88,15 +91,22 @@ class HtmlInjector {
             return;
         }
 
+        // Check if HTML injection is enabled in the config
+        if (!this.config?.htmlInjection) {
+            return res.send(this.replaceAppVersion(html.replace(/{{APP_NAME}}/g, 'MiroTalk SFU')));
+        }
+
         try {
             // Replace placeholders with dynamic data (OG, TITLE, etc.)
-            const modifiedHTML = html.replace(/{{(APP_NAME|OG_[A-Z_]+)}}/g, (_, key) => {
-                const value = this.injectData[key] || '';
-                return String(value).replace(/[&<>"']/g, (character) => {
-                    const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-                    return entities[character];
-                });
-            });
+            const modifiedHTML = this.replaceAppVersion(
+                html.replace(/{{(APP_NAME|OG_[A-Z_]+)}}/g, (_, key) => {
+                    const value = this.injectData[key] || '';
+                    return String(value).replace(/[&<>"']/g, (character) => {
+                        const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                        return entities[character];
+                    });
+                })
+            );
 
             if (!res.headersSent) {
                 res.send(modifiedHTML);

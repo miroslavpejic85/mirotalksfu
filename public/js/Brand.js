@@ -80,6 +80,7 @@ let BRAND = {
         advertisers: true,
         supportUs: true,
         footer: true,
+        version: true,
     },
     whoAreYou: {
         title: 'MiroTalk SFU - Waiting for host to start the meeting',
@@ -102,7 +103,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.6.87</strong>',
+        title: '<strong>WebRTC SFU v2.6.88</strong>',
         html: `
             <div class="about-content">
                 <p class="about-description">

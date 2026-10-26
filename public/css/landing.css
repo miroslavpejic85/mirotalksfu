@@ -1692,6 +1692,15 @@ main {
     text-align: center;
 }
 
+.footer-version {
+    margin-left: 6px;
+    color: #6b7280;
+}
+
+.footer-version:empty {
+    display: none;
+}
+
 .footer-brand,
 .footer-links,
 .footer-social-links {
