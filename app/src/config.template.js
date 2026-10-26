@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.90 - Configuration File
+ * MiroTalk SFU v2.6.91 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -2037,7 +2037,8 @@ module.exports = {
             iceConsentTimeout: 35, // Timeout for ICE consent (seconds)
 
             /**
-             * Bandwidth Control Settings
+             * Bandwidth Control Settings (mediasoup 3.32.0+ built-in BWE)
+             * Passed directly to createWebRtcTransport() at creation time.
              * Kubernetes implications:
              * - These values should be tuned based on Node resources
              * - Consider network plugin overhead (Calico, Cilium etc.)
