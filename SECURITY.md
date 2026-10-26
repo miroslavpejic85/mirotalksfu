@@ -35,5 +35,6 @@ We would like to extend our gratitude to the following individuals for their res
 | `28Hus`                                              | [GitHub](https://github.com/28Hus)                                                                  |
 | `Hama1cco`                                           | [GitHub](https://github.com/Hama1cco) \| [Email](mailto:limiecco@gmail.com)                         |
 | `Azzzzzqz`                                           | [GitHub](https://github.com/Azzzzzqz)                                                               |
+| `kats1123`                                           | [GitHub](https://github.com/kats1123)                                                               |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
