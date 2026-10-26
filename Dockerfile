@@ -1,5 +1,12 @@
 # syntax=docker/dockerfile:1.6
 
+# Pinned, statically-linked FFmpeg (multi-arch, no shared-lib deps).
+# FFmpeg >= 9.0 contains the vobsub subtitle demuxer stream-count bounds fix
+# (FFmpeg commit dbd495f066a85ba96b17433f4306582aa37c3951). Debian bookworm's apt
+# ffmpeg (5.1.9) is still vulnerable to that heap buffer overflow and has no backport,
+# so we ship a fixed static build instead of installing ffmpeg from apt.
+FROM mwader/static-ffmpeg:9.0.2 AS ffmpeg
+
 # Use Node.js 24 LTS slim image as base
 FROM node:24-slim
 
@@ -15,8 +22,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     build-essential \
-    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
+
+# Install the fixed, statically-linked FFmpeg/ffprobe over the paths the app resolves
+# (config default /usr/bin/ffmpeg and bare `ffmpeg` on PATH).
+COPY --from=ffmpeg /ffmpeg /usr/bin/ffmpeg
+COPY --from=ffmpeg /ffprobe /usr/bin/ffprobe
 
 # Install dependencies (cache npm)
 COPY package*.json ./

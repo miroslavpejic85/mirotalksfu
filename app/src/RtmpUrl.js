@@ -19,6 +19,12 @@ const log = new Logger('RtmpUrl');
 const MAX_REDIRECTS = 5;
 const REQUEST_TIMEOUT_MS = 15000;
 
+// Header signatures of non audio/video payloads that FFmpeg would still probe and
+// demux (e.g. the VobSub subtitle demuxer), used to reject them before spawning FFmpeg
+// as defense-in-depth against demuxer memory-safety bugs on attacker-influenced input.
+const REJECTED_INPUT_SIGNATURES = [Buffer.from('# VobSub index file')];
+const HEADER_SNIFF_BYTES = 256;
+
 class RtmpUrl {
     constructor(socket_id = false, room = false) {
         this.room = room;
@@ -94,7 +100,28 @@ class RtmpUrl {
         await pipeline(inputStream, fs.createWriteStream(inputFilePath));
         this.inputResponse = null;
         this.inputRequest = null;
+        await this.assertSupportedMedia(inputFilePath);
         return inputFilePath;
+    }
+
+    /**
+     * Reject downloaded payloads whose header matches a known non audio/video demuxer
+     * (e.g. VobSub subtitle index files) before they are handed to FFmpeg.
+     * @param {string} filePath
+     */
+    async assertSupportedMedia(filePath) {
+        const fd = await fs.promises.open(filePath, 'r');
+        try {
+            const { buffer, bytesRead } = await fd.read(Buffer.alloc(HEADER_SNIFF_BYTES), 0, HEADER_SNIFF_BYTES, 0);
+            const header = buffer.subarray(0, bytesRead);
+            for (const signature of REJECTED_INPUT_SIGNATURES) {
+                if (header.includes(signature)) {
+                    throw new Error('Rejected unsupported input media type');
+                }
+            }
+        } finally {
+            await fd.close();
+        }
     }
 
     async start(inputVideoURL, rtmpUrl) {
