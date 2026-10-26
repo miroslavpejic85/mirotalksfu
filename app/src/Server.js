@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.89
+ * @version 2.6.90
  *
  */
 
@@ -3685,28 +3685,54 @@ function startServer() {
         // BREAKOUT ROOMS
         // ####################################################
 
-        socket.on('getBreakoutRoomsInfo', async ({ mainRoom }, callback) => {
-            if (!roomExists(socket)) return callback([]);
+        // Security: breakout operations are always bound to the sender's actual room.
+        // Client-supplied mainRoom/targetRoom values are never trusted to select rooms.
+        function getBreakoutPrefix(mainRoomId) {
+            return `${mainRoomId}_breakout_`;
+        }
 
-            const breakoutRooms = [];
+        function isMainRoomSocket(socket) {
+            return typeof socket.room_id === 'string' && !socket.room_id.includes('_breakout_');
+        }
+
+        function isOwnBreakoutRoom(mainRoomId, roomId) {
+            return typeof roomId === 'string' && roomId.startsWith(getBreakoutPrefix(mainRoomId));
+        }
+
+        function getOwnBreakoutRooms(mainRoomId) {
+            const rooms = [];
             for (const [roomId, room] of roomList) {
-                if (roomId.startsWith(mainRoom + '_breakout_')) {
-                    const peerNames = [];
-                    room.getPeers().forEach((peer) => {
-                        if (peer.peer_name) peerNames.push(peer.peer_name);
-                    });
-                    breakoutRooms.push({
-                        room: roomId,
-                        peers: room.getPeersCount(),
-                        peerNames: peerNames,
-                    });
-                }
+                if (isOwnBreakoutRoom(mainRoomId, roomId)) rooms.push([roomId, room]);
+            }
+            return rooms;
+        }
+
+        function isSocketPresenter(socket) {
+            return presenters[socket.room_id]?.[socket.id]?.is_presenter === true;
+        }
+
+        socket.on('getBreakoutRoomsInfo', async (_data, callback) => {
+            if (typeof callback !== 'function') return;
+            if (!roomExists(socket) || !isMainRoomSocket(socket) || !isSocketPresenter(socket)) return callback([]);
+
+            const mainRoom = socket.room_id;
+            const breakoutRooms = [];
+            for (const [roomId, room] of getOwnBreakoutRooms(mainRoom)) {
+                const peerNames = [];
+                room.getPeers().forEach((peer) => {
+                    if (peer.peer_name) peerNames.push(peer.peer_name);
+                });
+                breakoutRooms.push({
+                    room: roomId,
+                    peers: room.getPeersCount(),
+                    peerNames: peerNames,
+                });
             }
             callback(breakoutRooms);
         });
 
         socket.on('breakoutRoomBroadcast', async (dataObject) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket) || !isMainRoomSocket(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -3716,8 +3742,9 @@ function startServer() {
 
             if (!isPresenter) return;
 
-            const { mainRoom, targetRoom, message } = data;
-            if (!message || !mainRoom) return;
+            const mainRoom = socket.room_id;
+            const { targetRoom, message } = data;
+            if (!message) return;
 
             const msgData = {
                 peer_name: data.peer_name,
@@ -3725,21 +3752,20 @@ function startServer() {
             };
 
             if (targetRoom) {
-                // Send to a specific breakout room
+                // Send to a specific breakout room (must belong to the sender's main room)
+                if (!isOwnBreakoutRoom(mainRoom, targetRoom)) return;
                 const room = roomList.get(targetRoom);
                 if (room) room.sendToAll('breakoutRoomMessage', msgData);
             } else {
                 // Send to all breakout rooms
-                for (const [roomId, room] of roomList) {
-                    if (roomId.startsWith(mainRoom + '_breakout_')) {
-                        room.sendToAll('breakoutRoomMessage', msgData);
-                    }
+                for (const [, room] of getOwnBreakoutRooms(mainRoom)) {
+                    room.sendToAll('breakoutRoomMessage', msgData);
                 }
             }
         });
 
         socket.on('breakoutRoomEnd', async (dataObject) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket) || !isMainRoomSocket(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -3749,19 +3775,16 @@ function startServer() {
 
             if (!isPresenter) return;
 
-            const { mainRoom } = data;
-            if (!mainRoom) return;
+            const mainRoom = socket.room_id;
 
             // Force all peers in breakout rooms to return to main room
-            for (const [roomId, room] of roomList) {
-                if (roomId.startsWith(mainRoom + '_breakout_')) {
-                    room.sendToAll('breakoutRoomEnd', { mainRoom });
-                }
+            for (const [, room] of getOwnBreakoutRooms(mainRoom)) {
+                room.sendToAll('breakoutRoomEnd', { mainRoom });
             }
         });
 
         socket.on('breakoutRoomCountdown', async (dataObject) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket) || !isMainRoomSocket(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -3771,15 +3794,14 @@ function startServer() {
 
             if (!isPresenter) return;
 
-            const { mainRoom, countdown } = data;
-            if (!mainRoom || !countdown) return;
+            const mainRoom = socket.room_id;
+            const { countdown } = data;
+            if (!countdown) return;
 
             const seconds = Math.min(Math.max(parseInt(countdown) || 0, 0), 300);
 
-            for (const [roomId, room] of roomList) {
-                if (roomId.startsWith(mainRoom + '_breakout_')) {
-                    room.sendToAll('breakoutRoomCountdown', { mainRoom, countdown: seconds });
-                }
+            for (const [, room] of getOwnBreakoutRooms(mainRoom)) {
+                room.sendToAll('breakoutRoomCountdown', { mainRoom, countdown: seconds });
             }
         });
 
@@ -3790,8 +3812,15 @@ function startServer() {
 
             log.debug('Breakout room help request', data);
 
-            const { mainRoom, peer_name, breakoutRoom } = data;
-            if (!mainRoom || !peer_name || !breakoutRoom) return;
+            // Only peers actually inside a breakout room may ask for help, and only to its own main room
+            const breakoutRoom = socket.room_id;
+            const idx = typeof breakoutRoom === 'string' ? breakoutRoom.lastIndexOf('_breakout_') : -1;
+            if (idx <= 0) return;
+            const mainRoom = breakoutRoom.slice(0, idx);
+
+            const peer = getPeer(socket);
+            const peer_name = peer?.peer_name;
+            if (!peer_name) return;
 
             // Send help request to all peers in the main room (presenter will handle it)
             const room = roomList.get(mainRoom);
@@ -3804,7 +3833,7 @@ function startServer() {
         });
 
         socket.on('breakoutRoom', async (dataObject) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket) || !isMainRoomSocket(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -3817,11 +3846,15 @@ function startServer() {
             const room = getRoom(socket);
             if (!room) return;
 
+            const mainRoom = socket.room_id;
+
             // Send breakout room assignment to each assigned peer
-            const { assignments, mainRoom } = data;
+            const { assignments } = data;
             if (assignments && Array.isArray(assignments)) {
                 for (const assignment of assignments) {
+                    if (!assignment || typeof assignment !== 'object') continue;
                     const { peerId, breakoutRoom, duration, roomName } = assignment;
+                    if (!isOwnBreakoutRoom(mainRoom, breakoutRoom)) continue;
                     room.sendTo(peerId, 'breakoutRoom', {
                         action: 'assign',
                         breakoutRoom: breakoutRoom,
