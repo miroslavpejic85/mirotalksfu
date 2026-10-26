@@ -211,4 +211,29 @@ describe('test-Validator', () => {
             (await checkValidator.isPublicHttpUrl('not a url')).should.be.false();
         });
     });
+
+    describe('6. Array index validation (poll handlers)', () => {
+        const polls = [{ voters: new Map() }, { voters: new Map() }];
+
+        it('should accept in-range integer indexes', () => {
+            checkValidator.isValidArrayIndex(0, polls).should.be.true();
+            checkValidator.isValidArrayIndex(1, polls).should.be.true();
+        });
+
+        it('should reject out-of-range, non-integer and prototype-key indexes', () => {
+            checkValidator.isValidArrayIndex(2, polls).should.be.false();
+            checkValidator.isValidArrayIndex(-1, polls).should.be.false();
+            checkValidator.isValidArrayIndex(0.5, polls).should.be.false();
+            checkValidator.isValidArrayIndex(NaN, polls).should.be.false();
+            checkValidator.isValidArrayIndex('0', polls).should.be.false();
+            checkValidator.isValidArrayIndex('constructor', polls).should.be.false();
+            checkValidator.isValidArrayIndex('length', polls).should.be.false();
+            checkValidator.isValidArrayIndex('__proto__', polls).should.be.false();
+            checkValidator.isValidArrayIndex(null, polls).should.be.false();
+            checkValidator.isValidArrayIndex(undefined, polls).should.be.false();
+            checkValidator.isValidArrayIndex({}, polls).should.be.false();
+            checkValidator.isValidArrayIndex(0, []).should.be.false();
+            checkValidator.isValidArrayIndex(0, null).should.be.false();
+        });
+    });
 });

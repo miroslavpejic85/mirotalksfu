@@ -121,6 +121,18 @@ function isValidData(data) {
 }
 
 /**
+ * Strictly validate a client-supplied array index. Rejects strings such as
+ * "constructor", "length" or "__proto__" that would otherwise resolve to
+ * Array built-ins when used with bracket access.
+ * @param {*} index
+ * @param {Array} array
+ * @returns {boolean}
+ */
+function isValidArrayIndex(index, array) {
+    return Array.isArray(array) && Number.isInteger(index) && index >= 0 && index < array.length;
+}
+
+/**
  * Block private / loopback / link-local / unspecified / well known internal hosts.
  * Note: does NOT do DNS resolution, so a public domain that resolves to
  * an internal IP is not caught here — use `isPublicHttpUrl()` when the server
@@ -314,6 +326,7 @@ module.exports = {
     parseEmailList,
     hasAllowedEmailDomains,
     isValidData,
+    isValidArrayIndex,
     isPrivateOrLoopbackHost,
     isPublicHttpUrl,
     safeDnsLookup,

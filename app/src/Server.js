@@ -61,7 +61,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.88
+ * @version 2.6.89
  *
  */
 
@@ -5437,8 +5437,11 @@ function startServer() {
 
             const roomPolls = room.getPolls();
 
+            if (!Validator.isValidArrayIndex(data.pollIndex, roomPolls)) return;
+            if (typeof data.option !== 'string') return;
+
             const poll = roomPolls[data.pollIndex];
-            if (poll) {
+            if (poll && poll.voters instanceof Map) {
                 poll.voters.set(peer_name, data.option);
                 room.sendToAll('updatePolls', room.convertPolls(roomPolls));
                 log.debug('[Poll] vote', roomPolls);
@@ -5488,6 +5491,8 @@ function startServer() {
 
             const roomPolls = room.getPolls();
 
+            if (!Validator.isValidArrayIndex(index, roomPolls)) return;
+
             if (roomPolls[index]) {
                 roomPolls[index].question = question;
                 roomPolls[index].options = options;
@@ -5496,10 +5501,14 @@ function startServer() {
             }
         });
 
-        socket.on('deletePoll', async (data) => {
+        socket.on('deletePoll', async (dataObject) => {
             if (!roomExists(socket)) return;
 
-            const { index, peer_name, peer_uuid } = checkXSS(data);
+            const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
+
+            const { index, peer_name, peer_uuid } = data;
 
             const room = getRoom(socket);
 
@@ -5513,6 +5522,8 @@ function startServer() {
             }
 
             const roomPolls = room.getPolls();
+
+            if (!Validator.isValidArrayIndex(index, roomPolls)) return;
 
             if (roomPolls[index]) {
                 roomPolls.splice(index, 1);
