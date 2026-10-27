@@ -94,6 +94,50 @@ function ffmpegOffer() {
     ].join('\r\n');
 }
 
+// Example offer from RFC 9725 section 4.2 (max-bundle, bundle-only video, rtcp-mux-only, single msid)
+function rfc9725Offer() {
+    const stream = 'd46fb922-d52a-4e9c-aa87-444eadc1521b';
+    return [
+        'v=0',
+        'o=- 5228595038118931041 2 IN IP4 127.0.0.1',
+        's=-',
+        't=0 0',
+        'a=group:BUNDLE 0 1',
+        'a=extmap-allow-mixed',
+        'a=ice-options:trickle ice2',
+        'm=audio 9 UDP/TLS/RTP/SAVPF 111',
+        'c=IN IP4 0.0.0.0',
+        'a=rtcp:9 IN IP4 0.0.0.0',
+        'a=ice-ufrag:EsAw',
+        'a=ice-pwd:bP+XJMM09aR8AiX1jdukzR6Y',
+        'a=fingerprint:sha-256 DA:7B:57:DC:28:CE:04:4F:31:79:85:C4:31:67:EB:27:58:29:ED:77:2A:0D:24:AE:ED:AD:30:BC:BD:F1:9C:02',
+        'a=setup:actpass',
+        'a=mid:0',
+        'a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid',
+        'a=sendonly',
+        `a=msid:${stream} ce326ecf-a081-453a-8f9f-0605d5ef4128`,
+        'a=rtcp-mux',
+        'a=rtcp-mux-only',
+        'a=rtpmap:111 opus/48000/2',
+        'a=fmtp:111 minptime=10;useinbandfec=1',
+        'm=video 0 UDP/TLS/RTP/SAVPF 96 97',
+        'a=mid:1',
+        'a=bundle-only',
+        'a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid',
+        'a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id',
+        'a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id',
+        'a=sendonly',
+        `a=msid:${stream} 3956b460-40f4-4d05-acef-03abcdd8c6fd`,
+        'a=rtpmap:96 VP8/90000',
+        'a=rtcp-fb:96 ccm fir',
+        'a=rtcp-fb:96 nack',
+        'a=rtcp-fb:96 nack pli',
+        'a=rtpmap:97 rtx/90000',
+        'a=fmtp:97 apt=96',
+        '',
+    ].join('\r\n');
+}
+
 const routerMediaCodecs = [
     { kind: 'audio', mimeType: 'audio/opus', clockRate: 48000, channels: 2 },
     { kind: 'video', mimeType: 'video/VP8', clockRate: 90000 },
@@ -284,6 +328,46 @@ describe('test-Whip', function () {
             ).sections.length.should.equal(1);
         });
 
+        it('requires a=rtcp-mux and a single MediaStream (msid)', () => {
+            expectSdpError(obsOffer().replace(/a=rtcp-mux\r\n/g, ''), 400, /must use a=rtcp-mux/);
+            expectSdpError(
+                obsOffer()
+                    .replace('a=mid:0\r\n', 'a=mid:0\r\na=msid:s1 a\r\n')
+                    .replace('a=mid:1\r\n', 'a=mid:1\r\na=msid:s2 v\r\n'),
+                400,
+                /same MediaStream/
+            );
+            parseOffer(ffmpegOffer(), router.rtpCapabilities).sections.length.should.equal(2);
+        });
+
+        it('accepts the RFC 9725 example offer', async () => {
+            const offer = parseOffer(rfc9725Offer(), router.rtpCapabilities);
+            offer.sections
+                .map((s) => [s.kind, s.mid])
+                .should.eql([
+                    ['audio', '0'],
+                    ['video', '1'],
+                ]);
+            const transport = await router.createWebRtcTransport({
+                listenInfos: [{ protocol: 'udp', ip: '127.0.0.1' }],
+            });
+            const answer = buildAnswer({
+                offer,
+                iceParameters: transport.iceParameters,
+                iceCandidates: transport.iceCandidates,
+                dtlsParameters: transport.dtlsParameters,
+            });
+            answer.should.match(/a=group:BUNDLE 0 1/);
+            answer.should.match(/a=recvonly/);
+            answer.should.match(/a=rtcp-mux/);
+            answer.should.not.match(/a=rtcp-mux-only/); // forbidden in answers (RFC 8858 4.3)
+            await transport.connect({ dtlsParameters: offer.dtlsParameters });
+            for (const section of offer.sections) {
+                await transport.produce({ kind: section.kind, rtpParameters: section.rtpParameters });
+            }
+            transport.close();
+        });
+
         const expectSdpError = (sdp, status, pattern) => {
             let error;
             try {
@@ -307,7 +391,7 @@ describe('test-Whip', function () {
                 400,
                 /Unsupported media section "application"/
             );
-            expectSdpError(obsOffer({ video: 'AV1/90000' }), 406, /No supported video codec/);
+            expectSdpError(obsOffer({ video: 'AV1/90000' }), 422, /No supported video codec/);
             expectSdpError('x'.repeat(70 * 1024), 413);
         });
     });
@@ -409,7 +493,7 @@ describe('test-Whip', function () {
             // Failed negotiation releases the reserved slot
             whip.closeAll();
             await create({ sdp: obsOffer({ video: 'AV1/90000' }) }).should.be.rejectedWith(WhipError, {
-                status: 406,
+                status: 422,
             });
             whip.getSessionsCount().should.equal(0);
             room.getPeersCount().should.equal(1);
@@ -643,8 +727,36 @@ describe('test-Whip', function () {
 
                 (await post(obsOffer(), { 'Content-Type': 'application/json' })).status.should.equal(415);
                 (await post('not an sdp')).status.should.equal(400);
-                (await fetch(`${baseUrl}/whip/${ROOM_ID}`)).status.should.equal(405);
+                (await fetch(`${baseUrl}/whip/${ROOM_ID}`, { method: 'PUT' })).status.should.equal(405);
                 whip.getSessionsCount().should.equal(0);
+            });
+
+            it('answers GET with 204 No Content on the endpoint and session URLs', async () => {
+                for (const path of [`/whip/${ROOM_ID}`, `/whip/${ROOM_ID}/unknown-session`]) {
+                    const res = await fetch(`${baseUrl}${path}`);
+                    res.status.should.equal(204);
+                    (await res.text()).should.equal('');
+                }
+            });
+
+            it('advertises Accept-Post on OPTIONS (CORS preflight)', async () => {
+                const app = express();
+                app.use(whip.getCorsMiddleware());
+                whip.register(app);
+                const s = await new Promise((resolve) => {
+                    const srv = app.listen(0, '127.0.0.1', () => resolve(srv));
+                });
+                try {
+                    const res = await fetch(`http://127.0.0.1:${s.address().port}/whip/${ROOM_ID}`, {
+                        method: 'OPTIONS',
+                        headers: { Origin: 'https://example.com', 'Access-Control-Request-Method': 'POST' },
+                    });
+                    res.status.should.be.within(200, 204);
+                    res.headers.get('accept-post').should.equal('application/sdp');
+                    res.headers.get('access-control-allow-methods').should.match(/POST/);
+                } finally {
+                    await new Promise((resolve) => s.close(resolve));
+                }
             });
         });
     });

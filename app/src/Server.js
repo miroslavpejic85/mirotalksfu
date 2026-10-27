@@ -702,7 +702,7 @@ function startServer() {
         })
     );
     const appCors = cors(corsOptions);
-    const whipCors = cors(whipServer.getCorsOptions(corsOptions));
+    const whipCors = whipServer.getCorsMiddleware(corsOptions);
     app.use((req, res, next) => (whipServer.isWhipPath(req.path) ? whipCors : appCors)(req, res, next));
     app.use(express.json({ limit: '50mb' })); // Handles JSON payloads
     app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Handles URL-encoded payloads
@@ -747,7 +747,9 @@ function startServer() {
 
         if (req.path.endsWith('/') && req.path.length > 1) {
             let query = req.url.substring(req.path.length).replace(/\/$/, ''); // Ensure query params don't end in '/'
-            return res.redirect(301, req.path.slice(0, -1) + query);
+            // 308 keeps the method and body of non-GET requests (e.g. WHIP POST, RFC 9725 4.6)
+            const status = ['GET', 'HEAD'].includes(req.method) ? 301 : 308;
+            return res.redirect(status, req.path.slice(0, -1) + query);
         }
 
         next();

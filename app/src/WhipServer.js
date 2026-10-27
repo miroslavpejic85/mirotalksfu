@@ -9,6 +9,7 @@
  *
  *   POST   /whip/:roomId              SDP offer -> 201 + SDP answer + Location
  *   DELETE /whip/:roomId/:sessionId   Terminate the session (creator token or server-wide secret)
+ *   GET    /whip/:roomId[/:sessionId] 204 (resources have no representation)
  *   PATCH  /whip/:roomId/:sessionId   405 (no trickle ICE / ICE restart, ICE-lite server)
  *
  * Authorization: "Bearer <token>" where token is either the server-wide WHIP apiSecret or a
@@ -16,6 +17,7 @@
  */
 
 const express = require('express');
+const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const nodeCrypto = require('node:crypto');
 const { v4: uuidv4 } = require('uuid');
@@ -130,6 +132,15 @@ module.exports = class WhipServer {
         };
     }
 
+    // CORS for /whip/*; OPTIONS responses also advertise Accept-Post (RFC 9725 4.2)
+    getCorsMiddleware(baseCorsOptions = {}) {
+        const whipCors = cors(this.getCorsOptions(baseCorsOptions));
+        return (req, res, next) => {
+            if (req.method === 'OPTIONS') res.set('Accept-Post', 'application/sdp');
+            whipCors(req, res, next);
+        };
+    }
+
     // ####################################################
     // AUTH
     // ####################################################
@@ -214,9 +225,10 @@ module.exports = class WhipServer {
 
         app.post(`${WHIP_PATH}/:roomId`, rateLimit, sdpParser, (req, res) => this.handlePost(req, res));
         app.delete(`${WHIP_PATH}/:roomId/:sessionId`, rateLimit, (req, res) => this.handleDelete(req, res));
-        app.patch(`${WHIP_PATH}/:roomId/:sessionId`, (req, res) => this.methodNotAllowed(res, 'DELETE'));
-        app.all(`${WHIP_PATH}/:roomId/:sessionId`, (req, res) => this.methodNotAllowed(res, 'DELETE'));
-        app.all(`${WHIP_PATH}/:roomId`, (req, res) => this.methodNotAllowed(res, 'POST'));
+        // WHIP resources have no representation: GET must answer 2xx with no content (RFC 9725 4.1)
+        app.get([`${WHIP_PATH}/:roomId`, `${WHIP_PATH}/:roomId/:sessionId`], (req, res) => res.status(204).end());
+        app.all(`${WHIP_PATH}/:roomId/:sessionId`, (req, res) => this.methodNotAllowed(res, 'GET, DELETE, OPTIONS'));
+        app.all(`${WHIP_PATH}/:roomId`, (req, res) => this.methodNotAllowed(res, 'GET, POST, OPTIONS'));
 
         log.info('WHIP ingestion enabled', {
             endpoint: `${WHIP_PATH}/:roomId`,

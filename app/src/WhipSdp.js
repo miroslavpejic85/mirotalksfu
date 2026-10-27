@@ -124,6 +124,18 @@ function parseOffer(sdp, routerRtpCapabilities) {
         throw new WhipSdpError('At least one media section must not be bundle-only');
     }
 
+    // bundle-only sections inherit RTP/RTCP multiplexing from the BUNDLE-tagged one (RFC 9143)
+    const unmuxed = media.find((m) => !m.bundleOnly && !m.rtcpMux);
+    if (unmuxed) {
+        throw new WhipSdpError(`The ${unmuxed.type} media section must use a=rtcp-mux`);
+    }
+
+    // WHIP carries a single MediaStream (RFC 9725 4.4.2): every a=msid must share the same stream id
+    const streamIds = new Set(media.flatMap((m) => (m.msid || []).map((msid) => String(msid.id))));
+    if (streamIds.size > 1) {
+        throw new WhipSdpError('All media sections must belong to the same MediaStream (a=msid)');
+    }
+
     // WHIP mandates "max-bundle" (RFC 9725 4.4.1): every section must share a single BUNDLE group,
     // since mediasoup carries all of them over one transport. A lone section may omit the group.
     const bundleGroups = (sdpObject.groups || [])
@@ -169,7 +181,7 @@ function parseOffer(sdp, routerRtpCapabilities) {
         const answerRtpParameters = ortc.getSendingRemoteRtpParameters(kind, extendedRtpCapabilities);
 
         if (rtpParameters.codecs.length === 0) {
-            throw new WhipSdpError(`No supported ${kind} codec in the SDP offer`, 406);
+            throw new WhipSdpError(`No supported ${kind} codec in the SDP offer`, 422);
         }
 
         rtpParameters.codecs = ortc.reduceCodecs(rtpParameters.codecs);
