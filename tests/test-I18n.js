@@ -9,7 +9,7 @@ const { JSDOM } = require('jsdom');
 
 const root = path.join(__dirname, '..');
 const langDir = path.join(root, 'public/lang');
-const extractor = path.join(root, 'app/src/scripts/extract-ui-lang.js');
+const extractor = path.join(root, 'scripts/extract-ui-lang.js');
 const clientSource = fs.readFileSync(path.join(root, 'public/js/RoomClient.js'), 'utf8');
 const i18nSource = fs.readFileSync(path.join(root, 'public/js/I18n.js'), 'utf8');
 const screenshotLabels = ['Focus Mode', 'Picture in Picture', 'Take Snapshot', 'Video Privacy'];
@@ -80,7 +80,7 @@ describe('dynamic dropdown key extraction', () => {
 
     beforeEach(() => {
         fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mirotalk-i18n-'));
-        script = path.join(fixtureRoot, 'app/src/scripts/extract-ui-lang.js');
+        script = path.join(fixtureRoot, 'scripts/extract-ui-lang.js');
         fixtureLangDir = path.join(fixtureRoot, 'public/lang');
         fs.mkdirSync(path.dirname(script), { recursive: true });
         fs.mkdirSync(fixtureLangDir, { recursive: true });

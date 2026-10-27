@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.6.93",
+    "version": "2.6.94",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -8,8 +8,8 @@
         "start": "node app/src/Server.js",
         "dev": "node --watch app/src/Server.js",
         "debug": "DEBUG='mediasoup*' node app/src/Server.js",
-        "lang": "node app/src/scripts/extract-ui-lang.js",
-        "lang:translate": "node app/src/scripts/translate-missing-lang.js",
+        "lang": "node scripts/extract-ui-lang.js",
+        "lang:translate": "node scripts/translate-missing-lang.js",
         "lang:auto": "npm run lang && npm run lang:translate",
         "build:mediasoup-client": "npx esbuild node_modules/mediasoup-client/lib/index.js --bundle --minify --format=iife --global-name=mediasoupClient --outfile=public/sfu/MediasoupClient.js --platform=browser",
         "postinstall": "npm run build:mediasoup-client",
@@ -69,7 +69,7 @@
         "@ngrok/ngrok": "1.7.0",
         "@sentry/node": "^11.9.0",
         "async-mutex": "^0.5.0",
-        "axios": "^1.20.0",
+        "axios": "^1.21.0",
         "chokidar": "^6.0.0",
         "colors": "1.4.0",
         "compression": "1.8.2",
