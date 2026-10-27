@@ -8,7 +8,7 @@
  * receive-only "virtual peer", so participants consume it like any other camera.
  *
  *   POST   /whip/:roomId              SDP offer -> 201 + SDP answer + Location
- *   DELETE /whip/:roomId/:sessionId   Terminate the session
+ *   DELETE /whip/:roomId/:sessionId   Terminate the session (creator token or server-wide secret)
  *   PATCH  /whip/:roomId/:sessionId   405 (no trickle ICE / ICE restart, ICE-lite server)
  *
  * Authorization: "Bearer <token>" where token is either the server-wide WHIP apiSecret or a
@@ -279,10 +279,14 @@ module.exports = class WhipServer {
             const { roomId, sessionId } = req.params;
             if (!Validator.isValidRoomName(roomId)) throw new WhipError(400, 'Invalid room name');
 
-            this.authorize(req, roomId);
+            const { credential } = this.authorize(req, roomId);
 
             const session = this.sessions.get(sessionId);
             if (!session || session.roomId !== roomId) throw new WhipError(404, 'Session not found');
+
+            // Only the token that created the session (or the server-wide secret) may terminate it
+            const isOwner = session.credential?.hash && safeCompare(credential.hash, session.credential.hash);
+            if (!credential.serverWide && !isOwner) throw new WhipError(403, 'Forbidden');
 
             this.closeSession(sessionId, 'client DELETE');
             res.status(200).type('text/plain').send('OK');

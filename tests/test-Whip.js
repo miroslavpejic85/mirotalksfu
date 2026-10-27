@@ -223,6 +223,49 @@ describe('test-Whip', function () {
             offer.sections[0].rtpParameters.mid.should.equal('0');
         });
 
+        // RFC 9725 example offer shape: "max-bundle" policy, video section is port 0 + a=bundle-only
+        const bundleOnlyOffer = () =>
+            obsOffer().replace('m=video 9', 'm=video 0').replace('a=mid:1\r\n', 'a=mid:1\r\na=bundle-only\r\n');
+
+        it('accepts bundle-only media sections (max-bundle policy)', async () => {
+            const offer = parseOffer(bundleOnlyOffer(), router.rtpCapabilities);
+            offer.sections.map((s) => s.kind).should.eql(['audio', 'video']);
+
+            const transport = await router.createWebRtcTransport({
+                listenInfos: [{ protocol: 'udp', ip: '127.0.0.1' }],
+            });
+            const answer = buildAnswer({
+                offer,
+                iceParameters: transport.iceParameters,
+                iceCandidates: transport.iceCandidates,
+                dtlsParameters: transport.dtlsParameters,
+            });
+            answer.should.match(/a=group:BUNDLE 0 1/);
+            answer.should.not.match(/m=video 0 /);
+
+            await transport.connect({ dtlsParameters: offer.dtlsParameters });
+            for (const section of offer.sections) {
+                await transport.produce({ kind: section.kind, rtpParameters: section.rtpParameters });
+            }
+            transport.close();
+        });
+
+        it('rejects bundle-only sections outside the BUNDLE group or without a tagged section', () => {
+            expectSdpError(obsOffer().replace('m=video 9', 'm=video 0'), 400, /port 0/);
+            expectSdpError(
+                bundleOnlyOffer().replace('a=group:BUNDLE 0 1', 'a=group:BUNDLE 0'),
+                400,
+                /must be in the BUNDLE group/
+            );
+            expectSdpError(
+                bundleOnlyOffer()
+                    .replace('m=audio 9', 'm=audio 0')
+                    .replace('a=mid:0\r\n', 'a=mid:0\r\na=bundle-only\r\n'),
+                400,
+                /must not be bundle-only/
+            );
+        });
+
         const expectSdpError = (sdp, status, pattern) => {
             let error;
             try {
@@ -543,6 +586,27 @@ describe('test-Whip', function () {
                     headers: { Authorization: `Bearer ${API_SECRET}` },
                 });
                 again.status.should.equal(404);
+            });
+
+            it('only lets the creator token or the server-wide secret terminate a session', async () => {
+                const owner = whip.createToken({ roomId: ROOM_ID });
+                const other = whip.createToken({ roomId: ROOM_ID, name: 'Other' });
+                const del = (location, token) =>
+                    fetch(`${baseUrl}${location}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+
+                let created = await post(obsOffer(), { Authorization: 'Bearer ' + owner });
+                created.status.should.equal(201);
+                let location = created.headers.get('location');
+
+                (await del(location, other)).status.should.equal(403);
+                whip.getSessionsCount().should.equal(1);
+                (await del(location, owner)).status.should.equal(200);
+                whip.getSessionsCount().should.equal(0);
+
+                created = await post(obsOffer(), { Authorization: 'Bearer ' + owner });
+                location = created.headers.get('location');
+                (await del(location, API_SECRET)).status.should.equal(200);
+                whip.getSessionsCount().should.equal(0);
             });
 
             it('rejects unauthenticated, non-SDP and invalid requests', async () => {

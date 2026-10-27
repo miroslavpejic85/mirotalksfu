@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.95 - Configuration File
+ * MiroTalk SFU v2.6.96 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -393,7 +393,7 @@ module.exports = {
          * Endpoint
          * --------
          * - POST   /whip/{roomId}[?name=DisplayName]  Body: SDP offer (application/sdp) -> 201 + SDP answer
-         * - DELETE /whip/{roomId}/{sessionId}          Ends the session (URL returned in the Location header)
+         * - DELETE /whip/{roomId}/{sessionId}          Ends the session (URL returned in the Location header; creator token or WHIP_API_SECRET only)
          *
          * Authorization (Bearer token, required)
          * --------------------------------------

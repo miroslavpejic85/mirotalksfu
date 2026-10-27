@@ -103,7 +103,8 @@ function parseOffer(sdp, routerRtpCapabilities) {
             throw new WhipSdpError(`Only one ${m.type} media section is supported`);
         }
         seenKinds.add(m.type);
-        if (m.port === 0) {
+        // Port 0 + a=bundle-only is a bundled section under the "max-bundle" policy (RFC 9143, RFC 9725)
+        if (m.port === 0 && !m.bundleOnly) {
             throw new WhipSdpError(`Rejected ${m.type} media section (port 0) is not supported`);
         }
         if (m.direction && !SEND_DIRECTIONS.includes(m.direction)) {
@@ -117,6 +118,22 @@ function parseOffer(sdp, routerRtpCapabilities) {
             throw new WhipSdpError(`Duplicate a=mid "${mid}"`);
         }
         seenMids.add(mid);
+    }
+
+    const bundleOnlyMedia = media.filter((m) => m.bundleOnly);
+    if (bundleOnlyMedia.length > 0) {
+        if (bundleOnlyMedia.length === media.length) {
+            throw new WhipSdpError('At least one media section must not be bundle-only');
+        }
+        const bundleMids = new Set(
+            (sdpObject.groups || [])
+                .filter((g) => String(g.type).toUpperCase() === 'BUNDLE')
+                .flatMap((g) => String(g.mids).trim().split(/\s+/))
+        );
+        const unbundled = bundleOnlyMedia.find((m) => !bundleMids.has(String(m.mid)));
+        if (unbundled) {
+            throw new WhipSdpError(`The bundle-only ${unbundled.type} media section must be in the BUNDLE group`);
+        }
     }
 
     let dtlsParameters;

@@ -54,7 +54,7 @@ python3 whip.py
 - **FFmpeg**: `ffmpeg -re -i input.mp4 -c:v libx264 -profile:v baseline -tune zerolatency -c:a libopus -f whip -authorization "<token>" "<whip>"`
 - **GStreamer**: `whipclientsink signaller::whip-endpoint="<whip>" signaller::auth-token="<token>"`
 
-A server-wide token (`WHIP_API_SECRET`) can be used instead of per-room tokens. Ending the stream in the client (HTTP `DELETE`) or ejecting the WHIP participant from the room closes the session. Banning it also rejects its token in that room: a per-room token until it expires, the server-wide token until the room ends.
+A server-wide token (`WHIP_API_SECRET`) can be used instead of per-room tokens. Ending the stream in the client (HTTP `DELETE`, accepted only with the token that started the session or the server-wide token) or ejecting the WHIP participant from the room closes the session. Banning it also rejects its token in that room: a per-room token until it expires, the server-wide token until the room ends.
 
 ## Embed a meeting
 
