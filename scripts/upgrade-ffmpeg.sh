@@ -95,10 +95,10 @@ verify_not_vulnerable() {
     done
     head -c 4096 /dev/zero > "$sub"
 
-    set +e
-    "$ffmpeg_bin" -hide_banner -loglevel error -i "$idx" -f null - >/dev/null 2>&1
-    exit_code=$?
-    set -e
+    # `|| exit_code=$?` keeps the non-zero FFmpeg status from tripping errexit/the
+    # ERR trap: a patched build exits non-zero here (e.g. 234) without crashing.
+    exit_code=0
+    "$ffmpeg_bin" -hide_banner -loglevel error -i "$idx" -f null - >/dev/null 2>&1 || exit_code=$?
 
     rm -rf "$work"
 
