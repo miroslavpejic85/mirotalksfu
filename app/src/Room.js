@@ -710,9 +710,24 @@ module.exports = class Room {
 
         this.delPeer(peer);
 
+        // WHIP ingest peers never keep a room alive on their own
+        if (!peer.isWhip && this.getPeersCount() > 0 && !this.hasNonWhipPeers()) {
+            for (const whipPeerId of [...this.peers.keys()]) {
+                this.removePeer(whipPeerId);
+            }
+            return;
+        }
+
         if (this.getPeersCount() === 0) {
             this.close();
         }
+    }
+
+    hasNonWhipPeers() {
+        for (const peer of this.peers.values()) {
+            if (!peer.isWhip) return true;
+        }
+        return false;
     }
 
     getPresenterPeers() {

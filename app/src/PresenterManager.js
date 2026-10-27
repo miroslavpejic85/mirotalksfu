@@ -37,7 +37,7 @@ function assignFallbackPresenter(roomId, room, presenters, joinFirst) {
     if (!(roomId in presenters)) presenters[roomId] = {};
     if (Object.keys(presenters[roomId]).length > 0) return null;
 
-    const peer = [...room.getPeers().values()].find((candidate) => !candidate.peer_lobby);
+    const peer = [...room.getPeers().values()].find((candidate) => !candidate.peer_lobby && !candidate.isWhip);
     if (!peer) return null;
 
     presenters[roomId][peer.id] = {

@@ -71,7 +71,7 @@ href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/">Documentation</a> ·
 | 🎥 **Resolution**  | Up to 8K @ 60fps                                                                                                                                    | Up to 1080p                 |
 | 🌍 **Languages**   | 133 languages                                                                                                                                       | ~30-80                      |
 | 🔌 **API**         | Full REST API included                                                                                                                              | Paid add-on                 |
-| 📡 **RTMP/OBS**    | Built-in RTMP streaming                                                                                                                             | Third-party needed          |
+| 📡 **RTMP/OBS**    | Built-in RTMP streaming + WHIP ingest (RFC 9725)                                                                                                    | Third-party needed          |
 | 🤖 **AI Features** | ChatGPT, DeepSeek + VideoAI integration                                                                                                             | Paid AI add-ons             |
 | 🧩 **Rebrand**     | Full source code, white-label ready                                                                                                                 | Limited branding options    |
 | 📦 **Deploy**      | Docker, Node.js, one-click install                                                                                                                  | N/A (SaaS only)             |

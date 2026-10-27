@@ -44,6 +44,8 @@ module.exports = class Peer {
         this.dataProducers = new Map();
         this.dataConsumers = new Map();
         this.closed = false;
+        // Server-side only (never derived from client data): true for WHIP ingest peers
+        this.isWhip = false;
     }
 
     // ####################################################

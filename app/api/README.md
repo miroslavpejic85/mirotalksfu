@@ -37,6 +37,25 @@ python3 join.py
 ./join.sh
 ```
 
+## Publish with WHIP (OBS, FFmpeg, GStreamer)
+
+When `WHIP_ENABLED=true`, any [WHIP (RFC 9725)](https://www.rfc-editor.org/rfc/rfc9725.html) client can publish audio/video into an **active** room. Get the room endpoint and a Bearer token bound to it:
+
+```bash
+# js / php / python / bash
+node whip.js
+php whip.php
+python3 whip.py
+./whip.sh
+# -> { "whip": "https://sfu.mirotalk.com/whip/test", "token": "eyJ..." }
+```
+
+- **OBS Studio 30+**: Settings → Stream → Service `WHIP`, Server = `whip` (append `?name=OBS` to set the display name), Bearer Token = `token`.
+- **FFmpeg**: `ffmpeg -re -i input.mp4 -c:v libx264 -profile:v baseline -tune zerolatency -c:a libopus -f whip -authorization "<token>" "<whip>"`
+- **GStreamer**: `whipclientsink signaller::whip-endpoint="<whip>" signaller::auth-token="<token>"`
+
+A server-wide token (`WHIP_API_SECRET`) can be used instead of per-room tokens. Ending the stream in the client (HTTP `DELETE`) or ejecting the WHIP participant from the room closes the session. Banning it also rejects its token in that room: a per-room token until it expires, the server-wide token until the room ends.
+
 ## Embed a meeting
 
 Embedding a meeting into a `service` or `app` requires using an `iframe` with the `src` attribute specified as the `meeting` from `HTTP response`.

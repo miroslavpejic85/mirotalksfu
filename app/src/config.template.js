@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.92 - Configuration File
+ * MiroTalk SFU v2.6.93 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -379,6 +379,63 @@ module.exports = {
             videoPreset: process.env.RTMP_VIDEO_PRESET || 'veryfast',
             audioBitrate: parseInt(process.env.RTMP_AUDIO_BITRATE) || 128,
         },
+
+        /**
+         * WHIP Ingestion (RFC 9725)
+         * =========================
+         * WebRTC-HTTP Ingestion Protocol: lets external encoders publish audio/video into an
+         * active room with sub-second latency (no FFmpeg/transcoding, the SFU only forwards).
+         * Each WHIP session appears in the room as a participant that only sends media.
+         *
+         * Compatible clients: OBS Studio 30+ (Service: WHIP), FFmpeg (-f whip), GStreamer
+         * (whipclientsink), Larix Broadcaster, vMix, browser libraries (@eyevinn/whip-web-client)...
+         *
+         * Endpoint
+         * --------
+         * - POST   /whip/{roomId}[?name=DisplayName]  Body: SDP offer (application/sdp) -> 201 + SDP answer
+         * - DELETE /whip/{roomId}/{sessionId}          Ends the session (URL returned in the Location header)
+         *
+         * Authorization (Bearer token, required)
+         * --------------------------------------
+         * - apiSecret : Server-wide token valid for every room (WHIP_API_SECRET, min 16 chars).
+         *               Leave empty to accept only per-room tokens.
+         * - Per-room token: POST /api/v1/whip { room, name?, expire? } (API_KEY_SECRET) returns
+         *               { whip, token }. The token is a JWT bound to that room (default expiry: tokenExpire).
+         *
+         * Core Settings
+         * -------------
+         * - enabled            : Enable WHIP ingestion (default: false)
+         * - tokenExpire        : Default lifetime of per-room tokens (default: '4h')
+         * - maxSessions        : Max simultaneous WHIP sessions on this server (default: 5)
+         * - maxSessionsPerRoom : Max simultaneous WHIP sessions per room (default: 1)
+         * - maxIncomingBitrate : Max bitrate accepted per WHIP session in bps (default: 6000000)
+         * - rateLimit          : Per-IP limit for WHIP HTTP requests (default: 30 / 60s)
+         *
+         * Behaviour
+         * ---------
+         * - The room must already be active (someone joined): WHIP never creates rooms.
+         * - Join-locked or full rooms reject new sessions; room password/lobby do not apply (token = authorization).
+         * - Supported codecs are the router ones (Opus, VP8, VP9, H264). One audio and/or one video track.
+         * - The session ends on DELETE, ICE/DTLS failure, presenter eject/ban, or when the room ends.
+         * - Presenter ban also blocks the token: a per-room token until it expires, the server-wide
+         *   secret only in that room until the room ends (in memory, cleared on restart).
+         * - /whip/* has its own CORS policy (CORS_ORIGIN + POST/DELETE/PATCH, exposes Location) for browser clients.
+         *
+         * OBS Studio: Settings -> Stream -> Service: WHIP
+         *   Server: https://your.domain/whip/{roomId}?name=OBS   Bearer Token: <token>
+         */
+        whip: {
+            enabled: process.env.WHIP_ENABLED === 'true',
+            apiSecret: process.env.WHIP_API_SECRET || '',
+            tokenExpire: process.env.WHIP_TOKEN_EXPIRE || '4h',
+            maxSessions: parseInt(process.env.WHIP_MAX_SESSIONS) || 5,
+            maxSessionsPerRoom: parseInt(process.env.WHIP_MAX_SESSIONS_PER_ROOM) || 1,
+            maxIncomingBitrate: parseInt(process.env.WHIP_MAX_INCOMING_BITRATE) || 6000000,
+            rateLimit: {
+                windowMs: 60 * 1000,
+                max: parseInt(process.env.WHIP_RATE_LIMIT_MAX) || 30,
+            },
+        },
     },
 
     // ==============================================
@@ -612,6 +669,7 @@ module.exports = {
      * - meeting    : Enable/disable single meeting operations [true/false] (default: true)
      * - join       : Enable/disable meeting join endpoint [true/false] (default: true)
      * - token      : Enable/disable token generation endpoint [true/false] (default: false)
+     * - whip       : Enable/disable WHIP ingest token endpoint (POST /api/v1/whip) [true/false] (default: true)
      * - slack      : Enable/disable Slack webhook integration [true/false] (default: true)
      * - mattermost : Enable/disable Mattermost webhook integration [true/false] (default: true)
      *
@@ -629,6 +687,7 @@ module.exports = {
             meetingEnd: process.env.API_ALLOW_MEETING_END === 'true',
             join: process.env.API_ALLOW_JOIN !== 'false',
             token: process.env.API_ALLOW_TOKEN === 'true',
+            whip: process.env.API_ALLOW_WHIP !== 'false',
             slack: process.env.API_ALLOW_SLACK !== 'false',
             mattermost: process.env.API_ALLOW_MATTERMOST !== 'false',
         },

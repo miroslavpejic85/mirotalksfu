@@ -33,6 +33,7 @@ prod dependencies: {
     openai                  : https://www.npmjs.com/package/openai
     qs                      : https://www.npmjs.com/package/qs
     sanitize-filename       : https://www.npmjs.com/package/sanitize-filename
+    sdp-transform           : https://www.npmjs.com/package/sdp-transform
     socket.io               : https://www.npmjs.com/package/socket.io
     swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
     uuid                    : https://www.npmjs.com/package/uuid
@@ -61,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.92
+ * @version 2.6.93
  *
  */
 
@@ -94,6 +95,7 @@ const Host = require('./Host');
 const { parseHostUsers, findHostUser } = require('./HostUsers');
 const Room = require('./Room');
 const Peer = require('./Peer');
+const WhipServer = require('./WhipServer');
 const { assignFallbackPresenter, isConfiguredPresenter, isOidcConfiguredPresenter } = require('./PresenterManager');
 const ServerApi = require('./ServerApi');
 const { getJwtKeys } = require('./JwtSecret');
@@ -144,6 +146,7 @@ const {
     createRoomTokenLimiter,
     checkCreateRoomLimit,
     createRoomLimiterMinutes,
+    whipLimiter,
 } = createRateLimiters({ getRequesterKey });
 
 // Room scheduler configuration
@@ -561,6 +564,9 @@ const authHost = new Host(); // Authenticated IP by Login
 
 const roomList = new Map(); // All Rooms
 
+// WHIP (RFC 9725) ingestion: OBS, FFmpeg, GStreamer... publish into active rooms
+const whipServer = new WhipServer({ roomList, config: config?.media?.whip, jwtKey: jwtKeys.whip });
+
 const presenters = {}; // Collect presenters grp by roomId
 
 const streams = {}; // Collect all rtmp streams
@@ -695,7 +701,9 @@ function startServer() {
             },
         })
     );
-    app.use(cors(corsOptions));
+    const appCors = cors(corsOptions);
+    const whipCors = cors(whipServer.getCorsOptions(corsOptions));
+    app.use((req, res, next) => (whipServer.isWhipPath(req.path) ? whipCors : appCors)(req, res, next));
     app.use(express.json({ limit: '50mb' })); // Handles JSON payloads
     app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Handles URL-encoded payloads
     app.use(express.raw({ type: 'video/webm', limit: '50mb' })); // Handles raw binary data
@@ -744,6 +752,9 @@ function startServer() {
 
         next();
     });
+
+    // WHIP ingestion uses its own Bearer auth, so it is registered before the OIDC session middleware
+    whipServer.register(app, { limiter: whipLimiter });
 
     // OpenID Connect - Dynamically set baseURL based on incoming host and protocol
     if (OIDC.enabled) {
@@ -2065,6 +2076,42 @@ function startServer() {
             body: req.body,
             token: token,
         });
+    });
+
+    // request WHIP ingest endpoint + per-room Bearer token
+    app.post(restApi.basePath + '/whip', (req, res) => {
+        // Check if endpoint allowed
+        if (restApi.allowed && !restApi.allowed.whip) {
+            return res.status(403).json({
+                error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+            });
+        }
+        // check if user was authorized for the api call
+        const { host, authorization } = req.headers;
+        const api = new ServerApi(host, authorization);
+        if (!api.isAuthorized()) {
+            log.debug('MiroTalk get whip - Unauthorized', {
+                header: req.headers,
+                body: req.body,
+            });
+            return res.status(403).json({ error: 'Unauthorized!' });
+        }
+        if (!whipServer.enabled) {
+            return res.status(404).json({ error: 'WHIP is not enabled on this server' });
+        }
+        const { room, name, expire } = req.body || {};
+        if (!Validator.isValidRoomName(room)) {
+            return res.status(400).json({ error: 'Invalid room name' });
+        }
+        try {
+            const token = whipServer.createToken({ roomId: room, name, expire });
+            const whip = `https://${host}/whip/${encodeURIComponent(room)}`;
+            res.json({ whip, token });
+            log.debug('MiroTalk get whip - Authorized', { room, whip });
+        } catch (error) {
+            log.warn('MiroTalk get whip - Failed', error.message);
+            res.status(400).json({ error: 'Invalid WHIP token request' });
+        }
     });
 
     // request end meeting room endpoint
@@ -3905,6 +3952,17 @@ function startServer() {
             }
 
             const room = getRoom(socket);
+
+            // WHIP peers have no socket: eject/ban ends their ingest session server-side
+            if (['eject', 'ban'].includes(data.action) && whipServer.isWhipPeer(data.peer_id)) {
+                const whipPeer = room.getPeer(data.peer_id);
+                if (whipPeer?.isWhip) {
+                    whipServer.closeSessionByPeerId(data.peer_id, `${data.action} by presenter`, {
+                        ban: data.action === 'ban',
+                    });
+                }
+                return;
+            }
 
             if (data.action === 'ban') room.addBannedPeer(data.to_peer_uuid);
 

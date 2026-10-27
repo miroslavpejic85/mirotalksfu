@@ -134,6 +134,14 @@ function createRateLimiters({ getRequesterKey }) {
 
     const checkCreateRoomLimit = createSlidingWindowLimiter({ windowMs: createRoomWindowMs, max: createRoomMax });
 
+    // WHIP ingestion (per IP). Each POST allocates a WebRTC transport, so cap session churn.
+    const whipCfg = config.media?.whip?.rateLimit || {};
+    const whipLimiter = createIpLimiter({
+        windowMs: whipCfg.windowMs || MINUTE_MS,
+        max: whipCfg.max || 30,
+        text: 'Too many WHIP requests.',
+    });
+
     return {
         loginLimiter,
         scheduleMeetingLimiter,
@@ -142,6 +150,7 @@ function createRateLimiters({ getRequesterKey }) {
         createRoomTokenLimiter,
         checkCreateRoomLimit,
         createRoomLimiterMinutes,
+        whipLimiter,
     };
 }
 

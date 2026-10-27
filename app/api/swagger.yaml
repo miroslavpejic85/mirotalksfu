@@ -150,6 +150,36 @@ paths:
                 '403':
                     description: 'Unauthorized!'
 
+    /whip:
+        post:
+            tags:
+                - 'whip'
+            summary: 'Get WHIP ingest endpoint'
+            description: 'Returns the WHIP (RFC 9725) endpoint of a room and a Bearer token bound to that room. Use them in OBS Studio (Service: WHIP), FFmpeg, GStreamer or any WHIP client to publish audio/video into the active room. Requires WHIP_ENABLED=true.'
+            parameters:
+                - in: body
+                  name: whip
+                  description: WHIP token request.
+                  schema:
+                      $ref: '#/definitions/WhipRequest'
+            consumes:
+                - 'application/json'
+            produces:
+                - 'application/json'
+            security:
+                - secretApiKey: []
+            responses:
+                '200':
+                    description: 'Get WHIP endpoint done'
+                    schema:
+                        $ref: '#/definitions/WhipResponse'
+                '400':
+                    description: 'Invalid room name or token request'
+                '403':
+                    description: 'Unauthorized!'
+                '404':
+                    description: 'WHIP is not enabled on this server'
+
 securityDefinitions:
     secretApiKey:
         type: 'apiKey'
@@ -271,6 +301,32 @@ definitions:
         properties:
             token:
                 type: string
+    WhipRequest:
+        type: object
+        required:
+            - room
+        properties:
+            room:
+                type: string
+                default: 'test'
+                description: 'Room the WHIP client publishes into (it must be active when publishing starts).'
+            name:
+                type: string
+                default: 'OBS'
+                description: 'Display name of the WHIP participant (max 32 chars).'
+            expire:
+                type: string
+                default: '4h'
+                description: 'Token lifetime (defaults to WHIP_TOKEN_EXPIRE).'
+    WhipResponse:
+        type: 'object'
+        properties:
+            whip:
+                type: string
+                example: 'https://sfu.mirotalk.com/whip/test'
+            token:
+                type: string
+                description: 'Bearer token for the WHIP endpoint.'
     Peer:
         type: object
         properties:

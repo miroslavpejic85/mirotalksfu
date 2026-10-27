@@ -16,6 +16,7 @@ const PURPOSES = {
     createRoom: 'create-room',
     rcSetup: 'rc-setup',
     oidcPresenter: 'oidc-presenter',
+    whip: 'whip',
 };
 
 let cached = null;
@@ -53,6 +54,7 @@ function getJwtKeys(rawSecret = process.env.JWT_SECRET) {
                 createRoom: deriveKey(secret, PURPOSES.createRoom),
                 rcSetup: deriveKey(secret, PURPOSES.rcSetup),
                 oidcPresenter: deriveKey(secret, PURPOSES.oidcPresenter),
+                whip: deriveKey(secret, PURPOSES.whip),
             }),
         };
     }
