@@ -120,19 +120,24 @@ function parseOffer(sdp, routerRtpCapabilities) {
         seenMids.add(mid);
     }
 
-    const bundleOnlyMedia = media.filter((m) => m.bundleOnly);
-    if (bundleOnlyMedia.length > 0) {
-        if (bundleOnlyMedia.length === media.length) {
-            throw new WhipSdpError('At least one media section must not be bundle-only');
+    if (media.every((m) => m.bundleOnly)) {
+        throw new WhipSdpError('At least one media section must not be bundle-only');
+    }
+
+    // WHIP mandates "max-bundle" (RFC 9725 4.4.1): every section must share a single BUNDLE group,
+    // since mediasoup carries all of them over one transport. A lone section may omit the group.
+    const bundleGroups = (sdpObject.groups || [])
+        .filter((g) => String(g.type).toUpperCase() === 'BUNDLE')
+        .map((g) => new Set(String(g.mids).trim().split(/\s+/)));
+    if (bundleGroups.length > 0 || media.length > 1) {
+        if (bundleGroups.length !== 1) {
+            throw new WhipSdpError('The SDP offer must have exactly one a=group:BUNDLE with every media section');
         }
-        const bundleMids = new Set(
-            (sdpObject.groups || [])
-                .filter((g) => String(g.type).toUpperCase() === 'BUNDLE')
-                .flatMap((g) => String(g.mids).trim().split(/\s+/))
-        );
-        const unbundled = bundleOnlyMedia.find((m) => !bundleMids.has(String(m.mid)));
+        const unbundled = media.find((m) => !bundleGroups[0].has(String(m.mid)));
         if (unbundled) {
-            throw new WhipSdpError(`The bundle-only ${unbundled.type} media section must be in the BUNDLE group`);
+            throw new WhipSdpError(
+                `The ${unbundled.type} media section (mid ${unbundled.mid}) must be in the BUNDLE group`
+            );
         }
     }
 

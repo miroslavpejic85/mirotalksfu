@@ -266,6 +266,24 @@ describe('test-Whip', function () {
             );
         });
 
+        it('requires every media section in a single BUNDLE group (max-bundle)', () => {
+            const msg = /exactly one a=group:BUNDLE/;
+            expectSdpError(obsOffer().replace('a=group:BUNDLE 0 1\r\n', ''), 400, msg);
+            expectSdpError(obsOffer().replace('a=group:BUNDLE 0 1', 'a=group:BUNDLE 0\r\na=group:BUNDLE 1'), 400, msg);
+            expectSdpError(
+                obsOffer().replace('a=group:BUNDLE 0 1', 'a=group:BUNDLE 0'),
+                400,
+                /video media section \(mid 1\) must be in the BUNDLE group/
+            );
+
+            const audioOnly = obsOffer().split('m=video')[0];
+            expectSdpError(audioOnly.replace('a=group:BUNDLE 0 1', 'a=group:BUNDLE 1'), 400, /must be in the BUNDLE/);
+            parseOffer(
+                audioOnly.replace('a=group:BUNDLE 0 1\r\n', ''),
+                router.rtpCapabilities
+            ).sections.length.should.equal(1);
+        });
+
         const expectSdpError = (sdp, status, pattern) => {
             let error;
             try {
@@ -409,6 +427,15 @@ describe('test-Whip', function () {
             const removeMe = emitted.find((e) => e.action === 'removeMe');
             removeMe.id.should.equal('socket-1');
             removeMe.data.should.containEql({ peer_id: session.peerId, peer_counts: 1 });
+        });
+
+        it('rejects a non max-bundle offer without leaving a partial session', async () => {
+            await create({ sdp: obsOffer().replace('a=group:BUNDLE 0 1\r\n', '') }).should.be.rejectedWith(WhipError, {
+                status: 400,
+            });
+            whip.getSessionsCount().should.equal(0);
+            room.getPeersCount().should.equal(1);
+            emitted.length.should.equal(0);
         });
 
         it('ends WHIP sessions and closes the room when the last participant leaves', async () => {
