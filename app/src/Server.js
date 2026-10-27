@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.94
+ * @version 2.6.95
  *
  */
 
@@ -2669,6 +2669,9 @@ function startServer() {
             // Proof of an OIDC presenter session (presenters.list), consumed here and never stored on the peer
             const oidcPresenter = isOidcPresenterTokenValid(data.oidc_presenter_token, socket.room_id);
             delete data.oidc_presenter_token;
+
+            // peer_whip is server-owned (set only by WhipServer); socket peers can never claim it
+            if (data.peer_info) delete data.peer_info.peer_whip;
 
             log.debug('User joined', data);
 

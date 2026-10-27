@@ -102,6 +102,17 @@
     color: #4ade80;
 }
 
+.chat-peer-badge.whip {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+/* WHIP ingest peers are listed for moderation only, they can't be chatted with */
+.people-list .chat-list > li.participant-whip,
+.people-list .chat-list > li.participant-whip:hover {
+    cursor: default;
+}
+
 .chat-peer-status-text {
     color: rgba(255, 255, 255, 0.7);
     font-size: 12px;

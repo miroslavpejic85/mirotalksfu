@@ -8646,6 +8646,20 @@ hr {
     font-size: inherit !important;
 }
 
+/* Marks WHIP ingest tiles (OBS, FFmpeg...) next to the peer name */
+.whip-name-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+}
+
 /*--------------------------------------------------------------
 # Video AI Avatars
 --------------------------------------------------------------*/

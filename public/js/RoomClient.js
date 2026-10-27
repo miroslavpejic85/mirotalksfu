@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.94
+ * @version 2.6.95
  *
  */
 
@@ -4647,6 +4647,9 @@ class RoomClient {
         const remotePeerAudioVolume = peer_info.peer_audio_volume;
         const remotePrivacyOn = peer_info.peer_video_privacy;
         const remotePeerPresenter = peer_info.peer_presenter;
+        // WHIP ingest (OBS, FFmpeg...) has no socket: it can't chat, receive files or obey peer actions
+        const remoteIsWhip = this.isWhipPeer(peer_info);
+        const canInteract = !remoteIsWhip;
 
         switch (type) {
             case mediaType.video:
@@ -4659,6 +4662,7 @@ class RoomClient {
                 d.dataset.peerId = remotePeerId;
                 d.dataset.mediaType = type;
                 d.dataset.cameraOff = 'false';
+                if (remoteIsWhip) d.dataset.whip = 'true';
 
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
@@ -4721,7 +4725,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = remotePeerId + '__name';
                 p.className = html.userName;
-                this.setPeerNameWithPresenter(p, remotePeerPresenter, peer_name);
+                this.setPeerNameWithPresenter(p, remotePeerPresenter, peer_name, remoteIsWhip);
 
                 pm = document.createElement('div');
                 pb = document.createElement('div');
@@ -4757,6 +4761,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.audioVolumeInput &&
                     eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
                 BUTTONS.consumerVideo.presenterRoleButton &&
+                    canInteract &&
                     eVc.appendChild(
                         this.createDropdownItem(
                             role,
@@ -4771,14 +4776,20 @@ class RoomClient {
                     this.isVideoFullScreenSupported &&
                     eVc.appendChild(this.createDropdownItem(fs, 'Full Screen', eVc));
                 BUTTONS.consumerVideo.sendMessageButton &&
+                    canInteract &&
                     eVc.appendChild(this.createDropdownItem(sm, 'Private Message', eVc));
                 BUTTONS.consumerVideo.geolocationButton &&
+                    canInteract &&
                     eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
                 this.remoteControlEnabled &&
                     isPresenter &&
+                    canInteract &&
                     eVc.appendChild(this.createDropdownItem(rcb, 'Remote control', eVc));
-                BUTTONS.consumerVideo.sendFileButton && eVc.appendChild(this.createDropdownItem(sf, 'Send File', eVc));
+                BUTTONS.consumerVideo.sendFileButton &&
+                    canInteract &&
+                    eVc.appendChild(this.createDropdownItem(sf, 'Send File', eVc));
                 BUTTONS.consumerVideo.sendVideoButton &&
+                    canInteract &&
                     eVc.appendChild(this.createDropdownItem(sv, 'Send Video/Audio', eVc));
                 BUTTONS.consumerVideo.banButton && eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
                 BUTTONS.consumerVideo.ejectButton &&
@@ -4791,8 +4802,8 @@ class RoomClient {
 
                 vb.appendChild(eDiv);
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
-                BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
-                BUTTONS.consumerVideo.muteVideoButton && vb.appendChild(cm);
+                BUTTONS.consumerVideo.muteAudioButton && canInteract && vb.appendChild(au);
+                BUTTONS.consumerVideo.muteVideoButton && canInteract && vb.appendChild(cm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
@@ -4825,7 +4836,7 @@ class RoomClient {
                 this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleVB(d.id, vb.id);
-                this.handleDD(elem.id, remotePeerId);
+                canInteract && this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
@@ -4835,8 +4846,8 @@ class RoomClient {
                 this.handleHFG(hg.id, remotePeerId);
                 this.handleSM(sm.id, peer_name, remotePeerId);
                 this.handleSV(sv.id, peer_name, remotePeerId);
-                BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id, remotePeerId);
-                BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id, remotePeerId);
+                BUTTONS.consumerVideo.muteVideoButton && canInteract && this.handleCM(cm.id, remotePeerId);
+                BUTTONS.consumerVideo.muteAudioButton && canInteract && this.handleAU(au.id, remotePeerId);
                 this.handleCV(pv.id);
                 this.handleGL(gl.id, remotePeerId);
                 this.handleRC(rcb.id, remotePeerId);
@@ -5028,12 +5039,17 @@ class RoomClient {
     // HANDLE VIDEO OFF
     // ####################################################
 
+    isWhipPeer(peer_info) {
+        return !!peer_info?.peer_whip;
+    }
+
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
         let d, vb, i, h, au, sf, sm, sv, gl, rcb, ban, ko, hg, p, pm, pb, pv, pn, st, ri, role;
         let eDiv, eBtn, eVc;
 
         const { peer_id, peer_name, peer_avatar, peer_audio, peer_presenter } = peer_info;
+        const canInteract = !(remotePeer && this.isWhipPeer(peer_info));
 
         this.removeVideoOff(peer_id);
 
@@ -5042,6 +5058,7 @@ class RoomClient {
         d.id = peer_id + '__videoOff';
         d.dataset.peerId = peer_id;
         d.dataset.cameraOff = 'true';
+        if (!canInteract) d.dataset.whip = 'true';
 
         vb = document.createElement('div');
         vb.id = peer_id + '__vb';
@@ -5093,7 +5110,7 @@ class RoomClient {
         p = document.createElement('p');
         p.id = peer_id + '__name';
         p.className = html.userName;
-        this.setPeerNameWithPresenter(p, peer_presenter, peer_name + (remotePeer ? '' : ' (me) '));
+        this.setPeerNameWithPresenter(p, peer_presenter, peer_name + (remotePeer ? '' : ' (me) '), !canInteract);
 
         if (!remotePeer) {
             ri = this.createElement(peer_id + '__recIndicator', 'span', 'rec-indicator');
@@ -5123,17 +5140,27 @@ class RoomClient {
             eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
         if (remotePeer) {
             BUTTONS.videoOff.presenterRoleButton &&
+                canInteract &&
                 eVc.appendChild(
                     this.createDropdownItem(role, peer_presenter ? 'Remove presenter role' : 'Set as presenter', eVc)
                 );
             BUTTONS.videoOff.hideFromGridButton && eVc.appendChild(this.createDropdownItem(hg, 'Hide from grid', eVc));
-            BUTTONS.videoOff.sendMessageButton && eVc.appendChild(this.createDropdownItem(sm, 'Private Message', eVc));
-            BUTTONS.videoOff.geolocationButton && eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
+            BUTTONS.videoOff.sendMessageButton &&
+                canInteract &&
+                eVc.appendChild(this.createDropdownItem(sm, 'Private Message', eVc));
+            BUTTONS.videoOff.geolocationButton &&
+                canInteract &&
+                eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
             this.remoteControlEnabled &&
                 isPresenter &&
+                canInteract &&
                 eVc.appendChild(this.createDropdownItem(rcb, 'Remote control', eVc));
-            BUTTONS.videoOff.sendFileButton && eVc.appendChild(this.createDropdownItem(sf, 'Send File', eVc));
-            BUTTONS.videoOff.sendVideoButton && eVc.appendChild(this.createDropdownItem(sv, 'Send Video/Audio', eVc));
+            BUTTONS.videoOff.sendFileButton &&
+                canInteract &&
+                eVc.appendChild(this.createDropdownItem(sf, 'Send File', eVc));
+            BUTTONS.videoOff.sendVideoButton &&
+                canInteract &&
+                eVc.appendChild(this.createDropdownItem(sv, 'Send Video/Audio', eVc));
             BUTTONS.videoOff.banButton && eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
             BUTTONS.videoOff.ejectButton && eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
         }
@@ -5145,7 +5172,7 @@ class RoomClient {
 
         vb.appendChild(eDiv);
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
-        BUTTONS.videoOff.muteAudioButton && vb.appendChild(au);
+        BUTTONS.videoOff.muteAudioButton && canInteract && vb.appendChild(au);
         if (BUTTONS.videoOff.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
         if (!remotePeer) vb.appendChild(st);
 
@@ -5173,7 +5200,7 @@ class RoomClient {
 
         this.videoMediaContainer.appendChild(d);
         if (typeof applyParticipantGridVisibility === 'function') applyParticipantGridVisibility();
-        BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id, peer_id);
+        BUTTONS.videoOff.muteAudioButton && canInteract && this.handleAU(au.id, peer_id);
 
         if (remotePeer) {
             this.handleCV(pv.id);
@@ -5191,7 +5218,7 @@ class RoomClient {
         }
 
         this.handleVB(d.id, vb.id);
-        this.handleDD(d.id, peer_id, !remotePeer);
+        canInteract && this.handleDD(d.id, peer_id, !remotePeer);
         this.handlePN(i.id, pn.id, d.id);
         this.popupPeerInfo(p.id, peer_info);
         this.checkPeerInfoStatus(peer_info);
@@ -12744,10 +12771,18 @@ class RoomClient {
         return badge;
     }
 
-    setPeerNameWithPresenter(nameEl, is_presenter, displayName) {
+    createWhipNameBadge() {
+        const badge = document.createElement('span');
+        badge.className = 'whip-name-badge';
+        badge.textContent = 'WHIP';
+        return badge;
+    }
+
+    setPeerNameWithPresenter(nameEl, is_presenter, displayName, is_whip = false) {
         nameEl.textContent = '';
         if (is_presenter) nameEl.appendChild(this.createPresenterNameBadge());
         nameEl.appendChild(document.createTextNode(displayName));
+        if (is_whip) nameEl.appendChild(this.createWhipNameBadge());
     }
 
     updatePeerPresenterBadge(peer_id, is_presenter) {
@@ -12783,6 +12818,7 @@ class RoomClient {
         this.videoMediaContainer.querySelectorAll('.Camera[id$="__video"]').forEach((tile) => {
             const remotePeerId = tile.dataset.peerId;
             if (!remotePeerId || remotePeerId === this.peer_id) return;
+            const canInteract = tile.dataset.whip !== 'true';
 
             const consumerId = tile.id.replace('__video', '');
             const vb = this.getId(consumerId + '__vb');
@@ -12796,7 +12832,7 @@ class RoomClient {
             this.reconcilePresenterMenuItem(
                 eVc,
                 `${prefix}role`,
-                canModerate && BUTTONS.consumerVideo.presenterRoleButton,
+                canModerate && canInteract && BUTTONS.consumerVideo.presenterRoleButton,
                 () => {
                     const role = this.createButton(
                         `${prefix}role`,
@@ -12815,7 +12851,7 @@ class RoomClient {
             this.reconcilePresenterMenuItem(
                 eVc,
                 `${prefix}geoLocation`,
-                canModerate && BUTTONS.consumerVideo.geolocationButton,
+                canModerate && canInteract && BUTTONS.consumerVideo.geolocationButton,
                 () => {
                     const gl = this.createButton(`${prefix}geoLocation`, html.geolocation);
                     eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
@@ -12825,7 +12861,7 @@ class RoomClient {
             this.reconcilePresenterMenuItem(
                 eVc,
                 `${prefix}remoteControl`,
-                canModerate && this.remoteControlEnabled,
+                canModerate && canInteract && this.remoteControlEnabled,
                 () => {
                     const rcb = this.createButton(`${prefix}remoteControl`, html.remoteControl);
                     eVc.appendChild(this.createDropdownItem(rcb, 'Remote control', eVc));
@@ -12853,6 +12889,7 @@ class RoomClient {
         this.videoMediaContainer.querySelectorAll('.Camera[id$="__videoOff"]').forEach((tile) => {
             const peerId = tile.dataset.peerId;
             if (!peerId || peerId === this.peer_id) return;
+            const canInteract = tile.dataset.whip !== 'true';
 
             const vb = this.getId(peerId + '__vb');
             if (!vb) return;
@@ -12881,7 +12918,7 @@ class RoomClient {
             this.reconcilePresenterMenuItem(
                 eVc,
                 `${prefix}role`,
-                canModerate && BUTTONS.videoOff.presenterRoleButton,
+                canModerate && canInteract && BUTTONS.videoOff.presenterRoleButton,
                 () => {
                     const role = this.createButton(
                         `${prefix}role`,
@@ -12900,7 +12937,7 @@ class RoomClient {
             this.reconcilePresenterMenuItem(
                 eVc,
                 `${prefix}geoLocation`,
-                canModerate && BUTTONS.videoOff.geolocationButton,
+                canModerate && canInteract && BUTTONS.videoOff.geolocationButton,
                 () => {
                     const gl = this.createButton(`${prefix}geoLocation`, html.geolocation);
                     eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
@@ -12910,7 +12947,7 @@ class RoomClient {
             this.reconcilePresenterMenuItem(
                 eVc,
                 `${prefix}remoteControl`,
-                canModerate && this.remoteControlEnabled,
+                canModerate && canInteract && this.remoteControlEnabled,
                 () => {
                     const rcb = this.createButton(`${prefix}remoteControl`, html.remoteControl);
                     eVc.appendChild(this.createDropdownItem(rcb, 'Remote control', eVc));

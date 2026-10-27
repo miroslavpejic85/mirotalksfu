@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.94
+ * @version 2.6.95
  *
  */
 
@@ -2979,7 +2979,9 @@ function updateChatConversationsCount() {
     if (!el) return;
     const list = getId('participantsList');
     const count = list
-        ? Array.from(list.querySelectorAll(':scope > li')).filter((li) => li.style.display !== 'none').length
+        ? Array.from(list.querySelectorAll(':scope > li:not(.participant-whip)')).filter(
+              (li) => li.style.display !== 'none'
+          ).length
         : 0;
     el.textContent = count > 0 ? `${count} conversation${count !== 1 ? 's' : ''}` : '';
 }
@@ -8796,7 +8798,58 @@ function getParticipantsList(peers) {
             : '';
 
         // NOT ME
-        if (socket.id !== peer_id) {
+        if (socket.id !== peer_id && peer_info.peer_whip) {
+            // WHIP INGEST (OBS, FFmpeg...): media only, no chat, files or remote peer actions
+            let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
+
+            menuItems += renderParticipantMenuGroup('View');
+            menuItems += pinMenuItem;
+            menuItems += hideFromGridMenuItem;
+
+            const canModerate = isRulesActive && isPresenter;
+            if (canModerate && (BUTTONS.participantsList.banButton || BUTTONS.participantsList.ejectButton)) {
+                menuItems += renderParticipantMenuGroup('Danger zone');
+            }
+            if (canModerate && BUTTONS.participantsList.banButton) {
+                menuItems += renderParticipantMenuItem(
+                    renderParticipantActionButton({
+                        buttonClass: 'btn-sm ml5 participant-action-danger',
+                        buttonId: `${peer_id}___pBan`,
+                        onClick: `rc.peerAction('me','${peer_id}','ban')`,
+                        iconHtml: peer_ban,
+                        label: 'Ban participant',
+                    })
+                );
+            }
+            if (canModerate && BUTTONS.participantsList.ejectButton) {
+                menuItems += renderParticipantMenuItem(
+                    renderParticipantActionButton({
+                        buttonClass: 'btn-sm ml5 participant-action-danger',
+                        buttonId: `${peer_id}___pEject`,
+                        onClick: `rc.peerAction('me','${peer_id}','eject')`,
+                        iconHtml: peer_eject,
+                        label: 'Eject participant',
+                    })
+                );
+            }
+
+            li += renderParticipantItem({
+                itemId: peer_id,
+                toId: peer_id,
+                toName: peer_name,
+                itemClass: 'clearfix participant-whip',
+                avatarSrc: avatarImg,
+                name: peer_name_limited,
+                nameSuffix: ' <span class="chat-peer-badge whip">WHIP</span>',
+                statusHtml: renderParticipantStatus('Live stream'),
+                dropdownHtml: renderParticipantDropdown(
+                    `${peer_id}-chatDropDownMenu`,
+                    menuItems,
+                    `Actions for ${peer_name_limited}`
+                ),
+                buttonsHtml: renderParticipantButtons(peer_hidden_badge),
+            });
+        } else if (socket.id !== peer_id) {
             // PRESENTER HAS MORE OPTIONS
             if (isRulesActive && isPresenter) {
                 let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
@@ -10409,7 +10462,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.94',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.95',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
@@ -10614,7 +10667,7 @@ async function refreshBreakoutPanel() {
     const peerList = [];
     for (const [id, data] of peers) {
         if (id === rc.peer_id) continue;
-        const avatar = getParticipantAvatar(data.peer_info.peer_name, data.peer_info.peer_avatar);
+        if (data.peer_info.peer_whip) continue; // WHIP ingest can't be moved to another room
         peerList.push({ id, name: data.peer_info.peer_name, avatar });
     }
 
