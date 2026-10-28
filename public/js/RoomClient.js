@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.97
+ * @version 2.6.98
  *
  */
 
@@ -543,6 +543,15 @@ class RoomClient {
         this.numSimulcastStreamsSharing = 1; // Number of streams for simulcast in screen sharing
         this.webcamScalabilityMode = 'L3T3'; // Scalability Mode for webcam | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3_KEY' for VP9
         this.sharingScalabilityMode = 'L1T3'; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
+
+        // Mobile webcam profile: phones that encode 720p30 x3 simulcast layers while decoding remote
+        // videos get CPU/thermal throttled and saturate their uplink, causing remote audio drops and frozen video.
+        this.mobileDefaultVideoQuality = 'vga'; // Used on mobile when Camera Quality is "Default"
+        this.mobileDefaultVideoFps = 20; // Used on mobile when Camera FPS is "Maximum"
+        this.numSimulcastStreamsWebcamMobile = 2; // Number of streams for simulcast in webcam on mobile
+        this.mobileWebcamMaxBitrate = 700000; // Top layer max bitrate on mobile (SD)
+        this.mobileWebcamMaxBitrateHD = 1500000; // Top layer max bitrate on mobile when HD or higher is selected
+        this.mobileWebcamLowMaxBitrate = 150000; // Low layer max bitrate on mobile
 
         this.myVideoEl = null;
         this.myAudioEl = null;
@@ -3490,13 +3499,16 @@ class RoomClient {
 
         const resolutionMap = this.getResolutionMap();
 
-        // Default to HD
-        const [width, height] = resolutionMap[videoQuality.value] || [1280, 720];
+        // Default to HD on desktop and to a lighter profile on mobile
+        const defaultResolution = this.isMobileDevice ? resolutionMap[this.mobileDefaultVideoQuality] : [1280, 720];
+        const defaultFrameRate = this.isMobileDevice ? this.mobileDefaultVideoFps : 30;
+
+        const [width, height] = resolutionMap[videoQuality.value] || defaultResolution;
 
         const constraints = {
             width: { ideal: width },
             height: { ideal: height },
-            frameRate: { ideal: customFrameRate || 30 },
+            frameRate: { ideal: customFrameRate || defaultFrameRate },
         };
 
         if (deviceId) {
@@ -3571,6 +3583,8 @@ class RoomClient {
             const firstVideoCodec = this.device.rtpCapabilities.codecs.find((c) => c.kind === 'video');
             console.log('WEBCAM ENCODING: first codec available', { firstVideoCodec: firstVideoCodec });
 
+            const { topMaxBitrate, midMaxBitrate, lowMaxBitrate, numSimulcastStreams } = this.getWebcamLayersConfig();
+
             // If VP9 is the only available video codec then use SVC.
             if (
                 ((this.forceVP9 || this.forceAV1) && codec) ||
@@ -3580,7 +3594,7 @@ class RoomClient {
                 console.log('WEBCAM ENCODING: VP9 or AV1 with SVC');
                 encodings = [
                     {
-                        maxBitrate: 5000000,
+                        maxBitrate: topMaxBitrate,
                         scalabilityMode: this.webcamScalabilityMode || 'L3T3_KEY',
                     },
                 ];
@@ -3589,27 +3603,48 @@ class RoomClient {
                 encodings = [
                     {
                         scaleResolutionDownBy: 1,
-                        maxBitrate: 5000000,
+                        maxBitrate: topMaxBitrate,
                         scalabilityMode: this.webcamScalabilityMode || 'L1T3',
                     },
                 ];
-                if (this.numSimulcastStreamsWebcam > 1) {
+                if (numSimulcastStreams > 1) {
                     encodings.unshift({
                         scaleResolutionDownBy: 2,
-                        maxBitrate: 1000000,
+                        maxBitrate: midMaxBitrate,
                         scalabilityMode: this.webcamScalabilityMode || 'L1T3',
                     });
                 }
-                if (this.numSimulcastStreamsWebcam > 2) {
+                if (numSimulcastStreams > 2) {
                     encodings.unshift({
                         scaleResolutionDownBy: 4,
-                        maxBitrate: 500000,
+                        maxBitrate: lowMaxBitrate,
                         scalabilityMode: this.webcamScalabilityMode || 'L1T3',
                     });
                 }
             }
         }
         return { encodings, codec };
+    }
+
+    getWebcamLayersConfig() {
+        if (!this.isMobileDevice) {
+            return {
+                topMaxBitrate: 5000000,
+                midMaxBitrate: 1000000,
+                lowMaxBitrate: 500000,
+                numSimulcastStreams: this.numSimulcastStreamsWebcam,
+            };
+        }
+        const [width] = this.getResolutionMap()[videoQuality.value] || [];
+        const isHdOrHigher = width >= 1280;
+        const numSimulcastStreams = this.numSimulcastStreamsWebcamMobile;
+        return {
+            topMaxBitrate: isHdOrHigher ? this.mobileWebcamMaxBitrateHD : this.mobileWebcamMaxBitrate,
+            // With 2 streams the half-resolution layer is the lowest one
+            midMaxBitrate: numSimulcastStreams > 2 ? this.mobileWebcamMaxBitrate / 2 : this.mobileWebcamLowMaxBitrate,
+            lowMaxBitrate: this.mobileWebcamLowMaxBitrate,
+            numSimulcastStreams,
+        };
     }
 
     // ####################################################
