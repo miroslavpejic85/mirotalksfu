@@ -11,7 +11,7 @@ Self-hosted, open-source WebRTC video conferencing platform for real-time commun
 </h3>
 
 <h4 align="center">
-A modern alternative to Zoom, Google Meet, Jitsi Meet, and Microsoft Teams, powered by scalable SFU architecture with Mediasoup.
+A modern alternative to Zoom, Google Meet, Jitsi Meet, and Microsoft Teams, powered by scalable SFU architecture with <a href="https://mediasoup.org" target="_blank">Mediasoup</a>.
 </h4>
 
 <br />
