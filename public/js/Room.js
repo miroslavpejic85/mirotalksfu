@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.96
+ * @version 2.6.97
  *
  */
 
@@ -640,6 +640,7 @@ async function initClient() {
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatGifButton', 'GIF', 'top');
         setTippy('chatShowParticipantsListBtn', 'Toggle participants list', 'bottom');
         setTippy('chatMarkdownButton', 'Markdown', 'top');
         setTippy('fileShareChatButton', 'Share the file', 'top');
@@ -2737,6 +2738,7 @@ function roomIsReady() {
     handleSelects();
     handleInputs();
     handleChatEmojiPicker();
+    handleChatGifPicker();
     handleRoomEmojiPicker();
     handleEditor();
     loadSettingsFromLocalStorage();
@@ -5180,6 +5182,27 @@ function handleChatEmojiPicker() {
             rc.setChatEmojiOpen(false);
         }
     });
+}
+
+function handleChatGifPicker() {
+    const chatGifButton = getId('chatGifButton');
+    const chatGif = getId('chatGif');
+    if (!chatGifButton || !chatGif) return;
+
+    chatGifButton.onclick = () => rc.toggleChatGif();
+    getId('chatGifSearchInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            rc.setChatGifOpen(false);
+            chatGifButton.focus();
+        }
+    });
+
+    handleClickOutside(chatGif, chatGifButton, () => {
+        if (rc.isChatGifOpen) rc.setChatGifOpen(false);
+    });
+
+    rc.initChatGif();
 }
 
 function handleRoomEmojiPicker() {
@@ -10462,7 +10485,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.96',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.97',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

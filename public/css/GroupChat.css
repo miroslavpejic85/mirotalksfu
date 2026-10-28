@@ -922,6 +922,105 @@
     --font-family: 'Montserrat';
 }
 
+/* Chat GIF (KLIPY) */
+.chatGifPicker {
+    z-index: 1;
+    position: absolute;
+    left: 5px;
+    bottom: 132px;
+    width: min(352px, calc(100% - 10px));
+    height: min(420px, calc(100% - 140px));
+    min-height: 220px;
+    padding: 8px;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--body-bg);
+    border: var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.chatGifPicker.show {
+    display: flex !important;
+}
+
+.chat-gif-search {
+    width: 100%;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    border: var(--border);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+}
+
+.chat-gif-search:focus-visible {
+    outline: 2px solid var(--chat-accent);
+    outline-offset: 1px;
+}
+
+.chat-gif-results {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    grid-auto-rows: 96px;
+    gap: 4px;
+}
+
+.chat-gif-item {
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.chat-gif-item:hover,
+.chat-gif-item:focus-visible {
+    outline: 2px solid var(--chat-accent);
+    outline-offset: -2px;
+}
+
+.chat-gif-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.chat-gif-status {
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.chat-gif-attribution {
+    align-self: flex-end;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+}
+
+.chat-gif-attribution:hover {
+    color: #fff;
+}
+
+.chat-gif-btn-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 1px 3px;
+    border: 1.5px solid currentColor;
+    border-radius: 4px;
+    line-height: 1;
+}
+
 /* status */
 .online,
 .offline,

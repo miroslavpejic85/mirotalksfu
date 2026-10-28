@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.96 - Configuration File
+ * MiroTalk SFU v2.6.97 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -791,6 +791,38 @@ module.exports = {
             model: process.env.DEEP_SEEK_MODEL || 'deepseek-v4-flash',
             max_tokens: parseInt(process.env.DEEP_SEEK_MAX_TOKENS) || 1024,
             temperature: parseInt(process.env.DEEP_SEEK_TEMPERATURE) || 0.7,
+        },
+
+        /**
+         * GIF Search Configuration (KLIPY)
+         * ================================
+         * Optional GIF picker in the chat, powered by KLIPY
+         * (a free, drop-in replacement for the discontinued Tenor API).
+         *
+         * Setup Instructions:
+         * ------------------
+         * 1. Create a free API key at https://partner.klipy.com/ (API Keys)
+         * 2. Set KLIPY_API_KEY in your .env file
+         * 3. Restart the server
+         *
+         * Core Settings:
+         * -------------
+         * - enabled       : Enabled automatically when an API key is set (default: false)
+         * - apiKey        : KLIPY app key. Per KLIPY's integration requirements, searches are
+         *                   sent directly from the browser, so this key is shared with joined peers.
+         * - contentFilter : Content safety level [off/low/medium/high] (default: 'high')
+         *
+         * Notes:
+         * -----
+         * - Testing-mode keys are limited to 100 requests/hour; request Production access
+         *   in the KLIPY Partner Panel to remove the limit.
+         * - Attribution: the picker uses the required "Search KLIPY" placeholder and shows "Powered by KLIPY".
+         *   See https://docs.klipy.com/attribution and https://docs.klipy.com/integration-requirements
+         */
+        gifSearch: {
+            enabled: process.env.KLIPY_API_ENABLED === 'true',
+            apiKey: process.env.KLIPY_API_KEY || '',
+            contentFilter: process.env.KLIPY_CONTENT_FILTER || 'high',
         },
 
         /**
@@ -1640,6 +1672,7 @@ module.exports = {
                 chatMaxButton: process.env.SHOW_CHAT_MAXIMIZE !== 'false',
                 chatSaveButton: process.env.SHOW_CHAT_SAVE !== 'false',
                 chatEmojiButton: process.env.SHOW_CHAT_EMOJI !== 'false',
+                chatGifButton: process.env.SHOW_CHAT_GIF !== 'false',
                 chatMarkdownButton: process.env.SHOW_CHAT_MARKDOWN !== 'false',
                 chatSpeechStartButton: process.env.SHOW_CHAT_SPEECH !== 'false',
                 chatGPT: process.env.ENABLE_CHAT_GPT !== 'false',

@@ -144,6 +144,7 @@
         <script defer src="../js/RoomBackground.js"></script>
         <script defer src="../js/RoomTemplate.js"></script>
         <script defer src="../js/NetworkStats.js"></script>
+        <script defer src="../js/GifSearch.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/SipPhone.js"></script>
         <script defer src="../js/Room.js"></script>
@@ -3287,6 +3288,27 @@
 
                         <!-- CHAT EMOJI -->
                         <div id="chatEmoji" class="hidden fadein chatEmojiPicker"></div>
+
+                        <!-- CHAT GIF (KLIPY) -->
+                        <div id="chatGif" class="hidden fadein chatGifPicker" role="dialog" aria-label="GIF search">
+                            <input
+                                id="chatGifSearchInput"
+                                class="chat-gif-search"
+                                type="search"
+                                autocomplete="off"
+                                aria-label="Search GIFs"
+                            />
+                            <div id="chatGifResults" class="chat-gif-results"></div>
+                            <div id="chatGifStatus" class="chat-gif-status hidden" aria-live="polite"></div>
+                            <a
+                                class="chat-gif-attribution"
+                                href="https://klipy.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                translate="no"
+                                >Powered by KLIPY</a
+                            >
+                        </div>
                     </div>
 
                     <!-- CHAT TYPING INDICATOR -->
@@ -3331,6 +3353,15 @@
                                             aria-expanded="false"
                                         >
                                             <i class="fas fa-smile"></i>
+                                        </button>
+                                        <button
+                                            id="chatGifButton"
+                                            class="chat-toolbar-btn hidden"
+                                            type="button"
+                                            aria-label="Choose GIF"
+                                            aria-expanded="false"
+                                        >
+                                            <span class="chat-gif-btn-label" translate="no">GIF</span>
                                         </button>
                                         <button
                                             id="chatMarkdownButton"

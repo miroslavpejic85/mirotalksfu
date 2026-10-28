@@ -121,6 +121,7 @@ let BUTTONS = {
         chatMaxButton: true,
         chatSaveButton: true,
         chatEmojiButton: true,
+        chatGifButton: true,
         chatMarkdownButton: true,
         chatSpeechStartButton: true,
         chatGPT: true,

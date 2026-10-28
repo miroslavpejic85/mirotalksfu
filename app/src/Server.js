@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.96
+ * @version 2.6.97
  *
  */
 
@@ -472,6 +472,20 @@ if (config?.integrations?.chatGPT?.enabled) {
         log.warn('ChatGPT seems enabled, but you missing the apiKey!');
     }
 }
+
+// GIF search (KLIPY)
+const GIF_CONTENT_FILTERS = ['off', 'low', 'medium', 'high'];
+const gifSearchCfg = config?.integrations?.gifSearch || {};
+const gifSearchClientConfig =
+    gifSearchCfg.enabled && gifSearchCfg.apiKey
+        ? {
+              enabled: true,
+              apiKey: String(gifSearchCfg.apiKey).trim(),
+              contentFilter: GIF_CONTENT_FILTERS.includes(gifSearchCfg.contentFilter)
+                  ? gifSearchCfg.contentFilter
+                  : 'high',
+          }
+        : false;
 
 function getChatGPTParams(messages) {
     const chatGPTConfig = config?.integrations?.chatGPT || {};
@@ -2319,6 +2333,9 @@ function startServer() {
                 slack: slackEnabled ? config.integrations?.slack : false,
                 chatGPT: config.integrations?.chatGPT?.enabled ? config.integrations.chatGPT : false,
                 deepSeek: config.integrations?.deepSeek?.enabled ? config.integrations.deepSeek : false,
+                gifSearch: gifSearchClientConfig
+                    ? { provider: 'klipy', contentFilter: gifSearchClientConfig.contentFilter }
+                    : false,
                 email_alerts: config?.integrations?.email?.alert ? config.integrations.email : false,
             },
 
@@ -4179,6 +4196,15 @@ function startServer() {
             }
 
             room.broadCast(socket.id, 'followMe', data);
+        });
+
+        // KLIPY requires searches to originate from the browser, so joined (non-lobby) peers get the app key.
+        socket.on('getGifSearchConfig', (_, cb) => {
+            if (typeof cb !== 'function') return;
+            if (!roomExists(socket)) return cb(false);
+            const { peer } = getRoomAndPeer(socket);
+            if (!peer || isPeerInLobby(peer)) return cb(false);
+            cb(gifSearchClientConfig);
         });
 
         socket.on('getRoomInfo', async (_, cb) => {

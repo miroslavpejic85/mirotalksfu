@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.96
+ * @version 2.6.97
  *
  */
 
@@ -427,6 +427,9 @@ class RoomClient {
         this.isZoomCenterMode = false;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
+        this.isChatGifOpen = false;
+        this.gifSearch = null; // KLIPY client config from joinRoom
+        this.chatGifSearch = null; // GifSearch instance
         this.isPollOpen = false;
         this.isPollPinned = false;
         this.isPollMaximized = false;
@@ -815,6 +818,8 @@ class RoomClient {
         console.log('07 ----> Join Room allowed');
 
         await this.handleRoomInfo(room);
+
+        this.loadGifSearchConfig();
 
         await this.loadDeviceAndInitTransports();
 
@@ -7557,11 +7562,84 @@ class RoomClient {
     }
 
     setChatEmojiOpen(isOpen) {
+        if (isOpen && this.isChatGifOpen) this.setChatGifOpen(false);
         this.isChatEmojiOpen = isOpen;
         this.getId('chatEmoji').classList.toggle('show', isOpen);
         const chatEmojiButton = this.getId('chatEmojiButton');
         chatEmojiButton.style.color = isOpen ? '#FFFF00' : '#FFFFFF';
         chatEmojiButton.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    toggleChatGif() {
+        this.setChatGifOpen(!this.isChatGifOpen);
+    }
+
+    async loadGifSearchConfig() {
+        try {
+            const cfg = await this.socket.request('getGifSearchConfig');
+            this.gifSearch = cfg?.enabled && cfg?.apiKey ? cfg : null;
+        } catch (err) {
+            console.warn('GIF search config error', err?.message || err);
+            this.gifSearch = null;
+        }
+        this.initChatGif();
+    }
+
+    // Idempotent: called once the config arrives and again when the room UI is ready (whichever is last wins).
+    initChatGif() {
+        const chatGifButton = this.getId('chatGifButton');
+        if (!chatGifButton || this.chatGifSearch) return;
+        if (!BUTTONS.chat.chatGifButton || !this.gifSearch || typeof GifSearch === 'undefined') {
+            hide(chatGifButton);
+            return;
+        }
+        try {
+            this.chatGifSearch = new GifSearch({
+                apiKey: this.gifSearch.apiKey,
+                contentFilter: this.gifSearch.contentFilter,
+                container: this.getId('chatGif'),
+                input: this.getId('chatGifSearchInput'),
+                results: this.getId('chatGifResults'),
+                status: this.getId('chatGifStatus'),
+                onSelect: (url) => {
+                    this.setChatGifOpen(false);
+                    this.sendGif(url);
+                },
+            });
+            show(chatGifButton);
+        } catch (err) {
+            console.warn('GIF search init failed', err?.message || err);
+            hide(chatGifButton);
+        }
+    }
+
+    setChatGifOpen(isOpen) {
+        const chatGif = this.getId('chatGif');
+        const chatGifButton = this.getId('chatGifButton');
+        if (!chatGif || !chatGifButton) return;
+        if (isOpen && !this.chatGifSearch) return;
+        if (isOpen && this.isChatEmojiOpen) this.setChatEmojiOpen(false);
+        this.isChatGifOpen = isOpen;
+        chatGif.classList.toggle('show', isOpen);
+        chatGifButton.classList.toggle('is-active', isOpen);
+        chatGifButton.setAttribute('aria-expanded', String(isOpen));
+        if (isOpen) {
+            this.chatGifSearch.open();
+            if (!this.isMobileDevice) this.getId('chatGifSearchInput')?.focus();
+        }
+    }
+
+    sendGif(url) {
+        if (!url || !this.isImageURL(url)) return;
+        if (isChatGPTOn || isDeepSeekOn) {
+            return this.userLog('info', 'GIFs cannot be sent to AI assistants', 'top-end');
+        }
+        // Reuse the regular chat pipeline (privacy, moderation, spam checks) while keeping any draft text.
+        const draft = chatMessage.value;
+        chatMessage.value = url;
+        isChatPasteTxt = false;
+        this.sendMessage();
+        chatMessage.value = draft;
     }
 
     addEmojiToMsg(data) {
