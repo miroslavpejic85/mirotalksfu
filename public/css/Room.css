@@ -3887,10 +3887,13 @@ body {
 
 #whipEndpoint,
 #whipToken,
+#whipUsername,
+#whipPassword,
 #whipName,
 #whipIngestUrl,
 #whipIngestToken {
     min-width: 0;
+    height: 40px;
     padding: 10px;
     width: 100%;
     color: #fff;
@@ -3906,6 +3909,68 @@ body {
     cursor: not-allowed;
 }
 
+/* `#mySettings select` caps the width at 310px and adds a top margin */
+#mySettings #tabWhip select {
+    width: 100%;
+    max-width: none;
+    height: 40px;
+    margin-top: 0;
+    border-radius: 8px;
+}
+
+#tabWhip .whip-destination {
+    padding-top: 8px;
+}
+
+.whip-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.whip-input-row input {
+    flex: 1 1 auto;
+}
+
+/* `.tabcontent button` forces full width, keep the inline actions compact */
+#tabWhip .whip-inline-button {
+    width: auto;
+    min-height: 40px;
+    margin: 0;
+    padding: 6px 14px;
+    flex: 0 0 auto;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 8px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.whip-auth-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 8px;
+}
+
+.whip-auth-row[data-auth='basic'] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.whip-auth-row input.hidden {
+    display: none;
+}
+
+.whip-source-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 14px;
+}
+
+.whip-source-grid .rtmp-field {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
 .whip-live-status[data-state='connecting'] {
     border-color: rgba(255, 176, 32, 0.5);
     background: rgba(255, 176, 32, 0.08);
@@ -3913,6 +3978,49 @@ body {
 
 .whip-live-status[data-state='connecting'] .rtmp-live-dot {
     background: rgb(255, 176, 32);
+}
+
+.whip-live-status[data-state='live'] {
+    border-color: rgba(46, 204, 113, 0.45);
+    background: rgba(46, 204, 113, 0.08);
+}
+
+.whip-live-status[data-state='live'] .rtmp-live-dot {
+    background: rgb(46, 204, 113);
+    animation-name: whipLivePulse;
+}
+
+.whip-live-status .rtmp-live-text {
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+    column-gap: 12px;
+}
+
+.whip-live-status .rtmp-live-text strong {
+    font-size: 13px;
+}
+
+.whip-live-status[data-state='live'] .rtmp-live-text strong {
+    color: rgb(46, 204, 113);
+}
+
+.whip-live-status .rtmp-live-text small {
+    color: var(--fg-2);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+@keyframes whipLivePulse {
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.55);
+    }
+    50% {
+        opacity: 0.6;
+        box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+    }
 }
 
 .whip-status {
@@ -3955,18 +4063,6 @@ body {
     border-left-color: var(--btns-bg-color);
 }
 
-/* `.tabcontent button` forces full width, keep the heading action compact */
-.rtmp-section-heading .whip-heading-button {
-    width: auto;
-    min-height: 30px;
-    margin: 0 0 0 auto;
-    padding: 5px 12px;
-    flex: 0 0 auto;
-    justify-content: center;
-    border-radius: 7px;
-    font-size: 10px;
-}
-
 #tabWhip .rtmp-section > .btn-custom {
     margin-top: 14px;
     border-radius: 8px;
@@ -3981,7 +4077,8 @@ body {
     align-items: stretch;
 }
 
-.whip-copy-row button {
+/* `.tabcontent button` adds a top margin that pushes the button below its input */
+#tabWhip .whip-copy-row button {
     width: 40px;
     height: 40px;
     min-width: 40px;
@@ -3996,10 +4093,114 @@ body {
     font-size: 13px;
 }
 
-.whip-copy-row button:hover {
+#tabWhip .whip-copy-row button:hover {
     color: #fff;
     border-color: var(--border-strong);
     background: var(--surface-2) !important;
+}
+
+.whip-ingest-card {
+    margin-top: 6px;
+    padding: 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--surface-1);
+}
+
+.whip-ingest-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+#mySettings .whip-ingest-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    color: var(--fg-2);
+    background: var(--surface-2);
+}
+
+#mySettings .whip-ingest-icon i {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+}
+
+.whip-ingest-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.whip-ingest-body h4 {
+    margin: 0;
+    color: var(--fg-1);
+    font-size: 13px;
+    letter-spacing: 0;
+}
+
+/* `#mySettings p` adds inline-flex, auto margin and padding */
+#mySettings .whip-ingest-body p {
+    display: block;
+    margin: 3px 0 10px;
+    padding: 0;
+    color: var(--fg-3);
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+#tabWhip .whip-ingest-toggle {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    margin: 0;
+    padding: 0;
+    flex: 0 0 32px;
+    align-self: flex-end;
+    justify-content: center;
+    border-color: transparent;
+    background: transparent;
+    color: var(--fg-2);
+}
+
+#mySettings #tabWhip .whip-ingest-toggle i {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    transition: transform var(--motion-fast) ease;
+}
+
+#tabWhip .whip-ingest-toggle[aria-expanded='true'] i {
+    transform: rotate(180deg);
+}
+
+.whip-ingest-toggle.hidden {
+    display: none !important;
+}
+
+#whipIngestFields {
+    margin-top: 6px;
+    padding-left: 44px;
+}
+
+@media (max-width: 480px) {
+    .whip-input-row {
+        flex-wrap: wrap;
+    }
+    #tabWhip .whip-input-row .whip-inline-button {
+        width: 100%;
+    }
+    .whip-auth-row,
+    .whip-auth-row[data-auth='basic'],
+    .whip-source-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    #whipIngestFields {
+        padding-left: 0;
+    }
 }
 
 /*--------------------------------------------------------------

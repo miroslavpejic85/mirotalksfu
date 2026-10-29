@@ -14,6 +14,7 @@ const {
     stripCredentials,
     isMiroTalkEndpoint,
     getAuthorization,
+    resolveAuthorization,
     resolveResourceUrl,
     normalizeToken,
     isRoomEndpoint,
@@ -51,6 +52,28 @@ describe('WHIP client helpers', () => {
             `Basic ${Buffer.from('user:pässword', 'utf8').toString('base64')}`
         );
         assert.equal(getAuthorization('', null), '');
+    });
+
+    it('builds the Authorization header from the selected method', () => {
+        const fromUrl = { username: 'url', password: 'pw' };
+        const basic = (user, pass) => `Basic ${Buffer.from(`${user}:${pass}`, 'utf8').toString('base64')}`;
+        assert.deepEqual(resolveAuthorization({ type: 'none' }), { authorization: '' });
+        assert.deepEqual(resolveAuthorization({ type: 'none', token: 'ignored' }, fromUrl), {
+            authorization: basic('url', 'pw'),
+        });
+        assert.deepEqual(resolveAuthorization({ type: 'bearer', token: ' Bearer abc ' }), {
+            authorization: 'Bearer abc',
+        });
+        assert.equal(resolveAuthorization({ type: 'bearer', token: ' ' }).error, 'Enter the token');
+        assert.deepEqual(resolveAuthorization({ type: 'basic', username: 'bob', password: 'pässword' }, fromUrl), {
+            authorization: basic('bob', 'pässword'),
+        });
+        assert.deepEqual(resolveAuthorization({ type: 'basic' }, fromUrl), { authorization: basic('url', 'pw') });
+        assert.equal(resolveAuthorization({ type: 'basic' }).error, 'Enter the username and password');
+        assert.equal(
+            resolveAuthorization({ type: 'basic', password: 'only' }).error,
+            'Enter the username and password'
+        );
     });
 
     it('blocks mixed content except on loopback', () => {
@@ -96,7 +119,7 @@ describe('WHIP client helpers', () => {
     });
 
     it('describes HTTP failures, preferring plain-text server reasons', () => {
-        assert.equal(describeWhipError(401, 'Unauthorized'), 'Unauthorized: check the token');
+        assert.equal(describeWhipError(401, 'Unauthorized'), 'Unauthorized: check the credentials');
         assert.equal(describeWhipError(403, 'Room is locked'), 'Room is locked');
         assert.equal(
             describeWhipError(404, '<html><body>nginx</body></html>'),
@@ -329,6 +352,7 @@ describe('WHIP client UI', () => {
     it('publishes cloned room tracks, posts a send-only offer and ends the session with DELETE', async () => {
         const client = setup();
         fill('whipEndpoint', 'https://other.example.com/whip/room2');
+        fill('whipAuthType', 'bearer');
         byId('whipToken').value = 'Bearer secret-token';
         byId('whipBitrate').value = '2500000';
         click(byId('whipStartButton'));
@@ -432,6 +456,11 @@ describe('WHIP client UI', () => {
         click(byId('whipStartButton'));
         await flush();
 
+        assert.equal(byId('whipEndpoint').value, 'https://mtx.example.com:8889/cam/whip');
+        assert.equal(byId('whipAuthType').value, 'basic');
+        assert.equal(byId('whipUsername').value, 'bob');
+        assert.equal(byId('whipPassword').value, 's3cret');
+
         const [post] = requests;
         assert.equal(post.url, 'https://mtx.example.com:8889/cam/whip');
         assert.equal(post.headers.Authorization, `Basic ${Buffer.from('bob:s3cret').toString('base64')}`);
@@ -442,6 +471,52 @@ describe('WHIP client UI', () => {
         assert.equal(requests[1].method, 'DELETE');
         assert.equal(requests[1].url, 'https://mtx.example.com:8889/whip/room2/session-1');
         assert.equal(requests[1].headers.Authorization, post.headers.Authorization);
+    });
+
+    it('shows only the credential fields of the selected authentication method', () => {
+        setup();
+        const visible = () =>
+            ['whipToken', 'whipUsername', 'whipPassword'].filter((id) => !byId(id).classList.contains('hidden'));
+        assert.equal(byId('whipAuthType').value, 'none');
+        assert.deepEqual(visible(), []);
+        fill('whipAuthType', 'bearer');
+        assert.deepEqual(visible(), ['whipToken']);
+        fill('whipAuthType', 'basic');
+        assert.deepEqual(visible(), ['whipUsername', 'whipPassword']);
+        assert.equal(byId('whipAuthRow').dataset.auth, 'basic');
+    });
+
+    it('publishes with Basic auth from the username and password fields', async () => {
+        setup();
+        fill('whipEndpoint', 'https://mtx.example.com/cam/whip');
+        fill('whipAuthType', 'basic');
+        click(byId('whipStartButton'));
+        await flush();
+        assert.equal(byId('whipStatus').textContent, 'Enter the username and password');
+        assert.equal(peerConnections.length, 0);
+
+        byId('whipUsername').value = 'alice';
+        byId('whipPassword').value = 'pässword';
+        click(byId('whipStartButton'));
+        await flush();
+        assert.equal(
+            requests[0].headers.Authorization,
+            `Basic ${Buffer.from('alice:pässword', 'utf8').toString('base64')}`
+        );
+        assert.ok(byId('whipAuthType').disabled && byId('whipPassword').disabled);
+        const saved = window.localStorage.getItem('MIROTALK_WHIP_SETTINGS');
+        assert.equal(JSON.parse(saved).auth, 'basic');
+        assert.ok(!saved.includes('alice') && !saved.includes('pässword'));
+    });
+
+    it('requires a token when the bearer method is selected', async () => {
+        setup();
+        fill('whipEndpoint', 'https://other.example.com/whip/room2');
+        fill('whipAuthType', 'bearer');
+        click(byId('whipStartButton'));
+        await flush();
+        assert.equal(byId('whipStatus').textContent, 'Enter the token');
+        assert.equal(requests.length, 0);
     });
 
     it('stops when the connection fails', async () => {
@@ -464,6 +539,13 @@ describe('WHIP client UI', () => {
         click(byId('whipGenerateTokenBtn'));
         await flush();
         assert.ok(!byId('whipIngestFields').classList.contains('hidden'));
+        assert.ok(!byId('whipIngestToggle').classList.contains('hidden'));
+        assert.equal(byId('whipIngestToggle').getAttribute('aria-expanded'), 'true');
+        click(byId('whipIngestToggle'));
+        assert.ok(byId('whipIngestFields').classList.contains('hidden'));
+        assert.equal(byId('whipIngestToggle').getAttribute('aria-expanded'), 'false');
+        click(byId('whipIngestToggle'));
+        assert.ok(!byId('whipIngestFields').classList.contains('hidden'));
         assert.equal(byId('whipIngestUrl').value, 'https://meet.example.com/whip/room1');
         assert.equal(byId('whipIngestToken').value, 'room-token');
 
@@ -472,6 +554,8 @@ describe('WHIP client UI', () => {
         assert.equal(tokenRequests, 2);
         assert.equal(byId('whipEndpoint').value, 'https://meet.example.com/whip/room1');
         assert.equal(byId('whipToken').value, 'room-token');
+        assert.equal(byId('whipAuthType').value, 'bearer');
+        assert.ok(!byId('whipToken').classList.contains('hidden'));
         assert.equal(byId('whipStatus').dataset.state, 'info');
     });
 
@@ -489,12 +573,19 @@ describe('WHIP client UI', () => {
             seedStorage: (win) =>
                 win.localStorage.setItem(
                     'MIROTALK_WHIP_SETTINGS',
-                    JSON.stringify({ endpoint: 'https://saved.example.com/whip/a', source: 'none', bitrate: 1000000 })
+                    JSON.stringify({
+                        endpoint: 'https://saved.example.com/whip/a',
+                        auth: 'bearer',
+                        source: 'none',
+                        bitrate: 1000000,
+                    })
                 ),
         });
         assert.equal(byId('whipEndpoint').value, 'https://saved.example.com/whip/a');
         assert.equal(byId('whipSource').value, 'none');
         assert.equal(byId('whipBitrate').value, '1000000');
+        assert.equal(byId('whipAuthType').value, 'bearer');
+        assert.ok(!byId('whipToken').classList.contains('hidden'));
         assert.equal(byId('whipToken').value, '');
     });
 });

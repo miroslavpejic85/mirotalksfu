@@ -15,6 +15,7 @@
     const MAX_ERROR_TEXT_LENGTH = 160;
     const SOURCES = ['camera', 'screen', 'none'];
     const AUDIO_MODES = ['mic', 'screen', 'none'];
+    const AUTH_TYPES = ['none', 'bearer', 'basic'];
     const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
     function t(text, namespace = 'labels') {
@@ -115,6 +116,31 @@
         return '';
     }
 
+    /**
+     * Build the Authorization header from the selected method. user:pass@ typed in the URL is used
+     * when the form has no credentials of its own.
+     * @returns {{authorization: string}|{error: string}}
+     */
+    function resolveAuthorization({ type = 'none', token = '', username = '', password = '' } = {}, urlCredentials) {
+        if (type === 'bearer') {
+            const bearer = normalizeToken(token);
+            if (bearer) return { authorization: getAuthorization(bearer) };
+            if (urlCredentials) return { authorization: getAuthorization('', urlCredentials) };
+            return { error: t('Enter the token') };
+        }
+        if (type === 'basic') {
+            const user = String(username || '');
+            const pass = String(password || '');
+            if (!user.trim() && !pass) {
+                if (urlCredentials) return { authorization: getAuthorization('', urlCredentials) };
+                return { error: t('Enter the username and password') };
+            }
+            if (!user.trim()) return { error: t('Enter the username and password') };
+            return { authorization: getAuthorization('', { username: user, password: pass }) };
+        }
+        return { authorization: getAuthorization('', urlCredentials) };
+    }
+
     // The Location header may be relative to the endpoint (RFC 9725 4.2)
     function resolveResourceUrl(location, endpoint) {
         if (!location) return null;
@@ -151,7 +177,7 @@
         const serverText = /<[a-z!/]/i.test(detail) ? '' : detail;
         switch (status) {
             case 401:
-                return t('Unauthorized: check the token');
+                return t('Unauthorized: check the credentials');
             case 404:
                 return serverText || t('Endpoint not found, the room must be active');
             case 405:
@@ -263,7 +289,11 @@
             whipStatus,
             whipUseRoomBtn,
             whipEndpoint,
+            whipAuthRow,
+            whipAuthType,
             whipToken,
+            whipUsername,
+            whipPassword,
             whipName,
             whipSource,
             whipAudio,
@@ -271,6 +301,7 @@
             whipStartButton,
             whipIngestSection,
             whipGenerateTokenBtn,
+            whipIngestToggle,
             whipIngestFields,
             whipIngestUrl,
             whipIngestToken,
@@ -282,7 +313,10 @@
 
         const formInputs = [
             whipEndpoint,
+            whipAuthType,
             whipToken,
+            whipUsername,
+            whipPassword,
             whipName,
             whipSource,
             whipAudio,
@@ -336,6 +370,43 @@
             if (!isScreen && whipAudio.value === 'screen') whipAudio.value = 'mic';
         }
 
+        function getAuthType() {
+            return AUTH_TYPES.includes(whipAuthType?.value) ? whipAuthType.value : 'none';
+        }
+
+        function refreshAuthFields() {
+            const type = getAuthType();
+            if (whipAuthRow) whipAuthRow.dataset.auth = type;
+            whipToken?.classList.toggle('hidden', type !== 'bearer');
+            whipUsername?.classList.toggle('hidden', type !== 'basic');
+            whipPassword?.classList.toggle('hidden', type !== 'basic');
+        }
+
+        function setAuthType(type) {
+            if (!whipAuthType || !AUTH_TYPES.includes(type)) return;
+            whipAuthType.value = type;
+            refreshAuthFields();
+        }
+
+        // Browsers refuse user:pass@ URLs: show them in the username and password fields instead
+        function moveUrlCredentials() {
+            const parsed = parseWhipEndpoint(whipEndpoint.value, window.location.protocol);
+            if (!parsed.credentials || !whipUsername || !whipPassword || !whipAuthType) return;
+            whipUsername.value = parsed.credentials.username;
+            whipPassword.value = parsed.credentials.password;
+            whipEndpoint.value = stripCredentials(whipEndpoint.value);
+            setAuthType('basic');
+        }
+
+        function setIngestExpanded(expanded) {
+            whipIngestFields?.classList.toggle('hidden', !expanded);
+            if (!whipIngestToggle) return;
+            const label = expanded ? t('Hide the WHIP token') : t('Show the WHIP token');
+            whipIngestToggle.setAttribute('aria-expanded', String(expanded));
+            whipIngestToggle.setAttribute('aria-label', label);
+            whipIngestToggle.title = label;
+        }
+
         function refreshRoomEndpoint() {
             const available = Boolean(requestRoomToken) && canUseRoomEndpoint();
             whipIngestSection?.classList.toggle('hidden', !available);
@@ -352,16 +423,18 @@
             if (whipName && typeof saved.name === 'string') whipName.value = saved.name;
             if (whipSource && SOURCES.includes(saved.source)) whipSource.value = saved.source;
             if (whipAudio && AUDIO_MODES.includes(saved.audio)) whipAudio.value = saved.audio;
+            if (whipAuthType && AUTH_TYPES.includes(saved.auth)) whipAuthType.value = saved.auth;
             if (whipBitrate && saved.bitrate !== undefined) {
                 const option = whipBitrate.querySelector(`option[value="${parseInt(saved.bitrate, 10) || 0}"]`);
                 if (option) whipBitrate.value = option.value;
             }
         }
 
-        // Credentials (token, user:pass@ in the URL) are never persisted
+        // Only the authentication method is kept: credentials (token, password, user:pass@) never are
         function saveSettings() {
             writeStorage(window.localStorage, SETTINGS_STORAGE_KEY, {
                 endpoint: stripCredentials(whipEndpoint.value),
+                auth: getAuthType(),
                 name: whipName?.value.trim() || '',
                 source: whipSource?.value || 'camera',
                 audio: whipAudio?.value || 'mic',
@@ -511,6 +584,16 @@
             if (source === 'none' && audioMode === 'none') {
                 return setStatus(t('Select a video or an audio source'), 'error');
             }
+            const auth = resolveAuthorization(
+                {
+                    type: getAuthType(),
+                    token: whipToken?.value,
+                    username: whipUsername?.value,
+                    password: whipPassword?.value,
+                },
+                endpoint.credentials
+            );
+            if (auth.error) return setStatus(auth.error, 'error');
             if (!PeerConnection) return setStatus(t('WebRTC is not supported by this browser'), 'error');
 
             saveSettings();
@@ -518,7 +601,7 @@
             const current = {
                 pc: null,
                 tracks: [],
-                authorization: getAuthorization(normalizeToken(whipToken?.value), endpoint.credentials),
+                authorization: auth.authorization,
                 controller: new AbortController(),
                 host: new URL(endpoint.url).host,
                 resourceUrl: null,
@@ -648,7 +731,8 @@
                 if (!url || !token) throw new Error(t('Unable to create a WHIP token'));
                 if (whipIngestUrl) whipIngestUrl.value = url;
                 if (whipIngestToken) whipIngestToken.value = token;
-                whipIngestFields?.classList.remove('hidden');
+                whipIngestToggle?.classList.remove('hidden');
+                setIngestExpanded(true);
                 return { url, token };
             } catch (error) {
                 setStatus(getErrorMessage(error), 'error');
@@ -664,6 +748,7 @@
             if (!credentials || session) return;
             whipEndpoint.value = credentials.url;
             if (whipToken) whipToken.value = credentials.token;
+            setAuthType('bearer');
             saveSettings();
             setStatus(t('This room is the destination: mute its WHIP tile to avoid hearing yourself'), 'info');
         }
@@ -683,6 +768,7 @@
         // ####################################################
 
         loadSettings();
+        refreshAuthFields();
         refreshRoomEndpoint();
         setStatus('');
         render();
@@ -696,6 +782,14 @@
         if (whipStopButton) whipStopButton.onclick = () => stop();
         if (whipUseRoomBtn) whipUseRoomBtn.onclick = () => useThisRoom();
         if (whipGenerateTokenBtn) whipGenerateTokenBtn.onclick = () => mintRoomToken();
+        if (whipIngestToggle) {
+            whipIngestToggle.onclick = () =>
+                setIngestExpanded(whipIngestToggle.getAttribute('aria-expanded') !== 'true');
+        }
+        whipAuthType?.addEventListener('change', () => {
+            refreshAuthFields();
+            saveSettings();
+        });
         if (whipCopyIngestUrlBtn) whipCopyIngestUrlBtn.onclick = () => copyValue(whipIngestUrl);
         if (whipCopyIngestTokenBtn) whipCopyIngestTokenBtn.onclick = () => copyValue(whipIngestToken);
         whipSource?.addEventListener('change', () => {
@@ -706,16 +800,19 @@
             .filter(Boolean)
             .forEach((input) => input.addEventListener('change', saveSettings));
         whipEndpoint.addEventListener('change', () => {
+            moveUrlCredentials();
             saveSettings();
             if (roomId && isRoomEndpoint(whipEndpoint.value.trim(), window.location.origin, roomId)) {
                 setStatus(t('This room is the destination: mute its WHIP tile to avoid hearing yourself'), 'info');
             }
         });
-        whipEndpoint.addEventListener('keydown', (event) => {
-            if (event.key !== 'Enter') return;
-            event.preventDefault();
-            start();
-        });
+        [whipEndpoint, whipToken, whipUsername, whipPassword].filter(Boolean).forEach((input) =>
+            input.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter') return;
+                event.preventDefault();
+                start();
+            })
+        );
 
         window.addEventListener('pagehide', () => stop({ keepalive: true }));
 
@@ -735,6 +832,7 @@
             stripCredentials,
             isMiroTalkEndpoint,
             getAuthorization,
+            resolveAuthorization,
             resolveResourceUrl,
             normalizeToken,
             isRoomEndpoint,
@@ -751,6 +849,7 @@
             stripCredentials,
             isMiroTalkEndpoint,
             getAuthorization,
+            resolveAuthorization,
             resolveResourceUrl,
             normalizeToken,
             isRoomEndpoint,

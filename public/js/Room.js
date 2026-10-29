@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.99
+ * @version 2.7.01
  *
  */
 
@@ -541,7 +541,11 @@ function initWhipClientControls() {
         'whipStatus',
         'whipUseRoomBtn',
         'whipEndpoint',
+        'whipAuthRow',
+        'whipAuthType',
         'whipToken',
+        'whipUsername',
+        'whipPassword',
         'whipName',
         'whipSource',
         'whipAudio',
@@ -549,6 +553,7 @@ function initWhipClientControls() {
         'whipStartButton',
         'whipIngestSection',
         'whipGenerateTokenBtn',
+        'whipIngestToggle',
         'whipIngestFields',
         'whipIngestUrl',
         'whipIngestToken',
@@ -10543,7 +10548,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.99',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.01',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
