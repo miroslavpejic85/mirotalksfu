@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.98
+ * @version 2.6.99
  *
  */
 
@@ -478,6 +478,7 @@ class RoomClient {
         this.localVideoStream = null;
         this.localAudioStream = null;
         this.localScreenStream = null;
+        this.whipIngestEnabled = false;
 
         // Room Password
         this.RoomIsLocked = false;
@@ -1029,6 +1030,8 @@ class RoomClient {
                     elemDisplay('tabRTMPStreamingBtn', false);
                 }
             }
+            // WHIP ingest on this server: lets the WHIP publish tab target this room
+            this.whipIngestEnabled = room.whip?.enabled === true;
             // There is polls
             if (room.thereIsPolls) {
                 this.socket.emit('updatePoll');

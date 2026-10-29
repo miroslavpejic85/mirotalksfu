@@ -147,6 +147,7 @@
         <script defer src="../js/GifSearch.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/SipPhone.js"></script>
+        <script defer src="../js/WhipClient.js"></script>
         <script defer src="../js/Room.js"></script>
     </head>
     <body>
@@ -650,6 +651,9 @@
                     </button>
                     <button id="tabRTMPStreamingBtn" class="fa-solid fa-satellite-dish tablinks">
                         <p class="tabButtonText">Live stream</p>
+                    </button>
+                    <button id="tabWhipBtn" class="fa-solid fa-tower-cell tablinks hidden">
+                        <p class="tabButtonText">WHIP publish</p>
                     </button>
                     <button id="tabSipPhoneBtn" class="fa-solid fa-phone tablinks hidden">
                         <p class="tabButtonText">SIP phone</p>
@@ -2221,6 +2225,164 @@
                                 </div>
                             </section>
                         </div>
+                    </div>
+
+                    <div id="tabWhip" class="tabcontent">
+                        <div class="rtmp-intro">
+                            <span class="rtmp-intro-icon" aria-hidden="true">
+                                <i class="fa-solid fa-tower-cell"></i>
+                            </span>
+                            <div>
+                                <h3>Publish with WHIP</h3>
+                                <p>
+                                    Send your camera or screen in real time to any WHIP endpoint: another meeting, a
+                                    media server or a streaming platform.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div
+                            id="whipLiveStatus"
+                            class="rtmp-live-status whip-live-status hidden"
+                            data-state="connecting"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            <span class="rtmp-live-dot" aria-hidden="true"></span>
+                            <span class="rtmp-live-text">
+                                <strong id="whipLiveLabel">Connecting</strong>
+                                <small id="whipLiveStatusText" translate="no"></small>
+                            </span>
+                            <button id="whipStopButton" type="button" class="rtmp-stop-button">
+                                <i class="fas fa-stop-circle"></i>&nbsp;Stop
+                            </button>
+                        </div>
+
+                        <p
+                            id="whipStatus"
+                            class="whip-status hidden"
+                            data-state="idle"
+                            role="status"
+                            aria-live="polite"
+                        ></p>
+
+                        <section class="rtmp-section" aria-labelledby="whipDestinationTitle">
+                            <div class="rtmp-section-heading">
+                                <div>
+                                    <h4 id="whipDestinationTitle">Destination</h4>
+                                </div>
+                                <button id="whipUseRoomBtn" type="button" class="whip-heading-button hidden">
+                                    <i class="fa-solid fa-flask"></i>&nbsp;Test with this room
+                                </button>
+                            </div>
+                            <div class="rtmp-field">
+                                <label for="whipEndpoint">WHIP endpoint URL</label>
+                                <input
+                                    id="whipEndpoint"
+                                    type="url"
+                                    value=""
+                                    placeholder="https://example.com/whip/room"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                />
+                                <small>For another MiroTalk SFU meeting: https://domain/whip/room-name</small>
+                            </div>
+                            <div class="rtmp-field">
+                                <label for="whipToken">Bearer token</label>
+                                <input
+                                    id="whipToken"
+                                    type="password"
+                                    value=""
+                                    placeholder="Token"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                />
+                                <small>Provided by the destination. Leave empty if it does not require one.</small>
+                            </div>
+                            <div class="rtmp-field">
+                                <label for="whipName">Display name</label>
+                                <input id="whipName" type="text" value="" maxlength="32" autocomplete="off" />
+                                <small>Shown to the participants of the destination meeting.</small>
+                            </div>
+                        </section>
+
+                        <section class="rtmp-section" aria-labelledby="whipSourceTitle">
+                            <div class="rtmp-section-heading">
+                                <div>
+                                    <h4 id="whipSourceTitle">Source</h4>
+                                </div>
+                            </div>
+                            <div class="rtmp-field">
+                                <label for="whipSource">Video</label>
+                                <select id="whipSource" class="form-select text-light bg-dark">
+                                    <option value="camera">Camera</option>
+                                    <option value="screen">Screen</option>
+                                    <option value="none">No video</option>
+                                </select>
+                            </div>
+                            <div class="rtmp-field">
+                                <label for="whipAudio">Audio</label>
+                                <select id="whipAudio" class="form-select text-light bg-dark">
+                                    <option value="mic">Microphone</option>
+                                    <option value="screen">Screen audio</option>
+                                    <option value="none">No audio</option>
+                                </select>
+                            </div>
+                            <div class="rtmp-field">
+                                <label for="whipBitrate">Max video bitrate</label>
+                                <select id="whipBitrate" class="form-select text-light bg-dark">
+                                    <option value="0">Auto</option>
+                                    <option value="1000000">1 Mbps</option>
+                                    <option value="2500000">2.5 Mbps</option>
+                                    <option value="4000000">4 Mbps</option>
+                                </select>
+                                <small>The camera and microphone already used in this room are reused.</small>
+                            </div>
+                            <button id="whipStartButton" type="button" class="btn-custom whip-start-button">
+                                <i class="fa-solid fa-play"></i>&nbsp;Start publishing
+                            </button>
+                        </section>
+
+                        <section id="whipIngestSection" class="rtmp-section hidden" aria-labelledby="whipIngestTitle">
+                            <div class="rtmp-section-heading">
+                                <div>
+                                    <h4 id="whipIngestTitle">Receive in this room</h4>
+                                    <p>Create a token so OBS, FFmpeg or another meeting can publish here with WHIP.</p>
+                                </div>
+                            </div>
+                            <button id="whipGenerateTokenBtn" type="button" class="btn-custom">
+                                <i class="fa-solid fa-key"></i>&nbsp;Create token
+                            </button>
+                            <div id="whipIngestFields" class="hidden">
+                                <div class="rtmp-field">
+                                    <label for="whipIngestUrl">Endpoint</label>
+                                    <div class="input-container whip-copy-row">
+                                        <input id="whipIngestUrl" type="text" value="" readonly translate="no" />
+                                        <button
+                                            id="whipCopyIngestUrlBtn"
+                                            type="button"
+                                            class="fas fa-copy"
+                                            aria-label="Copy WHIP endpoint"
+                                            title="Copy WHIP endpoint"
+                                        ></button>
+                                    </div>
+                                </div>
+                                <div class="rtmp-field">
+                                    <label for="whipIngestToken">Token</label>
+                                    <div class="input-container whip-copy-row">
+                                        <input id="whipIngestToken" type="password" value="" readonly translate="no" />
+                                        <button
+                                            id="whipCopyIngestTokenBtn"
+                                            type="button"
+                                            class="fas fa-copy"
+                                            aria-label="Copy WHIP token"
+                                            title="Copy WHIP token"
+                                        ></button>
+                                    </div>
+                                    <small>Anyone with this token can publish into this room until it expires.</small>
+                                </div>
+                            </div>
+                        </section>
                     </div>
 
                     <div id="tabProfile" class="tabcontent">

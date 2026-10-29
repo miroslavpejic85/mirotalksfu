@@ -3878,6 +3878,131 @@ body {
 }
 
 /*--------------------------------------------------------------
+# WHIP publish settings
+--------------------------------------------------------------*/
+
+#tabWhip {
+    color: var(--fg-1);
+}
+
+#whipEndpoint,
+#whipToken,
+#whipName,
+#whipIngestUrl,
+#whipIngestToken {
+    min-width: 0;
+    padding: 10px;
+    width: 100%;
+    color: #fff;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--select-bg) !important;
+    text-overflow: ellipsis;
+}
+
+#tabWhip input:disabled,
+#tabWhip select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.whip-live-status[data-state='connecting'] {
+    border-color: rgba(255, 176, 32, 0.5);
+    background: rgba(255, 176, 32, 0.08);
+}
+
+.whip-live-status[data-state='connecting'] .rtmp-live-dot {
+    background: rgb(255, 176, 32);
+}
+
+.whip-status {
+    margin: 0 0 14px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-subtle);
+    border-left-width: 3px;
+    border-radius: 8px;
+    color: var(--fg-2);
+    font-size: 11px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+/* `#mySettings p` adds inline-flex and auto margins */
+#mySettings .whip-status {
+    display: block;
+    margin: 0 0 14px;
+}
+
+#mySettings .whip-status.hidden {
+    display: none;
+}
+
+.whip-status[data-state='busy'] {
+    border-left-color: rgb(255, 176, 32);
+}
+
+.whip-status[data-state='live'] {
+    border-left-color: rgb(46, 204, 113);
+}
+
+.whip-status[data-state='error'] {
+    border-left-color: rgb(255, 75, 75);
+    color: var(--fg-1);
+    background: rgba(210, 35, 48, 0.08);
+}
+
+.whip-status[data-state='info'] {
+    border-left-color: var(--btns-bg-color);
+}
+
+/* `.tabcontent button` forces full width, keep the heading action compact */
+.rtmp-section-heading .whip-heading-button {
+    width: auto;
+    min-height: 30px;
+    margin: 0 0 0 auto;
+    padding: 5px 12px;
+    flex: 0 0 auto;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 10px;
+}
+
+#tabWhip .rtmp-section > .btn-custom {
+    margin-top: 14px;
+    border-radius: 8px;
+    font-size: 10px;
+    text-align: center;
+}
+
+.whip-copy-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.whip-copy-row button {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--fg-2);
+    background: var(--surface-1);
+    font-size: 13px;
+}
+
+.whip-copy-row button:hover {
+    color: #fff;
+    border-color: var(--border-strong);
+    background: var(--surface-2) !important;
+}
+
+/*--------------------------------------------------------------
 # Dropdown menu
 --------------------------------------------------------------*/
 

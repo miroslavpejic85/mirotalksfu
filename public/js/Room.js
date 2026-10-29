@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.98
+ * @version 2.6.99
  *
  */
 
@@ -280,6 +280,7 @@ const sipAcceptBtn = getId('sipAcceptBtn');
 const sipRejectBtn = getId('sipRejectBtn');
 const sipRecentCalls = getId('sipRecentCalls');
 const sipRecentList = getId('sipRecentList');
+const tabWhipBtn = getId('tabWhipBtn');
 
 const exitDropdown = getId('exitDropdown');
 const exitMenu = getId('exitMenu');
@@ -520,6 +521,61 @@ function initSipPhoneControls() {
 }
 
 // ####################################################
+// WHIP PUBLISH (client, RFC 9725)
+// ####################################################
+
+let whipClient = null;
+
+function initWhipClientControls() {
+    if (typeof window.initWhipClient !== 'function') {
+        console.warn('[WHIP] initWhipClient is not available');
+        return;
+    }
+
+    const elementIds = [
+        'tabWhipBtn',
+        'whipLiveStatus',
+        'whipLiveLabel',
+        'whipLiveStatusText',
+        'whipStopButton',
+        'whipStatus',
+        'whipUseRoomBtn',
+        'whipEndpoint',
+        'whipToken',
+        'whipName',
+        'whipSource',
+        'whipAudio',
+        'whipBitrate',
+        'whipStartButton',
+        'whipIngestSection',
+        'whipGenerateTokenBtn',
+        'whipIngestFields',
+        'whipIngestUrl',
+        'whipIngestToken',
+        'whipCopyIngestUrlBtn',
+        'whipCopyIngestTokenBtn',
+    ];
+
+    whipClient = window.initWhipClient({
+        elements: Object.fromEntries(elementIds.map((id) => [id, getId(id)])),
+        roomId: room_id,
+        getPeerName: () => peer_name,
+        getLocalStreams: () => ({ video: rc?.localVideoStream, audio: rc?.localAudioStream }),
+        getDeviceIds: () => ({ video: videoSelect?.value, audio: microphoneSelect?.value }),
+        canUseRoomEndpoint: () => Boolean(rc?.whipIngestEnabled && isPresenter),
+        requestRoomToken: async () => {
+            const { token, path } = await rc.socket.request('getWhipToken');
+            return { url: window.location.origin + path, token };
+        },
+        openWhipTab: (e) => rc.openTab(e, 'tabWhip'),
+        onCopied: () => userLog('success', 'Copied to clipboard', 'top-end', 2000),
+        onStateChange: (state) => {
+            if (state === 'live') userLog('success', 'WHIP publishing started', 'top-end', 3000);
+        },
+    });
+}
+
+// ####################################################
 // INIT ROOM
 // ####################################################
 
@@ -695,6 +751,7 @@ async function initClient() {
     setupWhiteboard();
     initEnumerateDevices();
     initSipPhoneControls();
+    initWhipClientControls();
     setupInitButtons();
 }
 
@@ -2721,6 +2778,7 @@ function roomIsReady() {
     !BUTTONS.settings.customNoiseSuppression && hide(everyoneNoiseSuppressionBtn);
     BUTTONS.settings.tabNotificationsBtn && show(tabNotificationsBtn);
     (BUTTONS.settings.tabSipPhoneBtn !== undefined ? BUTTONS.settings.tabSipPhoneBtn : true) && show(tabSipPhoneBtn);
+    BUTTONS.settings.tabWhipBtn !== false && show(tabWhipBtn);
     (BUTTONS.settings.tabNetworkBtn !== undefined ? BUTTONS.settings.tabNetworkBtn : true) && show(tabNetworkBtn);
     if (
         BUTTONS.main.settingsButton &&
@@ -10485,7 +10543,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.98',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.6.99',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

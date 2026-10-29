@@ -146,6 +146,7 @@ module.exports = class Room {
                 maxVideoQuality: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.maxVideoQuality,
             },
             hostProtected: this.isHostProtected,
+            whip: { enabled: config?.media?.whip?.enabled === true },
             moderator: this._moderator,
             followMe: this._followMe,
             survey: this.survey,

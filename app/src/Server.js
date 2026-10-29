@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.6.98
+ * @version 2.6.99
  *
  */
 
@@ -5385,6 +5385,33 @@ function startServer() {
             const rtmpFiles = await room.getRTMP(rtmpDir);
 
             cb(rtmpFiles);
+        });
+
+        // Presenter-only: mint a per-room WHIP token so OBS, FFmpeg or another meeting can publish here
+        socket.on('getWhipToken', (_, cb) => {
+            if (typeof cb !== 'function') return;
+            if (!roomExists(socket)) return cb({ error: 'Room not found' });
+            if (!whipServer.enabled) return cb({ error: 'WHIP is not enabled on this server' });
+
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!peer || isPeerInLobby(peer)) return cb({ error: 'Unauthorized' });
+
+            const isPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer.peer_info?.peer_name,
+                peer.peer_info?.peer_uuid
+            );
+            if (!isPresenter) return cb({ error: 'Unauthorized' });
+
+            try {
+                const token = whipServer.createToken({ roomId: room.id });
+                log.debug('WHIP token created from room', { room_id: room.id, peer_name: peer.peer_name });
+                cb({ token, path: `/whip/${encodeURIComponent(room.id)}` });
+            } catch (error) {
+                log.warn('WHIP token from room failed', error.message);
+                cb({ error: 'Unable to create a WHIP token' });
+            }
         });
 
         socket.on('startRTMP', async (dataObject, cb) => {

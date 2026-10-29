@@ -53,6 +53,9 @@ python3 whip.py
 - **OBS Studio 30+**: Settings → Stream → Service `WHIP`, Server = `whip` (append `?name=OBS` to set the display name), Bearer Token = `token`.
 - **FFmpeg**: `ffmpeg -re -i input.mp4 -c:v libx264 -profile:v baseline -tune zerolatency -c:a libopus -f whip -authorization "<token>" "<whip>"`
 - **GStreamer**: `whipclientsink signaller::whip-endpoint="<whip>" signaller::auth-token="<token>"`
+- **From a room (no API key)**: presenters can create the token in **Settings → WHIP publish → Receive in this room**.
+- **Another MiroTalk room**: in **Settings → WHIP publish**, a presenter enters the `whip` URL and `token` to publish their camera/screen and microphone into that room straight from the browser. **Test with this room** publishes into the current room to check the setup. A remote endpoint must allow your origin through CORS (`CORS_ORIGIN`).
+- **Any other WHIP server** (MediaMTX, Cloudflare Stream, Dolby.io, LiveKit...): paste its WHIP URL and token. For servers that use a username and password, put them in the URL (`https://user:pass@host/stream/whip`): they are sent as Basic auth and never saved in the browser. `?name=` is added only to MiroTalk endpoints (`/whip/{room}`) or when you fill in **Display name**.
 
 A server-wide token (`WHIP_API_SECRET`) can be used instead of per-room tokens. Ending the stream in the client (HTTP `DELETE`, accepted only with the token that started the session or the server-wide token) or ejecting the WHIP participant from the room closes the session. Banning it also rejects its token in that room: a per-room token until it expires, the server-wide token until the room ends.
 

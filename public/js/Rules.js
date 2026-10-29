@@ -54,6 +54,7 @@ let BUTTONS = {
         sendEmailInvitation: true, // presenter
         micOptionsButton: true,
         tabRTMPStreamingBtn: true, // presenter
+        tabWhipBtn: true, // presenter
         tabSipPhoneBtn: true,
         tabNotificationsBtn: true, // presenter
         tabNetworkBtn: true,
@@ -178,6 +179,7 @@ function handleRules(isPresenter, roomSetup = true) {
         BUTTONS.settings.joinLockButton = false;
         BUTTONS.settings.sendEmailInvitation = false;
         BUTTONS.settings.tabRTMPStreamingBtn = false;
+        BUTTONS.settings.tabWhipBtn = false;
         BUTTONS.settings.tabModerator = false;
         BUTTONS.settings.tabNotificationsBtn = false;
         BUTTONS.videoOff.muteAudioButton = false;
@@ -203,12 +205,17 @@ function handleRules(isPresenter, roomSetup = true) {
         VideoAI.enabled = false;
         elemDisplay('tabVideoAIBtn', false);
 
+        // WHIP publishing is presenter-only: end it on demotion since its controls are no longer reachable
+        if (typeof whipClient !== 'undefined' && whipClient?.isActive()) whipClient.stop();
+
         // If a presenter-only settings tab was open, reset to the default Room tab so its
         // content isn't left visible after the tab button is hidden.
-        const openPresenterTab = ['tabModerator', 'tabRTMPStreaming', 'tabNotifications', 'tabVideoAI'].some((id) => {
-            const el = rc.getId(id);
-            return el && el.style.display === 'block';
-        });
+        const openPresenterTab = ['tabModerator', 'tabRTMPStreaming', 'tabWhip', 'tabNotifications', 'tabVideoAI'].some(
+            (id) => {
+                const el = rc.getId(id);
+                return el && el.style.display === 'block';
+            }
+        );
         if (openPresenterTab) {
             const roomTabBtn = rc.getId('tabRoomBtn');
             if (roomTabBtn) roomTabBtn.click();
@@ -282,6 +289,7 @@ function handleRules(isPresenter, roomSetup = true) {
     } else {
         hide(tabRTMPStreamingBtn);
     }
+    BUTTONS.settings.tabWhipBtn !== false ? show(tabWhipBtn) : hide(tabWhipBtn);
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     BUTTONS.settings.broadcastingButton ? show(broadcastingButton) : hide(broadcastingButton);
@@ -422,6 +430,7 @@ function handleRulesBroadcasting() {
     BUTTONS.settings.lobbyButton = false;
     BUTTONS.settings.joinLockButton = false;
     BUTTONS.settings.tabRTMPStreamingBtn = false;
+    BUTTONS.settings.tabWhipBtn = false;
     BUTTONS.settings.tabNotificationsBtn = false;
     BUTTONS.videoOff.muteAudioButton = false;
     BUTTONS.videoOff.geolocationButton = false;
@@ -462,6 +471,7 @@ function handleRulesBroadcasting() {
     elemDisplay('joinUnlockButton', false);
     elemDisplay('settingsButton', false);
     elemDisplay('tabRTMPStreamingBtn', false);
+    elemDisplay('tabWhipBtn', false);
     elemDisplay('tabNotificationsBtn', false);
 
     elemDisplay('startVideoDeviceDropdown', false);

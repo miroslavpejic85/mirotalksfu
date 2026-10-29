@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.6.98 - Configuration File
+ * MiroTalk SFU v2.6.99 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -423,6 +423,15 @@ module.exports = {
          *
          * OBS Studio: Settings -> Stream -> Service: WHIP
          *   Server: https://your.domain/whip/{roomId}?name=OBS   Bearer Token: <token>
+         *
+         * In-room WHIP client (Settings -> WHIP publish, presenters only, SHOW_WHIP_TAB)
+         * -------------------------------------------------------------------------------
+         * - Publishes the presenter's camera/screen + microphone to any WHIP endpoint (another
+         *   MiroTalk room, a media server, a streaming platform), straight from the browser.
+         * - When WHIP is enabled here, presenters can also create a per-room token for this room
+         *   ("Receive in this room") or self-test with "Test with this room".
+         * - Remote endpoints must allow this origin via CORS (POST/DELETE, Authorization, expose Location).
+         * - Auth: Bearer token field, or https://user:pass@host/... sent as Basic auth (never persisted).
          */
         whip: {
             enabled: process.env.WHIP_ENABLED === 'true',
@@ -1594,6 +1603,7 @@ module.exports = {
                 sendEmailInvitation: process.env.SHOW_EMAIL_INVITE !== 'false',
                 micOptionsButton: process.env.SHOW_MIC_OPTIONS !== 'false',
                 tabRTMPStreamingBtn: process.env.SHOW_RTMP_TAB !== 'false',
+                tabWhipBtn: process.env.SHOW_WHIP_TAB !== 'false',
                 tabSipPhoneBtn: process.env.SHOW_SIP_TAB !== 'false',
                 tabNotificationsBtn: process.env.SHOW_NOTIFICATIONS_TAB !== 'false',
                 tabNetworkBtn: process.env.SHOW_NETWORK_TAB !== 'false',
