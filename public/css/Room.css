@@ -4077,15 +4077,22 @@ body {
     align-items: stretch;
 }
 
-/* `.tabcontent button` adds a top margin that pushes the button below its input */
+/* `.tabcontent button` adds a top margin and flex-start alignment that push the icon off-center */
 #tabWhip .whip-copy-row button {
     width: 40px;
     height: 40px;
     min-width: 40px;
+    min-height: 40px;
     margin: 0;
     padding: 0;
+    flex: 0 0 40px;
     display: grid;
     place-items: center;
+    justify-content: center;
+    align-content: center;
+    align-self: center;
+    line-height: 1;
+    text-align: center;
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
     color: var(--fg-2);
