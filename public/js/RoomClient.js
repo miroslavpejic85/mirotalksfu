@@ -333,6 +333,8 @@ class RoomClient {
         this.serverAwayShown = false;
         this.serverRestarting = false; // Set when the server announces a planned shutdown (e.g. update/redeploy)
         this.serverRestartReconnectAttempts = 120; // ~30 min at the 15s max backoff
+        this.reloadPending = false; // Set once the socket is back and the page is about to reload
+        this.reconnectMediaState = null; // Audio/video/screen state captured when the connection was lost
         this.silentReconnect = false; // If true, no popup will be shown on reconnect
 
         this.cacheReconnectBannerElements();
@@ -1407,6 +1409,8 @@ class RoomClient {
         const isCurrent = () =>
             transport &&
             !transport.closed &&
+            !this.serverRestarting &&
+            !this.reloadPending &&
             transport === (kind === 'producer' ? this.producerTransport : this.consumerTransport);
 
         if (!isCurrent()) return false;
@@ -1505,7 +1509,7 @@ class RoomClient {
 
         console.warn('SocketOn transport closed by the server', { transport_id, kind });
 
-        if (!this._isConnected) {
+        if (!this._isConnected || this.serverRestarting || this.reloadPending) {
             const transport = kind === 'producer' ? this.producerTransport : this.consumerTransport;
             if (!transport.closed) transport.close();
             return;
@@ -1523,7 +1527,9 @@ class RoomClient {
         // Never recover when we are leaving the room or the server closed it (e.g. meeting
         // ended via API, server shutdown): the socket is gone and recovery attempts would
         // only end in a pointless "Unable to restore media connection" popup.
-        if (!this._isConnected) {
+        // Same while the server restarts or the page is about to reload after a reconnect: it would
+        // only show "Media connection lost" toasts (one per producer/consumer transport).
+        if (!this._isConnected || this.serverRestarting || this.reloadPending) {
             console.warn(`↩️ ${kind} transport lost while not connected, skipping recovery`);
             return;
         }
@@ -1546,12 +1552,23 @@ class RoomClient {
         };
 
         console.warn(`🔄 ${kind} transport lost, attempting recovery...`);
+
+        // On a server stop the media can die a few ms before 'serverShutdown' arrives (e.g. Ctrl+C also
+        // signals the mediasoup workers, which close their transports at once): wait briefly, then re-check
+        // so a planned restart is not reported as a media failure.
+        await new Promise((resolve) => setTimeout(resolve, initialDelay));
+        if (!this._isConnected || this.serverRestarting || this.reloadPending) {
+            console.warn(`↩️ ${kind} recovery skipped: server restarting or no longer connected`);
+            this[recoveringFlag] = false;
+            return;
+        }
+
         this.userLog('warning', `${icons.refresh} Media connection lost, reconnecting...`, 'top-end', 8000);
 
         let delay = initialDelay;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             // abort if the room was exited / closed / the socket dropped while recovering
-            if (!this._isConnected) {
+            if (!this._isConnected || this.serverRestarting || this.reloadPending) {
                 console.warn(`↩️ ${kind} recovery aborted: no longer connected`);
                 releaseProducerSnapshot();
                 this[recoveringFlag] = false;
@@ -2411,6 +2428,7 @@ class RoomClient {
     }
 
     handleDisconnect(reason) {
+        this.saveReconnectMediaState();
         endRoomSession();
 
         window.localStorage.isReconnected = true;
@@ -2436,6 +2454,7 @@ class RoomClient {
 
     handleServerRestart() {
         if (this.serverRestarting) return;
+        this.saveReconnectMediaState();
         this.serverRestarting = true;
         // Stop media recovery flows: the server is going away on purpose, the page reloads once it is back
         this._isConnected = false;
@@ -2445,6 +2464,14 @@ class RoomClient {
         this.showServerRestartAlert();
     }
 
+    // Remember the media state at the moment the connection is lost: closing transports afterwards
+    // (server restart, transportclose -> closeProducer) flips peer_info to off, and the rejoin must restore it.
+    saveReconnectMediaState() {
+        if (this.reconnectMediaState || !this.peer_info) return;
+        const { peer_audio, peer_video, peer_screen } = this.peer_info;
+        this.reconnectMediaState = { peer_audio, peer_video, peer_screen };
+    }
+
     handleReconnectAttempt(attempt) {
         if (this._isConnected || attempt > this.maxReconnectAttempts) return;
         this.attemptReconnect(attempt);
@@ -2452,6 +2479,7 @@ class RoomClient {
 
     handleReconnect() {
         this._isConnected = true;
+        this.reloadPending = true;
         this.closeReconnectAlert(true);
         setTimeout(() => this.refreshBrowser(), 1400);
     }
@@ -2539,9 +2567,9 @@ class RoomClient {
         }
     }
 
-    updatePeerInfoInLocalStorage() {
+    updatePeerInfoInLocalStorage(peerInfo = this.peer_info) {
         try {
-            localStorage.setItem('sfu_peer_info', JSON.stringify(this.peer_info));
+            localStorage.setItem('sfu_peer_info', JSON.stringify(peerInfo));
         } catch (e) {
             console.warn('Unable to save peer_info to localStorage:', e);
         }
@@ -2558,7 +2586,7 @@ class RoomClient {
     }
 
     refreshBrowser() {
-        this.updatePeerInfoInLocalStorage();
+        this.updatePeerInfoInLocalStorage({ ...this.peer_info, ...this.reconnectMediaState });
         const reconnectDirectJoinURL = this.getReconnectDirectJoinURL();
         setTimeout(() => {
             runRoomExit(() => {

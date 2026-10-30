@@ -97,6 +97,31 @@ describe('test-TransportRecovery', () => {
             assert.equal(popups.length, 0);
         });
 
+        for (const flag of ['serverRestarting', 'reloadPending']) {
+            it(`skips recovery without a toast when ${flag} (page reloads anyway)`, async () => {
+                const client = createClient({ [flag]: true });
+                await handleTransportLost(client, 'producer', 3, 1);
+                await handleTransportLost(client, 'consumer', 3, 1);
+                assert.deepEqual(client.calls, []);
+                assert.equal(client.logs.length, 0);
+                assert.equal(popups.length, 0);
+            });
+        }
+
+        it('does not toast when the server restart is announced right after the transport failed', async () => {
+            const client = createClient();
+            const producer = handleTransportLost(client, 'producer', 3, 5);
+            const consumer = handleTransportLost(client, 'consumer', 3, 5);
+            // 'serverShutdown' arrives a few ms after the media died (Ctrl+C also signals the workers)
+            client.serverRestarting = true;
+            await Promise.all([producer, consumer]);
+            assert.deepEqual(client.calls, []);
+            assert.equal(client.logs.length, 0);
+            assert.equal(client.recoveringProducer, false);
+            assert.equal(client.recoveringConsumer, false);
+            assert.equal(popups.length, 0);
+        });
+
         it('does not start a second recovery while one is already running', async () => {
             const client = createClient({ recoveringConsumer: true });
             await handleTransportLost(client, 'consumer', 3, 1);
@@ -201,10 +226,51 @@ describe('test-TransportRecovery', () => {
             assert.deepEqual(lost, []);
             assert.equal(transport.closed, true);
         });
+
+        it('does not recover transports closed by a server restart', async () => {
+            const lost = [];
+            const transport = {
+                id: 'p1',
+                closed: false,
+                close() {
+                    this.closed = true;
+                },
+            };
+            const client = {
+                _isConnected: true,
+                serverRestarting: true,
+                producerTransport: transport,
+                consumerTransport: { id: 'c1' },
+                handleTransportLost: async (kind) => lost.push(kind),
+            };
+            await handle(client, { transport_id: 'p1' });
+            assert.deepEqual(lost, []);
+            assert.equal(transport.closed, true);
+        });
     });
 
     describe('restartTransportWithRetry', () => {
         const restart = (client, ...args) => RoomClientProto.restartTransportWithRetry.apply(client, args);
+
+        it('stops the ICE restart loop without escalating once a page reload is pending', async () => {
+            const lost = [];
+            let restarts = 0;
+            const transport = { id: 't', closed: false };
+            const client = {
+                iceRestartingTransports: new WeakSet(),
+                producerTransport: transport,
+                restartTransportIce: async function () {
+                    restarts++;
+                    this.reloadPending = true;
+                    return false;
+                },
+                handleTransportLost: (kind) => lost.push(kind),
+            };
+            const result = await restart(client, transport, 'Producer', 5, 1);
+            assert.equal(result, false);
+            assert.equal(restarts, 1);
+            assert.deepEqual(lost, []);
+        });
 
         it('does not escalate for a transport that was replaced meanwhile', async () => {
             const lost = [];

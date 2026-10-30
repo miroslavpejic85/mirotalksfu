@@ -16,6 +16,7 @@ describe('test-Reconnect', () => {
         const context = vm.createContext({
             window: { location: { origin: 'https://localhost:3010' }, localStorage: {} },
             endRoomSession: () => {},
+            setTimeout: () => {}, // refreshBrowser defers the actual navigation
         });
         vm.runInContext(`${roomClientSource}; globalThis.RoomClientForTest = RoomClient;`, context);
         proto = context.RoomClientForTest.prototype;
@@ -43,10 +44,35 @@ describe('test-Reconnect', () => {
             showReconnectAlert: (reason) => banners.push({ type: 'reconnect', reason }),
             showServerRestartAlert: (meta) => banners.push({ type: 'restart', meta }),
             renderReconnectBanner: (opts) => banners.push({ type: 'render', opts }),
+            peer_info: { peer_audio: true, peer_video: true, peer_screen: false, peer_name: 'User' },
         };
         client.handleServerRestart = proto.handleServerRestart.bind(client);
+        client.saveReconnectMediaState = proto.saveReconnectMediaState.bind(client);
         return client;
     }
+
+    it('rejoins with the media state from before the server restart, not the one left by closed transports', () => {
+        const client = createRestartClient();
+        let stored = null;
+        client.updatePeerInfoInLocalStorage = (info) => (stored = info);
+        client.getReconnectDirectJoinURL = () => 'url';
+
+        proto.handleServerRestart.call(client);
+        // transportclose -> closeProducer -> setIsAudio/setIsVideo(false)
+        client.peer_info.peer_audio = false;
+        client.peer_info.peer_video = false;
+        proto.handleDisconnect.call(client, 'transport close');
+
+        proto.refreshBrowser.call(client);
+
+        // Object built inside the vm realm: compare a plain copy
+        JSON.parse(JSON.stringify(stored)).should.eql({
+            peer_audio: true,
+            peer_video: true,
+            peer_screen: false,
+            peer_name: 'User',
+        });
+    });
 
     it('shows the server restart banner and extends reconnect attempts on serverShutdown', () => {
         const client = createRestartClient();
@@ -115,5 +141,60 @@ describe('test-Reconnect', () => {
         reconnectUrl.should.equal(
             'https://localhost:3010/join?room=test&roomPassword=false&name=Presenter&audio=false&video=false&screen=false&notify=0&token=signed-token'
         );
+    });
+});
+
+describe('test-Reconnect virtual background restore', () => {
+    const roomSource = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'Room.js'), 'utf8');
+    const match = roomSource.match(/function restoreVirtualBackgroundState\(\) \{[\s\S]*?\n\}\n/);
+
+    function restore(saved, available = true) {
+        const store = saved ? { virtualBackgroundSettings: JSON.stringify(saved) } : {};
+        const context = vm.createContext({
+            console: { warn() {} },
+            localStorage: { getItem: (key) => store[key] ?? null },
+            isVirtualBackgroundAvailable: () => available,
+        });
+        vm.runInContext(
+            `var virtualBackgroundBlurLevel = null, virtualBackgroundSelectedImage = null, virtualBackgroundTransparent = null;
+            ${match[0]}
+            restoreVirtualBackgroundState();
+            globalThis.state = { blur: virtualBackgroundBlurLevel, image: virtualBackgroundSelectedImage, transparent: virtualBackgroundTransparent };`,
+            context
+        );
+        return JSON.parse(JSON.stringify(context.state));
+    }
+
+    it('exists in Room.js', () => {
+        (match !== null).should.be.true();
+    });
+
+    it('restores blur before the rejoin produces the camera', () => {
+        restore({ blurLevel: 20, imageUrl: null, transparent: null }).should.eql({
+            blur: 20,
+            image: null,
+            transparent: null,
+        });
+    });
+
+    it('restores a virtual background image', () => {
+        restore({ blurLevel: null, imageUrl: '../images/virtual-background/x.jpg', transparent: null }).should.eql({
+            blur: null,
+            image: '../images/virtual-background/x.jpg',
+            transparent: null,
+        });
+    });
+
+    it('restores a transparent background', () => {
+        restore({ blurLevel: null, imageUrl: null, transparent: true }).should.eql({
+            blur: null,
+            image: null,
+            transparent: true,
+        });
+    });
+
+    it('does nothing when nothing is saved or virtual background is unavailable', () => {
+        restore(null).should.eql({ blur: null, image: null, transparent: null });
+        restore({ blurLevel: 20 }, false).should.eql({ blur: null, image: null, transparent: null });
     });
 });

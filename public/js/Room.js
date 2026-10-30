@@ -2039,6 +2039,8 @@ async function whoAreYou() {
         checkMedia();
         if (!BUTTONS.main.startScreenButton) isScreenAllowed = false;
         getPeerInfo();
+        // Rejoin after a reconnect/server restart: restore blur/virtual background before the camera is produced
+        if (window.localStorage.isReconnected === 'true') restoreVirtualBackgroundState();
         joinRoom(peer_name, room_id);
         return;
     }
@@ -10420,6 +10422,22 @@ function initSettingsNav() {
         e.preventDefault();
         next.focus();
     });
+}
+
+// Sets the blur/virtual background state from the saved settings without processing a stream, so the
+// in-room camera producer applies it. Used on direct rejoin, where loadVirtualBackgroundSettings() runs too late.
+function restoreVirtualBackgroundState() {
+    if (!isVirtualBackgroundAvailable()) return;
+    try {
+        const saved = JSON.parse(localStorage.getItem('virtualBackgroundSettings') || 'null');
+        if (!saved) return;
+        virtualBackgroundBlurLevel = saved.blurLevel || null;
+        virtualBackgroundSelectedImage = virtualBackgroundBlurLevel ? null : saved.imageUrl || null;
+        virtualBackgroundTransparent =
+            !virtualBackgroundBlurLevel && !virtualBackgroundSelectedImage && saved.transparent ? true : null;
+    } catch (error) {
+        console.warn('Unable to restore virtual background settings', error);
+    }
 }
 
 async function loadVirtualBackgroundSettings() {
