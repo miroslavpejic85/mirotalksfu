@@ -1718,6 +1718,129 @@ body {
     text-align: center;
 }
 
+/* Background image picker inside the video device menu */
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(64px, 1fr));
+    gap: 6px;
+    max-height: 196px;
+    margin: 4px 0 2px;
+    padding: 4px 10px;
+    overflow-y: auto;
+    border-radius: 10px;
+    outline: 2px dashed transparent;
+    outline-offset: -2px;
+    transition: outline-color 0.2s ease;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-grid.drag-over {
+    outline-color: var(--btns-color, #66beff);
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-grid .device-menu-bg-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    aspect-ratio: 16 / 10;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: none !important;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 1rem;
+    line-height: 1;
+    text-align: center;
+    box-shadow: none;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-grid .device-menu-bg-card i {
+    margin: 0;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-grid .device-menu-bg-card:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-grid .device-menu-bg-card:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-grid .device-menu-bg-card:focus-visible {
+    outline: 2px solid var(--btns-color, #fff);
+    outline-offset: 2px;
+}
+
+/* Frame and check badge are overlays so they paint above the thumbnail */
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: inherit;
+    pointer-events: none;
+    transition: border-color 0.2s ease;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-card:hover:not(:disabled)::after {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-card.active::after {
+    border-color: #fff;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-card.active::before {
+    content: '\f00c';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: #101314;
+    font-family: 'Font Awesome 6 Free';
+    font-size: 0.55rem;
+    font-weight: 900;
+    pointer-events: none;
+}
+
+/* Absolutely positioned so thumbnails never widen the max-content menu */
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-card span {
+    max-width: 100%;
+    padding: 0 4px;
+    overflow: hidden;
+    font-size: 0.65rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Live audio input level meter inside the audio device menu */
 #bottomButtons #startAudioDeviceMenu button .device-menu-label {
     flex: 1 1 auto;

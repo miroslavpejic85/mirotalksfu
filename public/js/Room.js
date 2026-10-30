@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.06
+ * @version 2.7.10
  *
  */
 
@@ -345,6 +345,7 @@ let bypassBeforeUnloadOnce = false;
 let virtualBackgroundBlurLevel;
 let virtualBackgroundSelectedImage;
 let virtualBackgroundTransparent;
+let virtualBackgroundLastImage;
 
 let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 
@@ -6728,6 +6729,198 @@ function setupQuickDeviceSwitchDropdowns() {
         });
     }
 
+    // Background picker in the video dropdown: Off / Blur / Image, plus a thumbnail grid while Image is active
+    let videoMenuBackgroundBusy = false;
+    let videoMenuBackgroundScrollTop = 0;
+    let videoMenuBackgroundFileInput = null;
+
+    function getVideoMenuBackgroundMode() {
+        if (virtualBackgroundBlurLevel) return 'blur';
+        if (virtualBackgroundSelectedImage) return 'image';
+        if (virtualBackgroundTransparent) return 'transparent';
+        return 'off';
+    }
+
+    async function setVideoMenuBackground(blurLevel = null, imageUrl = null) {
+        if (videoMenuBackgroundBusy) return;
+        videoMenuBackgroundBusy = true;
+        buildVideoMenu();
+        try {
+            await rc.applyVirtualBackground(blurLevel, imageUrl, null);
+        } catch (error) {
+            console.error('Unable to change camera background', error);
+        } finally {
+            videoMenuBackgroundBusy = false;
+            buildVideoMenu();
+        }
+    }
+
+    function getVideoMenuBackgroundFileInput() {
+        if (videoMenuBackgroundFileInput) return videoMenuBackgroundFileInput;
+        // Kept outside the menu so rebuilding the menu while the file picker is open does not drop the selection
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        fileInput.addEventListener('change', async () => {
+            const files = Array.from(fileInput.files || []);
+            fileInput.value = '';
+            await uploadVideoMenuBackground(files);
+        });
+        document.body.appendChild(fileInput);
+        videoMenuBackgroundFileInput = fileInput;
+        return fileInput;
+    }
+
+    async function uploadVideoMenuBackground(files) {
+        if (typeof rc.uploadVirtualBackgroundImages !== 'function') return;
+        const images = await rc.uploadVirtualBackgroundImages(files);
+        const lastImage = images?.[images.length - 1];
+        if (lastImage) await setVideoMenuBackground(null, lastImage);
+    }
+
+    function appendVideoMenuBackgroundOption(sectionEl, label, selected, clickHandler) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = videoMenuBackgroundBusy;
+
+        if (selected) {
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-check';
+            btn.appendChild(icon);
+        } else {
+            const spacer = document.createElement('span');
+            spacer.style.display = 'inline-block';
+            spacer.style.width = '1.25em';
+            btn.appendChild(spacer);
+        }
+
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'device-menu-label';
+        labelSpan.textContent = selected ? ` ${label}` : label;
+        btn.appendChild(labelSpan);
+
+        btn.addEventListener('click', () => {
+            if (!selected) clickHandler();
+        });
+        sectionEl.appendChild(btn);
+    }
+
+    function appendVideoMenuBackgroundGrid(sectionEl) {
+        const grid = document.createElement('div');
+        grid.className = 'device-menu-bg-grid';
+        grid.setAttribute('role', 'group');
+        grid.setAttribute('aria-label', 'Background image');
+
+        const createCard = (selected, clickHandler) => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'device-menu-bg-card';
+            card.disabled = videoMenuBackgroundBusy;
+            card.classList.toggle('active', selected);
+            card.setAttribute('aria-pressed', String(selected));
+            card.addEventListener('click', () => {
+                if (!selected) clickHandler();
+            });
+            grid.appendChild(card);
+            return card;
+        };
+
+        const createIconCard = (iconClass, label, selected, clickHandler) => {
+            const card = createCard(selected, clickHandler);
+            const icon = document.createElement('i');
+            icon.className = iconClass;
+            icon.setAttribute('aria-hidden', 'true');
+            const span = document.createElement('span');
+            span.textContent = label;
+            card.append(icon, span);
+            return card;
+        };
+
+        const createImageCard = (imageUrl) => {
+            const card = createCard(imageUrl === virtualBackgroundSelectedImage, () =>
+                setVideoMenuBackground(null, imageUrl)
+            );
+            card.setAttribute('aria-label', 'Background image');
+            const img = document.createElement('img');
+            img.alt = '';
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            img.src = imageUrl;
+            card.appendChild(img);
+        };
+
+        createIconCard('fas fa-ban', 'None', false, () => setVideoMenuBackground());
+
+        if (typeof rc.uploadVirtualBackgroundImages === 'function') {
+            createIconCard('fas fa-upload', 'Upload', false, () => getVideoMenuBackgroundFileInput().click());
+        }
+
+        // Same images as Settings > Background: presets, then uploaded images
+        const customImages = rc.virtualBackgroundCustomImages || [];
+        const images = [...new Set([...virtualBackgrounds, ...customImages])];
+        // The active image may be missing from both lists (e.g. restored from a previous session)
+        const currentImage = virtualBackgroundSelectedImage;
+        if (currentImage && !images.includes(currentImage)) images.unshift(currentImage);
+        images.forEach(createImageCard);
+
+        grid.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            grid.classList.add('drag-over');
+        });
+        grid.addEventListener('dragleave', () => grid.classList.remove('drag-over'));
+        grid.addEventListener('drop', (event) => {
+            event.preventDefault();
+            grid.classList.remove('drag-over');
+            if (!videoMenuBackgroundBusy) uploadVideoMenuBackground(Array.from(event.dataTransfer?.files || []));
+        });
+
+        sectionEl.appendChild(grid);
+    }
+
+    function appendVideoMenuBackground(menuEl) {
+        const section = document.createElement('div');
+        section.id = 'deviceMenuBackground';
+        section.setAttribute('aria-busy', String(videoMenuBackgroundBusy));
+        // Keep the dropdown open while picking a background
+        section.addEventListener('click', (event) => event.stopPropagation());
+
+        const mode = getVideoMenuBackgroundMode();
+
+        appendMenuHeader(section, 'fas fa-image', 'Background');
+        appendVideoMenuBackgroundOption(section, 'Off', mode === 'off', () => setVideoMenuBackground());
+        appendVideoMenuBackgroundOption(section, 'Blur', mode === 'blur', () => setVideoMenuBackground(20));
+        appendVideoMenuBackgroundOption(section, 'Image', mode === 'image', () => {
+            // Choosing "Image" applies something right away: the last used image, otherwise the first preset
+            const imageUrl = virtualBackgroundLastImage || virtualBackgrounds[0];
+            if (imageUrl) setVideoMenuBackground(null, imageUrl);
+        });
+
+        if (mode === 'image') appendVideoMenuBackgroundGrid(section);
+
+        menuEl.appendChild(section);
+        restoreVideoMenuBackgroundScroll(section);
+    }
+
+    // Rebuilding the menu after each pick would otherwise jump the grid back to the top
+    function restoreVideoMenuBackgroundScroll(section) {
+        const grid = section.querySelector('.device-menu-bg-grid');
+        if (!grid) return;
+        grid.addEventListener('scroll', () => (videoMenuBackgroundScrollTop = grid.scrollTop), { passive: true });
+        // Menu built while closed: nothing to measure, keep the saved position for the next open
+        if (!grid.clientHeight) return;
+        grid.scrollTop = videoMenuBackgroundScrollTop;
+        const active = grid.querySelector('.device-menu-bg-card.active');
+        if (active) {
+            const gridRect = grid.getBoundingClientRect();
+            const activeRect = active.getBoundingClientRect();
+            if (activeRect.top < gridRect.top || activeRect.bottom > gridRect.bottom) {
+                grid.scrollTop += activeRect.top - gridRect.top - (gridRect.height - activeRect.height) / 2;
+            }
+        }
+        videoMenuBackgroundScrollTop = grid.scrollTop;
+    }
+
     function buildVideoMenu() {
         if (!videoMenu || !videoSelect) return;
         videoMenu.innerHTML = '';
@@ -6738,22 +6931,10 @@ function setupQuickDeviceSwitchDropdowns() {
         appendMenuDivider(videoMenu);
 
         if (isVirtualBackgroundAvailable()) {
-            appendMenuToggle(
-                videoMenu,
-                'deviceMenuVirtualBackgroundBlur',
-                'Blur my background',
-                Boolean(virtualBackgroundBlurLevel),
-                async (checked) => {
-                    await rc.applyVirtualBackground(checked ? 20 : null, null, null);
-                    document
-                        .querySelectorAll('#imageGridVideoControls img.vb-selected, #imageGridVideo img.vb-selected')
-                        .forEach((imageElement) => imageElement.classList.remove('vb-selected'));
-                    const selectedControl = getId(checked ? 'highBlurImg' : 'cleanVbImg');
-                    if (selectedControl) selectedControl.classList.add('vb-selected');
-                },
-                'fa-solid fa-wand-magic-sparkles'
-            );
+            appendVideoMenuBackground(videoMenu);
+            appendMenuDivider(videoMenu);
 
+            // Full picker: low blur, transparent, image from URL and managing uploaded images
             const virtualBgBtn = document.createElement('button');
             virtualBgBtn.type = 'button';
             virtualBgBtn.className = 'device-menu-action-btn';
@@ -10193,6 +10374,7 @@ const indexedDBHelper = {
 // ####################################################
 
 function saveVirtualBackgroundSettings(blurLevel, imageUrl, transparent) {
+    if (imageUrl) virtualBackgroundLastImage = imageUrl;
     const settings = {
         blurLevel: blurLevel || null,
         imageUrl: imageUrl || null,
@@ -10445,6 +10627,7 @@ function restoreVirtualBackgroundState() {
         if (!saved) return;
         virtualBackgroundBlurLevel = saved.blurLevel || null;
         virtualBackgroundSelectedImage = virtualBackgroundBlurLevel ? null : saved.imageUrl || null;
+        if (saved.imageUrl) virtualBackgroundLastImage = saved.imageUrl;
         virtualBackgroundTransparent =
             !virtualBackgroundBlurLevel && !virtualBackgroundSelectedImage && saved.transparent ? true : null;
     } catch (error) {
@@ -10578,7 +10761,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.06',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.10',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

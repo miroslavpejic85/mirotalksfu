@@ -234,6 +234,8 @@ function scanJs(file) {
     // Dynamically-built UI text: device menu headers/options, text nodes, textContent assignments.
     const helperRe = /(?:appendMenuHeader|appendSelectOptions)\([^,]*,[^,]*,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
     while ((m = helperRe.exec(src))) add('labels', unescapeJs(m[2]));
+    const menuOptionRe = /appendVideoMenuBackgroundOption\([^,]*,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
+    while ((m = menuOptionRe.exec(src))) add('labels', unescapeJs(m[2]));
     const textNodeRe = /createTextNode\(\s*(['"])((?:\\.|(?!\1).)*)\1/g;
     while ((m = textNodeRe.exec(src))) add('labels', unescapeJs(m[2]));
     const textContentRe = /\.(?:textContent|innerText)\s*=\s*(['"])((?:\\.|(?!\1).)*)\1\s*;/g;

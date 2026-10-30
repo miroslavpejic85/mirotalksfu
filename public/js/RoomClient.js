@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.06
+ * @version 2.7.10
  *
  */
 
@@ -3152,10 +3152,6 @@ class RoomClient {
                 virtualBackgroundTransparent = null;
             }
             await rc.applyVirtualBackground(blurLevel, imgSrc, transparentBg);
-            const menuBlurSwitch = document.getElementById('deviceMenuVirtualBackgroundBlur');
-            if (menuBlurSwitch) {
-                menuBlurSwitch.checked = Boolean(virtualBackgroundBlurLevel);
-            }
         }
 
         // Create clean virtual bg Image
@@ -3221,6 +3217,7 @@ class RoomClient {
 
         async function handleFileUpload(files) {
             const imageFiles = Array.from(files || []).filter((file) => file?.type?.startsWith('image/'));
+            const uploadedImages = [];
 
             for (const file of imageFiles) {
                 const reader = new FileReader();
@@ -3229,13 +3226,20 @@ class RoomClient {
                         const imgData = e.target.result;
                         await indexedDBHelper.saveImage(imgData);
                         addImageToUI(imgData);
+                        uploadedImages.push(imgData);
                         resolve();
                     };
                     reader.onerror = resolve;
                     reader.readAsDataURL(file);
                 });
             }
+            return uploadedImages;
         }
+
+        // Shared with the video dropdown background picker, so uploads also land in this grid
+        this.uploadVirtualBackgroundImages = handleFileUpload;
+        // Uploaded images listed in this grid, mirrored by the video dropdown background picker
+        this.virtualBackgroundCustomImages = [];
 
         function createUploadImageButton() {
             const fileInput = document.createElement('input');
@@ -3254,6 +3258,8 @@ class RoomClient {
 
         // Function to add an image to UI
         function addImageToUI(imgData) {
+            rc.virtualBackgroundCustomImages.push(imgData);
+
             const imageContainer = document.createElement('div');
             imageContainer.className = 'image-wrapper';
 
@@ -3270,6 +3276,8 @@ class RoomClient {
                 event.stopPropagation();
                 await indexedDBHelper.removeImage(imgData);
                 imageContainer.remove();
+                const index = rc.virtualBackgroundCustomImages.indexOf(imgData);
+                if (index !== -1) rc.virtualBackgroundCustomImages.splice(index, 1);
             });
 
             imageContainer.appendChild(customImg);
