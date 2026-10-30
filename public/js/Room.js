@@ -6278,7 +6278,12 @@ function setCookie(name, value, expDays) {
 
 function getCookie(cName) {
     const name = cName + '=';
-    const cDecoded = decodeURIComponent(document.cookie);
+    let cDecoded = document.cookie;
+    try {
+        cDecoded = decodeURIComponent(document.cookie);
+    } catch (error) {
+        console.warn('Malformed cookie encoding detected, using raw cookie string', error);
+    }
     const cArr = cDecoded.split('; ');
     let res;
     cArr.forEach((val) => {

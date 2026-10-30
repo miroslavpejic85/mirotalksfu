@@ -25,7 +25,13 @@ const waitStartTime = Date.now();
 let elapsedTimerId = null;
 
 if (roomId && roomId !== 'whoAreYou') {
-    waitingRoomNameText.textContent = roomId;
+    let displayName = roomId;
+    try {
+        displayName = decodeURIComponent(roomId);
+    } catch (error) {
+        // malformed percent-encoding: keep raw roomId as fallback
+    }
+    waitingRoomNameText.textContent = displayName;
     waitingRoomNameEl.style.display = 'inline-block';
 }
 
