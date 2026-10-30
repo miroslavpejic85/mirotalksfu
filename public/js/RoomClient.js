@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.02
+ * @version 2.7.03
  *
  */
 
@@ -1781,6 +1781,7 @@ class RoomClient {
         this.socket.on('followMe', this.handleFollowMeData);
         this.socket.on('chatReaction', this.handleChatReaction);
         this.socket.on('chatTyping', this.handleChatTyping);
+        this.socket.on('deleteChatMessage', this.handleDeleteChatMessage);
     }
 
     // ####################################################
@@ -5385,6 +5386,7 @@ class RoomClient {
                 this.socket.off('refreshParticipantsCount');
                 this.socket.off('message');
                 this.socket.off('chatTyping');
+                this.socket.off('deleteChatMessage');
                 this.socket.off('roomAction');
                 this.socket.off('roomPassword');
                 this.socket.off('roomLobby');
@@ -8220,7 +8222,7 @@ class RoomClient {
             </li>
         `;
 
-        this.collectMessages(time, getFromName, getMsg, getToId, getToName);
+        this.collectMessages(time, getFromName, getMsg, getToId, getToName, getMsgId);
 
         console.log('Append message to:', { to_id: getToId, to_name: getToName });
 
@@ -8582,24 +8584,75 @@ class RoomClient {
     }
 
     deleteMessage(id) {
+        const msgEl = this.getId(id);
+        if (!msgEl) return;
+
+        const msgId = msgEl.getAttribute('data-msg-id') || '';
+        const fromId = msgEl.getAttribute('data-from-id') || '';
+        const toId = msgEl.getAttribute('data-to-id') || '';
+
+        // Only the author can delete for everyone, and only real participant chats (not AI)
+        const canDeleteForEveryone =
+            !!msgId &&
+            fromId === this.peer_id &&
+            msgId.startsWith(`${this.peer_id}_`) &&
+            !!toId &&
+            !['ChatGPT', 'DeepSeek'].includes(toId);
+
         Swal.fire({
             background: swalBackground,
             position: 'center',
             title: 'Delete this Message?',
             imageUrl: image.delete,
             ...swalDestructiveOptions(),
-            confirmButtonText: 'Delete message',
+            showDenyButton: canDeleteForEveryone,
+            confirmButtonText: canDeleteForEveryone ? 'Delete for me' : 'Delete message',
+            denyButtonText: 'Delete for everyone',
             cancelButtonText: 'Cancel',
+            customClass: { confirmButton: 'swal-destructive', denyButton: 'swal-destructive' },
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                this.getId(id).remove();
+                this.removeChatMessageElement(msgEl);
                 this.sound('delete');
-                updateChatEmptyNotice();
+            } else if (result.isDenied && canDeleteForEveryone) {
+                this.socket.emit('deleteChatMessage', { msg_id: msgId, to_peer_id: toId });
+                this.removeChatMessageElement(msgEl);
+                this.sound('delete');
             }
         });
     }
+
+    removeChatMessageElement(msgEl) {
+        const msgId = msgEl.getAttribute('data-msg-id') || '';
+        msgEl.remove();
+        if (msgId) {
+            this.chatMessages = this.chatMessages.filter((m) => m.msgId !== msgId);
+        }
+        updateChatEmptyNotice();
+    }
+
+    handleDeleteChatMessage = (data) => {
+        if (!data || typeof data.msg_id !== 'string' || typeof data.peer_id !== 'string') return;
+        const { msg_id, peer_id } = data;
+        const msgEls = document.querySelectorAll(`li[data-msg-id="${CSS.escape(msg_id)}"]`);
+        let removed = false;
+        msgEls.forEach((msgEl) => {
+            // Only remove messages actually authored by the requesting peer
+            if (msgEl.getAttribute('data-from-id') !== peer_id) return;
+            this.removeChatMessageElement(msgEl);
+            removed = true;
+        });
+        if (!removed) return;
+
+        const messagePeerId = data.to_peer_id === 'all' ? 'all' : peer_id;
+        const isMessageVisible = this.isChatOpen && this.chatPeerId === messagePeerId;
+        if (!isMessageVisible && this.unreadMessageCounts[messagePeerId] > 0) {
+            this.unreadMessageCounts[messagePeerId]--;
+            this.updateUnreadCountBadge(messagePeerId);
+        }
+    };
 
     copyToClipboard(id) {
         const text = this.getId(id).innerText;
@@ -8762,13 +8815,14 @@ class RoomClient {
         }
     }
 
-    collectMessages(time, from, msg, toId = 'all', toName = 'all') {
+    collectMessages(time, from, msg, toId = 'all', toName = 'all', msgId = '') {
         this.chatMessages.push({
             time: time,
             from: from,
             msg: msg,
             toId: toId,
             toName: toName,
+            msgId: msgId,
         });
     }
 

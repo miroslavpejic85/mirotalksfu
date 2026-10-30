@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.02
+ * @version 2.7.03
  *
  */
 
@@ -4983,6 +4983,41 @@ function startServer() {
             if (!Validator.isValidData(data)) return;
             const { room } = getRoomAndPeer(socket);
             room.broadCast(socket.id, 'chatReaction', data);
+        });
+
+        socket.on('deleteChatMessage', (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            if (!dataObject || typeof dataObject.msg_id !== 'string' || typeof dataObject.to_peer_id !== 'string') {
+                return;
+            }
+
+            const { msg_id, to_peer_id } = dataObject;
+
+            // Message ids are generated client-side as `${peer_id}_${Date.now()}`: only the author can delete for everyone
+            if (msg_id.length > 256 || !msg_id.startsWith(`${socket.id}_`)) {
+                log.warn('Unauthorized chat message delete attempt', { ip: getIpSocket(socket), msg_id });
+                return;
+            }
+
+            if (['ChatGPT', 'DeepSeek'].includes(to_peer_id)) return;
+
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!room || !peer) return;
+
+            const isPublic = to_peer_id === 'all';
+
+            const data = {
+                msg_id,
+                peer_id: socket.id,
+                to_peer_id: isPublic ? 'all' : to_peer_id,
+            };
+
+            log.debug('deleteChatMessage', data);
+
+            isPublic
+                ? room.broadCast(socket.id, 'deleteChatMessage', data)
+                : room.sendTo(to_peer_id, 'deleteChatMessage', data);
         });
 
         socket.on('getChatGPT', async ({ time, room, name, prompt, context }, cb) => {
