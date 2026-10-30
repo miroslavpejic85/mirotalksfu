@@ -45,6 +45,7 @@
     max-width: 100%;
     flex: 0 1 auto;
     margin: 0;
+    border-radius: var(--radius-md, 12px);
     white-space: normal;
     overflow-wrap: anywhere;
 }
