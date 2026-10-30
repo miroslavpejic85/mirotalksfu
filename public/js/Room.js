@@ -455,7 +455,7 @@ let workletNode = null;
 // window.location.origin + '/join/' + roomId
 // window.location.origin + '/join/?room=' + roomId + '&token=' + myToken
 
-let RoomURL = window.location.origin + '/join/' + room_id;
+let RoomURL = window.location.origin + getJoinRoomPath(room_id);
 
 let isExiting = false;
 let isLeavingRoom = false;
@@ -864,6 +864,13 @@ function getRoomId() {
     console.log('Direct join', { room: roomId });
     window.localStorage.lastRoom = roomId;
     return roomId;
+}
+
+function getJoinRoomPath(roomId) {
+    // Path ids are read as-is (not decoded): use /join/<id> only if it round-trips, else ?room= (e.g. abc% -> nginx 400)
+    return /^(?:[\w.~!$&'()*+,;=:@-]|%[0-9A-Fa-f]{2})+$/.test(roomId)
+        ? '/join/' + roomId
+        : '/join/?room=' + encodeURIComponent(roomId);
 }
 
 function makeId(length) {

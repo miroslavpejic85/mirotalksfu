@@ -1045,7 +1045,7 @@ class RoomClient {
             }
             // Host protected enabled in the server side
             if (room.hostProtected) {
-                RoomURL = window.location.origin + '/join/' + room_id;
+                RoomURL = window.location.origin + getJoinRoomPath(room_id);
             }
 
             // Share Media Data on Join
@@ -2639,7 +2639,7 @@ class RoomClient {
         }).then((result) => {
             if (result.isConfirmed) {
                 endRoomSession();
-                openURL((window.location.href = '/join/' + this.room_id));
+                openURL((window.location.href = getJoinRoomPath(this.room_id)));
             }
         });
     }
@@ -12379,7 +12379,7 @@ class RoomClient {
         }).then(() => {
             // Login required to join room
             endRoomSession();
-            openURL(`/login/?room=${this.room_id}`);
+            openURL(`/login/?room=${encodeURIComponent(this.room_id)}`);
         });
     }
 
