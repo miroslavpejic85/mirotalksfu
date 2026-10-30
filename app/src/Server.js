@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.03
+ * @version 2.7.04
  *
  */
 
@@ -5018,6 +5018,56 @@ function startServer() {
             isPublic
                 ? room.broadCast(socket.id, 'deleteChatMessage', data)
                 : room.sendTo(to_peer_id, 'deleteChatMessage', data);
+        });
+
+        socket.on('editChatMessage', (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            if (
+                !dataObject ||
+                typeof dataObject.msg_id !== 'string' ||
+                typeof dataObject.to_peer_id !== 'string' ||
+                typeof dataObject.peer_msg !== 'string'
+            ) {
+                return;
+            }
+
+            const { msg_id, to_peer_id } = dataObject;
+
+            // Message ids are generated client-side as `${peer_id}_${Date.now()}`: only the author can edit
+            if (msg_id.length > 256 || !msg_id.startsWith(`${socket.id}_`)) {
+                log.warn('Unauthorized chat message edit attempt', { ip: getIpSocket(socket), msg_id });
+                return;
+            }
+
+            if (['ChatGPT', 'DeepSeek'].includes(to_peer_id)) return;
+
+            if (dataObject.peer_msg.length > 100000) return;
+            const peer_msg = checkXSS(dataObject.peer_msg);
+            if (typeof peer_msg !== 'string' || !peer_msg.trim()) return;
+
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!room || !peer) return;
+
+            const isPublic = to_peer_id === 'all';
+
+            if (room._moderator) {
+                if (isPublic && room._moderator.chat_cant_publicly) return;
+                if (!isPublic && room._moderator.chat_cant_privately) return;
+            }
+
+            const data = {
+                msg_id,
+                peer_id: socket.id,
+                to_peer_id: isPublic ? 'all' : to_peer_id,
+                peer_msg,
+            };
+
+            log.debug('editChatMessage', { msg_id, peer_id: socket.id, to_peer_id: data.to_peer_id });
+
+            isPublic
+                ? room.broadCast(socket.id, 'editChatMessage', data)
+                : room.sendTo(to_peer_id, 'editChatMessage', data);
         });
 
         socket.on('getChatGPT', async ({ time, room, name, prompt, context }, cb) => {

@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.03
+ * @version 2.7.04
  *
  */
 
@@ -118,6 +118,7 @@ const icons = {
     paste: '<i class="fas fa-paste"></i>',
     smile: '<i class="fas fa-face-smile"></i>',
     trash: '<i class="fas fa-trash"></i>',
+    pen: '<i class="fas fa-pen"></i>',
     youtube: '<i class="fab fa-youtube"></i>',
     times: '<i class="fas fa-times"></i>',
     statusCircle: (status) => `<i class="fa fa-circle ${status}"></i>`,
@@ -372,6 +373,7 @@ class RoomClient {
         this.chatPeerName = 'all';
         this.chatPeerAvatar = '';
         this.unreadMessageCounts = {};
+        this.chatMessageRaw = new Map(); // msg_id -> original text of my own messages (for editing)
 
         // Chat typing indicator
         this.chatTypingIndicator = typeof BUTTONS !== 'undefined' ? BUTTONS.chat?.chatTyping !== false : true;
@@ -399,6 +401,7 @@ class RoomClient {
         // DataChannel chat
         this.chatDataProducer = null;
         this.chatDataConsumers = new Map();
+        this.chatDataConsumersPending = new Set(); // `${transportId}:${dataProducerId}` consume requests in flight
         this.iceRestartingTransports = new WeakSet();
         this.useDataChannel = true; // prefer DataChannel for chat
 
@@ -1782,6 +1785,7 @@ class RoomClient {
         this.socket.on('chatReaction', this.handleChatReaction);
         this.socket.on('chatTyping', this.handleChatTyping);
         this.socket.on('deleteChatMessage', this.handleDeleteChatMessage);
+        this.socket.on('editChatMessage', this.handleEditChatMessage);
     }
 
     // ####################################################
@@ -4516,10 +4520,15 @@ class RoomClient {
         }
 
         // Avoid duplicated chat messages when the same DataProducer is announced twice
-        // (e.g. getDataProducers after a recovery racing a newDataProducer broadcast)
+        // (e.g. getDataProducers on join/recovery racing a newDataProducer broadcast)
         for (const existing of this.chatDataConsumers.values()) {
             if (existing.dataProducerId === dataProducerId && !existing.closed) return;
         }
+
+        // Both announcements can arrive before the first consume completes: also skip in-flight requests
+        const pendingKey = `${transport.id}:${dataProducerId}`;
+        if (this.chatDataConsumersPending.has(pendingKey)) return;
+        this.chatDataConsumersPending.add(pendingKey);
 
         try {
             const params = await this.socket.request('consumeData', {
@@ -4589,6 +4598,8 @@ class RoomClient {
             });
         } catch (error) {
             console.error('Failed to consume data', error);
+        } finally {
+            this.chatDataConsumersPending.delete(pendingKey);
         }
     }
 
@@ -5387,6 +5398,7 @@ class RoomClient {
                 this.socket.off('message');
                 this.socket.off('chatTyping');
                 this.socket.off('deleteChatMessage');
+                this.socket.off('editChatMessage');
                 this.socket.off('roomAction');
                 this.socket.off('roomPassword');
                 this.socket.off('roomLobby');
@@ -7992,6 +8004,7 @@ class RoomClient {
                         data.to_peer_name,
                         data.msg_id
                     );
+                    this.chatMessageRaw.set(data.msg_id, chatMessage.value);
                     this.cleanMessage();
                 }
             }
@@ -8163,6 +8176,16 @@ class RoomClient {
                 </button>`
             : '';
 
+        const editButton =
+            myMessage && this.isOwnRelayedChatMessage(getFromId, getToId, getMsgId)
+                ? `<button 
+                    id="msg-edit-${chatMessagesId}" 
+                    class="mr5" 
+                    onclick="rc.editMessage('msg-${chatMessagesId}')">
+                    ${icons.pen}
+                </button>`
+                : '';
+
         // getImg is a user-controlled URL; use a temporary id and setAttribute
         // after insertion to avoid double-decode XSS via insertAdjacentHTML.
         const msgAvatarTmpId = `msg-av-${chatMessagesId}`;
@@ -8208,6 +8231,7 @@ class RoomClient {
                             onclick="rc.toggleReactionPicker('msg-${chatMessagesId}')">
                             ${icons.smile}
                         </button>
+                        ${editButton}
                         <button 
                             id="msg-delete-${chatMessagesId}"   
                             class="mr5" 
@@ -8263,6 +8287,7 @@ class RoomClient {
 
         if (!this.isMobileDevice) {
             this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
+            this.setTippy('msg-edit-' + chatMessagesId, 'Edit', 'top');
             this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
             this.setTippy('msg-speech-' + chatMessagesId, 'Speech', 'top');
             this.setTippy('msg-react-' + chatMessagesId, 'React', 'top');
@@ -8592,12 +8617,7 @@ class RoomClient {
         const toId = msgEl.getAttribute('data-to-id') || '';
 
         // Only the author can delete for everyone, and only real participant chats (not AI)
-        const canDeleteForEveryone =
-            !!msgId &&
-            fromId === this.peer_id &&
-            msgId.startsWith(`${this.peer_id}_`) &&
-            !!toId &&
-            !['ChatGPT', 'DeepSeek'].includes(toId);
+        const canDeleteForEveryone = this.isOwnRelayedChatMessage(fromId, toId, msgId);
 
         Swal.fire({
             background: swalBackground,
@@ -8629,6 +8649,7 @@ class RoomClient {
         msgEl.remove();
         if (msgId) {
             this.chatMessages = this.chatMessages.filter((m) => m.msgId !== msgId);
+            this.chatMessageRaw.delete(msgId);
         }
         updateChatEmptyNotice();
     }
@@ -8652,6 +8673,125 @@ class RoomClient {
             this.unreadMessageCounts[messagePeerId]--;
             this.updateUnreadCountBadge(messagePeerId);
         }
+    };
+
+    // Own messages relayed to real participants (public or private, not AI) can be edited/deleted for everyone
+    isOwnRelayedChatMessage(fromId, toId, msgId) {
+        return (
+            !!msgId &&
+            fromId === this.peer_id &&
+            msgId.startsWith(`${this.peer_id}_`) &&
+            !!toId &&
+            !['ChatGPT', 'DeepSeek'].includes(toId)
+        );
+    }
+
+    editMessage(id) {
+        const msgEl = this.getId(id);
+        if (!msgEl) return;
+
+        const msgId = msgEl.getAttribute('data-msg-id') || '';
+        const fromId = msgEl.getAttribute('data-from-id') || '';
+        const toId = msgEl.getAttribute('data-to-id') || '';
+
+        if (!this.isOwnRelayedChatMessage(fromId, toId, msgId)) return;
+
+        const isPublicMessage = toId === 'all';
+        if (isPublicMessage && this._moderator.chat_cant_publicly) {
+            return this.userLog('warning', 'The moderator does not allow you to chat publicly', 'top-end', 6000);
+        }
+        if (!isPublicMessage && this._moderator.chat_cant_privately) {
+            return this.userLog('warning', 'The moderator does not allow you to chat privately', 'top-end', 6000);
+        }
+
+        const textEl = msgEl.querySelector('.message > span[id^="message-"]');
+        const currentText = this.chatMessageRaw.get(msgId) ?? (textEl ? textEl.innerText : '');
+
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            title: 'Edit message',
+            input: 'textarea',
+            inputValue: currentText,
+            inputAttributes: this.chatMessageLengthCheck ? { maxlength: String(this.chatMessageLength) } : {},
+            showCancelButton: true,
+            confirmButtonText: 'Save',
+            cancelButtonText: 'Cancel',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            preConfirm: (value) => {
+                const text = (value || '').trim();
+                if (!text) {
+                    Swal.showValidationMessage('The message cannot be empty');
+                    return false;
+                }
+                return text;
+            },
+        }).then((result) => {
+            if (!result.isConfirmed || !msgEl.isConnected) return;
+
+            const newText = filterXSS(result.value);
+            if (newText === currentText) return;
+
+            const peer_msg = this.formatMsg(newText);
+            if (!peer_msg) return;
+
+            this.socket.emit('editChatMessage', { msg_id: msgId, to_peer_id: toId, peer_msg });
+            this.chatMessageRaw.set(msgId, newText);
+            this.applyChatMessageEdit(msgEl, peer_msg);
+        });
+    }
+
+    applyChatMessageEdit(msgEl, peerMsg) {
+        const textEl = msgEl.querySelector('.message > span[id^="message-"]');
+        if (!textEl) return;
+
+        const getMsg = filterXSS(peerMsg);
+        textEl.innerHTML = this.processMessage(getMsg);
+        hljs.highlightAll();
+
+        const msgId = msgEl.getAttribute('data-msg-id') || '';
+        const entry = msgId ? this.chatMessages.find((m) => m.msgId === msgId) : null;
+        if (entry) {
+            entry.msg = getMsg;
+            entry.edited = true;
+        }
+
+        this.markChatMessageEdited(msgEl);
+    }
+
+    markChatMessageEdited(msgEl) {
+        const timeEl = msgEl.querySelector('.message-data-time');
+        if (!timeEl) return;
+        const label = window.i18n?.t('edited', 'labels') || 'edited';
+        let badge = timeEl.querySelector('.msg-edited-badge');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'msg-edited-badge';
+            badge.textContent = label;
+            timeEl.appendChild(badge);
+        }
+        badge.title = `${label} ${this.getTimeNow()}`;
+    }
+
+    handleEditChatMessage = (data) => {
+        if (
+            !data ||
+            typeof data.msg_id !== 'string' ||
+            typeof data.peer_id !== 'string' ||
+            typeof data.peer_msg !== 'string'
+        ) {
+            return;
+        }
+        const { msg_id, peer_id, peer_msg } = data;
+        if (!msg_id.startsWith(`${peer_id}_`)) return;
+
+        const msgEls = document.querySelectorAll(`li[data-msg-id="${CSS.escape(msg_id)}"]`);
+        msgEls.forEach((msgEl) => {
+            // Only edit messages actually authored by the requesting peer
+            if (msgEl.getAttribute('data-from-id') !== peer_id) return;
+            this.applyChatMessageEdit(msgEl, peer_msg);
+        });
     };
 
     copyToClipboard(id) {
@@ -8894,6 +9034,7 @@ class RoomClient {
                 removeAllChildNodes(chatPublicMessages);
                 removeAllChildNodes(chatPrivateMessages);
                 this.chatMessages = [];
+                this.chatMessageRaw.clear();
                 this.chatGPTContext = [];
                 this.deepSeekContext = [];
                 updateChatEmptyNotice();
@@ -8915,6 +9056,7 @@ class RoomClient {
         };
         for (const msg of this.chatMessages) {
             const entry = { time: msg.time, from: msg.from, msg: msg.msg };
+            if (msg.edited) entry.edited = true;
             switch (msg.toId) {
                 case 'all':
                     grouped.public.push(entry);
