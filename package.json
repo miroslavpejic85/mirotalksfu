@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.7.04",
+    "version": "2.7.05",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -21,8 +21,8 @@
         "docker:push": "docker push mirotalk/sfu:latest",
         "docker:pull": "docker pull mirotalk/sfu:latest",
         "docker:rmc": "docker container rm mirotalksfu --force",
-        "docker:run": "docker run -d -p 40000-40100:40000-40100 -p 3010:3010 -v ./.env:/src/.env -v ./app/src/config.js:/src/app/src/config.js:ro --name mirotalksfu mirotalk/sfu:latest",
-        "docker:run-vm": "docker run -d -p 40000-40100:40000-40100 -p 3010:3010 -v ./.env:/src/.env -v ./app/:/src/app/:ro -v ./public/:/src/public/:ro --name mirotalksfu mirotalk/sfu:latest",
+        "docker:run": "docker run -d --init --stop-timeout 35 -p 40000-40100:40000-40100 -p 3010:3010 -v ./.env:/src/.env -v ./app/src/config.js:/src/app/src/config.js:ro --name mirotalksfu mirotalk/sfu:latest",
+        "docker:run-vm": "docker run -d --init --stop-timeout 35 -p 40000-40100:40000-40100 -p 3010:3010 -v ./.env:/src/.env -v ./app/:/src/app/:ro -v ./public/:/src/public/:ro --name mirotalksfu mirotalk/sfu:latest",
         "docker:start": "docker start mirotalksfu",
         "docker:stop": "docker stop mirotalksfu",
         "rtmp:start": "docker-compose -f rtmpServers/nginx-rtmp/docker-compose.yml up -d",
@@ -88,7 +88,7 @@
         "js-yaml": "^5.5.0",
         "jsdom": "^30.1.3",
         "jsonwebtoken": "^9.0.3",
-        "mediasoup": "^3.32.0",
+        "mediasoup": "^3.32.1",
         "mediasoup-client": "3.25.3",
         "mime-types": "^3.0.2",
         "nodemailer": "^10.3.1",

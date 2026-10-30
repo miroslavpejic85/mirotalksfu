@@ -174,12 +174,19 @@ body {
     line-height: 1.35;
 }
 
+.disconnect-banner__status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
 .disconnect-banner__meta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    padding: 7px 11px;
+    padding: 5px 10px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -196,11 +203,12 @@ body {
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    width: 34px;
-    height: 34px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     color: rgba(255, 255, 255, 0.88);
     background: rgba(255, 255, 255, 0.06);
+    font-size: 0.8rem;
 }
 
 .disconnect-banner__action {

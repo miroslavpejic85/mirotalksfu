@@ -7,6 +7,10 @@ services:
         # "node" user (1000:1000); set this to override with a different uid/gid.
         user: '1000:1000'
         restart: unless-stopped
+        # Forward signals and reap child processes (e.g. ffmpeg)
+        init: true
+        # Allow the graceful shutdown (notify clients, close rooms/workers) to finish before SIGKILL
+        stop_grace_period: 35s
         # The following ports are only required if 'network_mode: host' is NOT enabled.
         # If you enable 'network_mode: host', you can comment out or remove the 'ports' section below.
         # network_mode: 'host'

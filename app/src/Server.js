@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.04
+ * @version 2.7.05
  *
  */
 
@@ -6607,14 +6607,23 @@ async function getScheduleMeetingAuthState(req) {
 // ####################################################
 
 let isShuttingDown = false;
+let shutdownStartedAt = 0;
+const SHUTDOWN_NOTIFY_DELAY_MS = 1000;
+// `npm start` + Ctrl+C delivers SIGINT twice (from the terminal and forwarded by npm) within a few ms
+const SHUTDOWN_DUPLICATE_SIGNAL_WINDOW_MS = 2000;
 
 async function gracefulShutdown(signal) {
     if (isShuttingDown) {
+        if (Date.now() - shutdownStartedAt < SHUTDOWN_DUPLICATE_SIGNAL_WINDOW_MS) {
+            log.debug(`${signal} received again during shutdown, ignoring duplicate signal`);
+            return;
+        }
         log.warn(`${signal} received again, forcing exit...`);
         process.exit(1);
     }
 
     isShuttingDown = true;
+    shutdownStartedAt = Date.now();
     log.info(`${signal} received, starting graceful shutdown...`);
 
     try {
@@ -6624,13 +6633,16 @@ async function gracefulShutdown(signal) {
             log.info('HTTP server closed');
         });
 
-        // 2. Close all active rooms and notify peers
+        // 2. Notify all connected clients (in-room and lobby) the server is restarting,
+        // then give the message time to flush before tearing anything down
+        log.debug('Notifying clients about server shutdown...');
+        io.emit('serverShutdown', { message: 'Server is restarting' });
+        await new Promise((resolve) => setTimeout(resolve, SHUTDOWN_NOTIFY_DELAY_MS));
+
+        // 3. Close all active rooms
         log.debug(`Closing ${roomList.size} active rooms...`);
         for (const [roomId, room] of roomList.entries()) {
             try {
-                // Notify all peers in the room
-                room.sendToAll('serverShutdown', { message: 'Server is shutting down' });
-
                 // Stop any active RTMP streams
                 if (room.isRtmpFileStreamerActive()) {
                     await room.stopRTMP();
@@ -6651,7 +6663,7 @@ async function gracefulShutdown(signal) {
             }
         }
 
-        // 3. Close all RTMP streams
+        // 4. Close all RTMP streams
         log.debug(`Closing ${Object.keys(streams).length} RTMP streams...`);
         for (const [key, stream] of Object.entries(streams)) {
             try {
@@ -6664,16 +6676,11 @@ async function gracefulShutdown(signal) {
             }
         }
 
-        // 4. Disconnect all Socket.IO clients
-        log.debug('Disconnecting all Socket.IO clients...');
-        const sockets = await io.fetchSockets();
-        for (const socket of sockets) {
-            socket.disconnect(true);
-        }
-
-        // 5. Close Socket.IO server
+        // 5. Close Socket.IO server. Do NOT use socket.disconnect(true): it sends an
+        // "io server disconnect" packet, which stops clients from auto-reconnecting.
+        // io.close() only drops the transports, so clients reconnect once the server is back.
         log.debug('Closing Socket.IO server...');
-        io.close();
+        await io.close();
 
         // 6. Close all mediasoup workers
         log.debug(`Closing ${workers.length} mediasoup workers...`);

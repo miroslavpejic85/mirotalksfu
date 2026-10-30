@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.04
+ * @version 2.7.05
  *
  */
 
@@ -331,6 +331,8 @@ class RoomClient {
         this.reconnectInterval = Number(this.socket?.io?.opts?.reconnectionDelay) || 3000;
         this.maxReconnectInterval = Number(this.socket?.io?.opts?.reconnectionDelayMax) || 15000;
         this.serverAwayShown = false;
+        this.serverRestarting = false; // Set when the server announces a planned shutdown (e.g. update/redeploy)
+        this.serverRestartReconnectAttempts = 120; // ~30 min at the 15s max backoff
         this.silentReconnect = false; // If true, no popup will be shown on reconnect
 
         this.cacheReconnectBannerElements();
@@ -1735,6 +1737,7 @@ class RoomClient {
         this.socket.on('connect', this.handleSocketConnect);
         this.socket.on('connect_error', this.handleSocketConnectionError);
         this.socket.on('disconnect', this.handleSocketDisconnect);
+        this.socket.on('serverShutdown', this.handleServerShutdown);
         this.socket.on('transportClosed', this.handleTransportClosed);
         this.socket.on('consumerClosed', this.handleConsumerClosed);
         this.socket.on('setVideoOff', this.handleSetVideoOff);
@@ -1794,11 +1797,18 @@ class RoomClient {
 
     handleSocketConnect = () => {
         console.log('SocketOn Connected to signaling server!');
+        // Manual reconnect after a planned server restart emits 'connect' instead of 'reconnect'
+        if (this.serverRestarting && !this._isConnected) this.handleReconnect();
     };
 
     handleSocketDisconnect = (reason) => {
         console.log(`SocketOn Disconnect Reason: ${reason}`);
         this.handleDisconnect(reason);
+    };
+
+    handleServerShutdown = (data) => {
+        console.warn('SocketOn Server shutdown', data);
+        this.handleServerRestart();
     };
 
     handleSocketConnectionError = (err) => {
@@ -2236,6 +2246,7 @@ class RoomClient {
             meta: this.getId('disconnectBannerMeta'),
             action: this.getId('disconnectBannerAction'),
             spinner: this.getId('disconnectBannerSpinner'),
+            status: this.getId('disconnectBannerStatus'),
         };
     }
 
@@ -2301,6 +2312,11 @@ class RoomClient {
             banner.spinner.style.display = showSpinner ? 'inline-flex' : 'none';
         }
 
+        // Collapse the badge/spinner row when there is nothing to show (avoids an empty gap)
+        if (banner.status) {
+            banner.status.style.display = meta || showSpinner ? 'flex' : 'none';
+        }
+
         if (actionLabel && typeof onAction === 'function') {
             banner.root.classList.add('is-interactive');
         }
@@ -2344,6 +2360,20 @@ class RoomClient {
             message: `${reason || 'Network issue'}.`,
             meta: 'Retrying',
             icon: 'fa-solid fa-plug',
+            state: 'reconnecting',
+            showSpinner: true,
+        });
+    }
+
+    showServerRestartAlert(meta = 'Please wait') {
+        const message = 'The server is being updated. You will be reconnected automatically.';
+        this.renderReconnectBanner({
+            title: 'Server restarting',
+            message:
+                window.i18n?.t('The server is being updated. You will be reconnected automatically.', 'dialogs') ||
+                message,
+            meta,
+            icon: 'fa-solid fa-screwdriver-wrench',
             state: 'reconnecting',
             showSpinner: true,
         });
@@ -2394,7 +2424,25 @@ class RoomClient {
         this.serverAwayShown = false;
         this._isConnected = false;
 
+        if (this.serverRestarting) {
+            this.showServerRestartAlert();
+            // A server-initiated disconnect disables socket.io auto-reconnect, so resume it manually
+            if (reason === 'io server disconnect') this.socket.connect();
+            return;
+        }
+
         this.showReconnectAlert(reason);
+    }
+
+    handleServerRestart() {
+        if (this.serverRestarting) return;
+        this.serverRestarting = true;
+        // Stop media recovery flows: the server is going away on purpose, the page reloads once it is back
+        this._isConnected = false;
+        this.maxReconnectAttempts = this.serverRestartReconnectAttempts;
+        this.socket.io.reconnectionAttempts(this.serverRestartReconnectAttempts);
+        this.sound('alert');
+        this.showServerRestartAlert();
     }
 
     handleReconnectAttempt(attempt) {
@@ -2417,6 +2465,11 @@ class RoomClient {
 
     updateReconnectAlert(delay, attempt = 1) {
         const seconds = Math.max(1, Math.round(delay / 1000));
+
+        if (this.serverRestarting) {
+            this.showServerRestartAlert(`Retry in ${seconds}s`);
+            return;
+        }
 
         this.renderReconnectBanner({
             title: 'Reconnecting',
@@ -5387,6 +5440,7 @@ class RoomClient {
             if (this.producerTransport) this.producerTransport.close();
             if (this.socket) {
                 this.socket.off('disconnect');
+                this.socket.off('serverShutdown');
                 this.socket.off('transportClosed');
                 this.socket.off('newProducers');
                 this.socket.off('consumerClosed');
