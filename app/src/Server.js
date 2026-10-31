@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.10
+ * @version 2.7.11
  *
  */
 
@@ -3009,6 +3009,10 @@ function startServer() {
         });
 
         socket.on('createWebRtcTransport', async (_, callback) => {
+            if (isShuttingDown) {
+                return callback({ error: 'Server is shutting down' });
+            }
+
             if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
@@ -3027,7 +3031,14 @@ function startServer() {
                 const createWebRtcTransport = await room.createWebRtcTransport(socket.id);
                 callback(createWebRtcTransport);
             } catch (err) {
-                log.warn('Create WebRTC Transport warning', { error: err.message, peerInfo });
+                if (err.name === 'WorkerClosedError' || isShuttingDown) {
+                    log.debug('Create WebRTC Transport skipped, media server unavailable', {
+                        error: err.message,
+                        peerInfo,
+                    });
+                } else {
+                    log.warn('Create WebRTC Transport warning', { error: err.message, peerInfo });
+                }
                 callback({ error: err.message });
             }
         });

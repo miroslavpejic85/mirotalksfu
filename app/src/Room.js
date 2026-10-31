@@ -788,6 +788,13 @@ module.exports = class Room {
                 throw new Error('Failed to create WebRTC Transport');
             }
         } catch (error) {
+            // Worker died or was closed (e.g. server restart/update): expected, keep it out of error logs/Sentry
+            if (error?.name === 'WorkerClosedError' || this.router?.closed) {
+                log.debug('WebRTC Transport not created, mediasoup worker closed', { error: error.message, socket_id });
+                const workerClosedError = new Error('Media server unavailable');
+                workerClosedError.name = 'WorkerClosedError';
+                throw workerClosedError;
+            }
             log.error('Error creating WebRTC Transport', { error: error.message, socket_id });
             throw new Error('Error creating WebRTC Transport');
         }

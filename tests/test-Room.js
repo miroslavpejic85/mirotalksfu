@@ -396,4 +396,31 @@ describe('test-Room', () => {
             data: { transport_id: transport.id },
         });
     });
+
+    it('rejects with WorkerClosedError without logging an error when the mediasoup worker is closed', async () => {
+        const room = Object.create(Room.prototype);
+        room.router = {
+            closed: false,
+            createWebRtcTransport: async () => {
+                const err = new Error('Channel closed, cannot send request [method:ROUTER_CREATE_WEBRTCTRANSPORT]');
+                err.name = 'WorkerClosedError';
+                throw err;
+            },
+        };
+        room.peers = new Map([['peer-id', {}]]);
+        room.webRtcServerActive = false;
+        room.webRtcTransport = { listenInfos: [] };
+
+        const originalError = console.error;
+        let errorLogged = false;
+        console.error = () => {
+            errorLogged = true;
+        };
+        try {
+            await room.createWebRtcTransport('peer-id').should.be.rejectedWith({ name: 'WorkerClosedError' });
+        } finally {
+            console.error = originalError;
+        }
+        errorLogged.should.equal(false);
+    });
 });
