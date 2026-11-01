@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.20
+ * @version 2.7.21
  *
  */
 
@@ -4965,9 +4965,10 @@ class RoomClient {
                 BUTTONS.consumerVideo.sendVideoButton &&
                     canInteract &&
                     eVc.appendChild(this.createDropdownItem(sv, 'Send Video/Audio', eVc));
-                BUTTONS.consumerVideo.banButton && eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
                 BUTTONS.consumerVideo.ejectButton &&
-                    eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
+                    eVc.appendChild(this.createDropdownItem(ko, 'Eject participant', eVc, 'red'));
+                BUTTONS.consumerVideo.banButton &&
+                    eVc.appendChild(this.createDropdownItem(ban, 'Ban participant', eVc, 'red'));
 
                 eDiv.appendChild(eBtn);
                 document.body.appendChild(eVc);
@@ -5335,8 +5336,9 @@ class RoomClient {
             BUTTONS.videoOff.sendVideoButton &&
                 canInteract &&
                 eVc.appendChild(this.createDropdownItem(sv, 'Send Video/Audio', eVc));
-            BUTTONS.videoOff.banButton && eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
-            BUTTONS.videoOff.ejectButton && eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
+            BUTTONS.videoOff.ejectButton &&
+                eVc.appendChild(this.createDropdownItem(ko, 'Eject participant', eVc, 'red'));
+            BUTTONS.videoOff.banButton && eVc.appendChild(this.createDropdownItem(ban, 'Ban participant', eVc, 'red'));
         }
 
         eDiv.appendChild(eBtn);
@@ -13302,21 +13304,21 @@ class RoomClient {
                     this.handleRC(rcb.id, remotePeerId);
                 }
             );
-            this.reconcilePresenterMenuItem(eVc, `${prefix}ban`, canModerate && BUTTONS.consumerVideo.banButton, () => {
-                const ban = this.createButton(`${prefix}ban`, html.ban);
-                eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
-                this.handleBAN(ban.id, remotePeerId);
-            });
             this.reconcilePresenterMenuItem(
                 eVc,
                 `${prefix}kickOut`,
                 canModerate && BUTTONS.consumerVideo.ejectButton,
                 () => {
                     const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
-                    eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
+                    eVc.appendChild(this.createDropdownItem(ko, 'Eject participant', eVc, 'red'));
                     this.handleKO(ko.id, remotePeerId);
                 }
             );
+            this.reconcilePresenterMenuItem(eVc, `${prefix}ban`, canModerate && BUTTONS.consumerVideo.banButton, () => {
+                const ban = this.createButton(`${prefix}ban`, html.ban);
+                eVc.appendChild(this.createDropdownItem(ban, 'Ban participant', eVc, 'red'));
+                this.handleBAN(ban.id, remotePeerId);
+            });
         });
 
         // Remote video-off tiles: moderation controls live in the dropdown
@@ -13340,13 +13342,13 @@ class RoomClient {
                 canModerate && BUTTONS.videoOff.ejectButton,
                 () => {
                     const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
-                    eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
+                    eVc.appendChild(this.createDropdownItem(ko, 'Eject participant', eVc, 'red'));
                     this.handleKO(ko.id, peerId);
                 }
             );
             this.reconcilePresenterMenuItem(eVc, `${prefix}ban`, canModerate && BUTTONS.videoOff.banButton, () => {
                 const ban = this.createButton(`${prefix}ban`, html.ban);
-                eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
+                eVc.appendChild(this.createDropdownItem(ban, 'Ban participant', eVc, 'red'));
                 this.handleBAN(ban.id, peerId);
             });
             this.reconcilePresenterMenuItem(

@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.20
+ * @version 2.7.21
  *
  */
 
@@ -9100,17 +9100,6 @@ function getParticipantsList(peers) {
             if (canModerate && (BUTTONS.participantsList.banButton || BUTTONS.participantsList.ejectButton)) {
                 menuItems += renderParticipantMenuGroup('Danger zone');
             }
-            if (canModerate && BUTTONS.participantsList.banButton) {
-                menuItems += renderParticipantMenuItem(
-                    renderParticipantActionButton({
-                        buttonClass: 'btn-sm ml5 participant-action-danger',
-                        buttonId: `${peer_id}___pBan`,
-                        onClick: `rc.peerAction('me','${peer_id}','ban')`,
-                        iconHtml: peer_ban,
-                        label: 'Ban participant',
-                    })
-                );
-            }
             if (canModerate && BUTTONS.participantsList.ejectButton) {
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
@@ -9119,6 +9108,17 @@ function getParticipantsList(peers) {
                         onClick: `rc.peerAction('me','${peer_id}','eject')`,
                         iconHtml: peer_eject,
                         label: 'Eject participant',
+                    })
+                );
+            }
+            if (canModerate && BUTTONS.participantsList.banButton) {
+                menuItems += renderParticipantMenuItem(
+                    renderParticipantActionButton({
+                        buttonClass: 'btn-sm ml5 participant-action-danger',
+                        buttonId: `${peer_id}___pBan`,
+                        onClick: `rc.peerAction('me','${peer_id}','ban')`,
+                        iconHtml: peer_ban,
+                        label: 'Ban participant',
                     })
                 );
             }
@@ -9239,17 +9239,6 @@ function getParticipantsList(peers) {
                 if (BUTTONS.participantsList.banButton || BUTTONS.participantsList.ejectButton) {
                     menuItems += renderParticipantMenuGroup('Danger zone');
                 }
-                if (BUTTONS.participantsList.banButton) {
-                    menuItems += renderParticipantMenuItem(
-                        renderParticipantActionButton({
-                            buttonClass: 'btn-sm ml5 participant-action-danger',
-                            buttonId: `${peer_id}___pBan`,
-                            onClick: `rc.peerAction('me','${peer_id}','ban')`,
-                            iconHtml: peer_ban,
-                            label: 'Ban participant',
-                        })
-                    );
-                }
                 if (BUTTONS.participantsList.ejectButton) {
                     menuItems += renderParticipantMenuItem(
                         renderParticipantActionButton({
@@ -9258,6 +9247,17 @@ function getParticipantsList(peers) {
                             onClick: `rc.peerAction('me','${peer_id}','eject')`,
                             iconHtml: peer_eject,
                             label: 'Eject participant',
+                        })
+                    );
+                }
+                if (BUTTONS.participantsList.banButton) {
+                    menuItems += renderParticipantMenuItem(
+                        renderParticipantActionButton({
+                            buttonClass: 'btn-sm ml5 participant-action-danger',
+                            buttonId: `${peer_id}___pBan`,
+                            onClick: `rc.peerAction('me','${peer_id}','ban')`,
+                            iconHtml: peer_ban,
+                            label: 'Ban participant',
                         })
                     );
                 }
@@ -10770,7 +10770,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.20',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.21',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
