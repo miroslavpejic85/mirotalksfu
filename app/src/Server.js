@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.18
+ * @version 2.7.19
  *
  */
 
@@ -3629,6 +3629,21 @@ function startServer() {
                     }
                     break;
                 }
+                case 'transcript':
+                    // Bind the author to the sending connection: never trust client supplied identity
+                    data.peer_name = peer.peer_name;
+                    data.peer_avatar = peer.peer_avatar || false;
+                    data.broadcast = true;
+                    break;
+                case 'geoLocation':
+                case 'geoLocationOK':
+                case 'geoLocationKO':
+                    // Requester/responder identity and reply destination must be the real sender
+                    data.from_peer_id = socket.id;
+                    data.from_peer_name = peer.peer_name;
+                    data.broadcast = false;
+                    if (data.peer_id === socket.id) return;
+                    break;
                 default:
                     break;
                 //...
