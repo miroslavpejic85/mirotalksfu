@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.12
+ * @version 2.7.13
  *
  */
 
@@ -98,6 +98,7 @@ const Peer = require('./Peer');
 const WhipServer = require('./WhipServer');
 const { assignFallbackPresenter, isConfiguredPresenter, isOidcConfiguredPresenter } = require('./PresenterManager');
 const ServerApi = require('./ServerApi');
+const { getForcedExitTargets, scheduleForcedDisconnect } = require('./ForcedExit');
 const { getJwtKeys } = require('./JwtSecret');
 const Logger = require('./Logger');
 const Validator = require('./Validator');
@@ -3594,6 +3595,11 @@ function startServer() {
             }
 
             data.broadcast ? room.broadCast(socket.id, 'cmd', data) : room.sendTo(data.peer_id, 'cmd', data);
+
+            // A non-cooperating client can ignore the notification: enforce the removal server-side
+            if (data.type === 'ejectAll') {
+                scheduleForcedDisconnect(io, room, getForcedExitTargets(room, socket.id, data), data.type, log);
+            }
         });
 
         socket.on('roomAction', async (dataObject) => {
@@ -4002,6 +4008,11 @@ function startServer() {
             data.broadcast
                 ? room.broadCast(data.peer_id, 'peerAction', data)
                 : room.sendTo(data.peer_id, 'peerAction', data);
+
+            // A non-cooperating client can ignore the notification: enforce the removal server-side
+            if (['eject', 'ban'].includes(data.action)) {
+                scheduleForcedDisconnect(io, room, getForcedExitTargets(room, socket.id, data), data.action, log);
+            }
         });
 
         socket.on('setPresenterRole', async (dataObject) => {
