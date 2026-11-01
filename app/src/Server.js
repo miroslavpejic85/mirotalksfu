@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.15
+ * @version 2.7.16
  *
  */
 
@@ -2531,6 +2531,8 @@ function startServer() {
     // ####################################################
 
     const PRE_JOIN_EVENTS = new Set(['createRoom', 'checkPeerName', 'join', 'clientError', 'error']);
+    // Peers waiting in the lobby are not admitted yet: they may only leave
+    const LOBBY_ALLOWED_EVENTS = new Set(['exitRoom']);
     const PEER_NAME_CHECK_LIMIT = 20;
     const PEER_NAME_CHECK_WINDOW_MS = 60 * 1000;
 
@@ -2541,7 +2543,18 @@ function startServer() {
             const [event, payload] = packet;
             if (PRE_JOIN_EVENTS.has(event)) return next();
             if (event === 'roomAction' && payload?.action === 'checkPassword') return next();
-            if (roomExists(socket) && getPeer(socket)) return next();
+            if (roomExists(socket) && getPeer(socket)) {
+                if (!isPeerInLobby(getPeer(socket)) || LOBBY_ALLOWED_EVENTS.has(event)) return next();
+
+                log.warn('Blocked event from a peer waiting in the lobby', {
+                    event,
+                    peer_id: socket.id,
+                    room_id: socket.room_id,
+                });
+                const lobbyAck = packet[packet.length - 1];
+                if (typeof lobbyAck === 'function') lobbyAck({ error: 'In lobby' });
+                return;
+            }
 
             // Only a socket bound to a live room (via createRoom) but never admitted is a bypass attempt.
             // A socket with no room is a harmless leftover: events buffered during a reconnect (new socket
@@ -3790,6 +3803,16 @@ function startServer() {
                     peer.updatePeerInfo({ type: 'lobby', status: false });
 
                     handleJoinWebHook(room.id, room.getSessionId(), peer.peer_info);
+                }
+            }
+
+            if (data.lobby_status === 'reject') {
+                // A declined peer must not keep a member slot: drop it so it cannot reach any room interface
+                for (const peer_id of pears_id) {
+                    const lobbyPeer = room.getPeer(peer_id);
+                    if (!lobbyPeer || !lobbyPeer.peer_lobby) continue;
+
+                    room.removePeer(peer_id);
                 }
             }
         });

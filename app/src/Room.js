@@ -214,7 +214,9 @@ module.exports = class Room {
 
         log.info('Room time limit reached', { room_id: this.id, peers: this.getPeersCount() });
 
-        this.sendToAll('roomTimeLimit', { action: 'end' });
+        for (const peer_id of this.peers.keys()) {
+            this.send(peer_id, 'roomTimeLimit', { action: 'end' });
+        }
 
         // Clients leave on their own, disconnect anyone still connected once the grace period is over
         this._timeLimit.graceTimer = setTimeout(() => {
@@ -1402,8 +1404,15 @@ module.exports = class Room {
     // SENDER
     // ####################################################
 
+    // Peers waiting in the lobby are not admitted yet, so they never receive room-wide events
+    getAdmittedPeerIds() {
+        return Array.from(this.peers.entries())
+            .filter(([, peer]) => !peer.peer_lobby)
+            .map(([id]) => id);
+    }
+
     broadCast(socket_id, action, data) {
-        for (let otherID of Array.from(this.peers.keys()).filter((id) => id !== socket_id)) {
+        for (let otherID of this.getAdmittedPeerIds().filter((id) => id !== socket_id)) {
             this.send(otherID, action, data);
         }
     }
@@ -1415,7 +1424,7 @@ module.exports = class Room {
     }
 
     sendToAll(action, data) {
-        for (let peer_id of Array.from(this.peers.keys())) {
+        for (let peer_id of this.getAdmittedPeerIds()) {
             this.send(peer_id, action, data);
         }
     }

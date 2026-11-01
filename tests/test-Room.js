@@ -7,6 +7,33 @@ const { EventEmitter } = require('events');
 const Room = require('../app/src/Room');
 
 describe('test-Room', () => {
+    describe('lobby peers', () => {
+        const makeRoom = () => {
+            const room = Object.create(Room.prototype);
+            room.peers = new Map([
+                ['sender', { peer_lobby: false }],
+                ['member', { peer_lobby: false }],
+                ['waiting', { peer_lobby: true }],
+            ]);
+            room.sent = [];
+            room.send = (peer_id, action, data) => room.sent.push({ peer_id, action, data });
+            return room;
+        };
+
+        it('does not deliver broadcasts or room-wide events to peers waiting in the lobby', () => {
+            const room = makeRoom();
+            room.broadCast('sender', 'message', {});
+            room.sendToAll('breakoutRoomHelp', {});
+            room.sent.map((s) => s.peer_id).should.deepEqual(['member', 'sender', 'member']);
+        });
+
+        it('still delivers targeted messages to a lobby peer', () => {
+            const room = makeRoom();
+            room.sendTo('waiting', 'roomLobby', {});
+            room.sent.map((s) => s.peer_id).should.deepEqual(['waiting']);
+        });
+    });
+
     describe('room time limit', () => {
         const makeRoom = () => {
             const room = Object.create(Room.prototype);
