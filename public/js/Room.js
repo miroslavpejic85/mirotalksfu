@@ -6675,6 +6675,11 @@ function setupQuickDeviceSwitchDropdowns() {
         menuEl.appendChild(toggleRow);
     }
 
+    // The menus stay open after picking a device; actions that open another panel close them explicitly
+    function hideDeviceMenu(toggleEl) {
+        bootstrap.Dropdown.getInstance(toggleEl)?.hide();
+    }
+
     function appendSelectOptions(menuEl, selectEl, emptyLabel, rebuildFn, meterCollector) {
         if (!selectEl) return;
 
@@ -6943,6 +6948,7 @@ function setupQuickDeviceSwitchDropdowns() {
             virtualBgBtn.appendChild(virtualBgIcon);
             virtualBgBtn.appendChild(document.createTextNode(' Choose Background...'));
             virtualBgBtn.addEventListener('click', () => {
+                hideDeviceMenu(videoToggle);
                 rc.toggleMySettings();
                 setTimeout(() => {
                     tabVirtualBackgroundBtn.click();
@@ -6960,6 +6966,7 @@ function setupQuickDeviceSwitchDropdowns() {
         settingsBtn.appendChild(settingsIcon);
         settingsBtn.appendChild(document.createTextNode(' Open Video Settings'));
         settingsBtn.addEventListener('click', () => {
+            hideDeviceMenu(videoToggle);
             rc.toggleMySettings();
             // Simulate tab click to open video devices tab
             setTimeout(() => {
@@ -6985,6 +6992,7 @@ function setupQuickDeviceSwitchDropdowns() {
             videoAIBtn.appendChild(videoAIIcon);
             videoAIBtn.appendChild(document.createTextNode(' Open Video AI'));
             videoAIBtn.addEventListener('click', () => {
+                hideDeviceMenu(videoToggle);
                 rc.toggleMySettings();
                 // Simulate tab click to open video AI tab
                 setTimeout(() => {
@@ -7102,6 +7110,7 @@ function setupQuickDeviceSwitchDropdowns() {
         settingsBtn.appendChild(settingsIcon);
         settingsBtn.appendChild(document.createTextNode(' Open Audio Settings'));
         settingsBtn.addEventListener('click', () => {
+            hideDeviceMenu(audioToggle);
             rc.toggleMySettings();
             // Simulate tab click to open audio devices tab
             setTimeout(() => {
