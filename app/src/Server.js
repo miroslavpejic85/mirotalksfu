@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.17
+ * @version 2.7.18
  *
  */
 
@@ -5840,38 +5840,79 @@ function startServer() {
 
         // Room collaborative editor
 
+        // Security: the editor lock and presenter-only actions are enforced server-side;
+        // clients only mirror the state and must never be trusted to enforce it.
+        const getEditorSender = () => {
+            if (!roomExists(socket)) return null;
+            const room = getRoom(socket);
+            const peer = room.getPeer(socket.id);
+            if (!peer) return null;
+            const peer_name = peer.peer_info?.peer_name;
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer.peer_info?.peer_uuid);
+            return { room, peer_name, isPresenter };
+        };
+
         socket.on('editorChange', (dataObject) => {
-            if (!roomExists(socket)) return;
+            const sender = getEditorSender();
+            if (!sender) return;
+
+            if (!sender.isPresenter && sender.room.getEditorLock()) {
+                log.debug('editorChange blocked: editor is locked and sender is not presenter', {
+                    peer_name: sender.peer_name,
+                });
+                return;
+            }
 
             //const data = checkXSS(dataObject);
             const data = dataObject;
 
-            const room = getRoom(socket);
+            if (!Validator.isValidData(data)) return;
 
-            room.broadCast(socket.id, 'editorChange', data);
+            sender.room.broadCast(socket.id, 'editorChange', data);
         });
 
         socket.on('editorActions', (dataObject) => {
-            if (!roomExists(socket)) return;
+            const sender = getEditorSender();
+            if (!sender) return;
 
             const data = checkXSS(dataObject);
 
-            const room = getRoom(socket);
+            if (!Validator.isValidData(data) || typeof data.action !== 'string') return;
 
-            log.debug('editorActions', data);
+            const { room, isPresenter, peer_name } = sender;
 
-            room.broadCast(socket.id, 'editorActions', data);
+            // Participants may only clean the shared editor while it is unlocked.
+            const allowed = isPresenter || (data.action === 'clean' && !room.getEditorLock());
+            if (!['open', 'close', 'clean', 'lock', 'unlock'].includes(data.action) || !allowed) {
+                log.debug('editorActions blocked', { action: data.action, peer_name, isPresenter });
+                return;
+            }
+
+            if (data.action === 'lock') room.setEditorLock(true);
+            if (data.action === 'unlock') room.setEditorLock(false);
+
+            // Use the server-known name; the client renders it in a toast.
+            const action = { peer_name: peer_name || data.peer_name, action: data.action };
+
+            log.debug('editorActions', action);
+
+            room.broadCast(socket.id, 'editorActions', action);
         });
 
         socket.on('editorUpdate', (dataObject) => {
-            if (!roomExists(socket)) return;
+            const sender = getEditorSender();
+            if (!sender) return;
+
+            // Replaces the whole shared document for every peer: presenter only.
+            if (!sender.isPresenter) {
+                log.debug('editorUpdate blocked: sender is not presenter', { peer_name: sender.peer_name });
+                return;
+            }
 
             //const data = checkXSS(dataObject);
             const data = dataObject;
 
-            const room = getRoom(socket);
-
-            room.broadCast(socket.id, 'editorUpdate', data);
+            sender.room.broadCast(socket.id, 'editorUpdate', data);
         });
 
         socket.on('disconnect', (reason) => {

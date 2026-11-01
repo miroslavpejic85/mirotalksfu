@@ -40,6 +40,8 @@ module.exports = class Room {
         // Server-side whiteboard lock state. Authoritative — does not depend on the client
         // clicking the lock button. Used to drop non-presenter whiteboard writes when set.
         this._wbIsLock = false;
+        // Server-side collaborative editor lock state (authoritative, same model as the whiteboard).
+        this._editorIsLock = false;
         this._wbShowParticipantNames = false;
         // ##########################
         this.recording = {
@@ -1392,6 +1394,12 @@ module.exports = class Room {
     }
     setWhiteboardLock(status) {
         this._wbIsLock = Boolean(status);
+    }
+    getEditorLock() {
+        return this._editorIsLock;
+    }
+    setEditorLock(status) {
+        this._editorIsLock = Boolean(status);
     }
     getWhiteboardParticipantNames() {
         return this._wbShowParticipantNames;
