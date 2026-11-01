@@ -154,6 +154,7 @@ const image = {
     deepSeek: '../images/deepSeek.png',
     all: '../images/all.png',
     forbidden: '../images/forbidden.png',
+    banned: '../images/banned.svg',
     broadcasting: '../images/broadcasting.png',
     geolocation: '../images/geolocation.png',
     network: '../images/network.gif',
@@ -12611,7 +12612,9 @@ class RoomClient {
             showDenyButton: false,
             showConfirmButton: true,
             background: swalBackground,
-            imageUrl: image.forbidden,
+            imageUrl: image.banned,
+            imageWidth: 128,
+            imageHeight: 128,
             title: 'Banned',
             text: 'You are banned from this room!',
             confirmButtonText: `Ok`,
@@ -14062,7 +14065,9 @@ class RoomClient {
         return Swal.fire({
             allowOutsideClick: false,
             background: swalBackground,
-            icon: action == 'eject' ? 'warning' : 'success',
+            ...(action === 'ban'
+                ? { imageUrl: image.banned, imageWidth: 128, imageHeight: 128 }
+                : { icon: action == 'eject' ? 'warning' : 'success' }),
             title: tt,
             html: msg,
             timer: time,
@@ -14092,7 +14097,9 @@ class RoomClient {
                 Swal.fire({
                     background: swalBackground,
                     position: 'center',
-                    imageUrl: image.forbidden,
+                    imageUrl: image.banned,
+                    imageWidth: 128,
+                    imageHeight: 128,
                     title: 'Ban current participant',
                     input: 'text',
                     inputPlaceholder: 'Ban reason',
