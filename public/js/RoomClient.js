@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.13
+ * @version 2.7.14
  *
  */
 
@@ -2710,7 +2710,7 @@ class RoomClient {
             }
             if (!audioStarted) {
                 setColor(startAudioButton, 'red');
-            } else if (this._moderator.audio_start_muted) {
+            } else if (this._moderator.audio_start_muted || this.isAudioLockedByModerator()) {
                 await this.sleep(300);
                 await this.pauseAudioProducer();
             }
@@ -2731,7 +2731,7 @@ class RoomClient {
         }
 
         let videoStarted = false;
-        if (this.isVideoAllowed && !this._moderator.video_start_hidden) {
+        if (this.isVideoAllowed && !this._moderator.video_start_hidden && !this.isVideoLockedByModerator()) {
             videoStarted = !!(await this.produce(mediaType.video, videoSelect.value));
             console.log(videoStarted ? '10 ----> START VIDEO MEDIA' : '10 ----> START VIDEO MEDIA FAILED');
         }
@@ -2764,6 +2764,14 @@ class RoomClient {
         }
 
         console.log('[startLocalMedia] - PRODUCER LABEL', this.producerLabel);
+    }
+
+    isAudioLockedByModerator() {
+        return !!this._moderator.audio_cant_unmute && !isPresenter;
+    }
+
+    isVideoLockedByModerator() {
+        return !!this._moderator.video_cant_unhide && !isPresenter;
     }
 
     async pauseAudioProducer() {

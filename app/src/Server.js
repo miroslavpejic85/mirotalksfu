@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.13
+ * @version 2.7.14
  *
  */
 
@@ -3155,6 +3155,16 @@ function startServer() {
                 return callback({ error: 'Missing appData.mediaType' });
             }
 
+            const blockedBy = getBlockingMediaPolicy(room, peer, socket, kind, mediaType);
+
+            // Audio under "can't unmute" is still created (clients start their mic on join) but is forced muted
+            const startMuted = blockedBy === 'audio_cant_unmute';
+
+            if (blockedBy && !startMuted) {
+                log.debug('Produce blocked by moderator rule', { rule: blockedBy, kind, type: mediaType, peerInfo });
+                return callback({ error: `Not allowed by moderator (${blockedBy})` });
+            }
+
             // Must happen before room.produce(): its 'newProducers' broadcast carries this peer_info
             peer.updatePeerInfo({
                 room_id: room.id,
@@ -3162,11 +3172,13 @@ function startServer() {
                 peer_id: socket.id,
                 kind: kind,
                 type: mediaType,
-                status: true,
+                status: !startMuted,
             });
 
             try {
                 const producer_id = await room.produce(socket.id, producerTransportId, rtpParameters, kind, mediaType);
+
+                if (startMuted) await peer.getProducer(producer_id)?.pause();
 
                 log.debug('Produce', {
                     kind: kind,
@@ -3433,6 +3445,19 @@ function startServer() {
             }
 
             const peerInfo = getPeerInfo(peer);
+
+            const blockedBy = getBlockingMediaPolicy(
+                getRoom(socket),
+                peer,
+                socket,
+                producer.kind,
+                producer.appData?.mediaType
+            );
+
+            if (blockedBy) {
+                log.debug('Resume producer blocked by moderator rule', { rule: blockedBy, producer_id, peerInfo });
+                return callback({ error: `Not allowed by moderator (${blockedBy})` });
+            }
 
             try {
                 await producer.resume();
@@ -6160,6 +6185,25 @@ function startServer() {
         if (Number.isNaN(value)) return NaN;
         if (typeof structuredClone === 'function') return structuredClone(value);
         return JSON.parse(JSON.stringify(value));
+    }
+
+    // Returns the moderator policy that forbids this peer from publishing the given media, or null.
+    // Presenters are exempt because they own/toggle the policies. The policy is derived from the
+    // producer kind (not only the client-provided mediaType) so audio can't be published as another type.
+    function getBlockingMediaPolicy(room, peer, socket, kind, mediaType) {
+        const moderator = room?._moderator;
+        if (!moderator) return null;
+
+        let policy = null;
+        if (kind === 'audio') {
+            policy = mediaType === 'audioTab' ? 'screen_cant_share' : 'audio_cant_unmute';
+        } else if (kind === 'video') {
+            policy = mediaType === 'screenType' ? 'screen_cant_share' : 'video_cant_unhide';
+        }
+
+        if (!policy || !moderator[policy]) return null;
+
+        return isPeerPresenter(socket.room_id, socket.id, peer.peer_name, peer.peer_uuid) ? null : policy;
     }
 
     function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
