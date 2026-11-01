@@ -423,4 +423,39 @@ describe('test-Room', () => {
         }
         errorLogged.should.equal(false);
     });
+    describe('banned peers', () => {
+        const makeRoom = () => {
+            const room = Object.create(Room.prototype);
+            room.bannedPeers = new Map();
+            return room;
+        };
+
+        it('bans a replaced UUID when the verified account matches', () => {
+            const room = makeRoom();
+            room.addBannedPeer('uuid-1', 'Alice');
+            room.isBanned('uuid-1').should.equal(true);
+            room.isBanned('uuid-2', 'alice').should.equal(true);
+            room.isBanned('uuid-2', 'bob').should.equal(false);
+            room.isBanned('uuid-2').should.equal(false);
+        });
+
+        it('bans anonymous peers by UUID only', () => {
+            const room = makeRoom();
+            room.addBannedPeer('uuid-1', null);
+            room.isBanned('uuid-1', 'alice').should.equal(true);
+            room.isBanned('uuid-2', 'alice').should.equal(false);
+        });
+
+        it('expires bans after 24 hours', () => {
+            const clock = sinon.useFakeTimers({ now: 1000000 });
+            try {
+                const room = makeRoom();
+                room.addBannedPeer('uuid-1', 'alice');
+                clock.tick(24 * 60 * 60 * 1000 + 1);
+                room.isBanned('uuid-1', 'alice').should.equal(false);
+            } finally {
+                clock.restore();
+            }
+        });
+    });
 });

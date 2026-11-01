@@ -93,7 +93,7 @@ module.exports = class Room {
         this.videoTextAnnotations = new Map();
         this.videoDrawingAnnotations = new Map();
         this.videoDrawingPermissions = new Map();
-        this.bannedPeers = new Map(); // uuid -> timestamp, with TTL-based expiration
+        this.bannedPeers = new Map(); // uuid or auth:<username> -> timestamp, with TTL-based expiration
         this.webRtcTransport = config.mediasoup.webRtcTransport;
         this.router = null;
         this.routerSettings = config.mediasoup.router;
@@ -1310,22 +1310,30 @@ module.exports = class Room {
     // HANDLE BANNED PEERS
     // ####################################################
 
-    addBannedPeer(uuid) {
-        if (!this.bannedPeers.has(uuid)) {
-            this.bannedPeers.set(uuid, Date.now());
-            log.debug('Added to the banned list', {
-                uuid: uuid,
-                banned: [...this.bannedPeers.keys()],
-            });
+    // A verified account (authUser) is banned along with the client UUID, which the client can replace at will
+    addBannedPeer(uuid, authUser = null) {
+        const keys = [uuid];
+        if (authUser) keys.push(this._authBanKey(authUser));
+        for (const key of keys) {
+            if (key && !this.bannedPeers.has(key)) this.bannedPeers.set(key, Date.now());
         }
+        log.debug('Added to the banned list', { uuid: uuid, authUser: authUser, banned: [...this.bannedPeers.keys()] });
     }
 
-    isBanned(uuid) {
-        if (!this.bannedPeers.has(uuid)) return false;
-        const bannedAt = this.bannedPeers.get(uuid);
+    isBanned(uuid, authUser = null) {
+        return this._isBannedKey(uuid) || (!!authUser && this._isBannedKey(this._authBanKey(authUser)));
+    }
+
+    _authBanKey(authUser) {
+        return `auth:${String(authUser).toLowerCase()}`;
+    }
+
+    _isBannedKey(key) {
+        if (!this.bannedPeers.has(key)) return false;
+        const bannedAt = this.bannedPeers.get(key);
         const BAN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
         if (Date.now() - bannedAt > BAN_TTL_MS) {
-            this.bannedPeers.delete(uuid);
+            this.bannedPeers.delete(key);
             return false;
         }
         return true;

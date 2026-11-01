@@ -46,6 +46,8 @@ module.exports = class Peer {
         this.closed = false;
         // Server-side only (never derived from client data): true for WHIP ingest peers
         this.isWhip = false;
+        // Server-side only: username verified from the join token (null for anonymous peers)
+        this.authUser = null;
     }
 
     // ####################################################

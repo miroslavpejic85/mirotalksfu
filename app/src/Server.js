@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.14
+ * @version 2.7.15
  *
  */
 
@@ -2790,7 +2790,7 @@ function startServer() {
             }
 
             // check if banned...
-            if (room.isBanned(peer_uuid)) {
+            if (room.isBanned(peer_uuid, authenticatedUsername)) {
                 log.debug('[Join] - peer is banned!', {
                     room_id: data.room_id,
                     peer: {
@@ -2854,7 +2854,9 @@ function startServer() {
                 room.removePeer(socket.id);
             }
 
-            room.addPeer(new Peer(socket.id, data));
+            const newPeer = new Peer(socket.id, data);
+            newPeer.authUser = authenticatedUsername;
+            room.addPeer(newPeer);
 
             const activeRooms = getActiveRooms();
 
@@ -4028,7 +4030,7 @@ function startServer() {
                 return;
             }
 
-            if (data.action === 'ban') room.addBannedPeer(data.to_peer_uuid);
+            if (data.action === 'ban') room.addBannedPeer(data.to_peer_uuid, room.getPeer(data.peer_id)?.authUser);
 
             data.broadcast
                 ? room.broadCast(data.peer_id, 'peerAction', data)
