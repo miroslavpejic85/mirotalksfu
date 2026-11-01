@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.16
+ * @version 2.7.17
  *
  */
 
@@ -1952,7 +1952,11 @@ class RoomClient {
     handleNewDataProducer = async (data) => {
         console.log('SocketOn New data producer:', data);
         if (data.peer_id === this.peer_id) return;
-        await this.consumeData(data.dataProducerId);
+        await this.consumeData(data.dataProducerId, {
+            peer_id: data.peer_id,
+            peer_name: data.peer_name,
+            peer_avatar: data.peer_info?.peer_avatar,
+        });
     };
 
     handleDataConsumerClosed = (data) => {
@@ -4609,10 +4613,16 @@ class RoomClient {
         }
     }
 
-    async consumeData(dataProducerId) {
+    async consumeData(dataProducerId, producerIdentity) {
         const transport = this.consumerTransport;
         if (!transport) {
             console.warn('Consumer transport not available, skipping DataConsumer creation');
+            return;
+        }
+
+        // The sender identity comes from the server-announced DataProducer owner, never from the message body
+        if (!producerIdentity?.peer_id || !producerIdentity?.peer_name) {
+            console.warn('Missing DataProducer owner identity, skipping DataConsumer creation');
             return;
         }
 
@@ -4649,8 +4659,15 @@ class RoomClient {
 
             dataConsumer.on('message', (data) => {
                 try {
-                    const msg = JSON.parse(data);
-                    if (msg.type === 'chat') {
+                    const parsed = JSON.parse(data);
+                    if (parsed && parsed.type === 'chat') {
+                        // Override any client-supplied sender identity with the real DataProducer owner
+                        const msg = {
+                            ...parsed,
+                            peer_id: producerIdentity.peer_id,
+                            peer_name: producerIdentity.peer_name,
+                            peer_avatar: producerIdentity.peer_avatar,
+                        };
                         console.log('DataChannel chat message received', msg);
                         // Drop messages that violate current moderator restrictions
                         const isPublicMessage = msg.to_peer_id === 'all';
