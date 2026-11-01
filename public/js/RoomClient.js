@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.19
+ * @version 2.7.20
  *
  */
 
@@ -2035,6 +2035,8 @@ class RoomClient {
     };
 
     handleFileData = (data) => {
+        // Ignore chunks that do not come from the peer who announced the transfer
+        if (!this.incomingFileInfo || data?.sender_id !== this.incomingFileInfo.sender_id) return;
         this.handleFile(data);
     };
 
@@ -2043,6 +2045,8 @@ class RoomClient {
     };
 
     handleFileAbortData = (data) => {
+        // Only the sender of the current transfer can abort it
+        if (this.receiveInProgress && data?.sender_id !== this.incomingFileInfo?.sender_id) return;
         this.handleFileAbort(data);
     };
 
@@ -11303,7 +11307,7 @@ class RoomClient {
             ' File size: ' +
             this.bytesToSize(this.incomingFileInfo.fileSize);
         const isPrivateFile = !this.incomingFileInfo.broadcast;
-        const fileSenderId = this.incomingFileInfo.sender_id || this.incomingFileInfo.peer_id;
+        const fileSenderId = this.incomingFileInfo.sender_id;
         const fileToId = isPrivateFile ? fileSenderId : 'all';
         const fileToName = isPrivateFile ? this.incomingFileInfo.peer_name : 'all';
 

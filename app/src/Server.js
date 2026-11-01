@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.19
+ * @version 2.7.20
  *
  */
 
@@ -4320,17 +4320,42 @@ function startServer() {
                 return;
             }
 
-            log.debug('Send File Info', data);
-
             const room = getRoom(socket);
+
+            const peer = getPeer(socket);
+
+            if (!room || !peer) return;
+
+            // Bind the sender to the sending connection: never trust client supplied identity
+            data.sender_id = socket.id;
+            data.peer_name = peer.peer_name;
+            data.peer_avatar = peer.peer_avatar || false;
+
+            if (!data.broadcast && data.peer_id === socket.id) return;
+
+            log.debug('Send File Info', data);
 
             data.broadcast ? room.broadCast(socket.id, 'fileInfo', data) : room.sendTo(data.peer_id, 'fileInfo', data);
         });
 
-        socket.on('file', (data) => {
+        socket.on('file', (dataObject) => {
             if (!roomExists(socket)) return;
 
+            if (!Validator.isValidData(dataObject)) return;
+
             const room = getRoom(socket);
+
+            if (!room) return;
+
+            // Forward only the expected fields, tagged with the real sender
+            const data = {
+                peer_id: dataObject.peer_id,
+                broadcast: !!dataObject.broadcast,
+                fileData: dataObject.fileData,
+                sender_id: socket.id,
+            };
+
+            if (!data.broadcast && data.peer_id === socket.id) return;
 
             data.broadcast ? room.broadCast(socket.id, 'file', data) : room.sendTo(data.peer_id, 'file', data);
         });
@@ -4344,6 +4369,13 @@ function startServer() {
 
             const room = getRoom(socket);
 
+            const peer = getPeer(socket);
+
+            if (!room || !peer) return;
+
+            data.sender_id = socket.id;
+            data.peer_name = peer.peer_name;
+
             room.broadCast(socket.id, 'fileAbort', data);
         });
 
@@ -4355,6 +4387,13 @@ function startServer() {
             if (!Validator.isValidData(data)) return;
 
             const room = getRoom(socket);
+
+            const peer = getPeer(socket);
+
+            if (!room || !peer) return;
+
+            data.sender_id = socket.id;
+            data.peer_name = peer.peer_name;
 
             room.broadCast(socket.id, 'receiveFileAbort', data);
         });
