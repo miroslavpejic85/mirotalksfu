@@ -132,6 +132,10 @@
             if (typeof definition.model.asset !== 'string') {
                 throw new TypeError(`Effect "${definition.id}": model.asset is required`);
             }
+            const clipY = definition.model.clipY;
+            if (clipY !== undefined && clipY !== null && !Number.isFinite(clipY)) {
+                throw new TypeError(`Effect "${definition.id}": model.clipY must be a number`);
+            }
             model = {
                 anchor: validateLayer(
                     { asset: definition.model.asset, anchor: definition.model.anchor, width: 1 },
@@ -140,6 +144,9 @@
                 offset: definition.model.offset || [0, 0, 0],
                 scale: definition.model.scale || 1,
                 occluder: definition.model.occluder !== false,
+                // Avatar: morph targets follow the blendshapes, realistic lighting, optional neck rig
+                avatar: !!definition.model.avatar,
+                clipY: Number.isFinite(clipY) ? clipY : null,
                 asset: definition.model.asset,
             };
         }
@@ -196,6 +203,34 @@
                     drive,
                 };
             }),
+        });
+    }
+
+    /**
+     * Realistic 3D avatar (GLB) following the engine model convention (see model-renderer.js) with
+     * morph targets named like the MediaPipe blendshapes (eyeBlinkLeft, jawOpen, ...). Optional:
+     * an "avatarHead" bone (busts turn the head at the neck), `clipY` (straight cut of a bust, in
+     * model units), `scale` and `offset`. The model covers the face, so it has no head occluder.
+     */
+    function registerAvatar3D(definition) {
+        if (!definition?.model || typeof definition.model.asset !== 'string') {
+            throw new TypeError(`3D avatar "${definition?.id}" needs model.asset`);
+        }
+        return registerEffect({
+            id: definition.id,
+            label: definition.label,
+            order: definition.order,
+            category: 'avatar3d',
+            thumbnail: definition.thumbnail,
+            model: {
+                asset: definition.model.asset,
+                anchor: 'eyes',
+                offset: definition.model.offset,
+                scale: definition.model.scale,
+                clipY: definition.model.clipY,
+                occluder: false,
+                avatar: true,
+            },
         });
     }
 
@@ -392,6 +427,7 @@
     VFX.registerEffect = registerEffect;
     VFX.registerFilterPreset = registerFilterPreset;
     VFX.registerAvatar = registerAvatar;
+    VFX.registerAvatar3D = registerAvatar3D;
     VFX.driveValue = driveValue;
     VFX.driveProperty = driveProperty;
     VFX.getFilterPresets = () => [...filterPresets.values()].sort((a, b) => a.order - b.order);

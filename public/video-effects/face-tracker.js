@@ -211,8 +211,13 @@
                 const agree = Math.sign(landmarkWink) === Math.sign(blendshapeWink);
                 this.sideVotes = clamp(this.sideVotes + (agree ? 1 : -1), -10, 10);
             }
-            if (this.sideVotes < -2) [right, left] = [left, right];
+            if (this.sidesSwapped()) [right, left] = [left, right];
             return [clamp(smoothstep(0.25, 0.55, right), 0, 1), clamp(smoothstep(0.25, 0.55, left), 0, 1)];
+        }
+
+        // True once clear winks showed that the blendshape sides are mirrored
+        sidesSwapped() {
+            return this.sideVotes < -2;
         }
 
         update(points, scale, now, blendshapes = null) {
@@ -737,7 +742,15 @@
             const pose = computeFacePose(points);
             if (!pose) return null;
             const expressions = this.expressions.update(points, pose.scale, now, this.blendshapes);
-            return { points, pose, opacity: this.opacity, expressions };
+            // Raw MediaPipe blendshapes for 3D avatars; `sidesSwapped` when their left/right are the image's
+            return {
+                points,
+                pose,
+                opacity: this.opacity,
+                expressions,
+                blendshapes: this.blendshapes,
+                sidesSwapped: this.expressions.sidesSwapped(),
+            };
         }
 
         // New camera source: forget the previous face and ignore detections still in flight

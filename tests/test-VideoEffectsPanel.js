@@ -17,6 +17,8 @@ function createEngine() {
         { id: 'glasses', label: 'Glasses', category: 'face', thumbnail: 'glasses.svg' },
         { id: 'avatar-cat', label: 'Cat', category: 'avatar', thumbnail: 'cat.svg' },
         { id: 'avatar-bear', label: 'Bear', category: 'avatar', thumbnail: 'bear.svg' },
+        { id: 'avatar3d-man', label: 'Man', category: 'avatar3d', thumbnail: 'man.webp', is3D: true },
+        { id: 'avatar3d-raccoon', label: 'Raccoon', category: 'avatar3d', thumbnail: 'raccoon.webp', is3D: true },
     ];
     const state = {
         effect: null,
@@ -158,15 +160,15 @@ describe('Visual effects panel', () => {
     const visiblePanel = () => $$('.vfx-tabpanel').find((el) => !el.classList.contains('hidden'));
     const chipLabels = () => $$('.vfx-active .vfx-chip-open').map((chip) => chip.textContent.trim());
 
-    it('shows one tab at a time: Background, Effects, Avatars, Filters', () => {
+    it('shows one tab at a time: Background, Effects, Avatars, 3D Avatars, Filters', () => {
         const tabs = $$('.vfx-tab');
         assert.deepEqual(
             tabs.map((tab) => tab.dataset.tab),
-            ['background', 'face', 'avatar', 'filters']
+            ['background', 'face', 'avatar', 'avatar3d', 'filters']
         );
         assert.deepEqual(
             tabs.map((tab) => tab.getAttribute('aria-label')),
-            ['Background', 'Effects', 'Avatars', 'Filters']
+            ['Background', 'Effects', 'Avatars', '3D Avatars', 'Filters']
         );
         assert.equal($$('.vfx-tabpanel').filter((el) => !el.classList.contains('hidden')).length, 1);
         assert.equal($('.vfx-tab.active').getAttribute('aria-selected'), 'true');
@@ -184,7 +186,7 @@ describe('Visual effects panel', () => {
         panel.mount(container);
         assert.deepEqual(
             $$('.vfx-tab').map((tab) => tab.dataset.tab),
-            ['face', 'avatar', 'filters']
+            ['face', 'avatar', 'avatar3d', 'filters']
         );
     });
 
@@ -210,6 +212,35 @@ describe('Visual effects panel', () => {
         assert.equal($('.vfx-active-none').textContent, 'No effects on');
         assert.equal(indicator, false);
         assert.ok(changes >= 3);
+    });
+
+    it('lists the 3D avatars in their own tab, one effect at a time with the cartoon avatars', async () => {
+        panel.openTab('avatar3d');
+        const cards = [...visiblePanel().querySelectorAll('.vfx-card')];
+        assert.deepEqual(
+            cards.map((card) => card.getAttribute('aria-label')),
+            ['Man', 'Raccoon']
+        );
+        assert.equal(visiblePanel().querySelector('.vfx-badge'), null, 'no "3D" badge inside the 3D tab');
+
+        cards[1].click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.equal(engine.state.effect, 'avatar3d-raccoon');
+        assert.ok($('.vfx-tab[data-tab="avatar3d"]').classList.contains('vfx-tab-on'));
+        assert.ok(!$('.vfx-tab[data-tab="avatar"]').classList.contains('vfx-tab-on'));
+        assert.deepEqual(chipLabels(), ['Raccoon']);
+
+        // A cartoon avatar replaces it
+        await panel.selectEffect('avatar-cat');
+        assert.equal(engine.state.effect, 'avatar-cat');
+        assert.ok(!$('.vfx-tab[data-tab="avatar3d"]').classList.contains('vfx-tab-on'));
+        assert.ok($('.vfx-tab[data-tab="avatar"]').classList.contains('vfx-tab-on'));
+
+        // Its chip opens the 3D Avatars tab
+        await panel.selectEffect('avatar3d-man');
+        panel.openTab('filters');
+        $('.vfx-active .vfx-chip-open').click();
+        assert.equal($('.vfx-tab.active').dataset.tab, 'avatar3d');
     });
 
     it('lists everything that is on as removable chips with "Turn off all"', async () => {

@@ -29,17 +29,17 @@ camera track ─► (optional) VirtualBackground ─► hidden <video>
 | `workers/face-tracking-worker.js` | Module worker running Face Landmarker                                             |
 | `renderer.js`                     | WebGL2/WebGL1 renderer (filters, skin smoothing, accessories), Canvas 2D fallback |
 | `effects-manager.js`              | Effect/filter registries, asset loading and validation, accessory placement       |
-| `model-renderer.js`               | Lazy Three.js renderer for GLB/GLTF accessories with a head occluder              |
+| `model-renderer.js`               | Lazy Three.js renderer for GLB/GLTF accessories and realistic 3D avatars          |
 | `stream-manager.js`               | `canvas.captureStream()` output track                                             |
 | `effects/*.js`                    | Effect descriptors and filter presets                                             |
-| `assets/`                         | Original SVG artwork and the generated 3D glasses (`glasses-3d.glb`)              |
+| `assets/`                         | Original SVG artwork, 3D glasses (`glasses-3d.glb`) and 3D avatars (`avatars-3d`) |
 
 ## Visual effects panel (UI)
 
 `public/js/VideoEffectsPanel.js` is the one place for "how I look on camera", used in Settings > Visual effects,
 in the pre-join drawer and from the camera dropdown ("Visual effects..."):
 
-- Tabs **Background · Effects · Avatars · Filters** (a dot marks tabs with something on). Backgrounds use the
+- Tabs **Background · Effects · Avatars · 3D Avatars · Filters** (a dot marks tabs with something on). Backgrounds use the
   existing `public/js/VirtualBackground.js` through an adapter; the old Background tab and pre-join background
   button are hidden while the panel is available (they remain as fallback when video effects are disabled).
 - **Chips** of everything that is on, each removable, plus **Turn off all**. Effects and avatars are one
@@ -162,7 +162,7 @@ glasses were generated.
 ## Animated head avatars
 
 `effects/avatars.js` registers cartoon heads (cat, bear, panda, robot, alien, fox, monkey, man, woman, elf, dragon,
-unicorn, black man, black woman, lion) and an astronaut helmet. They replace the head, follow its movements, **blink**, **raise their brows**,
+unicorn, two more men and women, lion) and an astronaut helmet. They replace the head, follow its movements, **blink**, **raise their brows**,
 **smile** and **open the mouth while talking**.
 
 Expressions (0..1) are updated every frame:
@@ -213,6 +213,38 @@ it rewrites `assets/avatars/` and `effects/avatars.js`. Each avatar is ~20-35 KB
 Flat cartoon shapes are deliberate: they stay readable in small video tiles and compress well, while fine detail
 such as fur strands shimmers when the head moves and turns into noise after video encoding.
 
+## Realistic 3D avatars
+
+`effects/avatars-3d.js` registers the **3D Avatars** tab: semi-realistic people (Microsoft Rocketbox, MIT) as
+head-and-shoulders busts and a cartoon raccoon head (MediaPipe sample, Apache-2.0). They are rigged GLB models
+rendered by `model-renderer.js` with image based lighting (Three.js `RoomEnvironment`) and ACES tone mapping:
+
+- **Expressions**: every morph target named like a MediaPipe blendshape (`eyeBlinkLeft`, `jawOpen`,
+  `mouthSmileLeft`, `browInnerUp`, `eyeLookInLeft`...) follows the user, smoothed between detections. Blinks come
+  from the expression estimator (side-checked, landmark fallback); `jawOpen` never drops below the measured lip
+  gap; without blendshapes the landmark expressions still drive jaw, smile and brows.
+- **Neck**: busts have an `avatarHead` bone. The head follows the full head rotation while the shoulders take only
+  30% of it, with the eyes kept on the user's eyes.
+- **Straight cut**: `clipY` (model units) clips the bust with a plane that follows the shoulders.
+
+```js
+VFX.registerAvatar3D({
+    id: 'avatar3d-owl',
+    label: 'Owl',
+    thumbnail: 'assets/avatars-3d/owl/thumb.webp',
+    model: { asset: 'assets/avatars-3d/owl/model.glb', scale: 1, offset: [0, 0, 0], clipY: -3.5 },
+});
+```
+
+Models follow the accessory convention (1 unit = outer eye distance, origin between the eyes, +Z out of the
+face). The bundled ones are **generated** by `scripts/generate-video-effects-3d-avatars.js` (see its header for
+the dev tools to install): it converts the sources (FBX2glTF, names recovered with the three.js FBXLoader),
+keeps the 52 ARKit blendshapes, lowers the arms, bakes the pose, crops the bust, adds the 2-joint neck rig,
+normalizes the model, converts textures to WebP, compresses with meshopt and rewrites `effects/avatars-3d.js`;
+`--thumbs` renders the thumbnails in Chrome. Each avatar is ~0.4-0.8 MB, downloaded only when selected. More
+Rocketbox people (115 avatars, 40 adults with ARKit blendshapes) can be added to its `AVATARS` list. Licenses:
+`assets/avatars-3d/LICENSE.md`.
+
 ## Performance
 
 - Face detection runs in a module worker on downscaled frames (640 px wide, 480 on mobile) at 15 Hz (8 Hz on
@@ -252,15 +284,18 @@ Loaded from jsDelivr / Google storage at runtime, nothing added to `package.json
 | `@mediapipe/tasks-vision@1.2.0` (JS + WASM) | Face Landmarker     | Apache-2.0 |
 | `face_landmarker.task` (float16/1)          | Face landmark model | Apache-2.0 |
 | `three@0.181.0` + `GLTFLoader` (lazy)       | 3D accessories      | MIT        |
+| `three` meshopt decoder, `RoomEnvironment`  | 3D avatars          | MIT        |
 | `@mediapipe/selfie_segmentation` (existing) | Backgrounds         | Apache-2.0 |
 
-All artwork in `assets/` (SVG and the generated GLB) was created for MiroTalk and is covered by the project
-license. To self-host the runtime files, pass `mediapipe` / `three` URLs to the constructor.
+All artwork in `assets/` (SVG and the generated glasses GLB) was created for MiroTalk and is covered by the
+project license, except `assets/avatars-3d/` (Microsoft Rocketbox MIT and MediaPipe Apache-2.0 models, see its
+`LICENSE.md`). To self-host the runtime files, pass `mediapipe` / `three` URLs to the constructor.
 
 ## Tests
 
 `npx mocha tests/test-VideoEffects.js` covers smoothing, pose, placement, registry validation, face-loss
-handling, expressions (blink, wink, mouth, adaptive eye reference), avatar part mapping, the renderers, the API
+handling, expressions (blink, wink, mouth, adaptive eye reference), avatar part mapping, 3D avatars (registry,
+bundled GLB checks, blendshape to morph target mapping), the renderers, the API
 lifecycle (adjustments, clear all, slow device) and the `RoomClient` track replacement and cleanup logic.
 `npx mocha tests/test-VideoEffectsPanel.js` covers the panel (jsdom): tabs, one-effect selection, chips and
 "Turn off all", Custom state, keyboard, backgrounds (toggle, upload, delete, links) and the status messages.
@@ -271,6 +306,7 @@ lifecycle (adjustments, clear all, slow device) and the `RoomClient` track repla
 - 2D accessories are planar: they follow position, scale, roll, yaw and pitch, but hair or hands do not occlude
   them. 3D models use a simple ellipsoid head occluder.
 - Only the first detected face gets accessories.
-- Avatars are 2D: when the head turns far to the side they get narrower instead of showing a profile, and the
-  neck and shoulders stay visible. Blink detection needs the eyes to be visible (not behind tinted glasses).
+- Cartoon avatars are 2D: when the head turns far to the side they get narrower instead of showing a profile,
+  and the neck and shoulders stay visible. 3D avatars turn properly; the raccoon is a head only, and the busts
+  cover the user's shoulders only roughly (no body tracking). Blink detection needs the eyes to be visible (not behind tinted glasses).
 - Background effects use the existing virtual background module (separate segmentation pass).

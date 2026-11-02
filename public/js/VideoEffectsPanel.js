@@ -4,7 +4,7 @@
  * MiroTalk Video Effects - Visual effects panel.
  *
  * One component for "how I look on camera", mounted in Settings and in the pre-join lobby:
- * tabs Background / Effects / Avatars / Filters, removable chips for what is on with a
+ * tabs Background / Effects / Avatars / 3D Avatars / Filters, removable chips for what is on with a
  * "Turn off all" action, an optional live self-preview, and clear states (camera off, loading,
  * unavailable, slow device). Every mounted view follows the same state.
  *
@@ -17,7 +17,10 @@
 class VideoEffectsPanel {
     static STORAGE_KEY = 'videoEffectsSettings';
 
-    static TABS = ['background', 'face', 'avatar', 'filters'];
+    static TABS = ['background', 'face', 'avatar', 'avatar3d', 'filters'];
+
+    // Tabs listing engine effects, by effect category
+    static EFFECT_TABS = ['face', 'avatar', 'avatar3d'];
 
     static ADVANCED_SLIDERS = [
         { key: 'brightness', icon: 'fas fa-sun', min: 0.5, max: 1.5, step: 0.01 },
@@ -99,6 +102,8 @@ class VideoEffectsPanel {
                 return t('Effects');
             case 'avatar':
                 return t('Avatars');
+            case 'avatar3d':
+                return t('3D Avatars');
             default:
                 return t('Filters');
         }
@@ -109,6 +114,7 @@ class VideoEffectsPanel {
             background: 'fas fa-image',
             face: 'fas fa-face-smile',
             avatar: 'fas fa-masks-theater',
+            avatar3d: 'fas fa-user-astronaut',
             filters: 'fas fa-palette',
         }[tab];
     }
@@ -134,6 +140,10 @@ class VideoEffectsPanel {
 
     effectMeta(id) {
         return this.engine.getEffects().find((effect) => effect.id === id) || null;
+    }
+
+    static effectTab(effect) {
+        return VideoEffectsPanel.EFFECT_TABS.includes(effect?.category) ? effect.category : 'face';
     }
 
     // Everything currently changing the camera, each with its own remove action
@@ -168,7 +178,7 @@ class VideoEffectsPanel {
             const meta = this.effectMeta(state.effect);
             items.push({
                 id: 'effect',
-                tab: meta?.category === 'avatar' ? 'avatar' : 'face',
+                tab: VideoEffectsPanel.effectTab(meta),
                 label: meta?.label ? t(meta.label) : state.effect,
                 thumb: meta?.thumbnail || null,
                 remove: () => this.selectEffect(state.effect),
@@ -755,7 +765,8 @@ class VideoEffectsPanel {
                 const card = this.createCard({
                     label: t(effect.label),
                     image: effect.thumbnail,
-                    badge: effect.is3D ? '3D' : null,
+                    // Every card of the 3D Avatars tab is 3D
+                    badge: effect.is3D && category !== 'avatar3d' ? '3D' : null,
                     onClick: () => this.selectEffect(effect.id),
                 });
                 view.effectCards.set(effect.id, card);
@@ -1077,7 +1088,7 @@ class VideoEffectsPanel {
     defaultTab(state) {
         const tabs = this.availableTabs();
         const effect = state.effect ? this.effectMeta(state.effect) : null;
-        if (effect) return effect.category === 'avatar' ? 'avatar' : 'face';
+        if (effect) return VideoEffectsPanel.effectTab(effect);
         if (this.hasBackground() && this.backgroundKey()) return 'background';
         return tabs[0];
     }
@@ -1092,12 +1103,8 @@ class VideoEffectsPanel {
         const backgroundOn = this.hasBackground() && !!this.backgroundKey();
         const filtersOn =
             state.filterPreset !== 'none' || state.adjustments.touchUp > 0 || state.adjustments.lowLight > 0;
-        const tabOn = {
-            background: backgroundOn,
-            face: effectMeta?.category === 'face',
-            avatar: effectMeta?.category === 'avatar',
-            filters: filtersOn,
-        };
+        const tabOn = { background: backgroundOn, filters: filtersOn };
+        if (effectMeta) tabOn[VideoEffectsPanel.effectTab(effectMeta)] = true;
 
         this.views = this.views.filter((view) => view.root.isConnected);
         this.views.forEach((view) => {
@@ -1117,7 +1124,7 @@ class VideoEffectsPanel {
                 card.setAttribute('aria-pressed', String(selected));
                 card.disabled = !!faceUnavailable;
             });
-            ['face', 'avatar'].forEach((category) => {
+            VideoEffectsPanel.EFFECT_TABS.forEach((category) => {
                 const note = view[`${category}Unavailable`];
                 if (!note) return;
                 note.textContent = faceUnavailable || '';

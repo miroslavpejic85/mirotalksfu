@@ -24,6 +24,7 @@ const ENGINE_FILES = [
     'effects/hearts',
     'effects/headwear',
     'effects/avatars',
+    'effects/avatars-3d',
     'effects/beauty',
     'index',
 ];
@@ -460,6 +461,109 @@ describe('Video effects engine', () => {
         });
     });
 
+    describe('3D avatars', () => {
+        // JSON chunk of a GLB file (the binary chunk is meshopt compressed)
+        function readGlbJson(file) {
+            const data = fs.readFileSync(file);
+            assert.equal(data.toString('utf8', 0, 4), 'glTF', `${file} is a GLB`);
+            const length = data.readUInt32LE(12);
+            return JSON.parse(data.toString('utf8', 20, 20 + length));
+        }
+
+        it('registers realistic avatars in their own category, with their model and thumbnail', () => {
+            const manager = new VFX.EffectsManager({ assetBaseUrl: 'https://example.com/video-effects/' });
+            const avatars = manager.list().filter((effect) => effect.category === 'avatar3d');
+            assert.deepEqual(
+                [...avatars.map((effect) => effect.id)],
+                ['avatar3d-man', 'avatar3d-man-2', 'avatar3d-woman', 'avatar3d-woman-2', 'avatar3d-raccoon']
+            );
+            for (const { id, is3D } of avatars) {
+                const { model, thumbnail } = manager.getEffect(id);
+                assert.equal(is3D, true);
+                assert.equal(model.avatar, true);
+                assert.equal(model.occluder, false, 'the avatar covers the face');
+                assert.deepEqual([...model.anchor], [...VFX.ANCHORS.eyes]);
+                const root = path.join(__dirname, '../public/video-effects');
+                assert.ok(fs.existsSync(path.join(root, thumbnail)), `${thumbnail} exists`);
+
+                const gltf = readGlbJson(path.join(root, model.asset));
+                const names = gltf.meshes.flatMap((mesh) => mesh.extras?.targetNames || []);
+                for (const name of ['eyeBlinkLeft', 'eyeBlinkRight', 'jawOpen', 'mouthSmileLeft', 'browInnerUp']) {
+                    assert.ok(names.includes(name), `${id} has the ${name} blendshape`);
+                }
+                assert.ok(gltf.extensionsUsed.includes('EXT_meshopt_compression'), `${id} is meshopt compressed`);
+                // Busts are cut by a plane and turn their head on a 2 joint neck rig
+                const head = gltf.nodes.findIndex((node) => node.name === 'avatarHead');
+                if (model.clipY !== null) {
+                    assert.ok(model.clipY < -2, `${id} is cut below the chin`);
+                    assert.ok(head >= 0, `${id} has an avatarHead bone`);
+                    assert.ok(gltf.skins[0].joints.includes(head));
+                } else {
+                    assert.equal(head, -1);
+                }
+            }
+        });
+
+        it('builds 3D avatar descriptors and rejects invalid ones', () => {
+            const effect = VFX.registerAvatar3D({
+                id: 'test-3d',
+                label: 'Test',
+                model: { asset: 'a.glb', scale: 1.5, offset: [0, 0.1, 0], clipY: -3 },
+            });
+            assert.equal(effect.category, 'avatar3d');
+            assert.deepEqual(
+                { ...effect.model, anchor: [...effect.model.anchor], offset: [...effect.model.offset] },
+                {
+                    anchor: [...VFX.ANCHORS.eyes],
+                    offset: [0, 0.1, 0],
+                    scale: 1.5,
+                    occluder: false,
+                    avatar: true,
+                    clipY: -3,
+                    asset: 'a.glb',
+                }
+            );
+            assert.equal(VFX.registerAvatar3D({ id: 'test-3d-head', model: { asset: 'b.glb' } }).model.clipY, null);
+            assert.throws(() => VFX.registerAvatar3D({ id: 'x' }), /model.asset/);
+            assert.throws(() => VFX.registerAvatar3D({ id: 'x', model: { asset: 'a.glb', clipY: 'low' } }), /clipY/);
+        });
+
+        it('maps the face to morph target weights', () => {
+            const face = {
+                expressions: { blinkLeft: 0.9, blinkRight: 0.1, mouthOpen: 0.5, smile: 0.4, browUp: 0.3 },
+                blendshapes: { eyeBlinkLeft: 0.2, jawOpen: 0.1, mouthSmileLeft: 0.8, mouthSmileRight: 0.2 },
+                sidesSwapped: false,
+            };
+            // Blinks come from the side-checked expressions, not the raw blendshapes
+            assert.equal(VFX.blendshapeWeight('eyeBlinkLeft', face), 0.9);
+            assert.equal(VFX.blendshapeWeight('eyeBlinkRight', face), 0.1);
+            assert.equal(VFX.blendshapeWeight('mouthSmileLeft', face), 0.8);
+            assert.equal(VFX.blendshapeWeight('cheekPuff', face), 0);
+            // jawOpen never drops below the measured lip gap
+            close(VFX.blendshapeWeight('jawOpen', face), 0.425);
+            face.blendshapes.jawOpen = 0.7;
+            close(VFX.blendshapeWeight('jawOpen', face), 0.7);
+            // Mirrored blendshape sides are swapped back
+            face.sidesSwapped = true;
+            assert.equal(VFX.blendshapeWeight('mouthSmileLeft', face), 0.2);
+            assert.equal(VFX.blendshapeWeight('mouthSmileRight', face), 0.8);
+            // Without blendshapes the landmark expressions still animate the face
+            face.blendshapes = null;
+            assert.equal(VFX.blendshapeWeight('jawOpen', face), 0.5);
+            assert.equal(VFX.blendshapeWeight('mouthSmileRight', face), 0.4);
+            assert.equal(VFX.blendshapeWeight('browInnerUp', face), 0.3);
+            assert.equal(VFX.blendshapeWeight('eyeLookInLeft', face), 0);
+        });
+
+        it('defaults the three.js URLs of the avatar helpers', () => {
+            assert.match(VFX.THREE_DEFAULTS.meshoptDecoderUrl, /three@[\d.]+\/examples\/jsm\/libs\/meshopt_decoder/);
+            assert.match(
+                VFX.THREE_DEFAULTS.roomEnvironmentUrl,
+                /three@[\d.]+\/examples\/jsm\/environments\/RoomEnvironment/
+            );
+        });
+    });
+
     describe('face tracker interpolation and loss handling', () => {
         function readyTracker(options = {}) {
             const tracker = new VFX.FaceTracker({ detectionFps: 15, lossGraceMs: 600, fadeMs: 250, ...options });
@@ -498,6 +602,15 @@ describe('Video effects engine', () => {
             assert.ok(center > 600, 'follows the movement');
             assert.ok(tracker.display[33 * 3] > target, 'predicted ahead of the last detection');
             assert.ok(tracker.display[33 * 3] - target < 60, 'prediction is bounded');
+        });
+
+        it('passes the raw blendshapes and their side convention to 3D avatars', () => {
+            const tracker = readyTracker();
+            const blendshapes = { jawOpen: 0.4, eyeBlinkLeft: 0 };
+            tracker.handleLandmarks(normalized(syntheticFace(), 1280, 720), 1280, 720, 0, blendshapes);
+            const face = tracker.getFace(16);
+            assert.equal(face.blendshapes, blendshapes);
+            assert.equal(face.sidesSwapped, false);
         });
 
         it('scales the landmarks to a downscaled output', () => {

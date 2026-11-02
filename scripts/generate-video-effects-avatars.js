@@ -993,7 +993,7 @@ builders.push(() => {
     });
 });
 
-// ---------------- Black man (short cropped hair) ----------------
+// ---------------- Man 2 (short cropped hair) ----------------
 builders.push(() => {
     const id = 'blackman';
     const { back, face } = humanFace(id, {
@@ -1023,7 +1023,7 @@ builders.push(() => {
     <path d="M232 540 Q300 590 368 540 Q330 566 300 566 Q270 566 232 540 Z" fill="#1a0c06" fill-opacity="0.3" />`;
     characters.push({
         id,
-        label: 'Black man',
+        label: 'Man 2',
         order: 300,
         head: `${back}\n${face}\n${hair}`,
         eye: {
@@ -1054,7 +1054,7 @@ builders.push(() => {
     });
 });
 
-// ---------------- Black woman (short natural hair) ----------------
+// ---------------- Woman 2 (short natural hair) ----------------
 builders.push(() => {
     const id = 'blackwoman';
     const { back, face } = humanFace(id, {
@@ -1097,7 +1097,7 @@ builders.push(() => {
     <path d="${flicks}" fill="none" stroke="#0a0605" stroke-width="4.5" stroke-linecap="round" />`;
     characters.push({
         id,
-        label: 'Black woman',
+        label: 'Woman 2',
         order: 320,
         head: `${back}\n${face}\n${hair}`,
         eye: {
