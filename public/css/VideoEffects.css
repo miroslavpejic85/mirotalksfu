@@ -24,7 +24,9 @@
     display: none !important;
 }
 
-.vfx-panel i {
+/* The #mySettings prefix beats the generic `#mySettings i` (margin: auto, padding) */
+.vfx-panel i,
+#mySettings .vfx-panel i {
     margin: 0;
     padding: 0;
     color: inherit;
@@ -593,10 +595,13 @@
 .vfx-slider-name {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 8px;
+    text-align: left;
 }
 
 .vfx-slider-name i {
+    flex: 0 0 16px;
     width: 16px;
     text-align: center;
 }
