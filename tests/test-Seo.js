@@ -57,6 +57,49 @@ describe('test-Seo', function () {
         assert.ok(html.includes('id="faq"') && html.includes('id="about"'));
     });
 
+    for (const landingAbout of [true, false]) {
+        for (const faq of [true, false]) {
+            it(`landing visibility follows About=${landingAbout}, FAQ=${faq}`, () => {
+                const brand = { htmlInjection: true, html: { landingAbout, faq } };
+                const injector = new HtmlInjector([landing], brand);
+                let html = '';
+                try {
+                    injector.injectHtml(landing, { headersSent: false, send: (body) => (html = body) });
+                } finally {
+                    injector.cleanup();
+                }
+
+                assert.strictEqual(html.includes('id="about"'), landingAbout);
+                assert.strictEqual(html.includes('id="navAboutLink"'), landingAbout);
+                assert.strictEqual(html.includes('id="faq"'), faq);
+                assert.strictEqual(html.includes('id="navFaqLink"'), faq);
+                assert.ok(html.includes('id="features"') && html.includes('id="tryEasier"'));
+                assert.ok(!html.includes('<!-- LANDING_'));
+                const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+                assert.strictEqual(blocks.length, faq ? 2 : 1);
+                assert.strictEqual(
+                    blocks.some((block) => JSON.parse(block[1])['@type'] === 'FAQPage'),
+                    faq
+                );
+            });
+        }
+    }
+
+    it('keeps static landing sections when brand injection is disabled', () => {
+        const injector = new HtmlInjector([landing], {
+            htmlInjection: false,
+            html: { landingAbout: false, faq: false },
+        });
+        let html = '';
+        try {
+            injector.injectHtml(landing, { headersSent: false, send: (body) => (html = body) });
+        } finally {
+            injector.cleanup();
+        }
+        assert.ok(html.includes('id="about"') && html.includes('id="navAboutLink"'));
+        assert.ok(html.includes('id="faq"') && html.includes('id="navFaqLink"'));
+    });
+
     it('room pages are not indexable', () => {
         assert.ok(fs.readFileSync(room, 'utf8').includes('<meta name="robots" content="noindex, nofollow" />'));
     });

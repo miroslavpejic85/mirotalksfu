@@ -3898,10 +3898,70 @@ html:has(.sticky-header) {
     color: var(--landing-text);
 }
 
-.landing-page .about-links a,
 .landing-page .faq-item a,
 .landing-page .section-paragraph a {
     color: var(--landing-primary-bright);
+}
+
+.landing-page .about-links,
+.landing-page .faq-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.landing-page .landing-resource-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    background: #1b1e24;
+    color: var(--landing-text);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.landing-page .landing-resource-link i {
+    color: #4b7cff;
+    font-size: 18px;
+}
+
+.landing-page .landing-resource-link:hover {
+    transform: translateY(-2px);
+    border-color: var(--landing-border-strong);
+    background: var(--landing-surface-raised);
+    color: var(--landing-text);
+}
+
+.landing-page .landing-resource-link:focus-visible {
+    outline: 2px solid var(--landing-primary-bright);
+    outline-offset: 3px;
+}
+
+.landing-page .faq-more {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+}
+
+.landing-page .faq-more .landing-resource-link {
+    min-height: 48px;
+    padding: 10px 20px;
+    font-size: 18px;
+}
+
+.landing-page .faq-more .landing-resource-link i {
+    font-size: 20px;
 }
 
 .landing-page .faq-item {
@@ -3935,5 +3995,23 @@ html:has(.sticky-header) {
 @media (max-width: 640px) {
     .landing-page .about-grid {
         grid-template-columns: 1fr;
+    }
+
+    .landing-page .about-links {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .landing-page .about-links .landing-resource-link {
+        min-width: 0;
+        min-height: 44px;
+        gap: 4px;
+        padding: 8px 4px;
+        font-size: clamp(10px, 2.8vw, 14px);
+    }
+
+    .landing-page .about-links .landing-resource-link i {
+        display: none;
     }
 }

@@ -46,6 +46,7 @@
         <script type="application/ld+json">
             {{JSON_LD}}
         </script>
+        <!-- LANDING_FAQ_START -->
         <script type="application/ld+json">
             {
                 "@context": "https://schema.org",
@@ -102,6 +103,7 @@
                 ]
             }
         </script>
+        <!-- LANDING_FAQ_END -->
 
         <!-- StyleSheet -->
 
@@ -157,9 +159,13 @@
                             </div>
                         </div>
                         <nav class="landing-nav" aria-label="Primary">
-                            <a class="landing-nav-link" href="#about">About</a>
+                            <!-- LANDING_ABOUT_START -->
+                            <a id="navAboutLink" class="landing-nav-link" href="#about">About</a>
+                            <!-- LANDING_ABOUT_END -->
                             <a class="landing-nav-link" href="#features">Features</a>
-                            <a class="landing-nav-link" href="#faq">FAQ</a>
+                            <!-- LANDING_FAQ_START -->
+                            <a id="navFaqLink" class="landing-nav-link" href="#faq">FAQ</a>
+                            <!-- LANDING_FAQ_END -->
                             <a class="landing-nav-link" href="#supportUs">Support</a>
                             <a
                                 id="navGithubLink"
@@ -300,6 +306,7 @@
                     </div>
                 </section>
 
+                <!-- LANDING_ABOUT_START -->
                 <section id="about" class="about section mt-48 mb-48">
                     <div class="container-sm">
                         <div class="about-inner text-center">
@@ -324,25 +331,34 @@
                                     </p>
                                 </div>
                             </div>
-                            <p class="about-links mt-24 mb-0">
+                            <nav class="about-links mt-24" aria-label="Project resources">
                                 <a
+                                    class="landing-resource-link"
                                     href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/"
                                     target="_blank"
                                     rel="noopener"
-                                    >Documentation</a
+                                    ><i class="fas fa-book" aria-hidden="true"></i><span>Documentation</span></a
                                 >
-                                &middot;
-                                <a href="https://github.com/miroslavpejic85/mirotalksfu" target="_blank" rel="noopener"
-                                    >GitHub repository</a
+                                <a
+                                    class="landing-resource-link"
+                                    href="https://github.com/miroslavpejic85/mirotalksfu"
+                                    target="_blank"
+                                    rel="noopener"
+                                    ><i class="fab fa-github" aria-hidden="true"></i><span>GitHub repository</span></a
                                 >
-                                &middot;
-                                <a href="https://docs.mirotalk.com/license/" target="_blank" rel="noopener"
-                                    >License (AGPLv3)</a
+                                <a
+                                    class="landing-resource-link"
+                                    href="https://docs.mirotalk.com/license/"
+                                    target="_blank"
+                                    rel="noopener"
+                                    ><i class="fas fa-balance-scale" aria-hidden="true"></i
+                                    ><span>License (AGPLv3)</span></a
                                 >
-                            </p>
+                            </nav>
                         </div>
                     </div>
                 </section>
+                <!-- LANDING_ABOUT_END -->
 
                 <section id="features" class="features section mt-48 mb-48">
                     <div class="container-sm">
@@ -710,6 +726,7 @@
                     </div>
                 </section>
 
+                <!-- LANDING_FAQ_START -->
                 <section id="faq" class="faq section mt-48 mb-48">
                     <div class="container-sm">
                         <h2 class="section-title tac mt-0">Frequently asked questions</h2>
@@ -776,12 +793,19 @@
                                 </p>
                             </details>
                         </div>
-                        <p class="tac mt-24 mb-0">
-                            More answers in the
-                            <a href="https://docs.mirotalk.com/sites/faq/" target="_blank" rel="noopener">full FAQ</a>.
+                        <p class="faq-more tac mt-24 mb-0">
+                            <a
+                                class="landing-resource-link"
+                                href="https://docs.mirotalk.com/sites/faq/"
+                                target="_blank"
+                                rel="noopener"
+                                ><i class="fas fa-question-circle" aria-hidden="true"></i>More answers in the full
+                                FAQ</a
+                            >
                         </p>
                     </div>
                 </section>
+                <!-- LANDING_FAQ_END -->
 
                 <section id="tryEasier" class="cta section mt-48 mb-48">
                     <div class="container">

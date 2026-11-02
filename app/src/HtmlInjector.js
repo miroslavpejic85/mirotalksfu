@@ -67,11 +67,24 @@ class HtmlInjector {
         return String(value).replace(/[&<>"']/g, (character) => entities[character]);
     }
 
+    replaceLandingSections(html) {
+        if (!this.config?.htmlInjection) return html;
+
+        const visibility = {
+            ABOUT: this.config?.html?.landingAbout !== false,
+            FAQ: this.config?.html?.faq !== false,
+        };
+        return html.replace(
+            /<!-- LANDING_(ABOUT|FAQ)_START -->([\s\S]*?)<!-- LANDING_\1_END -->/g,
+            (_, section, content) => (visibility[section] ? content : '')
+        );
+    }
+
     // Function to load a file into the cache
     loadFileToCache(filePath) {
         try {
             const content = fs.readFileSync(filePath, 'utf-8');
-            this.cache[filePath] = content; // Store the content in cache
+            this.cache[filePath] = this.replaceLandingSections(content); // Store the content in cache
         } catch (err) {
             log.error(`Error reading file: ${filePath}`, err);
         }

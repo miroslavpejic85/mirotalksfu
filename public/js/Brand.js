@@ -20,6 +20,10 @@ const customizeRoomBtn = document.getElementById('customizeRoomButton');
 const joinLastLabel = document.getElementById('joinLastLabel');
 
 const topSponsors = document.getElementById('topSponsors');
+const landingAbout = document.getElementById('about');
+const faq = document.getElementById('faq');
+const navAboutLink = document.getElementById('navAboutLink');
+const navFaqLink = document.getElementById('navFaqLink');
 const features = document.getElementById('features');
 const teams = document.getElementById('teams');
 const tryEasier = document.getElementById('tryEasier');
@@ -71,6 +75,8 @@ let BRAND = {
     },
     html: {
         topSponsors: true,
+        landingAbout: true,
+        faq: true,
         features: true,
         teams: true,
         tryEasier: true,
@@ -256,6 +262,10 @@ function mergeBrand(current, updated) {
 // BRAND check
 function checkBrand() {
     !BRAND.html.topSponsors && elementDisplay(topSponsors, false);
+    !BRAND.html.landingAbout && elementDisplay(landingAbout, false);
+    !BRAND.html.landingAbout && elementDisplay(navAboutLink, false);
+    !BRAND.html.faq && elementDisplay(faq, false);
+    !BRAND.html.faq && elementDisplay(navFaqLink, false);
     !BRAND.html.features && elementDisplay(features, false);
     !BRAND.html.teams && elementDisplay(teams, false);
     !BRAND.html.tryEasier && elementDisplay(tryEasier, false);

@@ -1372,6 +1372,8 @@ module.exports = {
              */
             html: {
                 topSponsors: process.env.SHOW_TOP_SPONSORS !== 'false',
+                landingAbout: process.env.SHOW_LANDING_ABOUT !== 'false',
+                faq: process.env.SHOW_FAQ !== 'false',
                 features: process.env.SHOW_FEATURES !== 'false',
                 teams: process.env.SHOW_TEAMS !== 'false',
                 tryEasier: process.env.SHOW_TRY_EASIER !== 'false',
