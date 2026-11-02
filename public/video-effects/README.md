@@ -34,9 +34,24 @@ camera track ─► (optional) VirtualBackground ─► hidden <video>
 | `effects/*.js`                    | Effect descriptors and filter presets                                             |
 | `assets/`                         | Original SVG artwork and the generated 3D glasses (`glasses-3d.glb`)              |
 
-The UI lives in `public/js/VideoEffectsPanel.js` (Settings > Effects, the lobby picker and the camera
-dropdown entry). Backgrounds stay in their own Settings > Background tab (`public/js/VirtualBackground.js`);
-the Effects panel only links to it, so there is no duplicate picker.
+## Visual effects panel (UI)
+
+`public/js/VideoEffectsPanel.js` is the one place for "how I look on camera", used in Settings > Visual effects,
+in the pre-join drawer and from the camera dropdown ("Visual effects..."):
+
+- Tabs **Background · Effects · Avatars · Filters** (a dot marks tabs with something on). Backgrounds use the
+  existing `public/js/VirtualBackground.js` through an adapter; the old Background tab and pre-join background
+  button are hidden while the panel is available (they remain as fallback when video effects are disabled).
+- **Chips** of everything that is on, each removable, plus **Turn off all**. Effects and avatars are one
+  selection: choosing another replaces it, choosing the active one again removes it.
+- **Live self-preview** in Settings (the sent camera, no extra processing) with "Turn on camera" when it is off.
+- **Filters**: presets previewed on a snapshot of the user's camera, **Touch up appearance** and **Adjust for low
+  light** sliders, technical sliders under _Advanced adjustments_, and a **Custom** state after manual changes.
+- **States**: camera off, "Preparing effects...", face effects unavailable (cards disabled with the reason), Touch
+  up without WebGL, and a slow-device hint (engine `slow` state).
+- **Keyboard**: one tab stop per grid, arrows/Home/End move inside it; arrows switch tabs.
+- **Reminders** (`Room.js`): an "Effects on" badge on the own tile (open the panel / turn everything off), a dot on
+  the camera button, and removable chips under the pre-join preview.
 
 ## API
 
@@ -57,9 +72,11 @@ const processed = await effects.setSourceTrack(cameraTrack);
 | `setSourceTrack(track)` / `start()`                            | Processes a camera track, returns the processed track                                                                                                                                                                                                                                            |
 | `getStream()` / `getOutputTrack()`                             | Processed output                                                                                                                                                                                                                                                                                 |
 | `setEffect(id \| null)`                                        | Select an effect (`null`/`'none'` removes it). Rejects and keeps the previous effect if an asset is invalid                                                                                                                                                                                      |
-| `setFilters({...})` / `setFilterPreset(id)` / `resetFilters()` | `brightness`, `contrast`, `saturation` (CSS filter semantics), `grayscale`, `sepia`, `temperature` (-1..1), `smoothing` (0..1, WebGL only)                                                                                                                                                       |
+| `setFilters({...})` / `setFilterPreset(id)` / `resetFilters()` | `brightness`, `contrast`, `saturation` (CSS filter semantics), `grayscale`, `sepia`, `temperature` (-1..1), `smoothing` (0..1, WebGL only). Manual values make the preset `null` ("Custom")                                                                                                      |
+| `setAdjustments({ touchUp, lowLight })`                        | Friendly adjustments (0..1) applied on top of the preset/custom filters: skin smoothing and brightening for dark cameras                                                                                                                                                                         |
+| `clearAll()`                                                   | Back to the plain camera: no effect, filters or adjustments                                                                                                                                                                                                                                      |
 | `isActive()`                                                   | `true` when the output differs from the camera                                                                                                                                                                                                                                                   |
-| `getEffects()`, `getFilterPresets()`, `getState()`             | For UIs                                                                                                                                                                                                                                                                                          |
+| `getEffects()`, `getFilterPresets()`, `getState()`             | For UIs. `getState().slow` is `true` after 4 s under `slowFps` (option, default 12)                                                                                                                                                                                                              |
 | `on(event, fn)`                                                | `state`, `error` (`{ stage, error }`), `sourceended`, `destroyed`                                                                                                                                                                                                                                |
 | `stop()`                                                       | Ends the output track and detaches the camera **without stopping it**; models stay loaded                                                                                                                                                                                                        |
 | `destroy()`                                                    | Releases workers, MediaPipe, WebGL contexts, streams, listeners, loops and object URLs                                                                                                                                                                                                           |
@@ -244,7 +261,9 @@ license. To self-host the runtime files, pass `mediapipe` / `three` URLs to the 
 
 `npx mocha tests/test-VideoEffects.js` covers smoothing, pose, placement, registry validation, face-loss
 handling, expressions (blink, wink, mouth, adaptive eye reference), avatar part mapping, the renderers, the API
-lifecycle and the `RoomClient` track replacement and cleanup logic.
+lifecycle (adjustments, clear all, slow device) and the `RoomClient` track replacement and cleanup logic.
+`npx mocha tests/test-VideoEffectsPanel.js` covers the panel (jsdom): tabs, one-effect selection, chips and
+"Turn off all", Custom state, keyboard, backgrounds (toggle, upload, delete, links) and the status messages.
 
 ## Known limitations
 

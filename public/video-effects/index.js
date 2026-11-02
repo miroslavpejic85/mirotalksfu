@@ -33,6 +33,8 @@
                 width: mobile ? 1280 : 1920,
                 height: mobile ? 720 : 1080,
                 maxFps: 30,
+                // Below this rendered frame rate the UI suggests a lighter effect
+                slowFps: 12,
                 detectionFps: undefined,
                 useWorker: true,
                 preferWebGL: true,
@@ -44,6 +46,11 @@
             this.effectId = null;
             this.filterPresetId = 'none';
             this.filters = { ...VFX.DEFAULT_FILTERS };
+            // Friendly adjustments layered on top of the preset or custom filters (0..1)
+            this.adjustments = { touchUp: 0, lowLight: 0 };
+            this.effectiveFilters = { ...VFX.DEFAULT_FILTERS };
+            this.slowWindows = 0;
+            this.slow = false;
             this.initialized = false;
             this.initializing = null;
             this.destroyed = false;
@@ -195,10 +202,11 @@
             return this.modelRenderer;
         }
 
+        // Manual filter values: the preset becomes "custom" (filterPreset: null)
         setFilters(filters = {}) {
             this.filters = VFX.normalizeFilters({ ...this.filters, ...filters });
             this.filterPresetId = null;
-            this.emitState();
+            this.updateEffectiveFilters();
         }
 
         setFilterPreset(id) {
@@ -206,16 +214,51 @@
             if (!preset) throw new VFX.VideoEffectsError('UNKNOWN_FILTER', `Unknown filter preset "${id}"`);
             this.filters = { ...preset.filters };
             this.filterPresetId = preset.id;
-            this.emitState();
+            this.updateEffectiveFilters();
         }
 
+        // Resets the preset/custom filters, the adjustments are kept
         resetFilters() {
             this.setFilterPreset('none');
         }
 
-        // True when the output differs from the camera (effect selected or filters changed)
+        /**
+         * Friendly adjustments (0..1) applied on top of the filters: touchUp (skin smoothing) and
+         * lowLight (brightens a dark camera).
+         */
+        setAdjustments(adjustments = {}) {
+            for (const key of ['touchUp', 'lowLight']) {
+                const value = Number(adjustments[key]);
+                if (Number.isFinite(value)) this.adjustments[key] = VFX.clamp(value, 0, 1);
+            }
+            this.updateEffectiveFilters();
+        }
+
+        updateEffectiveFilters() {
+            const { touchUp, lowLight } = this.adjustments;
+            const base = this.filters;
+            this.effectiveFilters = VFX.normalizeFilters({
+                ...base,
+                smoothing: Math.max(base.smoothing, touchUp),
+                brightness: base.brightness * (1 + 0.35 * lowLight),
+                contrast: base.contrast * (1 - 0.08 * lowLight),
+                saturation: base.saturation * (1 + 0.08 * lowLight),
+            });
+            this.emitState();
+        }
+
+        // Back to the plain camera: no effect, filters or adjustments
+        async clearAll() {
+            this.filters = { ...VFX.DEFAULT_FILTERS };
+            this.filterPresetId = 'none';
+            this.adjustments = { touchUp: 0, lowLight: 0 };
+            this.updateEffectiveFilters();
+            if (this.effectId) await this.setEffect(null);
+        }
+
+        // True when the output differs from the camera (effect, filters or adjustments)
         isActive() {
-            return !!this.effectId || !VFX.isDefaultFilters(this.filters);
+            return !!this.effectId || !VFX.isDefaultFilters(this.effectiveFilters);
         }
 
         setDetectionFps(fps) {
@@ -246,7 +289,7 @@
             }
 
             try {
-                if (!this.renderer.drawVideo(this.source.frameSource, this.filters)) return;
+                if (!this.renderer.drawVideo(this.source.frameSource, this.effectiveFilters)) return;
                 if (face) {
                     const layers = this.manager.computeLayers(face);
                     for (let i = 0; i < layers.length; i++) {
@@ -271,6 +314,18 @@
                 this.fps = Math.round((this.frameCount * 1000) / elapsed);
                 this.frameCount = 0;
                 this.fpsWindowStart = now;
+                this.updatePerformance();
+            }
+        }
+
+        // "Slow" after 4 consecutive seconds under the threshold, back to normal after 4 good ones
+        updatePerformance() {
+            const struggling = this.fps > 0 && this.fps < this.options.slowFps;
+            this.slowWindows = struggling ? Math.min(this.slowWindows + 1, 4) : Math.max(this.slowWindows - 1, 0);
+            const slow = this.slow ? this.slowWindows > 0 : this.slowWindows >= 4;
+            if (slow !== this.slow) {
+                this.slow = slow;
+                this.emitState();
             }
         }
 
@@ -294,7 +349,10 @@
                 effect: this.effectId,
                 filterPreset: this.filterPresetId,
                 filters: { ...this.filters },
+                adjustments: { ...this.adjustments },
+                effectiveFilters: { ...this.effectiveFilters },
                 active: this.isActive(),
+                slow: this.slow,
                 running: this.running,
                 renderer: this.renderer?.type || null,
                 capabilities: this.renderer?.capabilities || { filters: false, smoothing: false, webgl: false },
@@ -322,6 +380,8 @@
             this.tracker.reset();
             this.running = false;
             this.fps = 0;
+            this.slowWindows = 0;
+            this.slow = false;
             this.emitState();
         }
 

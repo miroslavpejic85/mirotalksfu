@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.30
+ * @version 2.7.31
  *
  */
 
@@ -3035,6 +3035,7 @@ class RoomClient {
                 if (video) {
                     this.localVideoElement = elem;
                     this.videoProducerId = producer.id;
+                    if (typeof updateVideoEffectsIndicators === 'function') updateVideoEffectsIndicators();
                     // Processed tracks (effects, background) do not report the camera facing mode
                     camera = detectCameraFacingMode(cameraStream || stream);
                     handleCameraMirror(elem);
@@ -3439,6 +3440,7 @@ class RoomClient {
         this.syncVideoBackgroundSelection();
         videoSelect.onchange();
         saveVirtualBackgroundSettings(blurLevel, backgroundImage, backgroundTransparent);
+        if (typeof refreshVisualEffectsUi === 'function') refreshVisualEffectsUi();
     }
 
     // Stop the virtual background pipeline and the camera that fed it

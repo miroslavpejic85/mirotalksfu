@@ -598,6 +598,47 @@ describe('Video effects engine', () => {
             );
         });
 
+        it('layers touch up and low light on top of presets and clears everything', async () => {
+            const effects = new context.MiroTalkVideoEffects();
+            effects.setFilterPreset('warm');
+            effects.setAdjustments({ touchUp: 0.6, lowLight: 1, unknown: 5 });
+            const state = effects.getState();
+            assert.equal(state.filterPreset, 'warm', 'adjustments keep the preset');
+            assert.deepEqual({ ...state.adjustments }, { touchUp: 0.6, lowLight: 1 });
+            close(state.effectiveFilters.smoothing, 0.6);
+            close(state.effectiveFilters.brightness, 1.35);
+            close(state.effectiveFilters.temperature, 0.6, 1e-6, 'preset values kept');
+            effects.setAdjustments({ touchUp: 3, lowLight: -1 });
+            assert.deepEqual({ ...effects.getState().adjustments }, { touchUp: 1, lowLight: 0 }, 'clamped');
+
+            effects.resetFilters();
+            assert.equal(effects.isActive(), true, 'touch up alone keeps the engine active');
+            await effects.clearAll();
+            const cleared = effects.getState();
+            assert.equal(cleared.filterPreset, 'none');
+            assert.deepEqual({ ...cleared.adjustments }, { touchUp: 0, lowLight: 0 });
+            assert.equal(effects.isActive(), false);
+        });
+
+        it('reports a slow device after sustained low frame rates only', () => {
+            const effects = new context.MiroTalkVideoEffects({ slowFps: 12 });
+            const states = [];
+            effects.on('state', (state) => states.push(state.slow));
+            const second = (fps) => {
+                effects.fps = fps;
+                effects.updatePerformance();
+            };
+            [8, 8, 8].forEach(second);
+            assert.equal(effects.getState().slow, false, 'three slow seconds are not enough');
+            second(8);
+            assert.equal(effects.getState().slow, true);
+            second(25);
+            assert.equal(effects.getState().slow, true, 'one good second does not clear it');
+            [25, 25, 25].forEach(second);
+            assert.equal(effects.getState().slow, false);
+            assert.deepEqual(states, [true, false], 'state emitted only on changes');
+        });
+
         it('stop() ends the output but never stops the camera track', () => {
             const effects = new context.MiroTalkVideoEffects();
             const parts = {

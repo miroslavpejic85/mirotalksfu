@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.30
+ * @version 2.7.31
  *
  */
 
@@ -2063,6 +2063,8 @@ async function whoAreYou() {
     if (isVideoEffectsAvailable()) {
         show(initVideoEffectsButton);
     }
+    // One "Visual effects" entry point: the separate Background button/tab are merged into it
+    applyVisualEffectsMerge();
     // Restore the saved effect early: assets and the face model load while the user is in the lobby
     initVideoEffects();
 
@@ -3424,6 +3426,7 @@ function handleButtons() {
     tabVideoEffectsBtn.onclick = (e) => {
         rc.openTab(e, 'tabVideoEffects');
         mountVideoEffectsPanel();
+        getVideoEffectsPanel()?.refreshSnapshot();
     };
     tabAudioDevicesBtn.onclick = (e) => {
         rc.openTab(e, 'tabAudioDevices');
@@ -4060,7 +4063,7 @@ function setButtonsInit() {
         setTippy('initStopScreenButton', 'Toggle screen sharing', 'top');
         setTippy('initVideoMirrorButton', 'Toggle video mirror', 'top');
         setTippy('initVirtualBackgroundButton', 'Set Virtual Background or Blur', 'top');
-        setTippy('initVideoEffectsButton', 'Video effects', 'top');
+        setTippy('initVideoEffectsButton', 'Visual effects', 'top');
         setTippy('initUsernameEmojiButton', 'Toggle username emoji', 'top');
         setTippy('initExitButton', 'Leave meeting', 'top');
     }
@@ -6978,11 +6981,15 @@ function setupQuickDeviceSwitchDropdowns() {
 
         appendMenuDivider(videoMenu);
 
+        const visualEffectsMerged = isVisualEffectsMerged() && isVideoEffectsAvailable();
+
         if (isVirtualBackgroundAvailable()) {
             appendVideoMenuBackground(videoMenu);
             appendMenuDivider(videoMenu);
+        }
 
-            // Full picker: low blur, transparent, image from URL and managing uploaded images
+        // Full picker: low blur, transparent, image from URL and managing uploaded images
+        if (isVirtualBackgroundAvailable() && !visualEffectsMerged) {
             const virtualBgBtn = document.createElement('button');
             virtualBgBtn.type = 'button';
             virtualBgBtn.className = 'device-menu-action-btn';
@@ -7007,7 +7014,7 @@ function setupQuickDeviceSwitchDropdowns() {
             const effectsIcon = document.createElement('i');
             effectsIcon.className = 'fas fa-wand-magic-sparkles';
             effectsBtn.appendChild(effectsIcon);
-            effectsBtn.appendChild(document.createTextNode(' Video effects...'));
+            effectsBtn.appendChild(document.createTextNode(' Visual effects...'));
             effectsBtn.addEventListener('click', () => {
                 hideDeviceMenu(videoToggle);
                 openVideoEffectsSettings();
@@ -10385,6 +10392,7 @@ async function applyVirtualBackground(videoElement, stream, blurLevel, backgroun
     }
 
     saveVirtualBackgroundSettings(blurLevel, backgroundImage, backgroundTransparent);
+    refreshVisualEffectsUi();
 }
 
 function isValidImageURL(url) {
@@ -10485,22 +10493,191 @@ function isVideoEffectsAvailable() {
     );
 }
 
+// Visual effects merge Background into the effects panel (one place for "how I look on camera")
+function isVisualEffectsMerged() {
+    return !!videoEffects && !videoEffects.destroyed && BUTTONS.settings.videoEffects !== false;
+}
+
+function applyVisualEffectsMerge() {
+    const merged = isVisualEffectsMerged();
+    [tabVirtualBackgroundBtn, initVirtualBackgroundButton].forEach((el) => el?.classList.toggle('vfx-merged', merged));
+    if (merged) hideInitImageGrids();
+    updateDevicesNavLabel();
+}
+
+function readImageFiles(files) {
+    const imageFiles = Array.from(files || []).filter((file) => file?.type?.startsWith('image/'));
+    return Promise.all(
+        imageFiles.map(
+            (file) =>
+                new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(file);
+                })
+        )
+    ).then((images) => images.filter(Boolean));
+}
+
+// Background adapter for the effects panel: room (RoomClient) or pre-join lobby
+function createVisualBackgroundAdapter() {
+    let lobbyImages = null;
+    const inRoom = () => !!rc;
+    return {
+        isAvailable: () => isVirtualBackgroundAvailable(),
+        supportsTransparent: () => true,
+        isValidImageUrl: (url) => isValidImageURL(filterXSS(url)),
+        getSelection: () => ({
+            blurLevel: virtualBackgroundBlurLevel || null,
+            imageUrl: virtualBackgroundSelectedImage || null,
+            transparent: virtualBackgroundTransparent || null,
+        }),
+        getPresetImages: () => virtualBackgrounds,
+        getCustomImages() {
+            if (inRoom()) return rc.virtualBackgroundCustomImages || [];
+            if (!lobbyImages) {
+                lobbyImages = [];
+                indexedDBHelper
+                    .getAllImages()
+                    .then((images) => {
+                        lobbyImages = [...new Set(images)];
+                        videoEffectsPanel?.sync();
+                    })
+                    .catch((error) => console.warn('Unable to load the uploaded backgrounds', error));
+            }
+            return lobbyImages;
+        },
+        async apply(blurLevel = null, imageUrl = null, transparent = null) {
+            if (inRoom()) return rc.applyVirtualBackground(blurLevel, imageUrl, transparent);
+            const track = initStream?.getVideoTracks()[0];
+            if (track && track.readyState === 'live' && !joinRoomWithScreen) {
+                return applyVirtualBackground(initVideo, initStream, blurLevel, imageUrl, transparent);
+            }
+            // Camera off: remember the choice, it is applied when the camera starts
+            virtualBackgroundBlurLevel = blurLevel || null;
+            virtualBackgroundSelectedImage = blurLevel ? null : imageUrl || null;
+            virtualBackgroundTransparent = !blurLevel && !imageUrl && transparent ? true : null;
+            saveVirtualBackgroundSettings(blurLevel, imageUrl, transparent);
+            refreshVisualEffectsUi();
+        },
+        async upload(files) {
+            if (inRoom() && typeof rc.uploadVirtualBackgroundImages === 'function') {
+                return rc.uploadVirtualBackgroundImages(files);
+            }
+            const images = await readImageFiles(files);
+            for (const imageData of images) {
+                await indexedDBHelper.saveImage(imageData);
+                if (lobbyImages && !lobbyImages.includes(imageData)) lobbyImages.push(imageData);
+            }
+            return images;
+        },
+        async removeCustom(imageData) {
+            await indexedDBHelper.removeImage(imageData);
+            if (inRoom()) {
+                const list = rc.virtualBackgroundCustomImages || [];
+                const index = list.indexOf(imageData);
+                if (index !== -1) list.splice(index, 1);
+                // Keep the legacy background grid (used by other pickers) in sync
+                document.querySelectorAll('#imageGridVideo .image-wrapper img').forEach((img) => {
+                    if (img.getAttribute('src') === imageData) img.closest('.image-wrapper')?.remove();
+                });
+            } else if (lobbyImages) {
+                lobbyImages = lobbyImages.filter((image) => image !== imageData);
+            }
+        },
+    };
+}
+
 function getVideoEffectsPanel() {
     if (videoEffectsPanel || !videoEffects || typeof VideoEffectsPanel === 'undefined') return videoEffectsPanel;
     videoEffectsPanel = new VideoEffectsPanel(videoEffects, {
         onChange: () => refreshVideoEffectsOutput(),
-        // Backgrounds keep their own tab: the Effects panel only links to it
-        openBackgroundSettings: () => tabVirtualBackgroundBtn.click(),
+        onStateChange: (active) => updateVideoEffectsIndicators(active),
+        background: createVisualBackgroundAdapter(),
+        camera: {
+            isOn: () =>
+                rc ? rc.producerLabel.has(RoomClient.mediaType.video) : isVideoAllowed && !!initStream?.active,
+            turnOn: () => {
+                if (rc) return startVideoButton.click();
+                if (!isVideoAllowed) initVideoButton.click();
+            },
+        },
+        preview: {
+            getStream: () => (rc?.producerLabel.has(RoomClient.mediaType.video) ? rc.localVideoStream : null),
+            isMirrored: () => !!rc?.localVideoElement?.classList.contains('mirror'),
+        },
+        snapshotSource: () => (rc ? rc.localVideoElement : initVideo),
     });
     // Camera unplugged or permission revoked while the effects were processing it
     videoEffects.on('sourceended', () => rc?.handleVideoEffectsSourceEnded());
     return videoEffectsPanel;
 }
 
+function refreshVisualEffectsUi() {
+    if (videoEffectsPanel) videoEffectsPanel.sync();
+    else updateVideoEffectsIndicators();
+}
+
+function isAnyVisualEffectOn() {
+    if (videoEffectsPanel) return videoEffectsPanel.isAnythingActive();
+    return !!(virtualBackgroundBlurLevel || virtualBackgroundSelectedImage || virtualBackgroundTransparent);
+}
+
+/**
+ * "Effects on" indicators in the room: a badge on the own camera tile (open the panel / turn
+ * everything off) and a dot on the camera button. Effects are remembered between meetings.
+ */
+function updateVideoEffectsIndicators(active = isAnyVisualEffectOn()) {
+    if (!rc || !isVisualEffectsMerged()) return;
+    const cameraOn = rc.producerLabel.has(RoomClient.mediaType.video);
+    stopVideoButton?.classList.toggle('vfx-active-dot', active && cameraOn);
+    const tile = cameraOn ? getId(`${rc.videoProducerId}__video`) : null;
+    document.querySelectorAll('.vfx-on-badge').forEach((badge) => {
+        if (badge.parentElement !== tile) badge.remove();
+    });
+    if (!tile) return;
+    let badge = tile.querySelector('.vfx-on-badge');
+    if (!active) {
+        badge?.remove();
+        return;
+    }
+    if (badge) return;
+    badge = document.createElement('div');
+    badge.className = 'vfx-on-badge';
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.className = 'vfx-on-badge-open';
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-wand-magic-sparkles';
+    open.appendChild(icon);
+    open.appendChild(document.createTextNode(' Effects on'));
+    open.setAttribute('aria-label', window.i18n?.t('Open visual effects', 'labels') || 'Open visual effects');
+    open.addEventListener('click', (event) => {
+        event.stopPropagation();
+        openVideoEffectsSettings();
+    });
+    const off = document.createElement('button');
+    off.type = 'button';
+    off.className = 'vfx-on-badge-off';
+    const offIcon = document.createElement('i');
+    offIcon.className = 'fas fa-xmark';
+    off.appendChild(offIcon);
+    off.setAttribute('aria-label', window.i18n?.t('Turn off all effects', 'labels') || 'Turn off all effects');
+    off.addEventListener('click', (event) => {
+        event.stopPropagation();
+        getVideoEffectsPanel()?.turnOffAll();
+    });
+    badge.append(open, off);
+    tile.appendChild(badge);
+    if (!isMobileDevice) setTippy(off, 'Turn off all effects', 'top');
+}
+
 async function initVideoEffects() {
     if (!videoEffects || BUTTONS.settings.videoEffects === false) return;
     const panel = getVideoEffectsPanel();
     if (!panel) return;
+    mountInitVideoEffectsChips();
     await panel.restoreSettings();
     // The camera may already be on (direct join): apply the restored selection to it
     await refreshVideoEffectsOutput();
@@ -10523,15 +10700,18 @@ function mountVideoEffectsPanel() {
     const container = getId('videoEffectsPanel');
     if (!panel || !container) return;
     if (!container.firstChild) {
-        panel.mount(container, { backgroundLink: isVirtualBackgroundAvailable(), sliders: true });
+        panel.mount(container, { preview: true });
     } else {
         panel.sync();
     }
 }
 
-function openVideoEffectsSettings() {
-    rc.toggleMySettings();
-    setTimeout(() => tabVideoEffectsBtn.click(), 100);
+function openVideoEffectsSettings(tab = null) {
+    if (!rc.isMySettingsOpen) rc.toggleMySettings();
+    setTimeout(() => {
+        tabVideoEffectsBtn.click();
+        if (tab) getVideoEffectsPanel()?.openTab(tab);
+    }, 100);
 }
 
 // Lobby preview: the camera (or its virtual background) goes through the effects engine when needed
@@ -10574,22 +10754,50 @@ function stopInitVideoEffects() {
     if (initVideoBaseStream && initVideoBaseStream.active) initVideo.srcObject = initVideoBaseStream;
 }
 
-function toggleInitVideoEffects() {
-    const grid = getId('initVideoEffectsGrid');
-    if (!grid) return;
-    if (!grid.classList.contains('hidden')) return hideInitVideoEffects();
+// Pre-join: the panel opens as a drawer over the device controls, the preview stays visible
+function toggleInitVideoEffects(tab = null) {
+    const drawer = getId('initVideoEffectsGrid');
+    if (!drawer) return;
+    if (!drawer.classList.contains('hidden') && !tab) return hideInitVideoEffects();
+    openInitVideoEffects(tab);
+}
+
+function openInitVideoEffects(tab = null) {
+    const drawer = getId('initVideoEffectsGrid');
     const panel = getVideoEffectsPanel();
-    if (!panel) return;
+    if (!drawer || !panel) return;
     hideInitImageGrids();
-    if (!grid.firstChild) panel.mount(grid, { background: false, sliders: false, compact: true });
-    grid.classList.remove('hidden');
+    if (!drawer.firstChild) {
+        panel.mount(drawer, { compact: true, title: 'Visual effects', onClose: hideInitVideoEffects });
+    }
+    if (tab) panel.openTab(tab);
+    drawer.classList.remove('hidden');
+    drawer.parentElement?.classList.add('vfx-drawer-open');
+    // The drawer lists what is on: hide the reminder chips under the preview meanwhile
+    initUser.classList.add('vfx-drawer-open');
     initVideoEffectsButton.classList.add('active');
+    initVideoEffectsButton.setAttribute('aria-expanded', 'true');
+    panel.refreshSnapshot();
+    drawer.querySelector('.vfx-tab.active')?.focus({ preventScroll: true });
 }
 
 function hideInitVideoEffects() {
-    const grid = getId('initVideoEffectsGrid');
-    if (grid) grid.classList.add('hidden');
+    const drawer = getId('initVideoEffectsGrid');
+    if (drawer) drawer.classList.add('hidden');
+    drawer?.parentElement?.classList.remove('vfx-drawer-open');
+    initUser.classList.remove('vfx-drawer-open');
     initVideoEffectsButton?.classList.remove('active');
+    // Back to the button that opened the drawer
+    if (drawer?.contains(document.activeElement)) initVideoEffectsButton?.focus({ preventScroll: true });
+    initVideoEffectsButton?.setAttribute('aria-expanded', 'false');
+}
+
+// Removable chips under the pre-join preview: what is on is always visible before joining
+function mountInitVideoEffectsChips() {
+    const panel = getVideoEffectsPanel();
+    const container = getId('initVideoEffectsChips');
+    if (!panel || !container) return;
+    panel.mountActiveBar(container, { onOpen: (tab) => openInitVideoEffects(tab) });
 }
 
 /**
@@ -10849,7 +11057,10 @@ async function loadVirtualBackgroundSettings() {
         await applyVirtualBackground(initVideo, initStream, null, null, true);
     }
 
-    if (virtualBackgroundBlurLevel || virtualBackgroundSelectedImage || virtualBackgroundTransparent) {
+    if (
+        !isVisualEffectsMerged() &&
+        (virtualBackgroundBlurLevel || virtualBackgroundSelectedImage || virtualBackgroundTransparent)
+    ) {
         initVirtualBackgroundButton.click();
     }
 }
@@ -10958,7 +11169,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.30',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.31',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

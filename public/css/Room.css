@@ -888,7 +888,7 @@ body {
     .initComands {
         justify-content: center;
     }
-    .init-user button {
+    .init-user .initComands > button {
         width: 42px !important;
         height: 42px !important;
     }
@@ -918,7 +918,7 @@ body {
     .init-user.no-camera .initComands {
         justify-content: center;
     }
-    .init-user.no-camera button {
+    .init-user.no-camera .initComands > button {
         width: 42px;
         height: 42px;
     }

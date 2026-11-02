@@ -231,6 +231,7 @@
                         <span id="initVideoOffText" class="init-video-off-text" aria-live="polite">Camera is off</span>
                         <span id="initVideoOffHint" class="init-video-off-hint">Click to turn on camera</span>
                     </div>
+                    <div id="initVideoEffectsChips" class="init-video-effects-chips hidden"></div>
                     <div id="initImageGridControls" class="image-grid image-grid-controls fadein"></div>
                     <div id="imageGrid" class="image-grid fadein"></div>
                     <span id="initErrorMessage" class="show-error"></span>
@@ -257,7 +258,9 @@
                     <button
                         id="initVideoEffectsButton"
                         class="fa-solid fa-wand-magic-sparkles hidden"
-                        aria-label="Video effects"
+                        aria-label="Visual effects"
+                        aria-controls="initVideoEffectsGrid"
+                        aria-expanded="false"
                     ></button>
                     <button
                         id="initVideoMirrorButton"
@@ -295,7 +298,12 @@
                         class="form-select text-light bg-dark"
                         aria-label="Speakers"
                     ></select>
-                    <div id="initVideoEffectsGrid" class="init-video-effects hidden"></div>
+                    <div
+                        id="initVideoEffectsGrid"
+                        class="init-video-effects hidden"
+                        role="dialog"
+                        aria-label="Visual effects"
+                    ></div>
                 </div>
             </div>
             <div id="usernameEmoji" class="usernameEmoji fadein center hidden"></div>
@@ -669,7 +677,7 @@
                         <p class="tabButtonText">Background</p>
                     </button>
                     <button id="tabVideoEffectsBtn" class="fa-solid fa-wand-magic-sparkles tablinks hidden">
-                        <p class="tabButtonText">Effects</p>
+                        <p class="tabButtonText">Visual effects</p>
                     </button>
                     <button id="tabAudioDevicesBtn" class="fas fa-microphone tablinks">
                         <p class="tabButtonText">Audio</p>
@@ -1048,8 +1056,8 @@
 
                     <div id="tabVideoEffects" class="tabcontent">
                         <div class="settings-section-intro">
-                            <h3>Effects</h3>
-                            <p>Add face accessories and filters to your camera.</p>
+                            <h3>Visual effects</h3>
+                            <p>Change your background, add effects or avatars and adjust how you look.</p>
                         </div>
                         <div id="videoEffectsPanel"></div>
                     </div>
