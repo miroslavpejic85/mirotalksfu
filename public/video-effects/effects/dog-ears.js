@@ -14,7 +14,7 @@
     VFX.registerEffect({
         id: 'dog-ears',
         label: 'Dog ears',
-        order: 60,
+        order: 100,
         thumbnail: 'assets/accessories/dog-thumb.svg',
         layers: [
             // Ear on the image left (subject's right), the other one is mirrored

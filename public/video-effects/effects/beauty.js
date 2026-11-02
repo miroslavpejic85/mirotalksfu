@@ -15,11 +15,23 @@
     const presets = [
         { id: 'none', label: 'None', order: 0, filters: {} },
         { id: 'beauty', label: 'Beauty', order: 10, filters: { smoothing: 0.6, brightness: 1.05, saturation: 1.05 } },
-        { id: 'vivid', label: 'Vivid', order: 20, filters: { contrast: 1.12, saturation: 1.35 } },
-        { id: 'warm', label: 'Warm', order: 30, filters: { temperature: 0.6, saturation: 1.05 } },
-        { id: 'cool', label: 'Cool', order: 40, filters: { temperature: -0.6 } },
-        { id: 'grayscale', label: 'Grayscale', order: 50, filters: { grayscale: 1, contrast: 1.05 } },
-        { id: 'sepia', label: 'Sepia', order: 60, filters: { sepia: 0.85 } },
+        { id: 'vivid', label: 'Vivid', order: 30, filters: { contrast: 1.12, saturation: 1.35 } },
+        { id: 'warm', label: 'Warm', order: 40, filters: { temperature: 0.6, saturation: 1.05 } },
+        { id: 'cool', label: 'Cool', order: 50, filters: { temperature: -0.6 } },
+        { id: 'grayscale', label: 'Grayscale', order: 80, filters: { grayscale: 1, contrast: 1.05 } },
+        { id: 'sepia', label: 'Sepia', order: 70, filters: { sepia: 0.85 } },
+        {
+            id: 'vintage',
+            label: 'Vintage',
+            order: 60,
+            filters: { sepia: 0.35, temperature: 0.3, contrast: 1.1, saturation: 0.85, brightness: 0.97 },
+        },
+        {
+            id: 'soft-glow',
+            label: 'Soft glow',
+            order: 20,
+            filters: { smoothing: 0.5, brightness: 1.08, contrast: 0.94, saturation: 1.08, temperature: 0.15 },
+        },
     ];
     presets.forEach((preset) => VFX.registerFilterPreset(preset));
 })(typeof globalThis !== 'undefined' ? globalThis : self);

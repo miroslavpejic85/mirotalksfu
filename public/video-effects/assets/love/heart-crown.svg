@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="380" viewBox="0 0 800 380">
+    <defs>
+        <radialGradient id="red" cx="0.35" cy="0.28" r="0.85">
+            <stop offset="0" stop-color="#ff8aa5" />
+            <stop offset="0.5" stop-color="#ee2a55" />
+            <stop offset="1" stop-color="#a80f35" />
+        </radialGradient>
+        <radialGradient id="pink" cx="0.35" cy="0.28" r="0.85">
+            <stop offset="0" stop-color="#ffd1e0" />
+            <stop offset="0.5" stop-color="#ff7fab" />
+            <stop offset="1" stop-color="#d63b76" />
+        </radialGradient>
+        <path
+            id="heart"
+            d="M100 172 C22 112 4 74 4 50 C4 22 26 6 52 6 C74 6 92 18 100 38 C108 18 126 6 148 6 C174 6 196 22 196 50 C196 74 178 112 100 172 Z"
+        />
+        <path id="shine" d="M34 50 C34 34 46 26 60 28" fill="none" stroke="#ffffff" stroke-opacity="0.75" stroke-width="9" stroke-linecap="round" />
+    </defs>
+    <g transform="translate(70 170) rotate(-28 50 80) scale(0.5)">
+        <use href="#heart" fill="url(#pink)" stroke="#a80f35" stroke-width="7" stroke-linejoin="round" /><use href="#shine" />
+    </g>
+    <g transform="translate(610 170) rotate(28 50 80) scale(0.5)">
+        <use href="#heart" fill="url(#pink)" stroke="#a80f35" stroke-width="7" stroke-linejoin="round" /><use href="#shine" />
+    </g>
+    <g transform="translate(160 76) rotate(-16 70 90) scale(0.7)">
+        <use href="#heart" fill="url(#red)" stroke="#8f0c2c" stroke-width="6" stroke-linejoin="round" /><use href="#shine" />
+    </g>
+    <g transform="translate(500 76) rotate(16 70 90) scale(0.7)">
+        <use href="#heart" fill="url(#red)" stroke="#8f0c2c" stroke-width="6" stroke-linejoin="round" /><use href="#shine" />
+    </g>
+    <g transform="translate(300 8)">
+        <use href="#heart" fill="url(#red)" stroke="#8f0c2c" stroke-width="5" stroke-linejoin="round" /><use href="#shine" />
+    </g>
+    <g fill="#ffffff" fill-opacity="0.9">
+        <path d="M258 70 l5 14 l14 5 l-14 5 l-5 14 l-5 -14 l-14 -5 l14 -5 Z" />
+        <path d="M548 60 l4 11 l11 4 l-11 4 l-4 11 l-4 -11 l-11 -4 l11 -4 Z" />
+        <path d="M120 150 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 Z" />
+    </g>
+</svg>

@@ -360,7 +360,7 @@ ${shading(`${id}-head`, d, { rim: 0.38, light: 0.2, rimColor: '#2a1504' })}
     characters.push({
         id,
         label: 'Bear',
-        order: 220,
+        order: 230,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -418,7 +418,7 @@ ${shading(`${id}-head`, d, { rim: 0.22, light: 0.15, rimColor: '#4a4436' })}
     characters.push({
         id,
         label: 'Panda',
-        order: 230,
+        order: 240,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -489,7 +489,7 @@ ${shading(`${id}-head`, d, { rim: 0.3, light: 0.25, rimColor: '#5a2004' })}
     characters.push({
         id,
         label: 'Fox',
-        order: 260,
+        order: 250,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -554,7 +554,7 @@ ${shading(`${id}-head`, catmull(head), { rim: 0.35, light: 0.18, rimColor: '#120
     characters.push({
         id,
         label: 'Monkey',
-        order: 270,
+        order: 260,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -675,7 +675,7 @@ builders.push(() => {
     characters.push({
         id,
         label: 'Robot',
-        order: 240,
+        order: 340,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -753,7 +753,7 @@ ${shading(`${id}-head`, d, { rim: 0.3, light: 0.3, rimColor: '#0f3a12' })}
     characters.push({
         id,
         label: 'Alien',
-        order: 250,
+        order: 350,
         head: headSvg,
         eye: {
             box: [128, 116],
@@ -803,6 +803,642 @@ ${shading(`${id}-head`, d, { rim: 0.3, light: 0.3, rimColor: '#0f3a12' })}
     </defs>
     <path d="M24 10 Q60 2 96 10 Q100 46 60 66 Q20 46 24 10 Z" fill="url(#${id}-mouth)" stroke="#1b5e20" stroke-width="4" stroke-linejoin="round" />
     <path d="M38 46 Q60 36 82 46 Q76 60 60 63 Q44 60 38 46 Z" fill="#7ad67a" fill-opacity="0.85" />`,
+        },
+    });
+});
+
+// ####################################################
+// HUMANS AND FANTASY CREATURES
+// ####################################################
+
+// Human mouths (130x80 box, centred on the lip line): closed, smiling with teeth and open
+function humanMouths(id, { lip, lipDark, inside = ['#7a1f2b', '#2e080e'], tongue = '#e8667f' }) {
+    const neutral = `    <path d="M14 36 Q36 24 65 31 Q94 24 116 36 Q92 56 65 58 Q38 56 14 36 Z" fill="${lip}" stroke="${lipDark}" stroke-width="3" stroke-linejoin="round" />
+    <path d="M14 36 Q65 46 116 36" fill="none" stroke="${lipDark}" stroke-width="3.5" stroke-linecap="round" />
+    <path d="M44 33 Q65 28 86 33" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round" />`;
+    const smile = `    <defs><clipPath id="${id}-smile-clip"><path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" /></clipPath></defs>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="${inside[1]}" />
+    <g clip-path="url(#${id}-smile-clip)">
+        <path d="M6 22 Q65 34 124 22 L124 44 Q65 54 6 44 Z" fill="#fffdf8" />
+        <path d="M30 70 Q65 48 100 70 Z" fill="${tongue}" />
+    </g>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="none" stroke="${lipDark}" stroke-width="5" stroke-linejoin="round" />
+    <path d="M8 24 Q4 20 5 14 M122 24 Q126 20 125 14" fill="none" stroke="${lipDark}" stroke-width="4" stroke-linecap="round" />`;
+    const open = `    <defs>
+        <radialGradient id="${id}-inside" cx="0.5" cy="0.4" r="0.7">
+            <stop offset="0" stop-color="${inside[0]}" />
+            <stop offset="1" stop-color="${inside[1]}" />
+        </radialGradient>
+        <clipPath id="${id}-open-clip"><path d="M18 14 Q65 2 112 14 Q120 54 65 76 Q10 54 18 14 Z" /></clipPath>
+    </defs>
+    <path d="M18 14 Q65 2 112 14 Q120 54 65 76 Q10 54 18 14 Z" fill="url(#${id}-inside)" />
+    <g clip-path="url(#${id}-open-clip)">
+        <path d="M14 12 Q65 0 116 12 L116 28 Q65 18 14 28 Z" fill="#fffdf8" />
+        <path d="M32 70 Q65 44 98 70 Q82 82 65 82 Q48 82 32 70 Z" fill="${tongue}" />
+    </g>
+    <path d="M18 14 Q65 2 112 14 Q120 54 65 76 Q10 54 18 14 Z" fill="none" stroke="${lipDark}" stroke-width="5" stroke-linejoin="round" />`;
+    return { neutral, smile, open };
+}
+
+// Shared drawing of the human-like heads (man, woman, elf): ears, face, nose and cheeks
+function humanFace(id, { skin, skinDark, outline, blush, earPoints = null, extraDefs = '' }) {
+    const head = [
+        [300, 66], [396, 80], [458, 140], [482, 236], [482, 330], [468, 418], [428, 498], [366, 556], [300, 578],
+        [234, 556], [172, 498], [132, 418], [118, 330], [118, 236], [142, 140], [204, 80],
+    ]; // prettier-ignore
+    const d = catmull(head);
+    const ear = earPoints || [ellipse(112, 336, 30, 52, 20, -0.1), ellipse(488, 336, 30, 52, 20, 0.1)].map(catmull);
+    return {
+        d,
+        back: `    <defs>
+        <radialGradient id="${id}-skin" cx="0.5" cy="0.4" r="0.66">
+            <stop offset="0" stop-color="${skin[0]}" />
+            <stop offset="0.75" stop-color="${skin[1]}" />
+            <stop offset="1" stop-color="${skin[2]}" />
+        </radialGradient>
+        ${softFilter(`${id}-soft`, 5)}
+        ${softFilter(`${id}-blur`, 1.6)}
+        ${extraDefs}
+    </defs>
+    ${ear.map((e) => `<path d="${e}" fill="url(#${id}-skin)" stroke="${outline}" stroke-width="4" stroke-linejoin="round" />`).join('\n    ')}`,
+        face: `    <path d="${d}" fill="url(#${id}-skin)" />
+${shading(`${id}-face`, d, { rim: 0.2, light: 0.2, rimColor: skinDark })}
+    <path d="${d}" fill="none" stroke="${outline}" stroke-width="5" stroke-linejoin="round" />
+    <ellipse cx="190" cy="420" rx="40" ry="24" fill="${blush}" fill-opacity="0.3" filter="url(#${id}-soft)" />
+    <ellipse cx="410" cy="420" rx="40" ry="24" fill="${blush}" fill-opacity="0.3" filter="url(#${id}-soft)" />
+    <path d="M308 322 Q320 366 326 396" fill="none" stroke="${skinDark}" stroke-width="9" stroke-opacity="0.22" stroke-linecap="round" filter="url(#${id}-blur)" />
+    <path d="M276 398 Q300 418 324 398" fill="none" stroke="${outline}" stroke-width="4.5" stroke-linecap="round" />
+    <path d="M280 404 Q288 410 294 404 M306 404 Q312 410 320 404" fill="none" stroke="${outline}" stroke-width="3" stroke-linecap="round" />
+    <ellipse cx="296" cy="388" rx="10" ry="6" fill="#ffffff" fill-opacity="0.28" filter="url(#${id}-blur)" />`,
+    };
+}
+
+const humanEyeShape = 'M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z';
+const humanCrease = 'M12 46 C32 22 80 22 98 44';
+
+// ---------------- Man ----------------
+builders.push(() => {
+    const id = 'man';
+    const { back, face } = humanFace(id, {
+        skin: ['#ffe0c4', '#f1bf98', '#d79c74'],
+        skinDark: '#8a4f2a',
+        outline: '#a8683f',
+        blush: '#f08a78',
+    });
+    const random = rng(137);
+    const strands = [];
+    for (let i = 0; i < 26; i++) {
+        const x = 150 + random() * 300;
+        const y = 70 + random() * 70;
+        strands.push(
+            `M${fmt(x)} ${fmt(y)}q${fmt((random() - 0.5) * 30)} ${fmt(20 + random() * 18)} ${fmt((random() - 0.5) * 44)} ${fmt(40 + random() * 22)}`
+        );
+    }
+    const hair = `    <defs>
+        <linearGradient id="${id}-hair" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7a4a2a" />
+            <stop offset="1" stop-color="#3a2010" />
+        </linearGradient>
+    </defs>
+    <path d="M118 300 C84 130 190 30 300 30 C410 30 516 130 482 300 C476 240 462 214 440 196 C400 150 360 138 300 138 C240 138 200 150 160 196 C138 214 124 240 118 300 Z" fill="url(#${id}-hair)" stroke="#2a1608" stroke-width="5" stroke-linejoin="round" />
+    <path d="M214 120 C250 104 330 100 396 126" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-width="10" stroke-linecap="round" filter="url(#${id}-blur)" />
+    <path d="${strands.join('')}" fill="none" stroke="#2a1608" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round" />
+    <path d="M118 300 C124 330 130 338 136 340 L142 270 Z M482 300 C476 330 470 338 464 340 L458 270 Z" fill="#3a2010" />
+    <path d="M232 540 Q300 590 368 540 Q330 566 300 566 Q270 566 232 540 Z" fill="#6b4226" fill-opacity="0.28" />`;
+    characters.push({
+        id,
+        label: 'Man',
+        order: 290,
+        head: `${back}\n${face}\n${hair}`,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: humanEyeShape,
+                center: [55, 57],
+                irisRadius: 22,
+                iris: ['#b98a52', '#6a4220', '#2a1608'],
+                sclera: '#fffaf4',
+                outline: '#3a2010',
+                crease: humanCrease,
+            }),
+            closed: closedEye({
+                lid: 'M10 58 C30 76 80 76 100 56',
+                color: '#4a2a14',
+                lashes: false,
+                crease: humanCrease,
+            }),
+        },
+        brow: {
+            box: [185, 218, 100, 40],
+            svg: `    <path d="M6 32 Q42 4 94 20 Q96 30 90 32 Q46 18 12 38 Z" fill="#3a2010" fill-opacity="0.92" />`,
+            lift: 14,
+        },
+        mouth: { box: [235, 456, 130, 80], ...humanMouths(`${id}-mouth`, { lip: '#d98a7a', lipDark: '#8a3f36' }) },
+    });
+});
+
+// ---------------- Woman ----------------
+builders.push(() => {
+    const id = 'woman';
+    const { back, face } = humanFace(id, {
+        skin: ['#ffe6d2', '#f5c9a6', '#dca682'],
+        skinDark: '#945634',
+        outline: '#b4724a',
+        blush: '#ff7f9a',
+    });
+    const hairBack = `    <defs>
+        <linearGradient id="${id}-hair" x1="0" y1="0" x2="0.6" y2="1">
+            <stop offset="0" stop-color="#b8551f" />
+            <stop offset="0.55" stop-color="#8f3a12" />
+            <stop offset="1" stop-color="#5a2108" />
+        </linearGradient>
+    </defs>
+    <path d="M300 30 C136 30 60 160 74 320 C80 380 78 424 94 456 C130 480 176 456 184 420 L416 420 C424 456 470 480 506 456 C522 424 520 380 526 320 C540 160 464 30 300 30 Z" fill="url(#${id}-hair)" stroke="#4a1a06" stroke-width="5" stroke-linejoin="round" />
+    <path d="M92 360 C96 410 94 436 104 452 M508 360 C504 410 506 436 496 452" fill="none" stroke="#3a1304" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round" />`;
+    const fringe = `    <path d="M112 330 C86 150 190 46 300 46 C410 46 514 150 488 330 C482 262 462 214 430 186 C384 226 322 220 276 168 C236 214 170 232 138 270 C126 290 118 308 112 330 Z" fill="url(#${id}-hair)" stroke="#4a1a06" stroke-width="5" stroke-linejoin="round" />
+    <path d="M276 168 C262 120 262 84 280 52 M330 176 C340 124 360 92 392 66 M200 200 C170 160 160 120 170 90" fill="none" stroke="#3a1304" stroke-opacity="0.3" stroke-width="4" stroke-linecap="round" />
+    <path d="M188 110 C230 80 330 74 400 100" fill="none" stroke="#ffd0a0" stroke-opacity="0.45" stroke-width="10" stroke-linecap="round" filter="url(#${id}-blur)" />`;
+    const lashed = (
+        shape,
+        flicks
+    ) => `<path d="${shape}" fill="none" stroke="#2a1008" stroke-width="7" stroke-linecap="round" />
+    <path d="${flicks}" fill="none" stroke="#2a1008" stroke-width="4.5" stroke-linecap="round" />`;
+    characters.push({
+        id,
+        label: 'Woman',
+        order: 310,
+        head: `${hairBack}\n${back}\n${face}\n${fringe}`,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: `${eye({
+                id: `${id}-eye`,
+                shape: humanEyeShape,
+                center: [55, 57],
+                irisRadius: 23,
+                iris: ['#8fd0b0', '#2f8f6a', '#0e3d2c'],
+                sclera: '#fffaf4',
+                outline: '#2a1008',
+                crease: humanCrease,
+            })}
+    ${lashed('M8 58 C26 32 84 30 102 56', 'M12 48 L2 40 M24 38 L16 28 M92 40 L100 30')}`,
+            closed: `${closedEye({ lid: 'M10 58 C30 76 80 76 100 56', color: '#2a1008', lashes: true, width: 5 })}`,
+        },
+        brow: {
+            box: [185, 216, 100, 40],
+            svg: `    <path d="M8 30 Q44 2 94 24 Q48 12 8 34 Z" fill="#5a2108" fill-opacity="0.85" />`,
+            lift: 14,
+        },
+        mouth: { box: [235, 456, 130, 80], ...humanMouths(`${id}-mouth`, { lip: '#e0405f', lipDark: '#8c1731' }) },
+    });
+});
+
+// ---------------- Black man (short cropped hair) ----------------
+builders.push(() => {
+    const id = 'blackman';
+    const { back, face } = humanFace(id, {
+        skin: ['#b57a54', '#8f5a38', '#693d22'],
+        skinDark: '#2e140a',
+        outline: '#3f1f0e',
+        blush: '#c0584a',
+    });
+    const random = rng(331);
+    const curls = [];
+    for (let i = 0; i < 90; i++) {
+        const x = 150 + random() * 300;
+        const y = 64 + random() * 90;
+        curls.push(`<circle cx="${fmt(x)}" cy="${fmt(y)}" r="${fmt(2 + random() * 2.5)}" />`);
+    }
+    const hair = `    <defs>
+        <linearGradient id="${id}-hair" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#2e2623" />
+            <stop offset="1" stop-color="#0a0605" />
+        </linearGradient>
+        <clipPath id="${id}-hair-clip"><path d="M120 292 C96 150 188 52 300 52 C412 52 504 150 480 292 C474 244 460 210 440 192 C402 160 360 152 300 152 C240 152 198 160 160 192 C140 210 126 244 120 292 Z" /></clipPath>
+    </defs>
+    <path d="M120 292 C96 150 188 52 300 52 C412 52 504 150 480 292 C474 244 460 210 440 192 C402 160 360 152 300 152 C240 152 198 160 160 192 C140 210 126 244 120 292 Z" fill="url(#${id}-hair)" stroke="#050303" stroke-width="5" stroke-linejoin="round" />
+    <g fill="#ffffff" fill-opacity="0.16" clip-path="url(#${id}-hair-clip)">${curls.join('')}</g>
+    <path d="M204 104 C250 82 340 80 400 106" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="10" stroke-linecap="round" filter="url(#${id}-blur)" />
+    <path d="M120 292 C124 322 130 332 136 334 L142 266 Z M480 292 C476 322 470 332 464 334 L458 266 Z" fill="#0a0605" />
+    <path d="M232 540 Q300 590 368 540 Q330 566 300 566 Q270 566 232 540 Z" fill="#1a0c06" fill-opacity="0.3" />`;
+    characters.push({
+        id,
+        label: 'Black man',
+        order: 300,
+        head: `${back}\n${face}\n${hair}`,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: humanEyeShape,
+                center: [55, 57],
+                irisRadius: 22,
+                iris: ['#8a5a30', '#3a2010', '#140a04'],
+                sclera: '#fff6e8',
+                outline: '#1a0c06',
+                crease: humanCrease,
+            }),
+            closed: closedEye({
+                lid: 'M10 58 C30 76 80 76 100 56',
+                color: '#1a0c06',
+                lashes: false,
+                crease: humanCrease,
+            }),
+        },
+        brow: {
+            box: [185, 218, 100, 40],
+            svg: `    <path d="M6 32 Q42 4 94 20 Q96 30 90 32 Q46 18 12 38 Z" fill="#0a0605" fill-opacity="0.92" />`,
+            lift: 14,
+        },
+        mouth: { box: [235, 456, 130, 80], ...humanMouths(`${id}-mouth`, { lip: '#a8504a', lipDark: '#4a1814' }) },
+    });
+});
+
+// ---------------- Black woman (short natural hair) ----------------
+builders.push(() => {
+    const id = 'blackwoman';
+    const { back, face } = humanFace(id, {
+        skin: ['#b98058', '#935d3a', '#6c4024'],
+        skinDark: '#2e140a',
+        outline: '#3f1f0e',
+        blush: '#d4586a',
+    });
+    const random = rng(417);
+    const puffs = [];
+    for (let i = 0; i < 19; i++) {
+        const t = ((166 + (i / 18) * 208) * Math.PI) / 180;
+        const r = 24 + random() * 8;
+        puffs.push(
+            `<circle cx="${fmt(300 + Math.cos(t) * 224)}" cy="${fmt(250 + Math.sin(t) * 196)}" r="${fmt(r)}" />`
+        );
+    }
+    const hair = `    <defs>
+        <linearGradient id="${id}-hair" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#34292a" />
+            <stop offset="1" stop-color="#0a0605" />
+        </linearGradient>
+        <linearGradient id="${id}-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff2a8" />
+            <stop offset="1" stop-color="#c78e12" />
+        </linearGradient>
+    </defs>
+    <g fill="url(#${id}-hair)" stroke="#050303" stroke-width="10">${puffs.join('')}</g>
+    <g fill="url(#${id}-hair)">${puffs.join('')}</g>
+    <path d="M122 330 C84 250 82 140 170 80 C230 38 370 38 430 80 C518 140 516 250 478 330 C476 264 454 216 424 192 C384 156 216 156 176 192 C146 216 124 264 122 330 Z" fill="url(#${id}-hair)" />
+    <path d="M122 330 C124 264 146 216 176 192 C216 156 384 156 424 192 C454 216 476 264 478 330" fill="none" stroke="#050303" stroke-width="4" stroke-linejoin="round" />
+    <path d="M150 112 C210 60 390 60 450 112" fill="none" stroke="#ffffff" stroke-opacity="0.2" stroke-width="12" stroke-linecap="round" filter="url(#${id}-blur)" />
+    <g fill="none" stroke="url(#${id}-gold)" stroke-width="7">
+        <circle cx="110" cy="402" r="20" /><circle cx="490" cy="402" r="20" />
+    </g>`;
+    const lashed = (
+        shape,
+        flicks
+    ) => `<path d="${shape}" fill="none" stroke="#0a0605" stroke-width="7" stroke-linecap="round" />
+    <path d="${flicks}" fill="none" stroke="#0a0605" stroke-width="4.5" stroke-linecap="round" />`;
+    characters.push({
+        id,
+        label: 'Black woman',
+        order: 320,
+        head: `${back}\n${face}\n${hair}`,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: `${eye({
+                id: `${id}-eye`,
+                shape: humanEyeShape,
+                center: [55, 57],
+                irisRadius: 23,
+                iris: ['#a8743c', '#4a2a10', '#160a04'],
+                sclera: '#fff6e8',
+                outline: '#0a0605',
+                crease: humanCrease,
+            })}
+    ${lashed('M8 58 C26 32 84 30 102 56', 'M12 48 L2 40 M24 38 L16 28 M92 40 L100 30')}`,
+            closed: closedEye({ lid: 'M10 58 C30 76 80 76 100 56', color: '#0a0605', lashes: true, width: 5 }),
+        },
+        brow: {
+            box: [185, 216, 100, 40],
+            svg: `    <path d="M8 30 Q44 2 94 24 Q48 12 8 34 Z" fill="#0a0605" fill-opacity="0.85" />`,
+            lift: 14,
+        },
+        mouth: { box: [235, 456, 130, 80], ...humanMouths(`${id}-mouth`, { lip: '#b0304f', lipDark: '#560f26' }) },
+    });
+});
+
+// ---------------- Elf ----------------
+builders.push(() => {
+    const id = 'elf';
+    const earRight = 'M126 290 C84 262 50 222 14 168 C54 214 88 268 108 302 C106 336 112 366 134 378 Z';
+    const earLeft = 'M474 290 C516 262 550 222 586 168 C546 214 512 268 492 302 C494 336 488 366 466 378 Z';
+    const earInner =
+        'M118 296 C86 270 62 242 38 204 C70 240 94 278 108 308 Z M482 296 C514 270 538 242 562 204 C530 240 506 278 492 308 Z';
+    const { back, face } = humanFace(id, {
+        skin: ['#fff1e6', '#f4d6c4', '#d8b09c'],
+        skinDark: '#8a5a52',
+        outline: '#b88a7a',
+        blush: '#f6a0c0',
+        earPoints: [earRight, earLeft],
+    });
+    const hairBack = `    <defs>
+        <linearGradient id="${id}-hair" x1="0" y1="0" x2="0.5" y2="1">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="0.5" stop-color="#e4e9f6" />
+            <stop offset="1" stop-color="#aab4d4" />
+        </linearGradient>
+        <radialGradient id="${id}-gem" cx="0.35" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#d6ffe4" />
+            <stop offset="0.5" stop-color="#27c46a" />
+            <stop offset="1" stop-color="#0b6a38" />
+        </radialGradient>
+        <linearGradient id="${id}-gold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff2a8" />
+            <stop offset="1" stop-color="#c78e12" />
+        </linearGradient>
+    </defs>
+    <path d="M300 34 C148 34 76 150 90 296 C94 330 108 344 124 336 L476 336 C492 344 506 330 510 296 C524 150 452 34 300 34 Z" fill="url(#${id}-hair)" stroke="#8a93b5" stroke-width="5" stroke-linejoin="round" />`;
+    const front = `    <path d="${earInner}" fill="#f2aebd" fill-opacity="0.55" />
+    <path d="M112 320 C86 150 190 44 300 44 C410 44 514 150 488 320 C480 252 454 206 420 178 C380 214 336 200 300 160 C264 200 220 214 180 178 C146 206 120 252 112 320 Z" fill="url(#${id}-hair)" stroke="#8a93b5" stroke-width="5" stroke-linejoin="round" />
+    <path d="M300 160 C292 118 296 84 310 50 M230 190 C206 150 198 112 206 78 M370 190 C394 150 402 112 394 78" fill="none" stroke="#8a93b5" stroke-opacity="0.45" stroke-width="3.5" stroke-linecap="round" />
+    <path d="M150 196 Q300 128 450 196" fill="none" stroke="url(#${id}-gold)" stroke-width="9" stroke-linecap="round" />
+    <path d="M300 154 L322 178 L300 204 L278 178 Z" fill="url(#${id}-gem)" stroke="#a97a10" stroke-width="3.5" stroke-linejoin="round" />
+    <circle cx="293" cy="172" r="4" fill="#ffffff" fill-opacity="0.85" />
+    <path d="M236 150 q4 10 14 12 q-10 2 -14 12 q-4 -10 -14 -12 q10 -2 14 -12 Z M368 142 q3 8 11 9 q-8 2 -11 9 q-3 -7 -11 -9 q8 -1 11 -9 Z" fill="#fff6c4" />`;
+    characters.push({
+        id,
+        label: 'Elf',
+        order: 330,
+        head: `${hairBack}\n${back}\n${face}\n${front}`,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: `${eye({
+                id: `${id}-eye`,
+                shape: humanEyeShape,
+                center: [55, 57],
+                irisRadius: 24,
+                iris: ['#e0c8ff', '#8b5de0', '#3a1f7a'],
+                sclera: '#ffffff',
+                outline: '#3a2a5a',
+                crease: humanCrease,
+            })}
+    <path d="M8 58 C26 32 84 30 102 56" fill="none" stroke="#3a2a5a" stroke-width="6" stroke-linecap="round" />
+    <path d="M10 52 L0 44 M96 44 L108 38" fill="none" stroke="#3a2a5a" stroke-width="4" stroke-linecap="round" />`,
+            closed: closedEye({ lid: 'M10 58 C30 76 80 76 100 56', color: '#3a2a5a', lashes: true }),
+        },
+        brow: {
+            box: [185, 212, 100, 40],
+            svg: `    <path d="M8 32 Q46 2 96 14 Q50 12 8 36 Z" fill="#aab4d4" fill-opacity="0.9" />`,
+            lift: 14,
+        },
+        mouth: { box: [235, 456, 130, 80], ...humanMouths(`${id}-mouth`, { lip: '#e98aa6', lipDark: '#9a3f5e' }) },
+    });
+});
+
+// ---------------- Dragon ----------------
+builders.push(() => {
+    const id = 'dragon';
+    const head = [
+        [300, 70], [402, 82], [472, 148], [506, 250], [512, 340], [492, 432], [442, 510], [380, 566], [300, 592],
+        [220, 566], [158, 510], [108, 432], [88, 340], [94, 250], [128, 148], [198, 82],
+    ]; // prettier-ignore
+    const d = catmull(head);
+    const hornOuter = 'M222 120 C150 90 128 40 140 2 C196 28 250 66 270 112 Z';
+    const fin = 'M96 238 L16 196 L58 248 L2 276 L62 296 L18 344 L100 330 Z';
+    const random = rng(211);
+    const scales = [];
+    for (let i = 0; i < 90; i++) {
+        const x = 110 + random() * 380;
+        const y = 90 + random() * 250;
+        scales.push(`M${fmt(x)} ${fmt(y)}q7 8 14 0`);
+    }
+    const spikes = (x) => `M${x - 24} 84 L${x} 20 L${x + 24} 84 Z`;
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-skin" cx="0.5" cy="0.42" r="0.64">
+            <stop offset="0" stop-color="#7ae28f" />
+            <stop offset="0.65" stop-color="#34a853" />
+            <stop offset="1" stop-color="#1b6f35" />
+        </radialGradient>
+        <radialGradient id="${id}-snout" cx="0.5" cy="0.4" r="0.6">
+            <stop offset="0" stop-color="#f4f9a8" />
+            <stop offset="1" stop-color="#b6d86a" />
+        </radialGradient>
+        <linearGradient id="${id}-horn" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#c8651b" />
+            <stop offset="1" stop-color="#fff0c4" />
+        </linearGradient>
+        <linearGradient id="${id}-fin" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ff9a3c" />
+            <stop offset="1" stop-color="#d8541a" />
+        </linearGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    <path d="${fin}" fill="url(#${id}-fin)" stroke="#8a3410" stroke-width="4" stroke-linejoin="round" />
+    <path d="${fin}" fill="url(#${id}-fin)" stroke="#8a3410" stroke-width="4" stroke-linejoin="round" transform="translate(600 0) scale(-1 1)" />
+    <path d="${hornOuter}" fill="url(#${id}-horn)" stroke="#8a4a12" stroke-width="4" stroke-linejoin="round" />
+    <path d="${hornOuter}" fill="url(#${id}-horn)" stroke="#8a4a12" stroke-width="4" stroke-linejoin="round" transform="translate(600 0) scale(-1 1)" />
+    <path d="${spikes(300)}" fill="url(#${id}-fin)" stroke="#8a3410" stroke-width="4" stroke-linejoin="round" />
+    <path d="${spikes(238)}" fill="url(#${id}-fin)" stroke="#8a3410" stroke-width="4" stroke-linejoin="round" transform="translate(0 20) scale(1 0.8)" />
+    <path d="${spikes(362)}" fill="url(#${id}-fin)" stroke="#8a3410" stroke-width="4" stroke-linejoin="round" transform="translate(0 20) scale(1 0.8)" />
+    <path d="${d}" fill="url(#${id}-skin)" />
+${shading(`${id}-head`, d, { rim: 0.34, light: 0.26, rimColor: '#06240f' })}
+    <path d="${d}" fill="none" stroke="#12512a" stroke-width="5" stroke-linejoin="round" />
+    <path d="${scales.join('')}" fill="none" stroke="#0f5a28" stroke-opacity="0.35" stroke-width="2.5" stroke-linecap="round" />
+    <path d="${catmull(ellipse(300, 478, 130, 96, 28))}" fill="url(#${id}-snout)" />
+    <path d="M200 420 Q300 392 400 420" fill="none" stroke="#6fa02c" stroke-opacity="0.45" stroke-width="3" stroke-linecap="round" />
+    <ellipse cx="270" cy="410" rx="13" ry="8" fill="#1a3d17" transform="rotate(20 270 410)" />
+    <ellipse cx="330" cy="410" rx="13" ry="8" fill="#1a3d17" transform="rotate(-20 330 410)" />
+    <ellipse cx="266" cy="407" rx="4" ry="2" fill="#ffffff" fill-opacity="0.5" />
+    <ellipse cx="334" cy="407" rx="4" ry="2" fill="#ffffff" fill-opacity="0.5" />
+    <path d="M166 226 Q236 196 286 232 M314 232 Q364 196 434 226" fill="none" stroke="#0f5a28" stroke-opacity="0.4" stroke-width="9" stroke-linecap="round" filter="url(#${id}-soft)" />
+    <ellipse cx="182" cy="418" rx="30" ry="16" fill="#ffb347" fill-opacity="0.25" filter="url(#${id}-soft)" />
+    <ellipse cx="418" cy="418" rx="30" ry="16" fill="#ffb347" fill-opacity="0.25" filter="url(#${id}-soft)" />`;
+    characters.push({
+        id,
+        label: 'Dragon',
+        order: 270,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: 'M6 60 C20 24 86 20 104 50 C90 90 26 96 6 60 Z',
+                center: [55, 57],
+                irisRadius: 40,
+                iris: ['#fff59a', '#ffb81f', '#c25a00'],
+                pupil: 'slit',
+                outline: '#0d3b1c',
+            }),
+            closed: closedEye({ lid: 'M6 60 C30 78 82 76 104 50', color: '#0d3b1c', lashes: false, width: 6 }),
+        },
+        brow: { box: [180, 206, 100, 40], svg: cartoonBrow({ color: '#e07a1f', opacity: 0.95 }), lift: 14 },
+        mouth: {
+            box: [250, 421, 100, 90],
+            ...animalMouths(`${id}-mouth`, { color: '#0d3b1c', fangs: true, tongue: ['#ff8a5a', '#d6442a'] }),
+        },
+    });
+});
+
+// ---------------- Unicorn ----------------
+builders.push(() => {
+    const id = 'unicorn';
+    const head = ellipse(300, 336, 206, 262, 32);
+    const earShape = 'M176 150 C150 100 160 40 196 14 C236 54 258 96 262 138 Z';
+    const earInner = 'M190 134 C174 100 180 62 198 42 C222 70 238 100 242 128 Z';
+    const manes = [
+        ['#ff6fb5', 'M196 70 C74 74 22 210 52 330 C70 410 22 490 40 608 C132 580 154 480 150 392 Z'],
+        ['#b07cff', 'M206 86 C110 96 66 214 90 322 C104 394 70 470 84 568 C150 540 168 462 162 390 Z'],
+        ['#5ec6ff', 'M214 104 C140 118 108 218 126 308 C136 366 116 430 126 510 C172 486 184 428 178 372 Z'],
+    ];
+    const fringe = [
+        ['#ff6fb5', 'M214 124 C190 150 200 196 244 214 C230 190 232 160 262 132 Z'],
+        ['#b07cff', 'M262 112 C238 150 252 190 300 202 C284 176 288 148 318 118 Z'],
+        ['#5ec6ff', 'M318 112 C300 150 318 186 366 192 C350 168 352 144 372 118 Z'],
+        ['#7be3a8', 'M372 124 C362 150 376 184 412 190 C400 168 404 148 416 130 Z'],
+    ];
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-coat" cx="0.5" cy="0.4" r="0.64">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="0.7" stop-color="#f7f0ff" />
+            <stop offset="1" stop-color="#d8c8ee" />
+        </radialGradient>
+        <linearGradient id="${id}-horn" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#e8a317" />
+            <stop offset="0.5" stop-color="#ffe27a" />
+            <stop offset="1" stop-color="#fff8d6" />
+        </linearGradient>
+        <radialGradient id="${id}-muzzle" cx="0.5" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#fff2f6" />
+            <stop offset="1" stop-color="#ffc9dc" />
+        </radialGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    ${manes.map(([color, shape]) => `<path d="${shape}" fill="${color}" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3" /><path d="${shape}" fill="${color}" transform="translate(600 0) scale(-1 1)" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3" />`).join('\n    ')}
+    <path d="${earShape}" fill="url(#${id}-coat)" stroke="#b9a4d8" stroke-width="3.5" stroke-linejoin="round" />
+    <path d="${earShape}" fill="url(#${id}-coat)" stroke="#b9a4d8" stroke-width="3.5" stroke-linejoin="round" transform="translate(600 0) scale(-1 1)" />
+    <path d="${earInner}" fill="#ffb6cf" />
+    <path d="${earInner}" fill="#ffb6cf" transform="translate(600 0) scale(-1 1)" />
+    <path d="${catmull(head)}" fill="url(#${id}-coat)" />
+${shading(`${id}-head`, catmull(head), { rim: 0.22, light: 0.22, rimColor: '#6a4a9a' })}
+    <path d="${catmull(head)}" fill="none" stroke="#b9a4d8" stroke-width="5" />
+    <path d="${catmull(ellipse(300, 500, 112, 84, 28))}" fill="url(#${id}-muzzle)" stroke="#f0a8c4" stroke-width="3" stroke-opacity="0.6" />
+    <ellipse cx="272" cy="468" rx="9" ry="6" fill="#e07aa0" transform="rotate(25 272 468)" />
+    <ellipse cx="328" cy="468" rx="9" ry="6" fill="#e07aa0" transform="rotate(-25 328 468)" />
+    <ellipse cx="190" cy="430" rx="34" ry="19" fill="#ff8fb8" fill-opacity="0.35" filter="url(#${id}-soft)" />
+    <ellipse cx="410" cy="430" rx="34" ry="19" fill="#ff8fb8" fill-opacity="0.35" filter="url(#${id}-soft)" />
+    ${fringe.map(([color, shape]) => `<path d="${shape}" fill="${color}" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3" />`).join('\n    ')}
+    <path d="M268 124 L300 4 L332 124 Z" fill="url(#${id}-horn)" stroke="#b8820a" stroke-width="4" stroke-linejoin="round" />
+    <path d="M276 100 L322 92 M281 76 L317 70 M287 52 L312 48 M292 30 L307 28" fill="none" stroke="#b8820a" stroke-width="5" stroke-linecap="round" />
+    <path d="M252 62 q4 10 14 12 q-10 2 -14 12 q-4 -10 -14 -12 q10 -2 14 -12 Z M356 52 q3 8 11 9 q-8 2 -11 9 q-3 -7 -11 -9 q8 -1 11 -9 Z" fill="#ffffff" />`;
+    characters.push({
+        id,
+        label: 'Unicorn',
+        order: 280,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: `${eye({
+                id: `${id}-eye`,
+                shape: humanEyeShape,
+                center: [55, 57],
+                irisRadius: 25,
+                iris: ['#e6d0ff', '#9a63f0', '#3a1d8a'],
+                sclera: '#ffffff',
+                outline: '#4a2c8a',
+                crease: humanCrease,
+            })}
+    <path d="M8 58 C26 32 84 30 102 56" fill="none" stroke="#4a2c8a" stroke-width="6" stroke-linecap="round" />
+    <path d="M12 48 L2 40 M24 38 L16 28 M92 40 L100 30" fill="none" stroke="#4a2c8a" stroke-width="4.5" stroke-linecap="round" />`,
+            closed: closedEye({ lid: 'M10 58 C30 76 80 76 100 56', color: '#4a2c8a', lashes: true }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#c9a8f0', opacity: 0.85 }), lift: 14 },
+        mouth: {
+            box: [250, 478, 100, 90],
+            ...animalMouths(`${id}-mouth`, { color: '#a84470', tongue: ['#ff9ab8', '#e0507e'] }),
+        },
+    });
+});
+
+// ---------------- Lion ----------------
+builders.push(() => {
+    const id = 'lion';
+    const random = rng(523);
+    const puffs = (count, rx, ry, min, max) =>
+        Array.from({ length: count }, (_, i) => {
+            const t = (i / count) * Math.PI * 2 + random() * 0.08;
+            const r = min + random() * (max - min);
+            return `<circle cx="${fmt(300 + Math.cos(t) * rx)}" cy="${fmt(322 + Math.sin(t) * ry)}" r="${fmt(r)}" />`;
+        }).join('');
+    const maneOuter = puffs(30, 232, 252, 42, 52);
+    const maneInner = puffs(26, 196, 214, 36, 44);
+    const head = ellipse(300, 338, 182, 218, 32);
+    const muzzle = [ellipse(262, 452, 64, 46), ellipse(338, 452, 64, 46), ellipse(300, 498, 70, 52)];
+    const ears = [ellipse(156, 168, 44, 42), ellipse(444, 168, 44, 42)];
+    const earInner = [ellipse(158, 172, 24, 22), ellipse(442, 172, 24, 22)];
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-mane" cx="0.5" cy="0.5" r="0.55">
+            <stop offset="0.45" stop-color="#d9731c" />
+            <stop offset="1" stop-color="#8a3f0c" />
+        </radialGradient>
+        <radialGradient id="${id}-mane-in" cx="0.5" cy="0.5" r="0.55">
+            <stop offset="0.4" stop-color="#f0922c" />
+            <stop offset="1" stop-color="#b9560f" />
+        </radialGradient>
+        <radialGradient id="${id}-fur" cx="0.5" cy="0.42" r="0.62">
+            <stop offset="0" stop-color="#ffd58a" />
+            <stop offset="0.7" stop-color="#f0b052" />
+            <stop offset="1" stop-color="#cf8a2c" />
+        </radialGradient>
+        <linearGradient id="${id}-muzzle" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff6e0" />
+            <stop offset="1" stop-color="#f0d9a8" />
+        </linearGradient>
+        <linearGradient id="${id}-nose" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#a0605a" />
+            <stop offset="1" stop-color="#5a2e26" />
+        </linearGradient>
+        ${softFilter(`${id}-soft`, 2.5)}
+    </defs>
+    <g fill="url(#${id}-mane)" stroke="#4a2008" stroke-width="8">${maneOuter}</g>
+    <g fill="url(#${id}-mane)">${maneOuter}</g>
+    <ellipse cx="300" cy="322" rx="236" ry="256" fill="url(#${id}-mane)" />
+    <g fill="url(#${id}-mane-in)" stroke="#8a3f0c" stroke-width="3" stroke-opacity="0.6">${maneInner}</g>
+    <path d="M110 300 C80 380 100 470 150 540 M490 300 C520 380 500 470 450 540" fill="none" stroke="#8a3f0c" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round" />
+    ${ears.map((ear) => `<path d="${catmull(ear)}" fill="url(#${id}-fur)" stroke="#a8601c" stroke-width="4" />`).join('\n    ')}
+    ${earInner.map((ear) => `<path d="${catmull(ear)}" fill="#e98fa0" fill-opacity="0.8" />`).join('\n    ')}
+    <path d="${catmull(head)}" fill="url(#${id}-fur)" />
+${shading(`${id}-head`, catmull(head), { rim: 0.28, light: 0.22, rimColor: '#6b3a05' })}
+    <path d="${catmull(head)}" fill="none" stroke="#a8601c" stroke-width="5" />
+    <path d="M300 130 L300 190 M262 138 L274 190 M338 138 L326 190" fill="none" stroke="#b8701c" stroke-opacity="0.5" stroke-width="6" stroke-linecap="round" />
+    <path d="${muzzle.map((m) => catmull(m)).join('')}" fill="url(#${id}-muzzle)" />
+    <g fill="#b88a5a" fill-opacity="0.7">
+        <circle cx="244" cy="446" r="2.6" /><circle cx="232" cy="458" r="2.6" /><circle cx="248" cy="468" r="2.6" />
+        <circle cx="356" cy="446" r="2.6" /><circle cx="368" cy="458" r="2.6" /><circle cx="352" cy="468" r="2.6" />
+    </g>
+    <ellipse cx="190" cy="430" rx="32" ry="18" fill="#ff8f6a" fill-opacity="0.22" filter="url(#${id}-soft)" />
+    <ellipse cx="410" cy="430" rx="32" ry="18" fill="#ff8f6a" fill-opacity="0.22" filter="url(#${id}-soft)" />
+    <path d="M300 340 L300 392" fill="none" stroke="#b8701c" stroke-opacity="0.35" stroke-width="22" stroke-linecap="round" filter="url(#${id}-soft)" />
+    <path d="M264 394 Q300 378 336 394 Q330 420 300 434 Q270 420 264 394 Z" fill="url(#${id}-nose)" stroke="#3a1c16" stroke-width="2.5" />
+    <ellipse cx="288" cy="394" rx="12" ry="5" fill="#ffffff" fill-opacity="0.4" />`;
+    characters.push({
+        id,
+        label: 'Lion',
+        order: 220,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: 'M8 58 C22 28 84 26 102 54 C88 86 26 90 8 58 Z',
+                center: [55, 57],
+                irisRadius: 36,
+                iris: ['#fff0a8', '#e0961f', '#7a4408'],
+                pupilSize: 0.42,
+                outline: '#3a1c08',
+            }),
+            closed: closedEye({ lid: 'M8 58 C30 76 80 74 102 54', color: '#5a2a0c', lashes: false }),
+        },
+        brow: { box: [185, 212, 100, 40], svg: cartoonBrow({ color: '#a8601c' }), lift: 14 },
+        mouth: {
+            box: [250, 431, 100, 90],
+            ...animalMouths(`${id}-mouth`, { color: '#4a2410', fangs: true }),
         },
     });
 });
@@ -973,7 +1609,7 @@ writeFile(path.join(OUT, 'astronaut/thumb.svg'), svg(W, H, `${astronautThumbFace
 descriptors.push(`    VFX.registerAvatar({
         id: 'avatar-astronaut',
         label: 'Astronaut',
-        order: 280,
+        order: 360,
         thumbnail: 'assets/avatars/astronaut/thumb.svg',
         ...CANVAS,
         parts: [{ asset: 'assets/avatars/astronaut/helmet.svg', box: [0, 0, ${W}, ${H}] }],

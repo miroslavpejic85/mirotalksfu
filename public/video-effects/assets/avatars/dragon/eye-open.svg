@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs>
+        <clipPath id="dragon-eye-clip"><path d="M6 60 C20 24 86 20 104 50 C90 90 26 96 6 60 Z" /></clipPath>
+        <radialGradient id="dragon-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#fff59a" />
+            <stop offset="0.55" stop-color="#ffb81f" />
+            <stop offset="1" stop-color="#c25a00" />
+        </radialGradient>
+        <linearGradient id="dragon-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#dragon-eye-clip)">
+        
+        <circle cx="55" cy="57" r="40" fill="url(#dragon-eye-iris)" />
+        <path d="M71.3 57.6L87.9 58.2M69.9 60.1L89 64M72.1 62.1L89.2 67.2M71.7 65.4L88.1 73.6M70.2 67.8L85.3 78.4M66.2 68.2L81.7 83.9M66.2 70.5L79 86M62.5 70.4L73.6 90.2M61.9 73.2L68.6 88.9M58.8 73.7L63.1 92.6M56.7 73.2L58.8 93.6M54 74.6L52.9 92.1M51.3 73.6L47.4 90.7M49.4 73.3L43.5 90.3M47.8 71.8L38.2 91.3M45.7 70.3L34 87.1M43.8 69L30.3 83.6M41.1 68.2L27.8 78.8M39.5 66.1L26.6 73.7M38 63.4L19.7 70.4M37.1 62.1L22.9 66.2M36.6 58.3L18.1 59.6M37.3 55.6L19.8 54.3M39 54.2L20.1 51M37.2 50.6L24 45.9M41.3 49.8L24.8 41.2M40 47.2L27.4 39.1M41.4 44.9L26.9 32M43.4 42.7L32.8 29.6M47.2 43.3L37.1 25.4M48.7 40.9L42.5 25M50.8 41.2L46.2 23.6M52.9 39.9L50.7 22.1M55.9 38.6L56.7 21.2M57.7 40.4L60.9 20.6M60.5 42.5L67.3 24.5M63.1 42.4L71.4 27.5M65.8 41.4L76.6 26M65.7 45.3L78.5 31.2M70.1 45.6L84.4 34.9M68.9 48.5L85.4 38.4M72.2 50.1L85.9 44.6M72 52.7L89.7 48.3M72.3 54.7L90.7 52.2" stroke="#c25a00" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="24.8" fill="none" stroke="#fff59a" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="38.5" fill="none" stroke="#c25a00" stroke-width="3" stroke-opacity="0.8" />
+        <ellipse cx="55" cy="57" rx="6.4" ry="32.8" fill="#0a0806" />
+        <path d="M6 60 C20 24 86 20 104 50 C90 90 26 96 6 60 Z" fill="url(#dragon-eye-lid)" />
+    </g>
+    <path d="M6 60 C20 24 86 20 104 50 C90 90 26 96 6 60 Z" fill="none" stroke="#0d3b1c" stroke-width="4" stroke-linejoin="round" />
+    
+    <ellipse cx="39.8" cy="41" rx="9.6" ry="7.2" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="67.8" cy="71.4" r="3.6" fill="#ffffff" fill-opacity="0.75" />
+</svg>

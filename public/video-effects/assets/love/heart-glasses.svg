@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="260" viewBox="0 0 640 260">
+    <defs>
+        <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff9db7" stop-opacity="0.85" />
+            <stop offset="1" stop-color="#e11d58" stop-opacity="0.9" />
+        </linearGradient>
+        <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ff5c8a" />
+            <stop offset="1" stop-color="#b3123f" />
+        </linearGradient>
+        <path
+            id="heart"
+            d="M100 204 C28 148 10 112 10 88 C10 58 32 40 58 40 C80 40 96 52 100 68 C104 52 120 40 142 40 C168 40 190 58 190 88 C190 112 172 148 100 204 Z"
+        />
+    </defs>
+    <path d="M190 84 Q320 52 450 84" fill="none" stroke="url(#frame)" stroke-width="14" stroke-linecap="round" />
+    <path d="M12 96 L2 80 M628 96 L638 80" stroke="url(#frame)" stroke-width="12" stroke-linecap="round" />
+    <g transform="translate(20 4)">
+        <use href="#heart" fill="url(#lens)" stroke="url(#frame)" stroke-width="12" stroke-linejoin="round" />
+        <path d="M36 92 C36 74 48 64 64 66" fill="none" stroke="#ffffff" stroke-opacity="0.7" stroke-width="9" stroke-linecap="round" />
+    </g>
+    <g transform="translate(430 4)">
+        <use href="#heart" fill="url(#lens)" stroke="url(#frame)" stroke-width="12" stroke-linejoin="round" />
+        <path d="M36 92 C36 74 48 64 64 66" fill="none" stroke="#ffffff" stroke-opacity="0.7" stroke-width="9" stroke-linecap="round" />
+    </g>
+</svg>

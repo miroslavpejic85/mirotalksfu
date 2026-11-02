@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="640" viewBox="0 0 600 640">
+    <defs>
+        <radialGradient id="blackman-skin" cx="0.5" cy="0.4" r="0.66">
+            <stop offset="0" stop-color="#b57a54" />
+            <stop offset="0.75" stop-color="#8f5a38" />
+            <stop offset="1" stop-color="#693d22" />
+        </radialGradient>
+        <filter id="blackman-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" /></filter>
+        <filter id="blackman-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6" /></filter>
+        
+    </defs>
+    <path d="M141.9 333C142.4 338.3 142.4 344 142 349.1C141.6 354.3 140.6 359.5 139.2 364C137.8 368.5 135.9 372.7 133.7 376.1C131.6 379.5 128.9 382.3 126.2 384.3C123.4 386.2 120.3 387.4 117.2 387.7C114.1 388 110.8 387.5 107.7 386.1C104.6 384.8 101.5 382.5 98.7 379.6C95.9 376.7 93.1 373 90.9 368.8C88.7 364.7 86.7 359.8 85.2 354.8C83.8 349.9 82.7 344.3 82.1 339C81.6 333.7 81.6 328 82 322.9C82.4 317.7 83.4 312.5 84.8 308C86.2 303.5 88.1 299.3 90.3 295.9C92.4 292.5 95.1 289.7 97.8 287.7C100.6 285.8 103.7 284.6 106.8 284.3C109.9 284 113.2 284.5 116.3 285.9C119.4 287.2 122.5 289.5 125.3 292.4C128.1 295.3 130.9 299 133.1 303.2C135.3 307.3 137.3 312.2 138.8 317.2C140.2 322.1 141.3 327.7 141.9 333Z" fill="url(#blackman-skin)" stroke="#3f1f0e" stroke-width="4" stroke-linejoin="round" />
+    <path d="M517.9 339C517.3 344.3 516.2 349.9 514.8 354.8C513.3 359.8 511.3 364.7 509.1 368.8C506.9 373 504.1 376.7 501.3 379.6C498.5 382.5 495.4 384.8 492.3 386.1C489.2 387.5 485.9 388 482.8 387.7C479.7 387.4 476.6 386.2 473.8 384.3C471.1 382.3 468.4 379.5 466.3 376.1C464.1 372.7 462.2 368.5 460.8 364C459.4 359.5 458.4 354.3 458 349.1C457.6 344 457.6 338.3 458.1 333C458.7 327.7 459.8 322.1 461.2 317.2C462.7 312.2 464.7 307.3 466.9 303.2C469.1 299 471.9 295.3 474.7 292.4C477.5 289.5 480.6 287.2 483.7 285.9C486.8 284.5 490.1 284 493.2 284.3C496.3 284.6 499.4 285.8 502.2 287.7C504.9 289.7 507.6 292.5 509.7 295.9C511.9 299.3 513.8 303.5 515.2 308C516.6 312.5 517.6 317.7 518 322.9C518.4 328 518.4 333.7 517.9 339Z" fill="url(#blackman-skin)" stroke="#3f1f0e" stroke-width="4" stroke-linejoin="round" />
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#blackman-skin)" />
+    <defs>
+        <radialGradient id="blackman-face-rim" cx="0.5" cy="0.45" r="0.62">
+            <stop offset="0.62" stop-color="#2e140a" stop-opacity="0" />
+            <stop offset="1" stop-color="#2e140a" stop-opacity="0.2" />
+        </radialGradient>
+        <radialGradient id="blackman-face-light" cx="0.36" cy="0.26" r="0.55">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.2" />
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+        </radialGradient>
+    </defs>
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#blackman-face-rim)" />
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#blackman-face-light)" />
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="none" stroke="#3f1f0e" stroke-width="5" stroke-linejoin="round" />
+    <ellipse cx="190" cy="420" rx="40" ry="24" fill="#c0584a" fill-opacity="0.3" filter="url(#blackman-soft)" />
+    <ellipse cx="410" cy="420" rx="40" ry="24" fill="#c0584a" fill-opacity="0.3" filter="url(#blackman-soft)" />
+    <path d="M308 322 Q320 366 326 396" fill="none" stroke="#2e140a" stroke-width="9" stroke-opacity="0.22" stroke-linecap="round" filter="url(#blackman-blur)" />
+    <path d="M276 398 Q300 418 324 398" fill="none" stroke="#3f1f0e" stroke-width="4.5" stroke-linecap="round" />
+    <path d="M280 404 Q288 410 294 404 M306 404 Q312 410 320 404" fill="none" stroke="#3f1f0e" stroke-width="3" stroke-linecap="round" />
+    <ellipse cx="296" cy="388" rx="10" ry="6" fill="#ffffff" fill-opacity="0.28" filter="url(#blackman-blur)" />
+    <defs>
+        <linearGradient id="blackman-hair" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#2e2623" />
+            <stop offset="1" stop-color="#0a0605" />
+        </linearGradient>
+        <clipPath id="blackman-hair-clip"><path d="M120 292 C96 150 188 52 300 52 C412 52 504 150 480 292 C474 244 460 210 440 192 C402 160 360 152 300 152 C240 152 198 160 160 192 C140 210 126 244 120 292 Z" /></clipPath>
+    </defs>
+    <path d="M120 292 C96 150 188 52 300 52 C412 52 504 150 480 292 C474 244 460 210 440 192 C402 160 360 152 300 152 C240 152 198 160 160 192 C140 210 126 244 120 292 Z" fill="url(#blackman-hair)" stroke="#050303" stroke-width="5" stroke-linejoin="round" />
+    <g fill="#ffffff" fill-opacity="0.16" clip-path="url(#blackman-hair-clip)"><circle cx="357.2" cy="90.4" r="4.3" /><circle cx="336.1" cy="68" r="3.2" /><circle cx="181.4" cy="133.1" r="2.7" /><circle cx="270.7" cy="129.1" r="2.7" /><circle cx="218.5" cy="82.8" r="3.1" /><circle cx="161" cy="144.5" r="3.7" /><circle cx="277.8" cy="135.9" r="3" /><circle cx="418.1" cy="83.3" r="2.4" /><circle cx="331.9" cy="142.5" r="2.8" /><circle cx="363" cy="129.6" r="2.4" /><circle cx="186.2" cy="130.5" r="4.1" /><circle cx="189.9" cy="149.5" r="2.7" /><circle cx="307.3" cy="111.1" r="3.4" /><circle cx="195.9" cy="151.9" r="3.9" /><circle cx="179.2" cy="133.2" r="3.6" /><circle cx="196.2" cy="127.2" r="2.3" /><circle cx="381.7" cy="76" r="2.1" /><circle cx="432.7" cy="81" r="2.2" /><circle cx="350.1" cy="122.7" r="3.3" /><circle cx="347.3" cy="74" r="4.2" /><circle cx="191.1" cy="146.1" r="3.2" /><circle cx="426.7" cy="130" r="3.2" /><circle cx="377.4" cy="85.8" r="2.9" /><circle cx="334.8" cy="122" r="4.5" /><circle cx="427.7" cy="84.7" r="4.4" /><circle cx="152.6" cy="71.9" r="2.3" /><circle cx="429.9" cy="95.4" r="4.2" /><circle cx="153.8" cy="141.7" r="2.5" /><circle cx="157.9" cy="96.8" r="3.6" /><circle cx="409.3" cy="149.4" r="2.6" /><circle cx="269.9" cy="68.6" r="4" /><circle cx="158.9" cy="112.7" r="2.9" /><circle cx="386.5" cy="124.7" r="2.1" /><circle cx="155.8" cy="75.4" r="2.2" /><circle cx="212.5" cy="139.8" r="3.4" /><circle cx="228.3" cy="81.5" r="2.2" /><circle cx="225.8" cy="96.1" r="2.1" /><circle cx="330.3" cy="135.4" r="3.3" /><circle cx="158.2" cy="97.2" r="3.9" /><circle cx="177" cy="68.4" r="2.9" /><circle cx="171.6" cy="138.9" r="4.4" /><circle cx="299.1" cy="140.6" r="3" /><circle cx="257" cy="99.2" r="3.4" /><circle cx="348.8" cy="71.2" r="4.3" /><circle cx="426.3" cy="88.8" r="3.6" /><circle cx="375.2" cy="98" r="2.4" /><circle cx="209.7" cy="71.2" r="2.6" /><circle cx="410" cy="135.6" r="3.5" /><circle cx="227.6" cy="131.7" r="2.6" /><circle cx="442.8" cy="130.7" r="3.5" /><circle cx="438.7" cy="94.7" r="3.1" /><circle cx="153.8" cy="95.4" r="2.2" /><circle cx="394.6" cy="151.4" r="3.3" /><circle cx="238.1" cy="125.6" r="2.9" /><circle cx="161.4" cy="70.9" r="3.2" /><circle cx="421.2" cy="79.6" r="2.6" /><circle cx="242.5" cy="135.9" r="3.3" /><circle cx="352.3" cy="120" r="3.7" /><circle cx="390.5" cy="71.8" r="2" /><circle cx="307.6" cy="86" r="2.4" /><circle cx="264.2" cy="127.3" r="3.7" /><circle cx="419.1" cy="119.3" r="4.3" /><circle cx="291" cy="115.6" r="3.5" /><circle cx="336.1" cy="75.2" r="3.5" /><circle cx="403" cy="103.8" r="3.3" /><circle cx="439" cy="109.6" r="3.7" /><circle cx="393.7" cy="123.8" r="3.3" /><circle cx="216.5" cy="87.4" r="3.7" /><circle cx="194.2" cy="94.9" r="3.2" /><circle cx="424.7" cy="89.9" r="2.1" /><circle cx="298.7" cy="106.5" r="4.1" /><circle cx="161.8" cy="102.7" r="3" /><circle cx="217.8" cy="112.5" r="2.7" /><circle cx="205.5" cy="118.8" r="4" /><circle cx="306.8" cy="151.9" r="2.3" /><circle cx="167.7" cy="148.4" r="3.9" /><circle cx="425.3" cy="94.4" r="2.4" /><circle cx="436.9" cy="131.3" r="3.6" /><circle cx="292.4" cy="89.9" r="2.1" /><circle cx="206.8" cy="127.7" r="2.5" /><circle cx="395.9" cy="78.5" r="3.7" /><circle cx="327.6" cy="111.9" r="3.2" /><circle cx="340.5" cy="138.7" r="4.4" /><circle cx="326.9" cy="78.5" r="3.7" /><circle cx="319" cy="110.8" r="3.9" /><circle cx="415.2" cy="91.6" r="2" /><circle cx="253.1" cy="129.2" r="2.9" /><circle cx="154.8" cy="117.4" r="3.2" /><circle cx="446.8" cy="145.4" r="2.8" /><circle cx="213.3" cy="126.7" r="4.1" /></g>
+    <path d="M204 104 C250 82 340 80 400 106" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="10" stroke-linecap="round" filter="url(#blackman-blur)" />
+    <path d="M120 292 C124 322 130 332 136 334 L142 266 Z M480 292 C476 322 470 332 464 334 L458 266 Z" fill="#0a0605" />
+    <path d="M232 540 Q300 590 368 540 Q330 566 300 566 Q270 566 232 540 Z" fill="#1a0c06" fill-opacity="0.3" />
+<g><svg x="185" y="218" width="100" height="40" viewBox="0 0 100 40" overflow="visible">
+    <path d="M6 32 Q42 4 94 20 Q96 30 90 32 Q46 18 12 38 Z" fill="#0a0605" fill-opacity="0.92" />
+</svg></g>
+<g transform="translate(730 0) scale(-1 1)"><svg x="315" y="218" width="100" height="40" viewBox="0 0 100 40" overflow="visible">
+    <path d="M6 32 Q42 4 94 20 Q96 30 90 32 Q46 18 12 38 Z" fill="#0a0605" fill-opacity="0.92" />
+</svg></g>
+<g><svg x="180" y="245" width="110" height="110" viewBox="0 0 110 110" overflow="visible">
+    <defs>
+        <clipPath id="blackman-eye-clip"><path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" /></clipPath>
+        <radialGradient id="blackman-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#8a5a30" />
+            <stop offset="0.55" stop-color="#3a2010" />
+            <stop offset="1" stop-color="#140a04" />
+        </radialGradient>
+        <linearGradient id="blackman-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#blackman-eye-clip)">
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="#fff6e8" />
+        <circle cx="55" cy="57" r="22" fill="url(#blackman-eye-iris)" />
+        <path d="M64.8 57.4L75.7 57.9M65.2 59L72.9 60.5M63.5 60L72.9 63.4M63.8 61.3L72.3 65.5M62.9 62.3L70.7 67.6M61 62.8L69.2 70.6M60.8 63.8L68.1 72.4M60.5 65.9L65.6 74.1M58.6 66.2L62.5 75.9M57.2 65.3L59.8 74.9M55.8 65.6L57 77.9M54.3 66.4L53.6 76.3M53.7 65.9L52.1 76.5M52.1 66.1L48.9 76.2M51.2 65.3L47.2 73.8M49.8 65L44.7 72.9M47.7 64.2L40.8 71M48.4 62.5L40.2 69.4M47.3 61.8L37.2 68.2M46.4 60.7L36.1 65.1M46.1 59.5L36.4 62.3M45.6 57.7L34.5 58.4M46 56.4L34.1 55.6M46.1 55.5L34.9 53.6M46.7 54.3L35.4 50.7M47 52.9L37.8 48.2M46.8 51.4L39.1 46.2M48.3 51.1L40 43.8M48.4 48.9L43.2 42.3M50.2 48.9L45.2 40.3M51.2 47.6L47.7 38.8M52.1 46.9L49.6 37.8M53.7 47.5L52.6 38.9M55.5 47.1L56 36.6M56.7 48.6L59.1 36.9M58.1 48.4L61.9 37.9M59.3 49.1L63.8 40.8M60.6 48.4L64.9 41.8M61.3 50.3L68.6 42.4M63 50.9L69.9 45.6M62.7 52.5L72.5 46.8M62.9 53.6L72.8 49.3M65.1 54.8L74.8 52.7M64.1 55.8L73.6 54.6" stroke="#140a04" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="13.6" fill="none" stroke="#8a5a30" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="20.5" fill="none" stroke="#140a04" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="9.9" fill="#0a0806" />
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="url(#blackman-eye-lid)" />
+    </g>
+    <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="none" stroke="#1a0c06" stroke-width="4" stroke-linejoin="round" />
+    <path d="M12 46 C32 22 80 22 98 44" fill="none" stroke="#1a0c06" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round" />
+    <ellipse cx="46.6" cy="48.2" rx="5.3" ry="4" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62" cy="64.9" r="2" fill="#ffffff" fill-opacity="0.75" />
+</svg></g>
+<g transform="translate(730 0) scale(-1 1)"><svg x="310" y="245" width="110" height="110" viewBox="0 0 110 110" overflow="visible">
+    <defs>
+        <clipPath id="blackman-eye-clip"><path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" /></clipPath>
+        <radialGradient id="blackman-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#8a5a30" />
+            <stop offset="0.55" stop-color="#3a2010" />
+            <stop offset="1" stop-color="#140a04" />
+        </radialGradient>
+        <linearGradient id="blackman-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#blackman-eye-clip)">
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="#fff6e8" />
+        <circle cx="55" cy="57" r="22" fill="url(#blackman-eye-iris)" />
+        <path d="M64.8 57.4L75.7 57.9M65.2 59L72.9 60.5M63.5 60L72.9 63.4M63.8 61.3L72.3 65.5M62.9 62.3L70.7 67.6M61 62.8L69.2 70.6M60.8 63.8L68.1 72.4M60.5 65.9L65.6 74.1M58.6 66.2L62.5 75.9M57.2 65.3L59.8 74.9M55.8 65.6L57 77.9M54.3 66.4L53.6 76.3M53.7 65.9L52.1 76.5M52.1 66.1L48.9 76.2M51.2 65.3L47.2 73.8M49.8 65L44.7 72.9M47.7 64.2L40.8 71M48.4 62.5L40.2 69.4M47.3 61.8L37.2 68.2M46.4 60.7L36.1 65.1M46.1 59.5L36.4 62.3M45.6 57.7L34.5 58.4M46 56.4L34.1 55.6M46.1 55.5L34.9 53.6M46.7 54.3L35.4 50.7M47 52.9L37.8 48.2M46.8 51.4L39.1 46.2M48.3 51.1L40 43.8M48.4 48.9L43.2 42.3M50.2 48.9L45.2 40.3M51.2 47.6L47.7 38.8M52.1 46.9L49.6 37.8M53.7 47.5L52.6 38.9M55.5 47.1L56 36.6M56.7 48.6L59.1 36.9M58.1 48.4L61.9 37.9M59.3 49.1L63.8 40.8M60.6 48.4L64.9 41.8M61.3 50.3L68.6 42.4M63 50.9L69.9 45.6M62.7 52.5L72.5 46.8M62.9 53.6L72.8 49.3M65.1 54.8L74.8 52.7M64.1 55.8L73.6 54.6" stroke="#140a04" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="13.6" fill="none" stroke="#8a5a30" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="20.5" fill="none" stroke="#140a04" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="9.9" fill="#0a0806" />
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="url(#blackman-eye-lid)" />
+    </g>
+    <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="none" stroke="#1a0c06" stroke-width="4" stroke-linejoin="round" />
+    <path d="M12 46 C32 22 80 22 98 44" fill="none" stroke="#1a0c06" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round" />
+    <ellipse cx="46.6" cy="48.2" rx="5.3" ry="4" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62" cy="64.9" r="2" fill="#ffffff" fill-opacity="0.75" />
+</svg></g>
+<g><svg x="235" y="456" width="130" height="80" viewBox="0 0 130 80" overflow="visible">
+    <defs><clipPath id="blackman-mouth-smile-clip"><path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" /></clipPath></defs>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="#2e080e" />
+    <g clip-path="url(#blackman-mouth-smile-clip)">
+        <path d="M6 22 Q65 34 124 22 L124 44 Q65 54 6 44 Z" fill="#fffdf8" />
+        <path d="M30 70 Q65 48 100 70 Z" fill="#e8667f" />
+    </g>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="none" stroke="#4a1814" stroke-width="5" stroke-linejoin="round" />
+    <path d="M8 24 Q4 20 5 14 M122 24 Q126 20 125 14" fill="none" stroke="#4a1814" stroke-width="4" stroke-linecap="round" />
+</svg></g>
+</svg>

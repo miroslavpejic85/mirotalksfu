@@ -161,9 +161,9 @@ glasses were generated.
 
 ## Animated head avatars
 
-`effects/avatars.js` registers cartoon heads (cat, bear, panda, robot, alien, fox, monkey) and an astronaut
-helmet. They replace the head, follow its movements, **blink**, **raise their brows**, **smile** and
-**open the mouth while talking**.
+`effects/avatars.js` registers cartoon heads (cat, bear, panda, robot, alien, fox, monkey, man, woman, elf, dragon,
+unicorn, black man, black woman, lion) and an astronaut helmet. They replace the head, follow its movements, **blink**, **raise their brows**,
+**smile** and **open the mouth while talking**.
 
 Expressions (0..1) are updated every frame:
 

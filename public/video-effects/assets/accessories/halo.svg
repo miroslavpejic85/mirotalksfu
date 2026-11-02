@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="200" viewBox="0 0 640 200">
+    <defs>
+        <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fffbd0" />
+            <stop offset="0.5" stop-color="#ffd93b" />
+            <stop offset="1" stop-color="#e09a00" />
+        </linearGradient>
+        <filter id="glow" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="9" /></filter>
+    </defs>
+    <ellipse cx="320" cy="100" rx="270" ry="56" fill="none" stroke="#ffe680" stroke-opacity="0.8" stroke-width="30" filter="url(#glow)" />
+    <ellipse cx="320" cy="100" rx="270" ry="56" fill="none" stroke="url(#gold)" stroke-width="26" />
+    <path d="M130 84 Q320 38 510 84" fill="none" stroke="#ffffff" stroke-opacity="0.75" stroke-width="7" stroke-linecap="round" />
+    <path d="M120 120 Q320 164 520 120" fill="none" stroke="#b97700" stroke-opacity="0.4" stroke-width="6" stroke-linecap="round" />
+</svg>

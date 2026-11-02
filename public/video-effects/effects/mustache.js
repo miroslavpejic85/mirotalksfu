@@ -14,7 +14,7 @@
     VFX.registerEffect({
         id: 'mustache',
         label: 'Mustache',
-        order: 40,
+        order: 120,
         thumbnail: 'assets/masks/mustache-thumb.svg',
         layers: [
             {

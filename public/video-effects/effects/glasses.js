@@ -30,7 +30,7 @@
     VFX.registerEffect({
         id: 'glasses-3d',
         label: '3D glasses',
-        order: 25,
+        order: 30,
         thumbnail: 'assets/glasses/glasses-3d-thumb.svg',
         model: {
             asset: 'assets/glasses/glasses-3d.glb',

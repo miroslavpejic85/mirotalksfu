@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="640" viewBox="0 0 600 640">
+    <defs>
+        <radialGradient id="blackwoman-skin" cx="0.5" cy="0.4" r="0.66">
+            <stop offset="0" stop-color="#b98058" />
+            <stop offset="0.75" stop-color="#935d3a" />
+            <stop offset="1" stop-color="#6c4024" />
+        </radialGradient>
+        <filter id="blackwoman-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" /></filter>
+        <filter id="blackwoman-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6" /></filter>
+        
+    </defs>
+    <path d="M141.9 333C142.4 338.3 142.4 344 142 349.1C141.6 354.3 140.6 359.5 139.2 364C137.8 368.5 135.9 372.7 133.7 376.1C131.6 379.5 128.9 382.3 126.2 384.3C123.4 386.2 120.3 387.4 117.2 387.7C114.1 388 110.8 387.5 107.7 386.1C104.6 384.8 101.5 382.5 98.7 379.6C95.9 376.7 93.1 373 90.9 368.8C88.7 364.7 86.7 359.8 85.2 354.8C83.8 349.9 82.7 344.3 82.1 339C81.6 333.7 81.6 328 82 322.9C82.4 317.7 83.4 312.5 84.8 308C86.2 303.5 88.1 299.3 90.3 295.9C92.4 292.5 95.1 289.7 97.8 287.7C100.6 285.8 103.7 284.6 106.8 284.3C109.9 284 113.2 284.5 116.3 285.9C119.4 287.2 122.5 289.5 125.3 292.4C128.1 295.3 130.9 299 133.1 303.2C135.3 307.3 137.3 312.2 138.8 317.2C140.2 322.1 141.3 327.7 141.9 333Z" fill="url(#blackwoman-skin)" stroke="#3f1f0e" stroke-width="4" stroke-linejoin="round" />
+    <path d="M517.9 339C517.3 344.3 516.2 349.9 514.8 354.8C513.3 359.8 511.3 364.7 509.1 368.8C506.9 373 504.1 376.7 501.3 379.6C498.5 382.5 495.4 384.8 492.3 386.1C489.2 387.5 485.9 388 482.8 387.7C479.7 387.4 476.6 386.2 473.8 384.3C471.1 382.3 468.4 379.5 466.3 376.1C464.1 372.7 462.2 368.5 460.8 364C459.4 359.5 458.4 354.3 458 349.1C457.6 344 457.6 338.3 458.1 333C458.7 327.7 459.8 322.1 461.2 317.2C462.7 312.2 464.7 307.3 466.9 303.2C469.1 299 471.9 295.3 474.7 292.4C477.5 289.5 480.6 287.2 483.7 285.9C486.8 284.5 490.1 284 493.2 284.3C496.3 284.6 499.4 285.8 502.2 287.7C504.9 289.7 507.6 292.5 509.7 295.9C511.9 299.3 513.8 303.5 515.2 308C516.6 312.5 517.6 317.7 518 322.9C518.4 328 518.4 333.7 517.9 339Z" fill="url(#blackwoman-skin)" stroke="#3f1f0e" stroke-width="4" stroke-linejoin="round" />
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#blackwoman-skin)" />
+    <defs>
+        <radialGradient id="blackwoman-face-rim" cx="0.5" cy="0.45" r="0.62">
+            <stop offset="0.62" stop-color="#2e140a" stop-opacity="0" />
+            <stop offset="1" stop-color="#2e140a" stop-opacity="0.2" />
+        </radialGradient>
+        <radialGradient id="blackwoman-face-light" cx="0.36" cy="0.26" r="0.55">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.2" />
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+        </radialGradient>
+    </defs>
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#blackwoman-face-rim)" />
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#blackwoman-face-light)" />
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="none" stroke="#3f1f0e" stroke-width="5" stroke-linejoin="round" />
+    <ellipse cx="190" cy="420" rx="40" ry="24" fill="#d4586a" fill-opacity="0.3" filter="url(#blackwoman-soft)" />
+    <ellipse cx="410" cy="420" rx="40" ry="24" fill="#d4586a" fill-opacity="0.3" filter="url(#blackwoman-soft)" />
+    <path d="M308 322 Q320 366 326 396" fill="none" stroke="#2e140a" stroke-width="9" stroke-opacity="0.22" stroke-linecap="round" filter="url(#blackwoman-blur)" />
+    <path d="M276 398 Q300 418 324 398" fill="none" stroke="#3f1f0e" stroke-width="4.5" stroke-linecap="round" />
+    <path d="M280 404 Q288 410 294 404 M306 404 Q312 410 320 404" fill="none" stroke="#3f1f0e" stroke-width="3" stroke-linecap="round" />
+    <ellipse cx="296" cy="388" rx="10" ry="6" fill="#ffffff" fill-opacity="0.28" filter="url(#blackwoman-blur)" />
+    <defs>
+        <linearGradient id="blackwoman-hair" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#34292a" />
+            <stop offset="1" stop-color="#0a0605" />
+        </linearGradient>
+        <linearGradient id="blackwoman-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff2a8" />
+            <stop offset="1" stop-color="#c78e12" />
+        </linearGradient>
+    </defs>
+    <g fill="url(#blackwoman-hair)" stroke="#050303" stroke-width="10"><circle cx="82.7" cy="297.4" r="29.7" /><circle cx="76.2" cy="258.4" r="26.1" /><circle cx="78.8" cy="219" r="31.1" /><circle cx="90.4" cy="180.8" r="26.9" /><circle cx="110.5" cy="145.5" r="27.1" /><circle cx="138.3" cy="114.4" r="26.8" /><circle cx="172.6" cy="88.8" r="24.6" /><circle cx="212.1" cy="69.7" r="30.7" /><circle cx="255.1" cy="58" r="29.2" /><circle cx="300" cy="54" r="25.8" /><circle cx="344.9" cy="58" r="30.1" /><circle cx="387.9" cy="69.7" r="30" /><circle cx="427.4" cy="88.8" r="30" /><circle cx="461.7" cy="114.4" r="26" /><circle cx="489.5" cy="145.5" r="30" /><circle cx="509.6" cy="180.8" r="29.8" /><circle cx="521.2" cy="219" r="26.4" /><circle cx="523.8" cy="258.4" r="25.7" /><circle cx="517.3" cy="297.4" r="31.7" /></g>
+    <g fill="url(#blackwoman-hair)"><circle cx="82.7" cy="297.4" r="29.7" /><circle cx="76.2" cy="258.4" r="26.1" /><circle cx="78.8" cy="219" r="31.1" /><circle cx="90.4" cy="180.8" r="26.9" /><circle cx="110.5" cy="145.5" r="27.1" /><circle cx="138.3" cy="114.4" r="26.8" /><circle cx="172.6" cy="88.8" r="24.6" /><circle cx="212.1" cy="69.7" r="30.7" /><circle cx="255.1" cy="58" r="29.2" /><circle cx="300" cy="54" r="25.8" /><circle cx="344.9" cy="58" r="30.1" /><circle cx="387.9" cy="69.7" r="30" /><circle cx="427.4" cy="88.8" r="30" /><circle cx="461.7" cy="114.4" r="26" /><circle cx="489.5" cy="145.5" r="30" /><circle cx="509.6" cy="180.8" r="29.8" /><circle cx="521.2" cy="219" r="26.4" /><circle cx="523.8" cy="258.4" r="25.7" /><circle cx="517.3" cy="297.4" r="31.7" /></g>
+    <path d="M122 330 C84 250 82 140 170 80 C230 38 370 38 430 80 C518 140 516 250 478 330 C476 264 454 216 424 192 C384 156 216 156 176 192 C146 216 124 264 122 330 Z" fill="url(#blackwoman-hair)" />
+    <path d="M122 330 C124 264 146 216 176 192 C216 156 384 156 424 192 C454 216 476 264 478 330" fill="none" stroke="#050303" stroke-width="4" stroke-linejoin="round" />
+    <path d="M150 112 C210 60 390 60 450 112" fill="none" stroke="#ffffff" stroke-opacity="0.2" stroke-width="12" stroke-linecap="round" filter="url(#blackwoman-blur)" />
+    <g fill="none" stroke="url(#blackwoman-gold)" stroke-width="7">
+        <circle cx="110" cy="402" r="20" /><circle cx="490" cy="402" r="20" />
+    </g>
+<g><svg x="185" y="216" width="100" height="40" viewBox="0 0 100 40" overflow="visible">
+    <path d="M8 30 Q44 2 94 24 Q48 12 8 34 Z" fill="#0a0605" fill-opacity="0.85" />
+</svg></g>
+<g transform="translate(730 0) scale(-1 1)"><svg x="315" y="216" width="100" height="40" viewBox="0 0 100 40" overflow="visible">
+    <path d="M8 30 Q44 2 94 24 Q48 12 8 34 Z" fill="#0a0605" fill-opacity="0.85" />
+</svg></g>
+<g><svg x="180" y="245" width="110" height="110" viewBox="0 0 110 110" overflow="visible">
+    <defs>
+        <clipPath id="blackwoman-eye-clip"><path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" /></clipPath>
+        <radialGradient id="blackwoman-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#a8743c" />
+            <stop offset="0.55" stop-color="#4a2a10" />
+            <stop offset="1" stop-color="#160a04" />
+        </radialGradient>
+        <linearGradient id="blackwoman-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#blackwoman-eye-clip)">
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="#fff6e8" />
+        <circle cx="55" cy="57" r="23" fill="url(#blackwoman-eye-iris)" />
+        <path d="M64.9 57.2L74.1 57.3M65.2 59.2L76 61.6M65 60.7L73.1 63.7M64.6 62.2L73.6 67M62.3 61.9L71.3 67.8M63 64L71 71M61.9 65.1L68.5 72.8M59.3 64.8L64.2 73.6M58.7 66.1L63.3 77.2M57.1 65.6L59.6 76.4M56.3 66L57.8 76.7M54.7 67.5L54.5 76M53.6 65.7L51.5 78.1M52 66.8L49.2 75.7M50.8 65.2L45.6 75.4M49.2 65.3L44.2 72.5M47.2 64.7L40.9 70.9M47.8 62.9L38.9 70.1M46.2 62.5L38.9 67.1M44.9 61.5L35.5 65.7M45.4 59.3L34.1 62.1M44.5 58.5L35.9 59.7M45.3 56.7L35.4 56.5M44.2 55.3L34.4 53.7M46.1 53.7L36.5 50.1M47.2 52.7L37.2 47.2M47.2 51.4L39 45.5M47.4 49.5L40.2 42.4M49.1 49.2L42.1 39.9M49.4 48.2L43.2 38.5M50.7 47.5L46.1 37.1M52.8 47.9L49.7 35.6M53.7 46.3L52.4 35.3M55.3 47L55.6 35.5M57.1 46.8L59 37.2M58.1 46.9L60.8 38.1M59.4 48.4L63.8 39.6M60.9 48L66.9 39M61.7 50.4L70.4 41.9M62.3 51.6L70.2 45.8M62.8 52.1L72.1 46.3M64.2 53.4L72.7 50.1M63.7 55.1L74.9 52.6M65.8 56.2L74.4 55.5" stroke="#160a04" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="14.3" fill="none" stroke="#a8743c" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="21.5" fill="none" stroke="#160a04" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="10.4" fill="#0a0806" />
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="url(#blackwoman-eye-lid)" />
+    </g>
+    <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="none" stroke="#0a0605" stroke-width="4" stroke-linejoin="round" />
+    <path d="M12 46 C32 22 80 22 98 44" fill="none" stroke="#0a0605" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round" />
+    <ellipse cx="46.3" cy="47.8" rx="5.5" ry="4.1" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62.4" cy="65.3" r="2.1" fill="#ffffff" fill-opacity="0.75" />
+    <path d="M8 58 C26 32 84 30 102 56" fill="none" stroke="#0a0605" stroke-width="7" stroke-linecap="round" />
+    <path d="M12 48 L2 40 M24 38 L16 28 M92 40 L100 30" fill="none" stroke="#0a0605" stroke-width="4.5" stroke-linecap="round" />
+</svg></g>
+<g transform="translate(730 0) scale(-1 1)"><svg x="310" y="245" width="110" height="110" viewBox="0 0 110 110" overflow="visible">
+    <defs>
+        <clipPath id="blackwoman-eye-clip"><path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" /></clipPath>
+        <radialGradient id="blackwoman-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#a8743c" />
+            <stop offset="0.55" stop-color="#4a2a10" />
+            <stop offset="1" stop-color="#160a04" />
+        </radialGradient>
+        <linearGradient id="blackwoman-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#blackwoman-eye-clip)">
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="#fff6e8" />
+        <circle cx="55" cy="57" r="23" fill="url(#blackwoman-eye-iris)" />
+        <path d="M64.9 57.2L74.1 57.3M65.2 59.2L76 61.6M65 60.7L73.1 63.7M64.6 62.2L73.6 67M62.3 61.9L71.3 67.8M63 64L71 71M61.9 65.1L68.5 72.8M59.3 64.8L64.2 73.6M58.7 66.1L63.3 77.2M57.1 65.6L59.6 76.4M56.3 66L57.8 76.7M54.7 67.5L54.5 76M53.6 65.7L51.5 78.1M52 66.8L49.2 75.7M50.8 65.2L45.6 75.4M49.2 65.3L44.2 72.5M47.2 64.7L40.9 70.9M47.8 62.9L38.9 70.1M46.2 62.5L38.9 67.1M44.9 61.5L35.5 65.7M45.4 59.3L34.1 62.1M44.5 58.5L35.9 59.7M45.3 56.7L35.4 56.5M44.2 55.3L34.4 53.7M46.1 53.7L36.5 50.1M47.2 52.7L37.2 47.2M47.2 51.4L39 45.5M47.4 49.5L40.2 42.4M49.1 49.2L42.1 39.9M49.4 48.2L43.2 38.5M50.7 47.5L46.1 37.1M52.8 47.9L49.7 35.6M53.7 46.3L52.4 35.3M55.3 47L55.6 35.5M57.1 46.8L59 37.2M58.1 46.9L60.8 38.1M59.4 48.4L63.8 39.6M60.9 48L66.9 39M61.7 50.4L70.4 41.9M62.3 51.6L70.2 45.8M62.8 52.1L72.1 46.3M64.2 53.4L72.7 50.1M63.7 55.1L74.9 52.6M65.8 56.2L74.4 55.5" stroke="#160a04" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="14.3" fill="none" stroke="#a8743c" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="21.5" fill="none" stroke="#160a04" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="10.4" fill="#0a0806" />
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="url(#blackwoman-eye-lid)" />
+    </g>
+    <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="none" stroke="#0a0605" stroke-width="4" stroke-linejoin="round" />
+    <path d="M12 46 C32 22 80 22 98 44" fill="none" stroke="#0a0605" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round" />
+    <ellipse cx="46.3" cy="47.8" rx="5.5" ry="4.1" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62.4" cy="65.3" r="2.1" fill="#ffffff" fill-opacity="0.75" />
+    <path d="M8 58 C26 32 84 30 102 56" fill="none" stroke="#0a0605" stroke-width="7" stroke-linecap="round" />
+    <path d="M12 48 L2 40 M24 38 L16 28 M92 40 L100 30" fill="none" stroke="#0a0605" stroke-width="4.5" stroke-linecap="round" />
+</svg></g>
+<g><svg x="235" y="456" width="130" height="80" viewBox="0 0 130 80" overflow="visible">
+    <defs><clipPath id="blackwoman-mouth-smile-clip"><path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" /></clipPath></defs>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="#2e080e" />
+    <g clip-path="url(#blackwoman-mouth-smile-clip)">
+        <path d="M6 22 Q65 34 124 22 L124 44 Q65 54 6 44 Z" fill="#fffdf8" />
+        <path d="M30 70 Q65 48 100 70 Z" fill="#e8667f" />
+    </g>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="none" stroke="#560f26" stroke-width="5" stroke-linejoin="round" />
+    <path d="M8 24 Q4 20 5 14 M122 24 Q126 20 125 14" fill="none" stroke="#560f26" stroke-width="4" stroke-linecap="round" />
+</svg></g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="80" viewBox="0 0 130 80">
+    <defs><clipPath id="blackman-mouth-smile-clip"><path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" /></clipPath></defs>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="#2e080e" />
+    <g clip-path="url(#blackman-mouth-smile-clip)">
+        <path d="M6 22 Q65 34 124 22 L124 44 Q65 54 6 44 Z" fill="#fffdf8" />
+        <path d="M30 70 Q65 48 100 70 Z" fill="#e8667f" />
+    </g>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="none" stroke="#4a1814" stroke-width="5" stroke-linejoin="round" />
+    <path d="M8 24 Q4 20 5 14 M122 24 Q126 20 125 14" fill="none" stroke="#4a1814" stroke-width="4" stroke-linecap="round" />
+</svg>

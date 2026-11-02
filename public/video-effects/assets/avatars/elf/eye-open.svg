@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs>
+        <clipPath id="elf-eye-clip"><path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" /></clipPath>
+        <radialGradient id="elf-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#e0c8ff" />
+            <stop offset="0.55" stop-color="#8b5de0" />
+            <stop offset="1" stop-color="#3a1f7a" />
+        </radialGradient>
+        <linearGradient id="elf-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#elf-eye-clip)">
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="#ffffff" />
+        <circle cx="55" cy="57" r="24" fill="url(#elf-eye-iris)" />
+        <path d="M66.5 57.1L76.8 57.1M65.1 58.9L74.8 60.7M63.7 59.9L74.3 63.4M63.8 61.5L73.3 66.4M63 62.9L71.1 68.9M61.7 63.6L69.2 71.1M62 65.4L67.5 72.2M59.8 65.3L64.9 74.1M59.3 66.8L63.6 76.4M57.1 66.1L60 79.1M55.9 67.6L56.9 79.1M54.4 66.1L53.5 79.9M53.2 66L50.8 77.6M51.5 66.4L47.6 76.7M50.8 65.2L45.4 75.8M49.1 65.3L42.5 74.6M48.2 64.5L39.8 73.7M47.3 63L37 70.9M46.5 61.9L35.4 68.3M45.1 60.9L35.5 64.6M45 59.4L34.3 62.1M44.5 57.9L32.4 59M45.8 56.8L34.2 56.6M45.7 55.6L33.8 53.8M44.4 53.3L33.7 49.5M45.2 51.9L37 47.7M46.8 51.4L37.4 44.9M46.6 49.2L39.8 43M48.6 49.2L41.7 40.8M49.6 47.8L44 38.4M51.5 48L46.9 36.1M52.7 47L49.9 34.7M54.3 46.6L53.6 35.5M55.5 47.4L56.2 34.6M57 47.1L59 37.3M58.7 46.4L61.6 38M60.4 47.2L65.8 37.2M61.2 47.6L66.3 39.9M62.8 49L69.8 41.8M63.3 50.3L70.8 44.3M64.2 51.9L73.6 46.7M64.5 52.7L73 48.9M66 54.4L74.6 52.3M66.1 56.2L75.5 55.5" stroke="#3a1f7a" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="14.9" fill="none" stroke="#e0c8ff" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="22.5" fill="none" stroke="#3a1f7a" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="10.8" fill="#0a0806" />
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="url(#elf-eye-lid)" />
+    </g>
+    <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="none" stroke="#3a2a5a" stroke-width="4" stroke-linejoin="round" />
+    <path d="M12 46 C32 22 80 22 98 44" fill="none" stroke="#3a2a5a" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round" />
+    <ellipse cx="45.9" cy="47.4" rx="5.8" ry="4.3" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62.7" cy="65.6" r="2.2" fill="#ffffff" fill-opacity="0.75" />
+    <path d="M8 58 C26 32 84 30 102 56" fill="none" stroke="#3a2a5a" stroke-width="6" stroke-linecap="round" />
+    <path d="M10 52 L0 44 M96 44 L108 38" fill="none" stroke="#3a2a5a" stroke-width="4" stroke-linecap="round" />
+</svg>

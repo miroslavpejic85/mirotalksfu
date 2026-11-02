@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+    <defs>
+        <radialGradient id="heart" cx="0.35" cy="0.28" r="0.85">
+            <stop offset="0" stop-color="#ff8aa5" />
+            <stop offset="0.5" stop-color="#ee2a55" />
+            <stop offset="1" stop-color="#a80f35" />
+        </radialGradient>
+        <g id="h">
+            <path
+                d="M100 172 C22 112 4 74 4 50 C4 22 26 6 52 6 C74 6 92 18 100 38 C108 18 126 6 148 6 C174 6 196 22 196 50 C196 74 178 112 100 172 Z"
+                fill="url(#heart)"
+                stroke="#8f0c2c"
+                stroke-width="6"
+                stroke-linejoin="round"
+            />
+            <path d="M34 50 C34 34 46 26 60 28" fill="none" stroke="#ffffff" stroke-opacity="0.75" stroke-width="10" stroke-linecap="round" />
+        </g>
+    </defs>
+    <use href="#h" transform="translate(30 56) scale(0.5)" />
+    <use href="#h" transform="translate(190 56) scale(0.5)" />
+    <path d="M110 190 Q160 218 210 190" fill="none" stroke="#a80f35" stroke-width="9" stroke-linecap="round" />
+</svg>

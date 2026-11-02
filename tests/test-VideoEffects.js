@@ -21,6 +21,8 @@ const ENGINE_FILES = [
     'effects/beard',
     'effects/dog-ears',
     'effects/funny-mask',
+    'effects/hearts',
+    'effects/headwear',
     'effects/avatars',
     'effects/beauty',
     'index',
@@ -184,19 +186,44 @@ describe('Video effects engine', () => {
             const list = manager.list();
             assert.deepEqual(
                 [...list.filter((effect) => effect.category === 'face').map((effect) => effect.id)],
-                ['sunglasses', 'glasses', 'glasses-3d', 'baseball-cap', 'mustache', 'beard', 'dog-ears', 'funny-mask']
+                [
+                    'sunglasses',
+                    'glasses',
+                    'glasses-3d',
+                    'heart-glasses',
+                    'baseball-cap',
+                    'crown',
+                    'party-hat',
+                    'flower-crown',
+                    'halo',
+                    'dog-ears',
+                    'bunny-ears',
+                    'mustache',
+                    'beard',
+                    'funny-mask',
+                    'heart-eyes',
+                    'heart-crown',
+                ]
             );
             assert.equal(list.find((e) => e.id === 'glasses-3d').is3D, true);
             assert.deepEqual(
                 [...list.filter((effect) => effect.category === 'avatar').map((effect) => effect.id)],
                 [
                     'avatar-cat',
+                    'avatar-lion',
                     'avatar-bear',
                     'avatar-panda',
-                    'avatar-robot',
-                    'avatar-alien',
                     'avatar-fox',
                     'avatar-monkey',
+                    'avatar-dragon',
+                    'avatar-unicorn',
+                    'avatar-man',
+                    'avatar-blackman',
+                    'avatar-woman',
+                    'avatar-blackwoman',
+                    'avatar-elf',
+                    'avatar-robot',
+                    'avatar-alien',
                     'avatar-astronaut',
                 ]
             );
@@ -232,7 +259,7 @@ describe('Video effects engine', () => {
             assert.equal(VFX.isDefaultFilters(filters), false);
             assert.deepEqual(
                 [...VFX.getFilterPresets().map((preset) => preset.id)],
-                ['none', 'beauty', 'vivid', 'warm', 'cool', 'grayscale', 'sepia']
+                ['none', 'beauty', 'soft-glow', 'vivid', 'warm', 'cool', 'vintage', 'sepia', 'grayscale']
             );
         });
 

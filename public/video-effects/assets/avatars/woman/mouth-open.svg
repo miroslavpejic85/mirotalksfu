@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="80" viewBox="0 0 130 80">
+    <defs>
+        <radialGradient id="woman-mouth-inside" cx="0.5" cy="0.4" r="0.7">
+            <stop offset="0" stop-color="#7a1f2b" />
+            <stop offset="1" stop-color="#2e080e" />
+        </radialGradient>
+        <clipPath id="woman-mouth-open-clip"><path d="M18 14 Q65 2 112 14 Q120 54 65 76 Q10 54 18 14 Z" /></clipPath>
+    </defs>
+    <path d="M18 14 Q65 2 112 14 Q120 54 65 76 Q10 54 18 14 Z" fill="url(#woman-mouth-inside)" />
+    <g clip-path="url(#woman-mouth-open-clip)">
+        <path d="M14 12 Q65 0 116 12 L116 28 Q65 18 14 28 Z" fill="#fffdf8" />
+        <path d="M32 70 Q65 44 98 70 Q82 82 65 82 Q48 82 32 70 Z" fill="#e8667f" />
+    </g>
+    <path d="M18 14 Q65 2 112 14 Q120 54 65 76 Q10 54 18 14 Z" fill="none" stroke="#8c1731" stroke-width="5" stroke-linejoin="round" />
+</svg>

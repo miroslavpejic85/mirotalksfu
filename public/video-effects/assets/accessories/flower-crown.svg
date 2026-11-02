@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="300" viewBox="0 0 800 300">
+    <defs>
+        <g id="flower">
+            <g fill="#fff4f8" stroke="#e0709a" stroke-width="4">
+                <ellipse cx="0" cy="-34" rx="19" ry="30" />
+                <ellipse cx="0" cy="-34" rx="19" ry="30" transform="rotate(72)" />
+                <ellipse cx="0" cy="-34" rx="19" ry="30" transform="rotate(144)" />
+                <ellipse cx="0" cy="-34" rx="19" ry="30" transform="rotate(216)" />
+                <ellipse cx="0" cy="-34" rx="19" ry="30" transform="rotate(288)" />
+            </g>
+            <circle r="16" fill="#ffc83d" stroke="#c98a00" stroke-width="4" />
+        </g>
+        <g id="daisy">
+            <g fill="#ffd1e0" stroke="#d0457a" stroke-width="4">
+                <ellipse cx="0" cy="-30" rx="16" ry="26" />
+                <ellipse cx="0" cy="-30" rx="16" ry="26" transform="rotate(60)" />
+                <ellipse cx="0" cy="-30" rx="16" ry="26" transform="rotate(120)" />
+                <ellipse cx="0" cy="-30" rx="16" ry="26" transform="rotate(180)" />
+                <ellipse cx="0" cy="-30" rx="16" ry="26" transform="rotate(240)" />
+                <ellipse cx="0" cy="-30" rx="16" ry="26" transform="rotate(300)" />
+            </g>
+            <circle r="13" fill="#e04a7e" stroke="#9c2250" stroke-width="3" />
+        </g>
+        <g id="leaf">
+            <path d="M0 0 C16 -26 52 -26 70 0 C52 24 16 24 0 0 Z" fill="#4caf50" stroke="#2c7a31" stroke-width="4" />
+            <path d="M6 0 L62 0" stroke="#2c7a31" stroke-width="3" />
+        </g>
+    </defs>
+    <path d="M40 232 Q400 110 760 232" fill="none" stroke="#3d8f42" stroke-width="14" stroke-linecap="round" />
+    <use href="#leaf" transform="translate(120 200) rotate(-35)" />
+    <use href="#leaf" transform="translate(250 160) rotate(-20)" />
+    <use href="#leaf" transform="translate(470 160) rotate(200) scale(1 -1)" />
+    <use href="#leaf" transform="translate(680 200) rotate(215) scale(1 -1)" />
+    <use href="#daisy" transform="translate(88 228) scale(0.8)" />
+    <use href="#flower" transform="translate(210 178) scale(1.05)" />
+    <use href="#daisy" transform="translate(316 140) scale(0.95)" />
+    <use href="#flower" transform="translate(400 118) scale(1.3)" />
+    <use href="#daisy" transform="translate(484 140) scale(0.95)" />
+    <use href="#flower" transform="translate(590 178) scale(1.05)" />
+    <use href="#daisy" transform="translate(712 228) scale(0.8)" />
+    <g fill="#ffffff" fill-opacity="0.95">
+        <circle cx="152" cy="150" r="7" /><circle cx="650" cy="150" r="7" /><circle cx="262" cy="92" r="6" /><circle cx="540" cy="92" r="6" />
+    </g>
+</svg>

@@ -14,7 +14,7 @@
     VFX.registerEffect({
         id: 'baseball-cap',
         label: 'Baseball cap',
-        order: 30,
+        order: 50,
         layers: [
             {
                 asset: 'assets/hats/baseball-cap.svg',

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs>
+        <clipPath id="man-eye-clip"><path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" /></clipPath>
+        <radialGradient id="man-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#b98a52" />
+            <stop offset="0.55" stop-color="#6a4220" />
+            <stop offset="1" stop-color="#2a1608" />
+        </radialGradient>
+        <linearGradient id="man-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#man-eye-clip)">
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="#fffaf4" />
+        <circle cx="55" cy="57" r="22" fill="url(#man-eye-iris)" />
+        <path d="M65.2 57.1L74.5 57.3M64.4 58.6L74.1 60.2M64.2 60.1L72.6 63M62.6 60.8L73.2 66.1M62.8 62.5L72.1 69M61.7 63.3L68.5 69.7M61.4 64.7L66.7 71.1M59.5 64.9L64.1 73M58.2 65.7L62.2 76.6M57.4 66.2L59.7 74.9M56.4 67.4L57.4 75M54.7 66L54.3 77.8M53.5 65.8L51.8 76.5M52.5 65.3L49.5 75.4M51.1 65.2L46.3 75.5M49.1 65.1L43.2 73.2M48.4 64.6L42.9 70.9M46.7 63.2L38.4 69.3M46.2 62L36.7 67.4M46.7 60.3L36.4 64.4M46.1 59.6L37.1 62.2M46.5 57.6L34.4 58.5M46.1 56.6L35.6 56.1M44.9 55L34.3 52.9M46.8 54.4L37.5 51.4M45.9 52.4L37.1 47.9M47.1 51L39.9 45.7M48.7 50.7L40.2 42.2M49.9 50.1L43.8 42M50.1 48L45 38.6M51.4 47.4L48.1 38.6M52.4 47.8L49.4 37.4M54.2 46.5L53.5 37.8M55 48.4L55 36.1M56.4 48.7L58 39.1M57.9 48L61 38.2M58.8 48.9L63.2 39.6M60.5 48.6L65.9 40.4M61.2 50.1L68.6 41.7M61.7 51.4L69.3 45.1M63.2 52.5L73.5 47M63.6 53.3L71.7 49.9M63.6 54.9L74 52.4M64.5 56.1L73.9 55.2" stroke="#2a1608" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="13.6" fill="none" stroke="#b98a52" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="20.5" fill="none" stroke="#2a1608" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="9.9" fill="#0a0806" />
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="url(#man-eye-lid)" />
+    </g>
+    <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="none" stroke="#3a2010" stroke-width="4" stroke-linejoin="round" />
+    <path d="M12 46 C32 22 80 22 98 44" fill="none" stroke="#3a2010" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round" />
+    <ellipse cx="46.6" cy="48.2" rx="5.3" ry="4" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62" cy="64.9" r="2" fill="#ffffff" fill-opacity="0.75" />
+</svg>

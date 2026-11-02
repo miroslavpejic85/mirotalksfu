@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="720" viewBox="0 0 780 720">
+    <defs>
+        <linearGradient id="fur" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#d9dde6" />
+        </linearGradient>
+        <linearGradient id="inner" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#f58aa6" />
+            <stop offset="1" stop-color="#ffc9d8" />
+        </linearGradient>
+        <g id="ear">
+            <path
+                d="M70 700 C20 560 20 300 90 120 C120 40 190 -10 232 30 C276 74 272 280 236 460 C222 556 206 640 190 700 Z"
+                fill="url(#fur)"
+                stroke="#9aa3b5"
+                stroke-width="8"
+                stroke-linejoin="round"
+            />
+            <path
+                d="M100 660 C72 540 76 320 120 190 C140 130 180 96 206 120 C230 150 224 320 200 470 C188 550 178 620 168 660 Z"
+                fill="url(#inner)"
+            />
+            <path d="M92 200 C80 280 86 400 104 500" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="8" stroke-linecap="round" />
+        </g>
+    </defs>
+    <use href="#ear" transform="translate(70 0) rotate(-6 130 700)" />
+    <use href="#ear" transform="translate(710 0) scale(-1 1) rotate(-6 130 700)" />
+</svg>

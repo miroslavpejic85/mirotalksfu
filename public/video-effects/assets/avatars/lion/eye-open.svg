@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs>
+        <clipPath id="lion-eye-clip"><path d="M8 58 C22 28 84 26 102 54 C88 86 26 90 8 58 Z" /></clipPath>
+        <radialGradient id="lion-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#fff0a8" />
+            <stop offset="0.55" stop-color="#e0961f" />
+            <stop offset="1" stop-color="#7a4408" />
+        </radialGradient>
+        <linearGradient id="lion-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#lion-eye-clip)">
+        
+        <circle cx="55" cy="57" r="36" fill="url(#lion-eye-iris)" />
+        <path d="M71.8 57.5L88 58.1M68.5 59.3L87.7 62.6M70.5 61.8L87 66.8M69.6 64.2L84.1 71.3M67.8 65.6L83.3 75.9M65.4 66L78.5 77.3M65.3 70.7L73.8 81.8M62.4 70.9L70.5 85.9M61.3 72.6L66.5 85.3M58.9 73.8L62.1 87.8M57 72.7L58.9 88.2M54.2 72L53.2 91M52.1 72.5L48.9 89.4M50.5 71.1L45.8 85.8M47 71.5L40.6 83M45.5 70L34.8 84.8M45.1 67.6L33.5 79.9M41.7 67.4L28.1 78.1M42.7 64.1L25.9 73.9M42.2 62.3L27 68.5M39.6 61.2L21.8 66.1M41.3 58.9L21.2 61.7M38.8 56.3L20.9 55.5M39.8 53.6L23.9 50M38.5 52.1L24.9 48M42.3 50.5L24.3 41.4M41.3 48.1L27.9 39.4M43 45.7L31.8 35.1M44.4 43.8L33.6 30.2M48 45L38.8 29.4M49.1 43.7L41.8 27.3M51.4 42.6L46.7 24.2M52.7 40.8L50.4 24.9M55.4 40.2L55.8 23.8M58 43.5L61.4 27.6M59.2 43L64.3 25.9M62.5 43.1L70.4 28.5M64 43.8L73.6 29.9M65 46.2L75.5 34.9M68.3 47.2L80.7 38M68.2 49.7L85.1 40.4M70.2 51.4L85.7 45.7M69.2 52.8L85.8 48M68.8 55.7L88.7 53.9" stroke="#7a4408" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="22.3" fill="none" stroke="#fff0a8" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="34.5" fill="none" stroke="#7a4408" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="15.1" fill="#0a0806" />
+        <path d="M8 58 C22 28 84 26 102 54 C88 86 26 90 8 58 Z" fill="url(#lion-eye-lid)" />
+    </g>
+    <path d="M8 58 C22 28 84 26 102 54 C88 86 26 90 8 58 Z" fill="none" stroke="#3a1c08" stroke-width="4" stroke-linejoin="round" />
+    
+    <ellipse cx="41.3" cy="42.6" rx="8.6" ry="6.5" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="66.5" cy="70" r="3.2" fill="#ffffff" fill-opacity="0.75" />
+</svg>

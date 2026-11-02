@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="640" viewBox="0 0 480 640">
+    <defs>
+        <linearGradient id="cone" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ff7ab8" />
+            <stop offset="0.55" stop-color="#9b5de5" />
+            <stop offset="1" stop-color="#5a2fb0" />
+        </linearGradient>
+        <radialGradient id="pom" cx="0.35" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#fff7b0" />
+            <stop offset="1" stop-color="#f5a800" />
+        </radialGradient>
+        <clipPath id="clip"><path d="M240 60 L444 590 L36 590 Z" /></clipPath>
+    </defs>
+    <path d="M240 60 L444 590 Q240 640 36 590 Z" fill="url(#cone)" stroke="#3f1d85" stroke-width="8" stroke-linejoin="round" />
+    <g clip-path="url(#clip)" fill="none" stroke="#ffe066" stroke-width="22" stroke-linecap="round">
+        <path d="M120 400 L420 520" />
+        <path d="M150 300 L410 430" />
+        <path d="M185 205 L350 290" />
+        <path d="M0 520 L300 620" />
+    </g>
+    <g fill="#5ee6e0">
+        <circle cx="150" cy="520" r="11" /><circle cx="300" cy="560" r="11" /><circle cx="230" cy="420" r="11" />
+        <circle cx="330" cy="340" r="9" /><circle cx="250" cy="250" r="8" />
+    </g>
+    <path d="M40 586 Q240 640 440 586" fill="none" stroke="#ffe066" stroke-width="16" stroke-linecap="round" />
+    <g fill="url(#pom)" stroke="#b97700" stroke-width="4">
+        <circle cx="240" cy="52" r="42" />
+    </g>
+    <g stroke="#b97700" stroke-width="5" stroke-linecap="round">
+        <path d="M212 40 l10 12 M240 22 l0 14 M268 40 l-10 12 M222 70 l8 -10 M258 70 l-8 -10" />
+    </g>
+    <path d="M60 480 L120 560" stroke="#ffffff" stroke-opacity="0.3" stroke-width="10" stroke-linecap="round" />
+</svg>

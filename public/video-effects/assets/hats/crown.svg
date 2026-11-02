@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="480" viewBox="0 0 700 480">
+    <defs>
+        <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff0a8" />
+            <stop offset="0.45" stop-color="#f7c52b" />
+            <stop offset="1" stop-color="#b8820a" />
+        </linearGradient>
+        <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffd84d" />
+            <stop offset="1" stop-color="#a87306" />
+        </linearGradient>
+        <radialGradient id="ruby" cx="0.35" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#ff9aa8" />
+            <stop offset="0.5" stop-color="#e0213c" />
+            <stop offset="1" stop-color="#7d0a1c" />
+        </radialGradient>
+        <radialGradient id="sapphire" cx="0.35" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#a8d4ff" />
+            <stop offset="0.5" stop-color="#2d74e0" />
+            <stop offset="1" stop-color="#143c86" />
+        </radialGradient>
+    </defs>
+    <path
+        d="M56 420 L36 120 L190 250 L270 70 L350 230 L430 70 L510 250 L664 120 L644 420 Z"
+        fill="url(#gold)"
+        stroke="#8a5d05"
+        stroke-width="8"
+        stroke-linejoin="round"
+    />
+    <path d="M60 372 L644 372 L646 436 Q350 462 54 436 Z" fill="url(#band)" stroke="#8a5d05" stroke-width="8" stroke-linejoin="round" />
+    <path d="M90 392 Q350 416 610 392" fill="none" stroke="#fff6c4" stroke-opacity="0.7" stroke-width="6" stroke-linecap="round" />
+    <g stroke="#8a5d05" stroke-width="4">
+        <circle cx="36" cy="116" r="24" fill="url(#ruby)" />
+        <circle cx="270" cy="62" r="26" fill="url(#ruby)" />
+        <circle cx="430" cy="62" r="26" fill="url(#ruby)" />
+        <circle cx="664" cy="116" r="24" fill="url(#ruby)" />
+        <ellipse cx="350" cy="404" rx="30" ry="22" fill="url(#sapphire)" />
+        <ellipse cx="190" cy="406" rx="20" ry="15" fill="url(#ruby)" />
+        <ellipse cx="510" cy="406" rx="20" ry="15" fill="url(#ruby)" />
+    </g>
+    <path d="M110 330 L100 190 M270 320 L270 170 M430 320 L430 170 M590 330 L600 190" stroke="#ffffff" stroke-opacity="0.35" stroke-width="10" stroke-linecap="round" />
+</svg>

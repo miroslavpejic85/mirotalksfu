@@ -14,7 +14,7 @@
     VFX.registerEffect({
         id: 'beard',
         label: 'Beard',
-        order: 50,
+        order: 130,
         thumbnail: 'assets/masks/beard-thumb.svg',
         layers: [
             {

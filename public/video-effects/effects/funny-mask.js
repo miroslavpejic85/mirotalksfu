@@ -14,7 +14,7 @@
     VFX.registerEffect({
         id: 'funny-mask',
         label: 'Funny mask',
-        order: 70,
+        order: 140,
         thumbnail: 'assets/masks/funny-mask-thumb.svg',
         layers: [
             {
