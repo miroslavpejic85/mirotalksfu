@@ -644,6 +644,52 @@ describe('Video effects engine', () => {
         });
     });
 
+    describe('video source', () => {
+        it('renders canvas-captured tracks from their canvas (Safari WebGL video upload bug)', async () => {
+            class FakeCanvas {
+                constructor(width, height) {
+                    this.width = width;
+                    this.height = height;
+                }
+            }
+            const ctx = loadEngine({ HTMLCanvasElement: FakeCanvas, MediaStream: class {} });
+            const video = {
+                play: async () => {},
+                pause() {},
+                remove() {},
+                readyState: 4,
+                videoWidth: 1280,
+                videoHeight: 720,
+                srcObject: null,
+            };
+            const source = new ctx.MiroTalkVFX.VideoSource({ video });
+            const track = (canvas) => ({
+                kind: 'video',
+                readyState: 'live',
+                canvas,
+                addEventListener() {},
+                removeEventListener() {},
+            });
+
+            const canvas = new FakeCanvas(1280, 720);
+            await source.attachTrack(track(canvas));
+            assert.equal(source.frameSource, canvas);
+
+            canvas.width = 0;
+            assert.equal(source.frameSource, video, 'empty canvas falls back to the video element');
+
+            await source.attachTrack(track({ width: 1280, height: 720 }));
+            assert.equal(source.frameSource, video, 'non-canvas objects are ignored');
+
+            await source.attachTrack(track(undefined));
+            assert.equal(source.frameSource, video, 'camera tracks use the video element');
+
+            await source.attachTrack(track(new FakeCanvas(640, 360)));
+            source.detach();
+            assert.equal(source.frameSource, video);
+        });
+    });
+
     describe('frame scheduler', () => {
         it('falls back to a timer when requestVideoFrameCallback is unavailable', () => {
             const clock = sinon.useFakeTimers();

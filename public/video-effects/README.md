@@ -209,6 +209,9 @@ such as fur strands shimmers when the head moves and turns into noise after vide
 - Landmarks are One Euro filtered (no jitter when still, low lag when moving), interpolated every frame and
   extrapolated by their velocity (max 120 ms) to hide detection latency.
 - Output is capped (1920×1080 desktop, 1280×720 mobile by default) and never upscaled.
+- Sources from `canvas.captureStream()` (the virtual background on Safari and Firefox) are drawn straight from their
+  canvas (`track.canvas`): no extra video decode, and it avoids a WebKit bug where WebGL uploads of a video element
+  playing such a track are empty (solid green output).
 - Assets, the model and the worker are cached; `stop()` keeps them for instant re-activation, `destroy()` frees them.
 
 ## Browser support

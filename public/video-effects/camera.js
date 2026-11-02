@@ -14,6 +14,20 @@
     const HIDDEN_VIDEO_STYLE = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
     const RVFC_STALL_MS = 500;
 
+    /**
+     * Canvas behind a canvas.captureStream() track (e.g. the virtual background on Safari/Firefox).
+     * Rendering from it directly avoids a video encode/decode round trip and a WebKit bug where
+     * WebGL uploads of a video element playing such a track are empty (solid green frames).
+     */
+    function getCaptureCanvas(track) {
+        const canvas = track?.canvas;
+        if (!canvas) return null;
+        const isCanvas =
+            (typeof HTMLCanvasElement !== 'undefined' && canvas instanceof HTMLCanvasElement) ||
+            (typeof OffscreenCanvas !== 'undefined' && canvas instanceof OffscreenCanvas);
+        return isCanvas ? canvas : null;
+    }
+
     class VideoSource {
         constructor({ video = null } = {}) {
             this.externalVideo = video || null;
@@ -35,6 +49,7 @@
             this.detach();
             if (!this.video) this.video = this.createVideoElement();
             this.track = track;
+            this.captureCanvas = getCaptureCanvas(track);
             track.addEventListener('ended', this.handleEnded);
             this.video.srcObject = new MediaStream([track]);
             await this.play();
@@ -47,6 +62,7 @@
             const track = video.srcObject?.getVideoTracks?.()[0] || null;
             this.detach();
             this.track = track;
+            this.captureCanvas = getCaptureCanvas(track);
             if (track) track.addEventListener('ended', this.handleEnded);
             await this.play();
         }
@@ -104,6 +120,12 @@
             return !!this.video && this.video.readyState >= 2 && this.video.videoWidth > 0;
         }
 
+        // Image the renderer draws: the capture canvas when available, otherwise the video element
+        get frameSource() {
+            const canvas = this.captureCanvas;
+            return canvas && canvas.width > 0 && canvas.height > 0 ? canvas : this.video;
+        }
+
         get width() {
             return this.video?.videoWidth || 0;
         }
@@ -115,6 +137,7 @@
         detach() {
             if (this.track) this.track.removeEventListener('ended', this.handleEnded);
             this.track = null;
+            this.captureCanvas = null;
             if (this.video && !this.externalVideo) {
                 this.video.pause();
                 this.video.srcObject = null;

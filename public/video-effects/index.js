@@ -246,7 +246,7 @@
             }
 
             try {
-                if (!this.renderer.drawVideo(video, this.filters)) return;
+                if (!this.renderer.drawVideo(this.source.frameSource, this.filters)) return;
                 if (face) {
                     const layers = this.manager.computeLayers(face);
                     for (let i = 0; i < layers.length; i++) {
