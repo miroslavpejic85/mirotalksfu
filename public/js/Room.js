@@ -6146,6 +6146,7 @@ function showButtons() {
         return;
     bottomButtons.style.display = 'flex';
     toggleClassElements('username', 'flex');
+    toggleVideoEffectsBadges(true);
     isButtonsVisible = true;
 }
 
@@ -6153,11 +6154,13 @@ function checkButtonsBar() {
     if (localStorageSettings.keep_buttons_visible) {
         bottomButtons.style.display = 'flex';
         toggleClassElements('username', 'flex');
+        toggleVideoEffectsBadges(true);
         isButtonsVisible = true;
     } else {
         if (!isButtonsBarOver) {
             bottomButtons.style.display = 'none';
             toggleClassElements('username', 'none');
+            toggleVideoEffectsBadges(false);
             isButtonsVisible = false;
         }
     }
@@ -6171,6 +6174,13 @@ function toggleClassElements(className, displayState) {
     for (let i = 0; i < elements.length; i++) {
         elements[i].style.display = displayState;
     }
+}
+
+// The "Effects on" badge sits above the peer name and follows its visibility
+function toggleVideoEffectsBadges(visible) {
+    document.querySelectorAll('.vfx-on-badge').forEach((badge) => {
+        badge.style.display = visible ? '' : 'none';
+    });
 }
 
 function hideClassElements(className) {
@@ -10669,6 +10679,7 @@ function updateVideoEffectsIndicators(active = isAnyVisualEffectOn()) {
         getVideoEffectsPanel()?.turnOffAll();
     });
     badge.append(open, off);
+    if (bottomButtons.style.display === 'none') badge.style.display = 'none';
     tile.appendChild(badge);
     if (!isMobileDevice) setTippy(off, 'Turn off all effects', 'top');
 }

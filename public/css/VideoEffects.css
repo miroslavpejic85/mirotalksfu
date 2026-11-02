@@ -766,7 +766,7 @@
 .vfx-on-badge {
     position: absolute;
     right: 10px;
-    bottom: 10px;
+    bottom: 45px; /* stacked right above the peer name label (25px high, 10px margin) */
     z-index: 3;
     display: inline-flex;
     overflow: hidden;
