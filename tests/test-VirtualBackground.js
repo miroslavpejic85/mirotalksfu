@@ -164,6 +164,21 @@ function createCanvasEnvironment({ filters = true, webgl = true } = {}) {
                 restore: sinon.spy(),
                 clearRect: sinon.spy(),
                 drawImage: sinon.spy(),
+                getImageData: sinon.stub().callsFake((x, y, width, height) => {
+                    const data = new Uint8ClampedArray(width * height * 4);
+                    for (let row = 0; row < height; row++) {
+                        for (let column = 0; column < width; column++) {
+                            const index = (row * width + column) * 4;
+                            const value = column < width / 2 ? 0 : 255;
+                            data[index] = value;
+                            data[index + 1] = value;
+                            data[index + 2] = value;
+                            data[index + 3] = 255;
+                        }
+                    }
+                    return { data, width, height };
+                }),
+                putImageData: sinon.spy(),
                 ...(filters ? { filter: 'none' } : {}),
             };
             const track = { readyState: 'live', stop: sinon.spy() };
@@ -256,11 +271,32 @@ describe('Virtual background canvas fallback', () => {
         assert.equal(background.activeCanvas, null);
     });
 
-    it('rejects blur without canvas filters while keeping image and transparency support', async () => {
-        const { background, camera } = createCanvasEnvironment({ filters: false });
-        await assert.rejects(background.applyBlurToWebRTCStream(camera), /blur is not supported/);
+    it('approximates native blur with three box passes when canvas filters are unavailable', async () => {
+        const { background, camera, canvases, contexts } = createCanvasEnvironment({ filters: false });
+        await background.applyBlurToWebRTCStream(camera, 10);
+
         assert.equal(background.isSupported, true);
+        assert.equal(canvases[2].width, 160);
+        assert.equal(canvases[2].height, 90);
+        assert.equal(contexts[2].drawImage.calledOnce, true);
+        assert.equal(contexts[2].getImageData.calledOnce, true);
+        assert.equal(contexts[2].putImageData.calledOnce, true);
+        const blurredPixels = contexts[2].putImageData.firstCall.args[0].data;
+        const centerPixel = (45 * 160 + 80) * 4;
+        assert.ok(blurredPixels[centerPixel] > 0 && blurredPixels[centerPixel] < 255);
+        assert.equal(background.activeCanvas.context.drawImage.calledThrice, true);
+
+        await background.stopCurrentProcessor();
         await background.applyTransparentVirtualBackgroundToWebRTCStream(camera);
+        assert.equal(background.activeCanvas.context.drawImage.calledThrice, true);
+        await background.stopCurrentProcessor();
+    });
+
+    it('uses native canvas filters for blur when available', async () => {
+        const { background, camera } = createCanvasEnvironment();
+        await background.applyBlurToWebRTCStream(camera, 20);
+
+        assert.equal(background.isSupported, true);
         assert.equal(background.activeCanvas.context.drawImage.calledThrice, true);
         await background.stopCurrentProcessor();
     });

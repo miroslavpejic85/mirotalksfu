@@ -447,11 +447,8 @@ class VirtualBackground {
             );
         }
 
-        if (!this.supportsTrackPipeline() && !('filter' in document.createElement('canvas').getContext('2d'))) {
-            throw new Error('Background blur is not supported by this browser. Choose a background image instead.');
-        }
-
-        // Handler for applying blur effect to the background
+        let blurCanvas;
+        let blurContext;
         const maskHandler = (ctx, canvas, mask, imageBitmap) => {
             // Keep only the person using the segmentation mask
             ctx.save();
@@ -462,8 +459,75 @@ class VirtualBackground {
             // Apply blur to background and draw image behind the person
             ctx.save();
             ctx.globalCompositeOperation = 'destination-over';
-            ctx.filter = `blur(${blurLevel}px)`;
-            ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+            if ('filter' in ctx) {
+                ctx.filter = `blur(${blurLevel}px)`;
+                ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+            } else {
+                if (!blurCanvas) {
+                    blurCanvas = this.createCanvas(1, 1);
+                    blurContext = blurCanvas.getContext('2d', { willReadFrequently: true });
+                    if (!blurContext) throw new Error('Unable to create a canvas context for background blur.');
+                }
+
+                const scale = 8;
+                const width = Math.max(1, Math.round(canvas.width / scale));
+                const height = Math.max(1, Math.round(canvas.height / scale));
+                if (blurCanvas.width !== width || blurCanvas.height !== height) {
+                    blurCanvas.width = width;
+                    blurCanvas.height = height;
+                }
+                blurContext.clearRect(0, 0, width, height);
+                blurContext.imageSmoothingEnabled = true;
+                blurContext.drawImage(imageBitmap, 0, 0, width, height);
+                const imageData = blurContext.getImageData(0, 0, width, height);
+                let pixels = imageData.data;
+                const radius = Math.max(1, Math.round(blurLevel / scale));
+                const boxBlur = (source, horizontal) => {
+                    const blurred = new Uint8ClampedArray(source.length);
+                    const outerLength = horizontal ? height : width;
+                    const innerLength = horizontal ? width : height;
+                    const divisor = radius * 2 + 1;
+
+                    for (let outer = 0; outer < outerLength; outer++) {
+                        let red = 0;
+                        let green = 0;
+                        let blue = 0;
+                        for (let offset = -radius; offset <= radius; offset++) {
+                            const inner = Math.min(innerLength - 1, Math.max(0, offset));
+                            const index = (horizontal ? outer * width + inner : inner * width + outer) * 4;
+                            red += source[index];
+                            green += source[index + 1];
+                            blue += source[index + 2];
+                        }
+
+                        for (let inner = 0; inner < innerLength; inner++) {
+                            const index = (horizontal ? outer * width + inner : inner * width + outer) * 4;
+                            blurred[index] = Math.round(red / divisor);
+                            blurred[index + 1] = Math.round(green / divisor);
+                            blurred[index + 2] = Math.round(blue / divisor);
+                            blurred[index + 3] = source[index + 3];
+
+                            const remove = Math.max(0, inner - radius);
+                            const add = Math.min(innerLength - 1, inner + radius + 1);
+                            const removeIndex = (horizontal ? outer * width + remove : remove * width + outer) * 4;
+                            const addIndex = (horizontal ? outer * width + add : add * width + outer) * 4;
+                            red += source[addIndex] - source[removeIndex];
+                            green += source[addIndex + 1] - source[removeIndex + 1];
+                            blue += source[addIndex + 2] - source[removeIndex + 2];
+                        }
+                    }
+
+                    return blurred;
+                };
+                // Three box passes approximate a Gaussian blur without CanvasRenderingContext2D.filter.
+                for (let pass = 0; pass < 3; pass++) {
+                    pixels = boxBlur(boxBlur(pixels, true), false);
+                }
+                imageData.data.set(pixels);
+                blurContext.putImageData(imageData, 0, 0);
+                ctx.imageSmoothingEnabled = true;
+                ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
+            }
             ctx.restore();
         };
 
