@@ -9,8 +9,10 @@ these models.
 
 ## Microsoft Rocketbox (MIT)
 
-`man/` (Male_Adult_01), `man-2/` (Male_Adult_12), `woman/` (Female_Adult_01) and `woman-2/`
-(Female_Adult_11) come from https://github.com/microsoft/Microsoft-Rocketbox
+`man/` (Male_Adult_01), `man-2/` (Male_Adult_12), `man-3/` (Male_Adult_04), `man-4/` (Male_Adult_10),
+`man-5/` (Male_Adult_03, hair cards recoloured), `woman/` (Female_Adult_01), `woman-2/` (Female_Adult_11),
+`woman-3/` (Female_Adult_15) and `woman-4/` (Female_Adult_12) come from
+https://github.com/microsoft/Microsoft-Rocketbox
 
 ```
 MIT License

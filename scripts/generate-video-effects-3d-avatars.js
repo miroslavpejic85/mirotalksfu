@@ -47,6 +47,18 @@ const AVATARS = [
     { id: 'man-2', label: 'Man 2', source: 'rocketbox', name: 'Male_Adult_12' },
     { id: 'woman', label: 'Woman', source: 'rocketbox', name: 'Female_Adult_01' },
     { id: 'woman-2', label: 'Woman 2', source: 'rocketbox', name: 'Female_Adult_11' },
+    { id: 'man-3', label: 'Man 3', source: 'rocketbox', name: 'Male_Adult_04' },
+    { id: 'woman-3', label: 'Woman 3', source: 'rocketbox', name: 'Female_Adult_15' },
+    { id: 'man-4', label: 'Man 4', source: 'rocketbox', name: 'Male_Adult_10' },
+    { id: 'woman-4', label: 'Woman 4', source: 'rocketbox', name: 'Female_Adult_12' },
+    {
+        id: 'man-5',
+        label: 'Man 5',
+        source: 'rocketbox',
+        name: 'Male_Adult_03',
+        // Brown hair cards over a grey scalp texture
+        hair: { saturation: 0.35, brightness: 1.3 },
+    },
     {
         id: 'raccoon',
         label: 'Raccoon',
@@ -419,7 +431,9 @@ async function setRocketboxTextures(document, three, sharp, avatar, dir) {
         // <material>_color.tga (+ _normal.tga) next to the FBX in the Rocketbox repository
         const textureUrl = (suffix) => `${ROCKETBOX}/${avatar.name}/Textures/${name}_${suffix}.tga`;
         const color = await download(textureUrl('color'), path.join(dir, `${name}_color.tga`));
-        const colorImage = decodeTga(three, sharp, color, TEXTURE_SIZE[kind]);
+        let colorImage = decodeTga(three, sharp, color, TEXTURE_SIZE[kind]);
+        // Some hair cards do not match the hair painted on the scalp texture: recolour them
+        if (kind === 'opacity' && avatar.hair) colorImage = colorImage.modulate(avatar.hair);
         material
             .setBaseColorTexture(await webpTexture(`${name}_color`, colorImage.webp({ quality: 88, alphaQuality: 90 })))
             .setBaseColorFactor([1, 1, 1, 1])

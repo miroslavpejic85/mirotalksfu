@@ -42,9 +42,44 @@
         model: { asset: 'assets/avatars-3d/woman-2/model.glb', clipY: -4.042 },
     });
     VFX.registerAvatar3D({
+        id: 'avatar3d-man-3',
+        label: 'Man 3',
+        order: 450,
+        thumbnail: 'assets/avatars-3d/man-3/thumb.webp',
+        model: { asset: 'assets/avatars-3d/man-3/model.glb', clipY: -3.86 },
+    });
+    VFX.registerAvatar3D({
+        id: 'avatar3d-woman-3',
+        label: 'Woman 3',
+        order: 460,
+        thumbnail: 'assets/avatars-3d/woman-3/thumb.webp',
+        model: { asset: 'assets/avatars-3d/woman-3/model.glb', clipY: -3.886 },
+    });
+    VFX.registerAvatar3D({
+        id: 'avatar3d-man-4',
+        label: 'Man 4',
+        order: 470,
+        thumbnail: 'assets/avatars-3d/man-4/thumb.webp',
+        model: { asset: 'assets/avatars-3d/man-4/model.glb', clipY: -3.745 },
+    });
+    VFX.registerAvatar3D({
+        id: 'avatar3d-woman-4',
+        label: 'Woman 4',
+        order: 480,
+        thumbnail: 'assets/avatars-3d/woman-4/thumb.webp',
+        model: { asset: 'assets/avatars-3d/woman-4/model.glb', clipY: -4.003 },
+    });
+    VFX.registerAvatar3D({
+        id: 'avatar3d-man-5',
+        label: 'Man 5',
+        order: 490,
+        thumbnail: 'assets/avatars-3d/man-5/thumb.webp',
+        model: { asset: 'assets/avatars-3d/man-5/model.glb', clipY: -3.702 },
+    });
+    VFX.registerAvatar3D({
         id: 'avatar3d-raccoon',
         label: 'Raccoon',
-        order: 450,
+        order: 500,
         thumbnail: 'assets/avatars-3d/raccoon/thumb.webp',
         model: { asset: 'assets/avatars-3d/raccoon/model.glb', scale: 1.7 },
     });

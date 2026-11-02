@@ -475,7 +475,18 @@ describe('Video effects engine', () => {
             const avatars = manager.list().filter((effect) => effect.category === 'avatar3d');
             assert.deepEqual(
                 [...avatars.map((effect) => effect.id)],
-                ['avatar3d-man', 'avatar3d-man-2', 'avatar3d-woman', 'avatar3d-woman-2', 'avatar3d-raccoon']
+                [
+                    'avatar3d-man',
+                    'avatar3d-man-2',
+                    'avatar3d-woman',
+                    'avatar3d-woman-2',
+                    'avatar3d-man-3',
+                    'avatar3d-woman-3',
+                    'avatar3d-man-4',
+                    'avatar3d-woman-4',
+                    'avatar3d-man-5',
+                    'avatar3d-raccoon',
+                ]
             );
             for (const { id, is3D } of avatars) {
                 const { model, thumbnail } = manager.getEffect(id);

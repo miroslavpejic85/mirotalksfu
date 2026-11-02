@@ -215,7 +215,7 @@ such as fur strands shimmers when the head moves and turns into noise after vide
 
 ## Realistic 3D avatars
 
-`effects/avatars-3d.js` registers the **3D Avatars** tab: semi-realistic people (Microsoft Rocketbox, MIT) as
+`effects/avatars-3d.js` registers the **3D Avatars** tab: nine semi-realistic people (Microsoft Rocketbox, MIT) as
 head-and-shoulders busts and a cartoon raccoon head (MediaPipe sample, Apache-2.0). They are rigged GLB models
 rendered by `model-renderer.js` with image based lighting (Three.js `RoomEnvironment`) and ACES tone mapping:
 
@@ -241,8 +241,9 @@ face). The bundled ones are **generated** by `scripts/generate-video-effects-3d-
 the dev tools to install): it converts the sources (FBX2glTF, names recovered with the three.js FBXLoader),
 keeps the 52 ARKit blendshapes, lowers the arms, bakes the pose, crops the bust, adds the 2-joint neck rig,
 normalizes the model, converts textures to WebP, compresses with meshopt and rewrites `effects/avatars-3d.js`;
-`--thumbs` renders the thumbnails in Chrome. Each avatar is ~0.4-0.8 MB, downloaded only when selected. More
-Rocketbox people (115 avatars, 40 adults with ARKit blendshapes) can be added to its `AVATARS` list. Licenses:
+`--thumbs` renders the thumbnails in Chrome. Each avatar is ~0.4-0.9 MB, downloaded only when selected. More
+Rocketbox people (115 avatars, 40 adults with ARKit blendshapes) can be added to its `AVATARS` list (`hair`
+recolours hair cards that do not match the scalp texture). Licenses:
 `assets/avatars-3d/LICENSE.md`.
 
 ## Performance
