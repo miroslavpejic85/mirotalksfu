@@ -2599,11 +2599,12 @@ main {
 
 #supportUs .cta-inner {
     border: 1px solid var(--landing-border);
-    border-radius: 12px;
-    background: var(--landing-surface) !important;
+    border-radius: 8px;
+    background:
+        linear-gradient(to bottom right, transparent 60%, rgba(22, 140, 255, 0.1)), var(--landing-surface) !important;
     box-shadow:
-        0 18px 48px rgba(0, 0, 0, 0.24),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        0 24px 70px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .support-us-content {
@@ -2685,10 +2686,10 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 24px;
-    background: var(--landing-surface) !important;
+    padding: 28px 20px;
+    background: rgba(25, 30, 38, 0.72) !important;
     border: 1px solid var(--landing-border) !important;
-    border-radius: 12px;
+    border-radius: 8px;
     text-decoration: none;
     color: var(--landing-text-muted) !important;
     transition:
@@ -2699,24 +2700,41 @@ main {
     min-height: 160px;
     position: relative;
     overflow: hidden;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
 }
 
 .support-card::after {
-    content: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
 }
 
 .support-card::before {
-    content: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+    transition: left 0.6s ease;
+}
+
+.support-card:hover::before {
+    left: 100%;
 }
 
 .support-card:hover {
-    transform: translateY(-2px) !important;
-    border-color: var(--landing-border-strong) !important;
+    transform: translateY(-4px) !important;
+    border-color: rgba(50, 184, 232, 0.28) !important;
     box-shadow:
-        0 10px 24px rgba(0, 0, 0, 0.2),
+        0 14px 32px rgba(0, 0, 0, 0.24),
         inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
-    background: var(--landing-surface-raised) !important;
+    background: rgba(32, 38, 48, 0.88) !important;
 }
 
 .support-card-icon {
@@ -2728,7 +2746,7 @@ main {
     justify-content: center;
     background: var(--landing-surface-raised) !important;
     border: 1px solid var(--landing-border);
-    border-radius: 10px;
+    border-radius: 8px;
     transition: all 0.3s ease;
     position: relative;
     z-index: 1;
@@ -2781,8 +2799,8 @@ main {
     margin-right: auto;
     padding: 24px;
     border: 1px solid var(--landing-border);
-    border-radius: 12px;
-    background: var(--landing-surface);
+    border-radius: 10px;
+    background: rgba(17, 22, 29, 0.45);
 }
 
 .support-group-label {
