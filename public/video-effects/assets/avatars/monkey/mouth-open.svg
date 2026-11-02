@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80">
+    <defs>
+        <radialGradient id="monkey-mouth-inside" cx="0.5" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#6a1c28" />
+            <stop offset="1" stop-color="#2a070d" />
+        </radialGradient>
+    </defs>
+    <path d="M14 10 Q60 0 106 10 Q106 56 60 76 Q14 56 14 10 Z" fill="url(#monkey-mouth-inside)" stroke="#6a3e22" stroke-width="4" stroke-linejoin="round" />
+    <path d="M24 12 Q60 5 96 12 L94 22 Q60 15 26 22 Z" fill="#fbf6e9" />
+    <path d="M34 56 Q60 44 86 56 Q80 72 60 75 Q40 72 34 56 Z" fill="#e17c8e" />
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+    <defs><filter id="alien-brow-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2" /></filter></defs>
+    <path d="M10 32 Q60 4 112 22" fill="none" stroke="#2e7d32" stroke-width="8" stroke-opacity="0.45" stroke-linecap="round" filter="url(#alien-brow-soft)" />
+    <path d="M12 28 Q60 2 110 18" fill="none" stroke="#e5ffd0" stroke-width="3" stroke-opacity="0.4" stroke-linecap="round" />
+</svg>

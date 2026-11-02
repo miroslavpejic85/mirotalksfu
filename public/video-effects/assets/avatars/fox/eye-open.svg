@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs>
+        <clipPath id="fox-eye-clip"><path d="M6 64 C20 34 76 22 104 40 C96 74 40 92 6 64 Z" /></clipPath>
+        <radialGradient id="fox-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ffe08a" />
+            <stop offset="0.55" stop-color="#f0a018" />
+            <stop offset="1" stop-color="#9c5000" />
+        </radialGradient>
+        <linearGradient id="fox-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#fox-eye-clip)">
+        
+        <circle cx="56" cy="57" r="36" fill="url(#fox-eye-iris)" />
+        <path d="M72.9 58.4L87.8 59.5M71.3 60.4L86 63.8M69.7 61.9L84.9 67.4M70.2 63.7L83 69.8M69.1 66.8L80.2 75M68.8 68.2L81.8 79.6M65.3 68.6L76 81.9M63.8 69.3L72.3 82.7M62.6 72.9L68.9 87.8M60 71.1L65.4 89.7M57.8 71.7L59.8 87.8M55.6 73.6L55.2 90.4M52.9 72.5L50.1 86M51.6 71.8L46.7 88.2M50.2 69.5L43.5 84M46.6 71.4L39.6 82M46.3 67.5L34.8 80M45 66L29.4 78.6M42 65L26.9 73.7M42.5 62.5L27.7 68.5M40.3 61.3L26.4 65.2M39.8 58.2L23 59.5M41.1 56.9L26.5 56.8M40.1 53.5L22.7 49.6M40.3 51.3L24.6 45.6M42.6 50.2L26.6 41.9M44.4 49.1L28 38M43.4 45.6L32.3 35.6M45.9 45.2L36.3 33.7M48.9 44.3L41.1 30.3M50.2 42.4L44.2 27.4M52.1 42.3L47.6 25M54.7 40.5L53.5 25.4M56 42.4L56.1 24.9M59.1 40.2L61.8 26.2M60.9 43.2L66.9 26.4M62.6 42.8L70.2 26.6M65.6 44.3L76.6 29.7M68.3 44.9L78.9 34.4M69.4 47.2L81.6 38.1M69.4 49.3L83.7 41.2M69.1 52.2L87.2 45.6M71.2 53.8L86.2 50.5M70.5 55.9L86.2 54.6" stroke="#9c5000" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="56" cy="57" r="22.3" fill="none" stroke="#ffe08a" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="56" cy="57" r="34.5" fill="none" stroke="#9c5000" stroke-width="3" stroke-opacity="0.8" />
+        <ellipse cx="56" cy="57" rx="5.8" ry="29.5" fill="#0a0806" />
+        <path d="M6 64 C20 34 76 22 104 40 C96 74 40 92 6 64 Z" fill="url(#fox-eye-lid)" />
+    </g>
+    <path d="M6 64 C20 34 76 22 104 40 C96 74 40 92 6 64 Z" fill="none" stroke="#2a1206" stroke-width="4" stroke-linejoin="round" />
+    
+    <ellipse cx="42.3" cy="42.6" rx="8.6" ry="6.5" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="67.5" cy="70" r="3.2" fill="#ffffff" fill-opacity="0.75" />
+</svg>

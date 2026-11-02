@@ -841,6 +841,20 @@ body {
 
 /* Pre-join: background images sit next to the devices, so give them room instead of an inner scrollbar */
 @media screen and (min-width: 1025px) {
+    /* Device buttons share a single row (no lonely button wrapping to a second line) */
+    .init-user:not(.no-camera) .initComands > button {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 34px;
+        max-width: 56px;
+    }
+    /* Compact no-camera card: same single row at the card's 42px button size */
+    .init-user.no-camera .initComands > button {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 34px;
+        max-width: 42px;
+    }
     .initComands > #imageGrid {
         flex: 1 1 100%;
         grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
@@ -877,6 +891,16 @@ body {
     .init-user button {
         width: 42px !important;
         height: 42px !important;
+    }
+}
+
+/* Stacked card wide enough for one row: device buttons share it instead of wrapping a lonely button */
+@media screen and (min-width: 480px) and (max-width: 1024px) {
+    .init-user .initComands > button {
+        flex: 1 1 0;
+        width: auto !important;
+        min-width: 34px;
+        max-width: 42px;
     }
 }
 

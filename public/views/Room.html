@@ -39,6 +39,7 @@
         <link rel="stylesheet" href="../css/Editor.css" />
         <link rel="stylesheet" href="../css/Translate.css" />
         <link rel="stylesheet" href="../css/Swal.css" />
+        <link rel="stylesheet" href="../css/VideoEffects.css" />
 
         <!-- https://cdnjs.com/libraries/font-awesome -->
 
@@ -138,6 +139,24 @@
         <script defer src="../js/VideoGrid.js"></script>
         <script defer src="../js/ScreenCameraLayout.js"></script>
         <script defer src="../js/VirtualBackground.js"></script>
+        <script defer src="../video-effects/utils.js"></script>
+        <script defer src="../video-effects/camera.js"></script>
+        <script defer src="../video-effects/stream-manager.js"></script>
+        <script defer src="../video-effects/renderer.js"></script>
+        <script defer src="../video-effects/face-tracker.js"></script>
+        <script defer src="../video-effects/effects-manager.js"></script>
+        <script defer src="../video-effects/model-renderer.js"></script>
+        <script defer src="../video-effects/effects/sunglasses.js"></script>
+        <script defer src="../video-effects/effects/glasses.js"></script>
+        <script defer src="../video-effects/effects/hat.js"></script>
+        <script defer src="../video-effects/effects/mustache.js"></script>
+        <script defer src="../video-effects/effects/beard.js"></script>
+        <script defer src="../video-effects/effects/dog-ears.js"></script>
+        <script defer src="../video-effects/effects/funny-mask.js"></script>
+        <script defer src="../video-effects/effects/avatars.js"></script>
+        <script defer src="../video-effects/effects/beauty.js"></script>
+        <script defer src="../video-effects/index.js"></script>
+        <script defer src="../js/VideoEffectsPanel.js"></script>
         <script defer src="../js/NodeProcessor.js"></script>
         <script defer src="../js/FixWebmDuration.js"></script>
         <script defer src="../js/WakeLock.js"></script>
@@ -236,6 +255,11 @@
                         aria-label="Set Virtual Background or Blur"
                     ></button>
                     <button
+                        id="initVideoEffectsButton"
+                        class="fa-solid fa-wand-magic-sparkles hidden"
+                        aria-label="Video effects"
+                    ></button>
+                    <button
                         id="initVideoMirrorButton"
                         class="fas fa-arrow-right-arrow-left"
                         aria-label="Toggle video mirror"
@@ -271,6 +295,7 @@
                         class="form-select text-light bg-dark"
                         aria-label="Speakers"
                     ></select>
+                    <div id="initVideoEffectsGrid" class="init-video-effects hidden"></div>
                 </div>
             </div>
             <div id="usernameEmoji" class="usernameEmoji fadein center hidden"></div>
@@ -642,6 +667,9 @@
                     </button>
                     <button id="tabVirtualBackgroundBtn" class="fa-solid fa-image tablinks hidden">
                         <p class="tabButtonText">Background</p>
+                    </button>
+                    <button id="tabVideoEffectsBtn" class="fa-solid fa-wand-magic-sparkles tablinks hidden">
+                        <p class="tabButtonText">Effects</p>
                     </button>
                     <button id="tabAudioDevicesBtn" class="fas fa-microphone tablinks">
                         <p class="tabButtonText">Audio</p>
@@ -1016,6 +1044,14 @@
                             <span id="errorMessage" class="show-error"></span>
                             <br />
                         </div>
+                    </div>
+
+                    <div id="tabVideoEffects" class="tabcontent">
+                        <div class="settings-section-intro">
+                            <h3>Effects</h3>
+                            <p>Add face accessories and filters to your camera.</p>
+                        </div>
+                        <div id="videoEffectsPanel"></div>
                     </div>
 
                     <div id="tabAudioDevices" class="tabcontent">

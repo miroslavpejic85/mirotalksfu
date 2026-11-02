@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs>
+        <clipPath id="bear-eye-clip"><path d="M30 55 a25 25 0 1 0 50 0 a25 25 0 1 0 -50 0 Z" /></clipPath>
+        <radialGradient id="bear-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#8a5a32" />
+            <stop offset="0.55" stop-color="#4a2a12" />
+            <stop offset="1" stop-color="#1a0c04" />
+        </radialGradient>
+        <linearGradient id="bear-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#bear-eye-clip)">
+        
+        <circle cx="55" cy="55" r="24" fill="url(#bear-eye-iris)" />
+        <path d="M65.2 55L77.3 55M64.6 56.5L74.9 58M65 58.2L76.9 61.9M65.1 60L73.7 64.3M63.1 60.3L74.2 67.6M61.9 61.1L69.9 68.2M61.6 63.4L68.4 72M59.6 63.1L66 74.3M59.6 65.4L63.7 74.8M57.3 65.8L59.1 74.3M56.5 66.2L57.9 77M54.5 65.8L54 78M53.3 64L51.2 75.9M51.5 65.3L47.9 76M50.8 64L46 74.1M49.1 63.7L42.5 73.3M47.7 62.5L39.6 70.8M47.2 61.4L39.2 67.8M45.6 60.1L36.2 65.2M46.4 58.6L35 63.2M44.7 57.8L34.6 60.6M43.9 56.5L35.5 57.6M45.8 54.8L35.1 54.6M45.1 53L35.1 51M44.9 52L33.8 48.7M45.4 50.5L35 45.5M46.9 49.3L36.7 42.2M46.6 47.2L39.6 40.6M48.9 47.6L40.9 37.7M50.1 46.8L43.7 36.3M50.9 44.3L47.5 35M52.2 45.1L49.5 35.1M53.9 44.8L52.8 34.3M55.1 43.8L55.2 35.3M56.4 45.6L58.2 33.4M59 44.3L62.5 34.8M59.3 45.9L63.6 36.6M60.7 47L67 38.2M62.5 46.4L68.4 39.6M63.1 48.8L72.5 41.8M64.6 49.7L75 44.1M65.5 50.9L74.8 47.3M65.4 52.3L75.8 49.6M65 54.3L77.4 53.3" stroke="#1a0c04" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="55" r="14.9" fill="none" stroke="#8a5a32" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="55" r="22.5" fill="none" stroke="#1a0c04" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="55" r="13.2" fill="#0a0806" />
+        <path d="M30 55 a25 25 0 1 0 50 0 a25 25 0 1 0 -50 0 Z" fill="url(#bear-eye-lid)" />
+    </g>
+    <path d="M30 55 a25 25 0 1 0 50 0 a25 25 0 1 0 -50 0 Z" fill="none" stroke="#1a0c04" stroke-width="4" stroke-linejoin="round" />
+    
+    <ellipse cx="45.9" cy="45.4" rx="5.8" ry="4.3" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62.7" cy="63.6" r="2.2" fill="#ffffff" fill-opacity="0.75" />
+</svg>

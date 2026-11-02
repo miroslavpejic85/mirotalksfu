@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="240" viewBox="0 0 640 240">
+    <defs>
+        <linearGradient id="lens" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#26364a" />
+            <stop offset="0.5" stop-color="#0b0f15" />
+            <stop offset="1" stop-color="#1d2b3c" />
+        </linearGradient>
+        <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.7" />
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+        </linearGradient>
+        <path
+            id="lensShape"
+            d="M44 66 Q44 50 62 50 L280 54 Q300 55 298 76 L289 140 Q281 192 222 194 L124 194 Q62 192 50 140 Z"
+        />
+    </defs>
+    <path d="M6 72 L46 64 L50 92 L8 102 Z" fill="#0d0d0d" />
+    <path d="M634 72 L594 64 L590 92 L632 102 Z" fill="#0d0d0d" />
+    <use href="#lensShape" fill="url(#lens)" stroke="#0a0a0a" stroke-width="14" stroke-linejoin="round" />
+    <use
+        href="#lensShape"
+        transform="translate(640 0) scale(-1 1)"
+        fill="url(#lens)"
+        stroke="#0a0a0a"
+        stroke-width="14"
+        stroke-linejoin="round"
+    />
+    <path d="M296 80 Q320 62 344 80" fill="none" stroke="#0a0a0a" stroke-width="14" stroke-linecap="round" />
+    <path d="M74 70 L160 68 L92 158 Z" fill="url(#shine)" opacity="0.55" />
+    <path d="M362 70 L448 68 L380 158 Z" fill="url(#shine)" opacity="0.55" />
+    <path d="M44 60 L298 66" stroke="#3a3a3a" stroke-width="3" opacity="0.6" />
+    <path d="M342 66 L596 60" stroke="#3a3a3a" stroke-width="3" opacity="0.6" />
+</svg>

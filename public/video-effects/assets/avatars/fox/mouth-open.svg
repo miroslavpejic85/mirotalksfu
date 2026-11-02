@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="80" viewBox="0 0 100 80">
+    <defs>
+        <radialGradient id="fox-mouth-inside" cx="0.5" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#6a1c28" />
+            <stop offset="1" stop-color="#2a070d" />
+        </radialGradient>
+        <linearGradient id="fox-mouth-tongue" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f59aae" />
+            <stop offset="1" stop-color="#d5607a" />
+        </linearGradient>
+    </defs>
+    <path d="M50 1 L50 11" fill="none" stroke="#1a1210" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5" />
+    <path d="M17 13 Q50 4 83 13 Q88 56 50 84 Q12 56 17 13 Z" fill="url(#fox-mouth-inside)" stroke="#1a1210" stroke-width="4" stroke-linejoin="round" />
+    <path d="M28 60 Q50 46 72 60 Q68 80 50 83 Q32 80 28 60 Z" fill="url(#fox-mouth-tongue)" />
+    <path d="M50 52 L50 74" stroke="#d5607a" stroke-width="2" stroke-opacity="0.7" stroke-linecap="round" />
+    <path d="M29 15 L33 30 L37 15 Z M63 15 L67 30 L71 15 Z" fill="#fffdf6" stroke="#1a1210" stroke-width="1" />
+</svg>

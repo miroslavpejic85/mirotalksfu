@@ -110,6 +110,18 @@ function getRoomJsFiles() {
     return [...files];
 }
 
+// Video effect and filter preset names come from the effect descriptors (label: '...')
+function scanVideoEffectLabels() {
+    const dir = path.join(ROOT, 'public/video-effects/effects');
+    if (!fs.existsSync(dir)) return;
+    const labelRe = /\blabel\s*:\s*(['"])((?:\\.|(?!\1).)*)\1/g;
+    for (const file of fs.readdirSync(dir).filter((name) => name.endsWith('.js'))) {
+        const src = fs.readFileSync(path.join(dir, file), 'utf8');
+        let m;
+        while ((m = labelRe.exec(src))) add('labels', unescapeJs(m[2]));
+    }
+}
+
 function seedCuratedKeys() {
     if (!fs.existsSync(OUT_FILE)) return;
     const english = JSON.parse(fs.readFileSync(OUT_FILE, 'utf8'));
@@ -295,6 +307,7 @@ function scanHtml(file) {
 
 seedCuratedKeys();
 getRoomJsFiles().forEach(scanJs);
+scanVideoEffectLabels();
 scanHtml(HTML_FILE);
 
 const output = {};

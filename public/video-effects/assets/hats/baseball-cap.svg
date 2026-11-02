@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="520" viewBox="0 0 700 520">
+    <defs>
+        <radialGradient id="crown" cx="0.42" cy="0.3" r="0.85">
+            <stop offset="0" stop-color="#f05252" />
+            <stop offset="0.65" stop-color="#c81e1e" />
+            <stop offset="1" stop-color="#851212" />
+        </radialGradient>
+        <linearGradient id="brim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#b91c1c" />
+            <stop offset="1" stop-color="#6e0d0d" />
+        </linearGradient>
+    </defs>
+    <path d="M108 392 C104 176 214 46 350 46 C486 46 596 176 592 392 Z" fill="url(#crown)" />
+    <g fill="none" stroke="#7a1010" stroke-width="5" opacity="0.65">
+        <path d="M350 50 L350 390" />
+        <path d="M350 50 C276 120 236 250 228 390" />
+        <path d="M350 50 C424 120 464 250 472 390" />
+    </g>
+    <g fill="#fff" fill-opacity="0.55">
+        <circle cx="300" cy="150" r="5" />
+        <circle cx="400" cy="150" r="5" />
+    </g>
+    <ellipse cx="350" cy="48" rx="26" ry="13" fill="#7a1010" />
+    <circle cx="350" cy="262" r="58" fill="#ffffff" />
+    <path
+        d="M350 222 L361 250 L391 251 L367 269 L376 298 L350 281 L324 298 L333 269 L309 251 L339 250 Z"
+        fill="#c81e1e"
+    />
+    <path d="M108 384 L592 384 L594 410 L106 410 Z" fill="#6e0d0d" />
+    <path d="M66 404 C150 366 550 366 634 404 C646 448 566 508 350 508 C134 508 54 448 66 404 Z" fill="url(#brim)" />
+    <path d="M92 410 C170 384 530 384 608 410" fill="none" stroke="#ef4444" stroke-width="6" opacity="0.55" />
+    <path d="M110 452 C200 490 500 490 590 452" fill="none" stroke="#4d0909" stroke-width="5" opacity="0.6" />
+</svg>

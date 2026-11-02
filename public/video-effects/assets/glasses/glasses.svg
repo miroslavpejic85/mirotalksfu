@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="240" viewBox="0 0 640 240">
+    <defs>
+        <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#4a3222" />
+            <stop offset="1" stop-color="#22160e" />
+        </linearGradient>
+        <linearGradient id="glare" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.45" />
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <path d="M8 104 L80 100 L82 116 L10 124 Z" fill="url(#frame)" />
+    <path d="M632 104 L560 100 L558 116 L630 124 Z" fill="url(#frame)" />
+    <ellipse cx="170" cy="120" rx="96" ry="86" fill="#cfe6ff" fill-opacity="0.12" />
+    <ellipse cx="470" cy="120" rx="96" ry="86" fill="#cfe6ff" fill-opacity="0.12" />
+    <ellipse cx="170" cy="120" rx="96" ry="86" fill="none" stroke="url(#frame)" stroke-width="12" />
+    <ellipse cx="470" cy="120" rx="96" ry="86" fill="none" stroke="url(#frame)" stroke-width="12" />
+    <path d="M264 104 Q320 72 376 104" fill="none" stroke="url(#frame)" stroke-width="10" stroke-linecap="round" />
+    <path d="M110 74 Q140 52 182 50 L128 132 Q104 108 110 74 Z" fill="url(#glare)" opacity="0.5" />
+    <path d="M410 74 Q440 52 482 50 L428 132 Q404 108 410 74 Z" fill="url(#glare)" opacity="0.5" />
+    <circle cx="80" cy="108" r="6" fill="#c9a45c" />
+    <circle cx="560" cy="108" r="6" fill="#c9a45c" />
+</svg>

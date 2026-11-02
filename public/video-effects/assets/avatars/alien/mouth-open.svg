@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="70" viewBox="0 0 120 70">
+    <defs>
+        <radialGradient id="alien-mouth" cx="0.5" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#1f4a22" />
+            <stop offset="1" stop-color="#061208" />
+        </radialGradient>
+    </defs>
+    <path d="M24 10 Q60 2 96 10 Q100 46 60 66 Q20 46 24 10 Z" fill="url(#alien-mouth)" stroke="#1b5e20" stroke-width="4" stroke-linejoin="round" />
+    <path d="M38 46 Q60 36 82 46 Q76 60 60 63 Q44 60 38 46 Z" fill="#7ad67a" fill-opacity="0.85" />
+</svg>

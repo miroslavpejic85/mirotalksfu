@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.21
+ * @version 2.7.30
  *
  */
 
@@ -335,6 +335,16 @@ const virtualBackground = new VirtualBackground();
 
 const isMediaStreamTrackAndTransformerSupported = virtualBackground.checkSupport();
 
+// Face accessories and filters, processed locally in the browser (public/video-effects)
+const videoEffects =
+    typeof MiroTalkVideoEffects !== 'undefined' && MiroTalkVideoEffects.isSupported()
+        ? new MiroTalkVideoEffects()
+        : null;
+let videoEffectsPanel = null;
+// Lobby preview without effects: the camera, or its virtual background
+let initVideoBaseStream = null;
+let isInitVideoEffectsRunning = false;
+
 // ####################################################
 // DYNAMIC SETTINGS
 // ####################################################
@@ -446,6 +456,8 @@ let isRoomLocked = false;
 let isJoinLocked = false;
 
 let initStream = null;
+// Direct join (/join?...&name=): the lobby is skipped, so no preview camera is opened
+let isDirectJoin = false;
 let isInitVideoLoaded = false;
 let initGravatarTimer = null;
 let initGravatarToken = 0;
@@ -1195,7 +1207,11 @@ function setupInitButtons() {
     initVirtualBackgroundButton.onclick = () => {
         const imageGrid = getId('imageGrid');
         const imageGridVisible = imageGrid && getComputedStyle(imageGrid).display !== 'none';
+        hideInitVideoEffects();
         imageGridVisible ? hideInitImageGrids() : showImageSelector();
+    };
+    initVideoEffectsButton.onclick = () => {
+        toggleInitVideoEffects();
     };
     initUsernameEmojiButton.onclick = () => {
         getId('usernameInput').value = '';
@@ -1437,8 +1453,10 @@ async function retryVideoAccess(isPreJoin) {
             return false;
         }
         isVirtualBackgroundAvailable() && show(initVirtualBackgroundButton);
+        isVideoEffectsAvailable() && show(initVideoEffectsButton);
     }
     showVirtualBackgroundTab();
+    showVideoEffectsTab();
     return true;
 }
 
@@ -2042,13 +2060,20 @@ async function whoAreYou() {
         show(initVirtualBackgroundButton);
     }
 
+    if (isVideoEffectsAvailable()) {
+        show(initVideoEffectsButton);
+    }
+    // Restore the saved effect early: assets and the face model load while the user is in the lobby
+    initVideoEffects();
+
     if (peer_name) {
+        isDirectJoin = true;
         hide(loadingDiv);
         checkMedia();
         if (!BUTTONS.main.startScreenButton) isScreenAllowed = false;
         getPeerInfo();
-        // Rejoin after a reconnect/server restart: restore blur/virtual background before the camera is produced
-        if (window.localStorage.isReconnected === 'true') restoreVirtualBackgroundState();
+        // No lobby preview: restore blur/virtual background before the camera is produced
+        restoreVirtualBackgroundState();
         joinRoom(peer_name, room_id);
         return;
     }
@@ -2188,6 +2213,7 @@ async function whoAreYou() {
             // Keep the last frame at its size; collapse only after the fade-out animation ends
             initVideo.pause();
             await stopTracks(initStream);
+            stopInitVideoEffects();
             const hideInitVideo = () => {
                 elemDisplay('initVideo', false);
                 initVideoContainerShow(false);
@@ -2273,10 +2299,12 @@ function handleVideo() {
     lS.setInitConfig(lS.MEDIA_TYPE.video, isVideoAllowed);
 
     hideInitImageGrids();
+    hideInitVideoEffects();
 
     isVideoAllowed && isVirtualBackgroundAvailable()
         ? show(initVirtualBackgroundButton)
         : hide(initVirtualBackgroundButton);
+    isVideoAllowed && isVideoEffectsAvailable() ? show(initVideoEffectsButton) : hide(initVideoEffectsButton);
 }
 
 async function handleAudioVideo() {
@@ -2304,10 +2332,12 @@ async function handleAudioVideo() {
     checkInitAudio(isAudioAllowed);
 
     hideInitImageGrids();
+    hideInitVideoEffects();
 
     isVideoAllowed && isVirtualBackgroundAvailable()
         ? show(initVirtualBackgroundButton)
         : hide(initVirtualBackgroundButton);
+    isVideoAllowed && isVideoEffectsAvailable() ? show(initVideoEffectsButton) : hide(initVideoEffectsButton);
 }
 
 async function checkInitVideo(isVideoAllowed) {
@@ -2322,6 +2352,7 @@ async function checkInitVideo(isVideoAllowed) {
     } else {
         if (initStream) {
             stopTracks(initStream);
+            stopInitVideoEffects();
             elemDisplay('initVideo', false);
             elemDisplay('initVideoLoader', false);
             sound('left');
@@ -2806,6 +2837,7 @@ function roomIsReady() {
     if (!isMobileDevice) show(pinUnpinGridDiv);
     if (!isSpeechSynthesisSupported) hide(speechMsgDiv);
     showVirtualBackgroundTab();
+    showVideoEffectsTab();
     updateDevicesNavLabel();
     handleButtons();
     handleSelects();
@@ -3389,6 +3421,10 @@ function handleButtons() {
     tabVirtualBackgroundBtn.onclick = (e) => {
         rc.openTab(e, 'tabVirtualBackground');
     };
+    tabVideoEffectsBtn.onclick = (e) => {
+        rc.openTab(e, 'tabVideoEffects');
+        mountVideoEffectsPanel();
+    };
     tabAudioDevicesBtn.onclick = (e) => {
         rc.openTab(e, 'tabAudioDevices');
     };
@@ -3779,6 +3815,7 @@ function handleButtons() {
         if (!isEnumerateVideoDevices) {
             await initEnumerateVideoDevices();
             showVirtualBackgroundTab();
+            showVideoEffectsTab();
         }
         await rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // await rc.resumeProducer(RoomClient.mediaType.video);
@@ -4023,6 +4060,7 @@ function setButtonsInit() {
         setTippy('initStopScreenButton', 'Toggle screen sharing', 'top');
         setTippy('initVideoMirrorButton', 'Toggle video mirror', 'top');
         setTippy('initVirtualBackgroundButton', 'Set Virtual Background or Blur', 'top');
+        setTippy('initVideoEffectsButton', 'Video effects', 'top');
         setTippy('initUsernameEmojiButton', 'Toggle username emoji', 'top');
         setTippy('initExitButton', 'Leave meeting', 'top');
     }
@@ -4101,7 +4139,8 @@ async function setSelectsInit() {
         //
         console.log('04.4 ----> Get Local Storage Devices after', lS.getLocalStorageDevices());
     }
-    if (initVideoSelect.value) await changeCamera(initVideoSelect.value);
+    // The lobby preview camera is only needed when the lobby is shown
+    if (initVideoSelect.value && !isDirectJoin) await changeCamera(initVideoSelect.value);
 }
 
 function selectOptionByValueExist(selectElement, value) {
@@ -4142,8 +4181,8 @@ async function changeCamera(deviceId) {
     await navigator.mediaDevices
         .getUserMedia(videoConstraints)
         .then(async (camStream) => {
-            initVideo.srcObject = camStream;
             initStream = camStream;
+            setInitVideoStream(camStream);
             console.log(
                 '04.5 ----> Success attached init cam video stream',
                 initStream.getVideoTracks()[0].getSettings()
@@ -4285,6 +4324,7 @@ function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = f
 async function toggleScreenSharing() {
     if (initStream) {
         await stopTracks(initStream);
+        stopInitVideoEffects();
         elemDisplay('initVideo', true);
         elemDisplay('initVideoLoader', true, 'flex');
         initVideoContainerShow();
@@ -4315,6 +4355,8 @@ async function toggleScreenSharing() {
                 disable(initAudioVideoButton, true);
                 disable(initVideoAudioRefreshButton, true);
                 disable(initVirtualBackgroundButton, true);
+                disable(initVideoEffectsButton, true);
+                hideInitVideoEffects();
             })
             .catch((error) => {
                 console.error('[Error] toggleScreenSharing', error);
@@ -4330,6 +4372,7 @@ async function toggleScreenSharing() {
         disable(initAudioVideoButton, false);
         disable(initVideoAudioRefreshButton, false);
         disable(initVirtualBackgroundButton, false);
+        disable(initVideoEffectsButton, false);
     }
 }
 
@@ -6955,6 +6998,21 @@ function setupQuickDeviceSwitchDropdowns() {
                 }, 100);
             });
             videoMenu.appendChild(virtualBgBtn);
+        }
+
+        if (isVideoEffectsAvailable() && !rc.getModerator().video_cant_unhide) {
+            const effectsBtn = document.createElement('button');
+            effectsBtn.type = 'button';
+            effectsBtn.className = 'device-menu-action-btn';
+            const effectsIcon = document.createElement('i');
+            effectsIcon.className = 'fas fa-wand-magic-sparkles';
+            effectsBtn.appendChild(effectsIcon);
+            effectsBtn.appendChild(document.createTextNode(' Video effects...'));
+            effectsBtn.addEventListener('click', () => {
+                hideDeviceMenu(videoToggle);
+                openVideoEffectsSettings();
+            });
+            videoMenu.appendChild(effectsBtn);
         }
 
         // Add settings button
@@ -10298,26 +10356,29 @@ async function applyVirtualBackground(videoElement, stream, blurLevel, backgroun
     const videoTrack = stream.getVideoTracks()[0];
 
     if (blurLevel) {
-        videoElement.srcObject = await virtualBackground.applyBlurToWebRTCStream(videoTrack, blurLevel);
+        setPreviewStream(videoElement, await virtualBackground.applyBlurToWebRTCStream(videoTrack, blurLevel));
         virtualBackgroundBlurLevel = blurLevel;
         virtualBackgroundSelectedImage = null;
         virtualBackgroundTransparent = null;
     } else if (backgroundImage) {
-        videoElement.srcObject = await virtualBackground.applyVirtualBackgroundToWebRTCStream(
-            videoTrack,
-            backgroundImage
+        setPreviewStream(
+            videoElement,
+            await virtualBackground.applyVirtualBackgroundToWebRTCStream(videoTrack, backgroundImage)
         );
         virtualBackgroundSelectedImage = backgroundImage;
         virtualBackgroundBlurLevel = null;
         virtualBackgroundTransparent = null;
     } else if (backgroundTransparent) {
-        videoElement.srcObject = await virtualBackground.applyTransparentVirtualBackgroundToWebRTCStream(videoTrack);
+        setPreviewStream(
+            videoElement,
+            await virtualBackground.applyTransparentVirtualBackgroundToWebRTCStream(videoTrack)
+        );
         virtualBackgroundBlurLevel = null;
         virtualBackgroundSelectedImage = null;
         virtualBackgroundTransparent = true;
     } else {
         await virtualBackground.stopCurrentProcessor();
-        videoElement.srcObject = stream; // Default case, use original stream
+        setPreviewStream(videoElement, stream); // Default case, use original stream
         virtualBackgroundBlurLevel = null;
         virtualBackgroundSelectedImage = null;
         virtualBackgroundTransparent = null;
@@ -10409,6 +10470,128 @@ function showVirtualBackgroundTab() {
     updateDevicesNavLabel();
 }
 
+// ####################################################
+// VIDEO EFFECTS (face accessories, filters)
+// ####################################################
+
+// Requires browser support (canvas capture), config enabled, and a camera that was granted/enumerated
+function isVideoEffectsAvailable() {
+    return (
+        !!videoEffects &&
+        !videoEffects.destroyed &&
+        BUTTONS.settings.videoEffects !== false &&
+        BUTTONS.main.startVideoButton &&
+        isEnumerateVideoDevices
+    );
+}
+
+function getVideoEffectsPanel() {
+    if (videoEffectsPanel || !videoEffects || typeof VideoEffectsPanel === 'undefined') return videoEffectsPanel;
+    videoEffectsPanel = new VideoEffectsPanel(videoEffects, {
+        onChange: () => refreshVideoEffectsOutput(),
+        // Backgrounds keep their own tab: the Effects panel only links to it
+        openBackgroundSettings: () => tabVirtualBackgroundBtn.click(),
+    });
+    // Camera unplugged or permission revoked while the effects were processing it
+    videoEffects.on('sourceended', () => rc?.handleVideoEffectsSourceEnded());
+    return videoEffectsPanel;
+}
+
+async function initVideoEffects() {
+    if (!videoEffects || BUTTONS.settings.videoEffects === false) return;
+    const panel = getVideoEffectsPanel();
+    if (!panel) return;
+    await panel.restoreSettings();
+    // The camera may already be on (direct join): apply the restored selection to it
+    await refreshVideoEffectsOutput();
+}
+
+// Apply the current selection to whatever is showing the camera: the room producer or the lobby preview
+function refreshVideoEffectsOutput() {
+    if (rc) return rc.updateVideoEffectsTrack();
+    return applyInitVideoEffects();
+}
+
+function showVideoEffectsTab() {
+    if (!isVideoEffectsAvailable() || rc?.getModerator?.().video_cant_unhide) return;
+    show(tabVideoEffectsBtn);
+    updateDevicesNavLabel();
+}
+
+function mountVideoEffectsPanel() {
+    const panel = getVideoEffectsPanel();
+    const container = getId('videoEffectsPanel');
+    if (!panel || !container) return;
+    if (!container.firstChild) {
+        panel.mount(container, { backgroundLink: isVirtualBackgroundAvailable(), sliders: true });
+    } else {
+        panel.sync();
+    }
+}
+
+function openVideoEffectsSettings() {
+    rc.toggleMySettings();
+    setTimeout(() => tabVideoEffectsBtn.click(), 100);
+}
+
+// Lobby preview: the camera (or its virtual background) goes through the effects engine when needed
+function setPreviewStream(videoElement, stream) {
+    if (videoElement === initVideo) return setInitVideoStream(stream);
+    videoElement.srcObject = stream;
+}
+
+function setInitVideoStream(stream) {
+    initVideoBaseStream = stream;
+    if (!isInitVideoEffectsRunning) initVideo.srcObject = stream;
+    return applyInitVideoEffects();
+}
+
+async function applyInitVideoEffects() {
+    if (!videoEffects || rc) return;
+    const base = initVideoBaseStream;
+    const baseTrack = base?.getVideoTracks()[0];
+    const wanted = videoEffects.isActive() && !joinRoomWithScreen && baseTrack?.readyState === 'live';
+    if (!wanted) {
+        stopInitVideoEffects();
+        return;
+    }
+    try {
+        const track = await videoEffects.setSourceTrack(baseTrack);
+        // Preview changed meanwhile (camera switch, join): the newer call wins
+        if (initVideoBaseStream !== base || rc) return;
+        isInitVideoEffectsRunning = true;
+        if (initVideo.srcObject?.getVideoTracks()[0] !== track) initVideo.srcObject = new MediaStream([track]);
+    } catch (error) {
+        console.warn('Video effects preview unavailable', error);
+        stopInitVideoEffects();
+    }
+}
+
+function stopInitVideoEffects() {
+    if (!isInitVideoEffectsRunning) return;
+    isInitVideoEffectsRunning = false;
+    if (videoEffects && !rc) videoEffects.stop();
+    if (initVideoBaseStream && initVideoBaseStream.active) initVideo.srcObject = initVideoBaseStream;
+}
+
+function toggleInitVideoEffects() {
+    const grid = getId('initVideoEffectsGrid');
+    if (!grid) return;
+    if (!grid.classList.contains('hidden')) return hideInitVideoEffects();
+    const panel = getVideoEffectsPanel();
+    if (!panel) return;
+    hideInitImageGrids();
+    if (!grid.firstChild) panel.mount(grid, { background: false, sliders: false, compact: true });
+    grid.classList.remove('hidden');
+    initVideoEffectsButton.classList.add('active');
+}
+
+function hideInitVideoEffects() {
+    const grid = getId('initVideoEffectsGrid');
+    if (grid) grid.classList.add('hidden');
+    initVideoEffectsButton?.classList.remove('active');
+}
+
 /**
  * Camera/mic specific controls follow device availability, while screen sharing and
  * speaker/output controls stay reachable even when the camera or microphone is unavailable.
@@ -10434,8 +10617,11 @@ function updateDeviceSettingsVisibility() {
     if (!cameraAvailable) {
         elemDisplay('tabVirtualBackgroundBtn', false);
         elemDisplay('tabVirtualBackground', false);
+        elemDisplay('tabVideoEffectsBtn', false);
+        elemDisplay('tabVideoEffects', false);
     } else {
         tabVirtualBackgroundBtn.style.display = '';
+        tabVideoEffectsBtn.style.display = '';
     }
 
     setVisible('micSettingsDiv', micAvailable);
@@ -10453,7 +10639,9 @@ function updateDevicesNavLabel() {
     const label = getId('settingsNavDevicesLabel');
     if (!label) return;
     const isTabVisible = (btn) => btn && !btn.classList.contains('hidden') && btn.style.display !== 'none';
-    const anyVisible = [tabVideoDevicesBtn, tabVirtualBackgroundBtn, tabAudioDevicesBtn].some(isTabVisible);
+    const anyVisible = [tabVideoDevicesBtn, tabVirtualBackgroundBtn, tabVideoEffectsBtn, tabAudioDevicesBtn].some(
+        isTabVisible
+    );
     elemDisplay(label, anyVisible, '');
 }
 
@@ -10770,7 +10958,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.21',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.30',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

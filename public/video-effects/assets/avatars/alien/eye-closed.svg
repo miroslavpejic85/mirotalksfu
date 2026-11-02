@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="116" viewBox="0 0 128 116">
+    <defs>
+        <radialGradient id="alien-lid" cx="0.5" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#a6e88c" />
+            <stop offset="1" stop-color="#5cb85c" />
+        </radialGradient>
+    </defs>
+    <path d="M5.1 20.6 C34.1 1.9 95.5 9.4 121.1 48.6 C128 86 92.1 114.1 59.7 108.5 C23.9 102.9 0 65.5 5.1 20.6 Z" fill="url(#alien-lid)" stroke="#2e7d32" stroke-width="2" />
+    <path d="M10 60 C38 96 98 104 124 62" fill="none" stroke="#1b5e20" stroke-width="6" stroke-linecap="round" />
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+    <defs>
+        <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3c3c44" />
+            <stop offset="1" stop-color="#0c0c10" />
+        </linearGradient>
+        <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#6aa8ff" stop-opacity="0.55" />
+            <stop offset="1" stop-color="#1d3b6b" stop-opacity="0.75" />
+        </linearGradient>
+    </defs>
+    <path d="M30 104 L4 138 L14 142 L38 112 Z" fill="#1a1a20" />
+    <path d="M290 104 L316 138 L306 142 L282 112 Z" fill="#1a1a20" />
+    <ellipse cx="96" cy="116" rx="62" ry="50" fill="url(#lens)" stroke="url(#rim)" stroke-width="10" />
+    <ellipse cx="224" cy="116" rx="62" ry="50" fill="url(#lens)" stroke="url(#rim)" stroke-width="10" />
+    <path d="M156 104 Q160 92 164 104" fill="none" stroke="#2a2a30" stroke-width="12" stroke-linecap="round" />
+    <path d="M60 92 Q76 76 100 74" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.6" />
+    <path d="M188 92 Q204 76 228 74" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.6" />
+</svg>

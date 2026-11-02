@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs><filter id="robot-eye-glow-closed" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" /></filter></defs>
+    <rect x="16" y="48" width="78" height="14" rx="7" fill="#5ef2ff" fill-opacity="0.5" filter="url(#robot-eye-glow-closed)" />
+    <rect x="20" y="50" width="70" height="10" rx="5" fill="#5ef2ff" />
+</svg>

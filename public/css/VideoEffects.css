@@ -1,0 +1,315 @@
+/*--------------------------------------------------------------
+# Video effects panel (Settings > Effects and pre-join lobby)
+--------------------------------------------------------------*/
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    color: var(--fg-1, #fff);
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-section-header i {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 8px;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    box-sizing: border-box;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--room-border, rgba(255, 255, 255, 0.12));
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--fg-1, #fff);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    box-shadow: none;
+    cursor: pointer;
+    transition:
+        border-color 0.15s ease,
+        background-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-card:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+    transform: none;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-card:focus-visible {
+    outline: 2px solid var(--room-accent, #66beff);
+    outline-offset: 2px;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-card:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-card.active {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 1px #4caf50;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-card.active::before {
+    content: '\f00c';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4caf50;
+    color: #fff;
+    font-family: 'Font Awesome 6 Free';
+    font-size: 0.6rem;
+    font-weight: 900;
+    pointer-events: none;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-card.loading::after {
+    content: '';
+    position: absolute;
+    top: calc(50% - 22px);
+    left: calc(50% - 12px);
+    z-index: 2;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: vfx-spin 0.8s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes vfx-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-thumb {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 40%, #3a3f4b, #191b22);
+    font-size: 1.2rem;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-thumb i {
+    margin: 0;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-thumb img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-badge {
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-label {
+    display: block;
+    padding: 6px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Filter preview: a colourful sample rendered through the same CSS filter as the 2D fallback */
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-swatch {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 42%, #f2c7a5 0 18%, transparent 19%),
+        radial-gradient(ellipse at 50% 100%, #3b82f6 0 34%, transparent 35%),
+        linear-gradient(160deg, #f59e0b 0%, #ef4444 40%, #10b981 75%, #0ea5e9 100%);
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-swatch-tint {
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: soft-light;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.14);
+    font-size: 0.82rem;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-status[data-level='error'] {
+    background: rgba(239, 68, 68, 0.16);
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-status i {
+    margin: 0;
+    padding: 0;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-slider {
+    display: grid;
+    grid-template-columns: minmax(120px, 34%) 1fr 52px;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 0.82rem;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-slider.disabled {
+    opacity: 0.5;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-slider-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-slider-name i {
+    width: 16px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-range {
+    width: 100%;
+    height: 5px;
+    margin: 0;
+    accent-color: #3498db;
+    cursor: pointer;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-slider-value {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-link-btn {
+    align-self: flex-start;
+    width: auto !important;
+    min-height: 34px;
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+:is(#videoEffectsPanel, #initVideoEffectsGrid) .vfx-note {
+    display: block;
+    margin: 0;
+    padding: 0;
+    color: color-mix(in srgb, var(--fg-1, #fff) 60%, transparent);
+    font-size: 0.75rem;
+}
+
+/* Pre-join lobby: compact picker below the device controls */
+#initVideoEffectsGrid {
+    flex: 1 1 100%;
+    width: 100%;
+    max-height: 260px;
+    margin-top: var(--space-2, 8px);
+    padding: 4px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+#initVideoEffectsGrid .vfx-compact {
+    gap: 10px;
+}
+
+#initVideoEffectsGrid .vfx-compact .vfx-grid {
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    gap: 6px;
+}
+
+#initVideoEffectsGrid .vfx-compact .vfx-label {
+    padding: 4px 2px;
+    font-size: 0.68rem;
+}
+
+#initVideoEffectsButton.active {
+    border-color: #4caf50;
+    color: #4caf50;
+}
+
+@media screen and (max-width: 600px) {
+    #videoEffectsPanel .vfx-grid {
+        grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+        gap: 6px;
+    }
+
+    #videoEffectsPanel .vfx-slider {
+        grid-template-columns: 1fr 44px;
+    }
+
+    #videoEffectsPanel .vfx-slider .vfx-range {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}

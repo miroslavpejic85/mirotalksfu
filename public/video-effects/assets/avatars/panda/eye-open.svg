@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs>
+        <clipPath id="panda-eye-clip"><path d="M33 56 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z" /></clipPath>
+        <radialGradient id="panda-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#6a4630" />
+            <stop offset="0.55" stop-color="#3a2012" />
+            <stop offset="1" stop-color="#140904" />
+        </radialGradient>
+        <linearGradient id="panda-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#panda-eye-clip)">
+        
+        <circle cx="55" cy="56" r="21" fill="url(#panda-eye-iris)" />
+        <path d="M64.4 56.6L73.5 57.2M63.4 57.9L74.4 60.3M64 59L71.9 61.6M62.6 59.7L71.5 64.1M62.4 61.5L69.7 66.9M61 61.4L67.8 67.6M60.5 63.3L66.2 70.7M59 63.3L64 72.4M58.3 64.3L62.2 74.4M57.7 65.1L60.1 73.3M55.8 64.6L56.7 74.1M54.8 64.2L54.6 75.3M52.9 65.8L51.1 74.5M51.8 64.9L48.7 73.5M51.3 63.4L47 72.1M49.3 63.8L44.7 70.2M49.2 62.4L43.4 68.8M48.2 61.8L41.5 67.7M46.4 61.2L37.8 66.4M47 59L36.9 62.8M46.9 58.4L36.8 61.3M46.6 57.1L36.7 58.5M45.8 55.5L36.8 54.9M46.7 54.7L36 53.1M46.3 53.2L37.4 50.4M46.6 51.4L38.4 46.9M46.8 50.2L40.6 45.7M48.4 50.2L40.5 43.3M49 48.7L42.9 41.3M51.1 48.8L45.9 39.1M52 48.4L48 38.3M52.9 47L50.6 37.3M54.3 46.3L53.6 36.1M55.1 46.8L55.1 37.1M56.5 47.9L58.4 37M57.8 48.3L61.6 38M58.7 48.4L62.9 40.1M59.9 48.5L64.7 41.1M60.4 50L67.7 41.9M62.4 49.7L69.5 43.6M63.1 51.1L71.8 45.9M63.7 52.6L72.1 49.4M63 54.1L72.1 51.9M64.8 54.7L73.7 53.5" stroke="#140904" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="56" r="13" fill="none" stroke="#6a4630" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="56" r="19.5" fill="none" stroke="#140904" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="56" r="11.6" fill="#0a0806" />
+        <path d="M33 56 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z" fill="url(#panda-eye-lid)" />
+    </g>
+    <path d="M33 56 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z" fill="none" stroke="#5a5a5a" stroke-width="4" stroke-linejoin="round" />
+    
+    <ellipse cx="47" cy="47.6" rx="5" ry="3.8" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="61.7" cy="63.6" r="1.9" fill="#ffffff" fill-opacity="0.75" />
+</svg>

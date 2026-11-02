@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="640" viewBox="0 0 600 640">
+    <defs>
+        <radialGradient id="alien-skin" cx="0.5" cy="0.38" r="0.68">
+            <stop offset="0" stop-color="#c8f7a6" />
+            <stop offset="0.55" stop-color="#7fd16a" />
+            <stop offset="1" stop-color="#3f8f3c" />
+        </radialGradient>
+        <radialGradient id="alien-sss" cx="0.5" cy="0.85" r="0.5">
+            <stop offset="0" stop-color="#d9ff8a" stop-opacity="0.35" />
+            <stop offset="1" stop-color="#d9ff8a" stop-opacity="0" />
+        </radialGradient>
+        <filter id="alien-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.5" /></filter>
+    </defs>
+    <path d="M300 34 C480 34 540 190 512 320 C490 450 390 590 300 600 C210 590 110 450 88 320 C60 190 120 34 300 34 Z" fill="url(#alien-skin)" />
+    <path d="M300 34 C480 34 540 190 512 320 C490 450 390 590 300 600 C210 590 110 450 88 320 C60 190 120 34 300 34 Z" fill="url(#alien-sss)" />
+    <defs>
+        <radialGradient id="alien-head-rim" cx="0.5" cy="0.45" r="0.62">
+            <stop offset="0.62" stop-color="#0f3a12" stop-opacity="0" />
+            <stop offset="1" stop-color="#0f3a12" stop-opacity="0.3" />
+        </radialGradient>
+        <radialGradient id="alien-head-light" cx="0.36" cy="0.26" r="0.55">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.3" />
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+        </radialGradient>
+    </defs>
+    <path d="M300 34 C480 34 540 190 512 320 C490 450 390 590 300 600 C210 590 110 450 88 320 C60 190 120 34 300 34 Z" fill="url(#alien-head-rim)" />
+    <path d="M300 34 C480 34 540 190 512 320 C490 450 390 590 300 600 C210 590 110 450 88 320 C60 190 120 34 300 34 Z" fill="url(#alien-head-light)" />
+    <g fill="#2e7d32" fill-opacity="0.16"><ellipse cx="378.8" cy="98.7" rx="8.4" ry="6.1" /><ellipse cx="296.8" cy="98.6" rx="4.8" ry="6.1" /><ellipse cx="241.2" cy="147.5" rx="11.5" ry="6.2" /><ellipse cx="312.2" cy="168.1" rx="10.5" ry="5.2" /><ellipse cx="436.6" cy="152.8" rx="9" ry="5.2" /><ellipse cx="368.2" cy="89.3" rx="8.4" ry="5.9" /><ellipse cx="170.9" cy="71" rx="5.6" ry="6.1" /><ellipse cx="193.1" cy="230.7" rx="3.4" ry="4.3" /><ellipse cx="200" cy="115.4" rx="6.9" ry="3.3" /><ellipse cx="314.8" cy="114.9" rx="7.3" ry="5.5" /><ellipse cx="249.4" cy="234.9" rx="10.5" ry="4.2" /><ellipse cx="380.7" cy="155.9" rx="4" ry="7.2" /><ellipse cx="327.4" cy="109.1" rx="8.1" ry="3.2" /><ellipse cx="274" cy="200.1" rx="10.8" ry="3.8" /><ellipse cx="213.2" cy="111.3" rx="4.9" ry="6.4" /><ellipse cx="212.9" cy="170.2" rx="4.5" ry="6.7" /><ellipse cx="253.1" cy="99.1" rx="8.3" ry="3.1" /><ellipse cx="275" cy="142.2" rx="5.6" ry="6.9" /><ellipse cx="241" cy="224.9" rx="10" ry="5.3" /><ellipse cx="410.2" cy="121.6" rx="10" ry="6.2" /><ellipse cx="290.1" cy="211.6" rx="7.3" ry="6.1" /><ellipse cx="266.7" cy="246.3" rx="6.1" ry="2.7" /><ellipse cx="235.3" cy="218.3" rx="6.4" ry="2.1" /><ellipse cx="268.8" cy="89.6" rx="8.3" ry="7.3" /><ellipse cx="384.7" cy="243.4" rx="5.7" ry="4.4" /><ellipse cx="201.5" cy="185" rx="11.1" ry="2.5" /><ellipse cx="263.2" cy="220.3" rx="11.4" ry="7.4" /><ellipse cx="407.9" cy="237.7" rx="9.5" ry="4.1" /><ellipse cx="280.9" cy="218.8" rx="8.4" ry="5.8" /><ellipse cx="388.6" cy="94.1" rx="10.1" ry="6.6" /><ellipse cx="229.8" cy="167.4" rx="9.1" ry="3.5" /><ellipse cx="341.4" cy="110.6" rx="5.5" ry="6" /><ellipse cx="337.8" cy="87.7" rx="9.6" ry="2.3" /><ellipse cx="331.9" cy="172" rx="10.8" ry="5.8" /><ellipse cx="175.8" cy="72.8" rx="3.9" ry="5.2" /><ellipse cx="400.8" cy="230.4" rx="5.5" ry="7.6" /><ellipse cx="287.6" cy="192.9" rx="8.2" ry="2.2" /><ellipse cx="190.3" cy="199.4" rx="11" ry="3.8" /><ellipse cx="331.6" cy="74.5" rx="8.8" ry="7.3" /><ellipse cx="365.2" cy="188.9" rx="3.5" ry="2.3" /><ellipse cx="302.9" cy="142.5" rx="7.7" ry="7" /><ellipse cx="419.6" cy="167.7" rx="11.1" ry="7" /><ellipse cx="420.9" cy="174.6" rx="3.1" ry="5.2" /><ellipse cx="173.1" cy="179.5" rx="5.5" ry="6" /><ellipse cx="363.1" cy="194.6" rx="9.4" ry="6.6" /><ellipse cx="422.4" cy="76.1" rx="5.7" ry="4.4" /><ellipse cx="446.4" cy="239.5" rx="7.8" ry="4.1" /><ellipse cx="216.8" cy="189.6" rx="9.1" ry="6.6" /><ellipse cx="392.7" cy="81.7" rx="6.3" ry="2.9" /><ellipse cx="299.4" cy="234.4" rx="4.8" ry="7.4" /><ellipse cx="291.4" cy="143.9" rx="9.5" ry="5.8" /><ellipse cx="378.3" cy="243.2" rx="9.8" ry="6.6" /><ellipse cx="374" cy="150.9" rx="5.7" ry="7.8" /><ellipse cx="179.8" cy="229.2" rx="5.9" ry="6.1" /><ellipse cx="375.8" cy="90.4" rx="3.9" ry="2.9" /><ellipse cx="265.2" cy="80.2" rx="7.8" ry="4.8" /><ellipse cx="249.7" cy="100.3" rx="9.7" ry="6.4" /><ellipse cx="312.9" cy="181.4" rx="9.4" ry="7.3" /><ellipse cx="199" cy="158.9" rx="10.8" ry="6.8" /><ellipse cx="372.7" cy="171.5" rx="9.1" ry="4.5" /></g>
+    <path d="M196 182 Q300 150 404 182" fill="none" stroke="#ffffff" stroke-width="10" stroke-opacity="0.22" stroke-linecap="round" filter="url(#alien-blur)" />
+    <path d="M286 352 Q300 380 314 352" fill="none" stroke="#2e6b2e" stroke-width="4" stroke-opacity="0.35" stroke-linecap="round" filter="url(#alien-blur)" />
+    <path d="M283 414 Q287 424 291 414 M309 414 Q313 424 317 414" fill="none" stroke="#1b5e20" stroke-width="4" stroke-linecap="round" />
+    <path d="M300 34 C480 34 540 190 512 320" fill="none" stroke="#e5ffd0" stroke-width="5" stroke-opacity="0.35" filter="url(#alien-blur)" />
+<g><svg x="168" y="204" width="120" height="40" viewBox="0 0 120 40" overflow="visible">
+    <defs><filter id="alien-brow-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2" /></filter></defs>
+    <path d="M10 32 Q60 4 112 22" fill="none" stroke="#2e7d32" stroke-width="8" stroke-opacity="0.45" stroke-linecap="round" filter="url(#alien-brow-soft)" />
+    <path d="M12 28 Q60 2 110 18" fill="none" stroke="#e5ffd0" stroke-width="3" stroke-opacity="0.4" stroke-linecap="round" />
+</svg></g>
+<g transform="translate(744 0) scale(-1 1)"><svg x="312" y="204" width="120" height="40" viewBox="0 0 120 40" overflow="visible">
+    <defs><filter id="alien-brow-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2" /></filter></defs>
+    <path d="M10 32 Q60 4 112 22" fill="none" stroke="#2e7d32" stroke-width="8" stroke-opacity="0.45" stroke-linecap="round" filter="url(#alien-brow-soft)" />
+    <path d="M12 28 Q60 2 110 18" fill="none" stroke="#e5ffd0" stroke-width="3" stroke-opacity="0.4" stroke-linecap="round" />
+</svg></g>
+<g><svg x="159" y="242" width="128" height="116" viewBox="0 0 128 116" overflow="visible">
+    <defs>
+        <radialGradient id="alien-eye" cx="0.38" cy="0.32" r="0.8">
+            <stop offset="0" stop-color="#4a5464" />
+            <stop offset="0.5" stop-color="#121722" />
+            <stop offset="1" stop-color="#020306" />
+        </radialGradient>
+        <linearGradient id="alien-eye-rim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0.6" stop-color="#7fffd4" stop-opacity="0" />
+            <stop offset="1" stop-color="#7fffd4" stop-opacity="0.35" />
+        </linearGradient>
+    </defs>
+    <path d="M5.1 20.6 C34.1 1.9 95.5 9.4 121.1 48.6 C128 86 92.1 114.1 59.7 108.5 C23.9 102.9 0 65.5 5.1 20.6 Z" fill="url(#alien-eye)" stroke="#1f4d22" stroke-width="3" />
+    <path d="M5.1 20.6 C34.1 1.9 95.5 9.4 121.1 48.6 C128 86 92.1 114.1 59.7 108.5 C23.9 102.9 0 65.5 5.1 20.6 Z" fill="url(#alien-eye-rim)" />
+    <g fill="#ffffff" fill-opacity="0.85" transform="rotate(18 40 34)">
+        <rect x="24" y="22" width="14" height="18" rx="3" /><rect x="41" y="22" width="14" height="18" rx="3" />
+    </g>
+    <ellipse cx="88" cy="80" rx="8" ry="4" fill="#ffffff" fill-opacity="0.45" transform="rotate(30 88 80)" />
+</svg></g>
+<g transform="translate(754 0) scale(-1 1)"><svg x="313" y="242" width="128" height="116" viewBox="0 0 128 116" overflow="visible">
+    <defs>
+        <radialGradient id="alien-eye" cx="0.38" cy="0.32" r="0.8">
+            <stop offset="0" stop-color="#4a5464" />
+            <stop offset="0.5" stop-color="#121722" />
+            <stop offset="1" stop-color="#020306" />
+        </radialGradient>
+        <linearGradient id="alien-eye-rim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0.6" stop-color="#7fffd4" stop-opacity="0" />
+            <stop offset="1" stop-color="#7fffd4" stop-opacity="0.35" />
+        </linearGradient>
+    </defs>
+    <path d="M5.1 20.6 C34.1 1.9 95.5 9.4 121.1 48.6 C128 86 92.1 114.1 59.7 108.5 C23.9 102.9 0 65.5 5.1 20.6 Z" fill="url(#alien-eye)" stroke="#1f4d22" stroke-width="3" />
+    <path d="M5.1 20.6 C34.1 1.9 95.5 9.4 121.1 48.6 C128 86 92.1 114.1 59.7 108.5 C23.9 102.9 0 65.5 5.1 20.6 Z" fill="url(#alien-eye-rim)" />
+    <g fill="#ffffff" fill-opacity="0.85" transform="rotate(18 40 34)">
+        <rect x="24" y="22" width="14" height="18" rx="3" /><rect x="41" y="22" width="14" height="18" rx="3" />
+    </g>
+    <ellipse cx="88" cy="80" rx="8" ry="4" fill="#ffffff" fill-opacity="0.45" transform="rotate(30 88 80)" />
+</svg></g>
+<g><svg x="240" y="450" width="120" height="70" viewBox="0 0 120 70" overflow="visible">
+    <path d="M14 14 Q60 54 106 14" fill="none" stroke="#1b5e20" stroke-width="7" stroke-linecap="round" />
+</svg></g>
+</svg>

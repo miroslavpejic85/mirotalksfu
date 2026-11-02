@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="640" viewBox="0 0 600 640">
+    <defs>
+        <linearGradient id="robot-metal" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f4f7fb" />
+            <stop offset="0.45" stop-color="#c3cbd8" />
+            <stop offset="0.75" stop-color="#9ca6b8" />
+            <stop offset="1" stop-color="#7a8598" />
+        </linearGradient>
+        <linearGradient id="robot-side" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#7a8598" />
+            <stop offset="0.5" stop-color="#b9c2d0" />
+            <stop offset="1" stop-color="#6d778a" />
+        </linearGradient>
+        <linearGradient id="robot-visor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1d2b44" />
+            <stop offset="1" stop-color="#070b14" />
+        </linearGradient>
+        <linearGradient id="robot-glare" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.22" />
+            <stop offset="0.5" stop-color="#ffffff" stop-opacity="0" />
+        </linearGradient>
+        <radialGradient id="robot-screw" cx="0.35" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#8a95a8" />
+        </radialGradient>
+        <radialGradient id="robot-bulb" cx="0.38" cy="0.32" r="0.65">
+            <stop offset="0" stop-color="#ffe0e0" />
+            <stop offset="0.5" stop-color="#ff4d4d" />
+            <stop offset="1" stop-color="#a51515" />
+        </radialGradient>
+        <clipPath id="robot-clip"><rect x="100" y="70" width="400" height="510" rx="80" /></clipPath>
+        <filter id="robot-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7" /></filter>
+        <filter id="robot-shadow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter>
+    </defs>
+    <rect x="290" y="24" width="20" height="56" rx="6" fill="url(#robot-side)" stroke="#5f6b80" stroke-width="2" />
+    <circle cx="300" cy="22" r="26" fill="#ff4d4d" fill-opacity="0.45" filter="url(#robot-glow)" />
+    <circle cx="300" cy="22" r="17" fill="url(#robot-bulb)" />
+    <rect x="46" y="250" width="78" height="150" rx="26" fill="url(#robot-side)" stroke="#5f6b80" stroke-width="4" />
+    <rect x="476" y="250" width="78" height="150" rx="26" fill="url(#robot-side)" stroke="#5f6b80" stroke-width="4" />
+    <rect x="70" y="290" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="70" y="302" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="70" y="314" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="70" y="326" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="70" y="338" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="70" y="350" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="500" y="290" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="500" y="302" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="500" y="314" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="500" y="326" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="500" y="338" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" /><rect x="500" y="350" width="30" height="5" rx="2.5" fill="#4a5568" fill-opacity="0.7" />
+    <rect x="108" y="84" width="400" height="510" rx="80" fill="#000000" fill-opacity="0.35" filter="url(#robot-shadow)" />
+    <rect x="100" y="70" width="400" height="510" rx="80" fill="url(#robot-metal)" />
+    <g clip-path="url(#robot-clip)">
+        <path d="M316.5 348.1h163.3M117.2 439.7h68.1M230.4 360.4h94.9M340.7 333.8h127.8M223.5 440.4h143.4M359 284.9h107.1M357.6 318.9h171.3M394.2 382.3h68.3M146.3 80.4h173.6M305.4 471.3h70.2M363.7 434h68M353.7 150.8h105.4M270.4 382.1h109.9M168.8 126.7h148.3M120.8 359.1h151.1M272 202.1h154.4M320.6 91.7h54.7M364.2 503h178.3M181 259.4h145.1M154.3 525.4h153.8M213.4 444.2h83M385 440h100.7M258.6 75.5h175.2M145.2 517.6h146.5M269.5 457.1h102.6M336.4 178.6h71.3M179 258.2h122.5M189.2 486h90.6M366.7 231.9h88.6M365.6 437.8h57.8M337.7 169.4h62.5M169.3 493.2h73.2M110.4 471.2h104.1M245.7 219.5h131.9M235.3 86.8h103.9M113.9 261.2h82.1M170.6 166.7h90.1M254.8 244.6h176.3M285.2 532.4h109.8M190.1 127.1h55.1M337.2 275.6h69.3M188.5 165.4h161.6M283.1 181.3h163.6M215.8 542.7h107.1M122.3 518.2h147.4M105.9 572.5h96.7M288.6 234.5h65.3M175.1 525.9h114.2M283.1 556.4h173.4M384.6 188.9h149.1M352.3 226.5h94.2M338.5 527.7h101M370.4 303.8h78.5M232.8 487.3h129.5M233.4 352.3h141.4M334.6 423.5h147.3M330.6 380h78.4M108.1 438.9h159.7M396.4 107.6h118.7M403.1 403.7h74.2M120.4 413.4h110.8M397.6 343.1h139.8M251.7 437.4h75M183.3 557.9h106.7M302.4 508.6h72.4M174.7 525.2h135.2M217.2 442.5h61.2M314.9 193.7h131.9M110 331.5h147M269.1 104h71.9M343.4 306.9h176.6M365.5 225.7h55.3M272.3 120.2h62.5M313.5 184.5h56.4M181.4 548.9h85.5M180.8 252.5h79.6M292.7 328.4h157.8M317.5 290.8h48M228.6 380.8h171.3M259.5 534.9h111.6M347.6 393.4h73.2M244.8 328.8h149.8M233.3 364.6h97.1M391.3 153.2h106.9M354.2 417.5h53.7M309.2 246h126.5M130 546.6h66.9M122.4 228.3h119.8M133 473h159.7M327.8 130.9h109.3M154.4 538.7h169.7M118.5 314.3h94.4M183.7 525.5h112.5M391.1 314.2h107.6M149.7 224.3h122.2M106 548.2h106.4M195.5 366h120.1M337.4 513.9h80.8M141.6 281.2h162M258.3 227.2h52.3M268 473.6h161.3M283.6 330.6h75.2M108.5 456.7h163.3M229.6 146.7h75.3M367.2 561.5h66.1M376.1 428h60.9M305.9 155.3h67.4M347.4 572.1h154.1M385 405.2h62M104.8 123.1h146.2M342.8 144.6h147.4M182.3 543.6h133.6M241.2 319.2h107.7M131.3 453.7h52M374.7 511.9h150M118.9 302.2h169.8M177.9 410.1h146.8M174.4 313.6h80.8M251.4 245.7h79.7M212.7 418.6h161M277.8 426.7h81.3M365 550h56.3M259.6 152.4h90.1M299.8 250.9h126.8M392.2 210.3h120.8M385.3 551.3h135.5M124.7 429.6h148.2M292.3 526.9h164.4M260.2 205.1h80.1M286.7 141.5h58.4M300.8 393h151.5M247.6 236.4h73.4M344.4 178.8h57.3M353.5 82.4h118.3M175.5 391.8h110.9M217.9 177.3h71.4M390 147.1h46.8M347.5 246h165.6M176.3 237.9h155.9M148.1 459.9h115.1M385.5 483.6h107.8M174.3 207.3h64.4M354.1 190.6h166.8M299.7 223.7h80.1M193.3 208.1h135.1M206.4 474.2h61.7M131.3 265.8h137.3M338.8 487.4h71M222.3 438h70.8M118.1 336.3h44.3M139.8 312.2h154.4M181.7 424.9h161.1M348.3 193.4h74.4M305.7 511h175.9M253.4 92.1h124.6M346.7 226.6h174.5M261.7 459.8h138.9M394.5 172h165.6M334.8 488.3h82.5M219.1 459.5h55.8" stroke="#ffffff" stroke-width="1" stroke-opacity="0.18" />
+        <path d="M100 196 H500 M100 524 H500" stroke="#7a8598" stroke-width="3" stroke-opacity="0.5" />
+        <path d="M100 198 H500 M100 526 H500" stroke="#ffffff" stroke-width="2" stroke-opacity="0.6" />
+    </g>
+    <rect x="100" y="70" width="400" height="510" rx="80" fill="none" stroke="#5f6b80" stroke-width="6" />
+    <rect x="108" y="78" width="384" height="494" rx="74" fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity="0.55" />
+    <rect x="146" y="218" width="308" height="168" rx="48" fill="#5f6b80" />
+    <rect x="152" y="224" width="296" height="156" rx="44" fill="url(#robot-visor)" />
+    <rect x="152" y="224" width="296" height="156" rx="44" fill="url(#robot-glare)" />
+    <rect x="208" y="410" width="184" height="92" rx="24" fill="#5f6b80" />
+    <rect x="214" y="416" width="172" height="80" rx="20" fill="url(#robot-visor)" />
+    <g transform="translate(140 116)"><circle r="10" fill="url(#robot-screw)" stroke="#5f6b80" stroke-width="1.5" /><path d="M-6 -2 L6 2" stroke="#4a5568" stroke-width="2.5" stroke-linecap="round" /></g><g transform="translate(460 116)"><circle r="10" fill="url(#robot-screw)" stroke="#5f6b80" stroke-width="1.5" /><path d="M-6 -2 L6 2" stroke="#4a5568" stroke-width="2.5" stroke-linecap="round" /></g><g transform="translate(140 534)"><circle r="10" fill="url(#robot-screw)" stroke="#5f6b80" stroke-width="1.5" /><path d="M-6 -2 L6 2" stroke="#4a5568" stroke-width="2.5" stroke-linecap="round" /></g><g transform="translate(460 534)"><circle r="10" fill="url(#robot-screw)" stroke="#5f6b80" stroke-width="1.5" /><path d="M-6 -2 L6 2" stroke="#4a5568" stroke-width="2.5" stroke-linecap="round" /></g>
+    <path d="M150 150 Q300 120 450 150" fill="none" stroke="#ffffff" stroke-width="5" stroke-opacity="0.45" stroke-linecap="round" />
+</svg>

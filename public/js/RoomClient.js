@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.21
+ * @version 2.7.30
  *
  */
 
@@ -484,6 +484,11 @@ class RoomClient {
 
         this.localVideoElement = null;
         this.localVideoStream = null;
+        // Camera track feeding the video effects engine while the producer sends the processed track
+        this.videoEffectsSourceTrack = null;
+        // Camera track feeding the virtual background while the producer sends the processed track
+        this.videoBackgroundSourceTrack = null;
+        this.videoEffectsQueue = Promise.resolve();
         this.localAudioStream = null;
         this.localScreenStream = null;
         this.whipIngestEnabled = false;
@@ -987,6 +992,7 @@ class RoomClient {
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
                 if (this._moderator.video_cant_unhide) hide(tabVirtualBackgroundBtn);
+                if (this._moderator.video_cant_unhide) hide(tabVideoEffectsBtn);
                 updateDevicesNavLabel();
             }
             // Handle Follow Me state for late joiners
@@ -1550,6 +1556,11 @@ class RoomClient {
                 }
             }
             this.producerRecoverySnapshot = null;
+            // The processed camera track is gone: release the camera that fed the effects/background
+            if (!this.producerLabel.has(mediaType.video)) {
+                this.releaseVideoEffectsSource();
+                this.releaseVideoBackgroundSource();
+            }
         };
 
         console.warn(`🔄 ${kind} transport lost, attempting recovery...`);
@@ -2806,6 +2817,7 @@ class RoomClient {
         let audioRequest;
         let audioProcessor;
         let microphoneStream;
+        let cameraStream;
 
         switch (type) {
             case mediaType.audio:
@@ -2858,6 +2870,7 @@ class RoomClient {
                 stream = screen
                     ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
                     : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+                if (video) cameraStream = stream;
 
                 // Handle Virtual Background and Blur using MediaPipe
                 if (video && isMediaStreamTrackAndTransformerSupported) {
@@ -2879,7 +2892,12 @@ class RoomClient {
                         // Apply Transparent virtual background to WebRTC stream
                         stream = await virtualBackground.applyTransparentVirtualBackgroundToWebRTCStream(videoTrack);
                     }
+                    // The producer sends the processed track: keep the camera to release it with the producer
+                    if (stream.getVideoTracks()[0] !== videoTrack) this.videoBackgroundSourceTrack = videoTrack;
                 }
+
+                // Face accessories and colour filters, applied on top of the background
+                if (video) stream = await this.applyVideoEffectsToStream(stream);
             }
 
             if (audio) {
@@ -3017,8 +3035,11 @@ class RoomClient {
                 if (video) {
                     this.localVideoElement = elem;
                     this.videoProducerId = producer.id;
-                    camera = detectCameraFacingMode(stream);
+                    // Processed tracks (effects, background) do not report the camera facing mode
+                    camera = detectCameraFacingMode(cameraStream || stream);
                     handleCameraMirror(elem);
+                    // Effects changed while the transport was being recovered
+                    if (recovery) this.updateVideoEffectsTrack();
                 }
 
                 if (screen) {
@@ -3086,6 +3107,10 @@ class RoomClient {
             // Producers use stopTracks: false, so release the capture if no producer owns it
             if ((video || screen) && !init && !this.producerExist(type)) {
                 stream?.getTracks().forEach((track) => track.stop());
+                if (video) {
+                    this.releaseVideoEffectsSource();
+                    this.releaseVideoBackgroundSource();
+                }
             }
             console.error('Produce error:', err);
             handleMediaError(type, err);
@@ -3414,6 +3439,151 @@ class RoomClient {
         this.syncVideoBackgroundSelection();
         videoSelect.onchange();
         saveVirtualBackgroundSettings(blurLevel, backgroundImage, backgroundTransparent);
+    }
+
+    // Stop the virtual background pipeline and the camera that fed it
+    releaseVideoBackgroundSource() {
+        const sourceTrack = this.videoBackgroundSourceTrack;
+        this.videoBackgroundSourceTrack = null;
+        if (!sourceTrack) return;
+        if (virtualBackground.isProcessing) {
+            virtualBackground.stopCurrentProcessor().catch((error) => {
+                console.warn('Error stopping virtual background', error);
+            });
+        }
+        try {
+            sourceTrack.stop();
+        } catch (error) {
+            console.warn('Error stopping virtual background source track', error);
+        }
+    }
+
+    // ####################################################
+    // VIDEO EFFECTS (face accessories and filters)
+    // ####################################################
+
+    isVideoEffectsAvailable() {
+        return typeof videoEffects !== 'undefined' && !!videoEffects && !videoEffects.destroyed;
+    }
+
+    // Wrap a freshly captured camera stream with the effects engine when an effect is selected
+    async applyVideoEffectsToStream(stream) {
+        if (!this.isVideoEffectsAvailable() || !videoEffects.isActive()) return stream;
+        const sourceTrack = stream.getVideoTracks()[0];
+        if (!sourceTrack) return stream;
+        try {
+            const processedTrack = await videoEffects.setSourceTrack(sourceTrack);
+            this.videoEffectsSourceTrack = sourceTrack;
+            return new MediaStream([processedTrack]);
+        } catch (error) {
+            console.error('Video effects could not be started, sending the original camera', error);
+            this.videoEffectsSourceTrack = null;
+            videoEffects.stop();
+            userLog(
+                'warning',
+                'Video effects could not be started. Your camera is sent without effects.',
+                'top-end',
+                6000
+            );
+            return stream;
+        }
+    }
+
+    // Start or stop processing on the live camera after the selection changed (no renegotiation)
+    updateVideoEffectsTrack() {
+        this.videoEffectsQueue = this.videoEffectsQueue
+            .then(() => this.syncVideoEffectsTrack())
+            .catch((error) => console.error('Video effects update failed', error));
+        return this.videoEffectsQueue;
+    }
+
+    async syncVideoEffectsTrack() {
+        if (!this.isVideoEffectsAvailable()) return;
+        const producerId = this.producerLabel.get(mediaType.video);
+        const producer = producerId ? this.producers.get(producerId) : null;
+        // No camera producer: the selection is applied by the next produce()
+        if (!producer || producer.closed) return;
+
+        const active = videoEffects.isActive();
+        const processing = !!this.videoEffectsSourceTrack;
+        if (active === processing) return;
+
+        if (active) {
+            const sourceTrack = producer.track;
+            if (!sourceTrack || sourceTrack.readyState !== 'live') return;
+            let processedTrack;
+            try {
+                processedTrack = await videoEffects.setSourceTrack(sourceTrack);
+            } catch (error) {
+                videoEffects.stop();
+                console.error('Video effects could not be started', error);
+                userLog('warning', 'Video effects could not be started on this device.', 'top-end', 6000);
+                return;
+            }
+            if (producer.closed || this.producers.get(producerId) !== producer) {
+                videoEffects.stop();
+                return;
+            }
+            try {
+                // RTCRtpSender.replaceTrack() under the hood: same sender, no renegotiation
+                await producer.replaceTrack({ track: processedTrack });
+            } catch (error) {
+                videoEffects.stop();
+                throw error;
+            }
+            this.videoEffectsSourceTrack = sourceTrack;
+            this.setLocalVideoTrack(producerId, sourceTrack, processedTrack);
+        } else {
+            const sourceTrack = this.videoEffectsSourceTrack;
+            const processedTrack = producer.track;
+            this.videoEffectsSourceTrack = null;
+            if (sourceTrack.readyState === 'live') {
+                await producer.replaceTrack({ track: sourceTrack });
+                this.setLocalVideoTrack(producerId, processedTrack, sourceTrack);
+            }
+            // Ends the processed track only, the camera keeps running
+            videoEffects.stop();
+        }
+    }
+
+    setLocalVideoTrack(producerId, previousTrack, track) {
+        const stream = new MediaStream([track]);
+        if (!this.localVideoStream || this.localVideoStream.getVideoTracks()[0] === previousTrack) {
+            this.localVideoStream = stream;
+        }
+        const elem = this.getId(producerId);
+        if (elem) elem.srcObject = stream;
+    }
+
+    // Stop the effects pipeline and the camera that fed it (the processed track is stopped by its owner)
+    releaseVideoEffectsSource() {
+        const sourceTrack = this.videoEffectsSourceTrack;
+        this.videoEffectsSourceTrack = null;
+        if (this.isVideoEffectsAvailable() && videoEffects.running) videoEffects.stop();
+        if (sourceTrack) {
+            try {
+                sourceTrack.stop();
+            } catch (error) {
+                console.warn('Error stopping video effects source track', error);
+            }
+        }
+    }
+
+    // The camera feeding the effects ended (unplugged, revoked): same as a producer 'trackended'
+    handleVideoEffectsSourceEnded() {
+        if (!this.videoEffectsSourceTrack) return;
+        if (this.producerLabel.has(mediaType.video)) {
+            this.closeProducer(mediaType.video, 'trackended');
+        } else {
+            this.releaseVideoEffectsSource();
+        }
+    }
+
+    destroyVideoEffects() {
+        this.releaseVideoEffectsSource();
+        if (this.isVideoEffectsAvailable()) {
+            videoEffects.destroy().catch((error) => console.warn('Video effects cleanup failed', error));
+        }
     }
 
     // ####################################################
@@ -4277,6 +4447,12 @@ class RoomClient {
 
         const producer_id = this.producerLabel.get(type);
         const producer = this.producers.get(producer_id);
+
+        // The producer sends the processed track: also release the camera feeding the effects/background
+        if (type === mediaType.video) {
+            this.releaseVideoEffectsSource();
+            this.releaseVideoBackgroundSource();
+        }
 
         // Stop all tracks of the producer's stream
         if (producer && producer.track) {
@@ -5495,6 +5671,8 @@ class RoomClient {
         this.saveRecording('Client exiting the room');
         this.microphoneRequest++;
         this.disableRNNoiseSuppression();
+        this.destroyVideoEffects();
+        this.releaseVideoBackgroundSource();
         if (VideoAI.active) this.stopSession();
         if (this.rtmpFilestreamer) this.stopRTMP();
         if (this.rtmpUrlstreamer) this.stopRTMPfromURL();
@@ -14614,6 +14792,7 @@ class RoomClient {
                 this._moderator.video_cant_unhide = data.status;
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
                 if (this._moderator.video_cant_unhide) hide(tabVirtualBackgroundBtn);
+                if (this._moderator.video_cant_unhide) hide(tabVideoEffectsBtn);
                 updateDevicesNavLabel();
                 rc.roomMessage('video_cant_unhide', data.status);
                 break;

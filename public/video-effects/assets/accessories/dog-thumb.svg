@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+    <defs>
+        <linearGradient id="fur" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#a86b3c" />
+            <stop offset="1" stop-color="#6b3f1f" />
+        </linearGradient>
+        <radialGradient id="nose" cx="0.4" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#3a3a3a" />
+            <stop offset="1" stop-color="#0b0b0b" />
+        </radialGradient>
+        <g id="ear">
+            <path
+                d="M36 344 C26 252 36 122 88 50 C108 22 140 8 172 22 C218 42 238 124 232 204 C228 262 214 312 198 344 Z"
+                fill="url(#fur)"
+                stroke="#4a2a12"
+                stroke-width="6"
+            />
+            <path
+                d="M80 324 C74 252 84 150 116 90 C130 62 152 54 168 70 C194 100 198 182 192 242 C188 282 180 306 170 324 Z"
+                fill="#eea0b0"
+            />
+        </g>
+    </defs>
+    <use href="#ear" transform="translate(12 6) rotate(-14 130 344) scale(0.42)" />
+    <use href="#ear" transform="translate(308 6) scale(-1 1) rotate(-14 130 344) scale(0.42)" />
+    <path
+        d="M160 214 C134 208 94 182 96 150 C97 126 128 116 160 116 C192 116 223 126 224 150 C226 182 186 208 160 214 Z"
+        fill="url(#nose)"
+    />
+    <ellipse cx="140" cy="138" rx="20" ry="8" fill="#ffffff" opacity="0.35" />
+</svg>

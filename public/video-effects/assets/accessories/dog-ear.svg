@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="360" viewBox="0 0 260 360">
+    <defs>
+        <linearGradient id="fur" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#a86b3c" />
+            <stop offset="1" stop-color="#6b3f1f" />
+        </linearGradient>
+        <linearGradient id="inner" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f7b8c4" />
+            <stop offset="1" stop-color="#d9788c" />
+        </linearGradient>
+    </defs>
+    <path
+        d="M36 344 C26 252 36 122 88 50 C108 22 140 8 172 22 C218 42 238 124 232 204 C228 262 214 312 198 344 Z"
+        fill="url(#fur)"
+        stroke="#4a2a12"
+        stroke-width="6"
+        stroke-linejoin="round"
+    />
+    <path
+        d="M80 324 C74 252 84 150 116 90 C130 62 152 54 168 70 C194 100 198 182 192 242 C188 282 180 306 170 324 Z"
+        fill="url(#inner)"
+    />
+</svg>

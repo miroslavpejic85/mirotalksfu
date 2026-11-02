@@ -65,6 +65,7 @@ let BUTTONS = {
         pushToTalk: true,
         keyboardShortcuts: true,
         virtualBackground: true,
+        videoEffects: true, // face accessories and filters processed in the browser
         customNoiseSuppression: true, // use RNNoise else WebRTC built-in
         customNoiseSuppressionDefault: true, // initial RNNoise state for users without a saved choice
     },
