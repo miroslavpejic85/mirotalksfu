@@ -1569,8 +1569,9 @@ for (const character of characters) {
     );
     for (const [name, content] of Object.entries(files)) writeFile(path.join(dir, name), content);
 
-    const lift = `offsetY: { expression: 'browUp', from: 0.15, to: 0.6, min: 0, max: -${character.brow.lift * 2} }`;
-    const notTalking = opacity('mouthOpen', 0.04, 0.12, true);
+    // Slightly gentler brow travel and wider mouth thresholds reduce jitter on low-light cameras.
+    const lift = `offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -${Math.round(character.brow.lift * 1.6)} }`;
+    const notTalking = opacity('mouthOpen', 0.08, 0.2, true);
     const parts = [
         `{ asset: '${base}/head.svg', box: [0, 0, ${W}, ${H}] }`,
         `{ asset: '${base}/brow.svg', box: [${browRight}], drive: { ${lift} } }`,
@@ -1590,7 +1591,7 @@ for (const character of characters) {
     parts.push(
         `{ asset: '${base}/mouth-neutral.svg', box: ${mouthBox}, drive: { opacity: [${notTalking}, ${opacity('smile', 0.3, 0.55, true)}] } }`,
         `{ asset: '${base}/mouth-smile.svg', box: ${mouthBox}, drive: { opacity: [${notTalking}, ${opacity('smile', 0.3, 0.55)}] } }`,
-        `{ asset: '${base}/mouth-open.svg', box: ${mouthBox}, drive: { opacity: ${opacity('mouthOpen', 0.04, 0.12)}, scaleY: { expression: 'mouthOpen', from: 0.05, to: 0.7, min: 0.3, max: 1 } } }`
+        `{ asset: '${base}/mouth-open.svg', box: ${mouthBox}, drive: { opacity: ${opacity('mouthOpen', 0.08, 0.2)}, scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 } } }`
     );
     descriptors.push(`    VFX.registerAvatar({
         id: 'avatar-${character.id}',

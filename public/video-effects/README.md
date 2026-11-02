@@ -181,10 +181,10 @@ Any layer can be driven by expressions. Each property takes one spec or a list (
 ```js
 drive: {
     opacity: [
-        { expression: 'mouthOpen', from: 0.04, to: 0.12, invert: true }, // hidden while talking...
+        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true }, // hidden while talking...
         { expression: 'smile', from: 0.3, to: 0.55, invert: true }, // ...and while smiling
     ],
-    scaleY: { expression: 'mouthOpen', from: 0.05, to: 0.7, min: 0.3, max: 1 }, // grows downwards
+    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 }, // grows downwards
     offsetY: { expression: 'browUp', from: 0.15, to: 0.6, min: 0, max: -28 }, // moves up (canvas px for avatars)
 }
 ```
