@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.7.42 - Configuration File
+ * MiroTalk SFU v2.7.43 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1354,7 +1354,7 @@ module.exports = {
              * Metadata for rich social media sharing.
              */
             og: {
-                type: process.env.OG_TYPE || 'app-webrtc',
+                type: process.env.OG_TYPE || 'website',
                 siteName: process.env.OG_SITE_NAME || 'MiroTalk SFU',
                 title: process.env.OG_TITLE || 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
                 description:

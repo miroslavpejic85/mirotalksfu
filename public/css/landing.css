@@ -3871,3 +3871,69 @@ html:has(.sticky-header) {
         transform: none;
     }
 }
+
+/* About + FAQ (discoverability sections) */
+.landing-page .about-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+    text-align: left;
+}
+
+.landing-page .about-card,
+.landing-page .faq-item {
+    background: var(--landing-surface);
+    border: 1px solid var(--landing-border);
+    border-radius: 12px;
+}
+
+.landing-page .about-card {
+    padding: 20px 24px;
+}
+
+.landing-page .about-card-title {
+    margin: 0 0 8px;
+    font-size: 18px;
+    color: var(--landing-text);
+}
+
+.landing-page .about-links a,
+.landing-page .faq-item a,
+.landing-page .section-paragraph a {
+    color: var(--landing-primary-bright);
+}
+
+.landing-page .faq-item {
+    margin-bottom: 12px;
+    transition: border-color 0.3s ease;
+}
+
+.landing-page .faq-item[open] {
+    border-color: var(--landing-border-strong);
+}
+
+.landing-page .faq-item summary {
+    cursor: pointer;
+    padding: 16px 20px;
+    font-weight: 600;
+    color: var(--landing-text);
+}
+
+.landing-page .faq-item summary:focus-visible {
+    outline: 2px solid var(--landing-primary-bright);
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+
+.landing-page .faq-item p {
+    margin: 0;
+    padding: 0 20px 18px;
+    color: var(--landing-text-muted);
+}
+
+@media (max-width: 640px) {
+    .landing-page .about-grid {
+        grid-template-columns: 1fr;
+    }
+}

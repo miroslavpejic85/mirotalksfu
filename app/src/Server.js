@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.42
+ * @version 2.7.43
  *
  */
 
@@ -104,6 +104,7 @@ const Logger = require('./Logger');
 const Validator = require('./Validator');
 const RoomPassword = require('./RoomPassword');
 const HtmlInjector = require('./HtmlInjector');
+const { buildRobotsTxt, buildSitemapXml } = require('./Seo');
 const log = new Logger('Server');
 const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
@@ -706,6 +707,16 @@ function startServer() {
     app.use(applyEmbedHeaders); // Apply iframe embedding restrictions (CSP frame-ancestors / X-Frame-Options)
     // Compress all HTTP responses (including static files) using GZip; must be registered before express.static
     app.use(compression());
+    // Crawler files generated from the configured public URL (OG_URL); must precede express.static
+    const seoBaseUrl = config?.ui?.brand?.og?.url || 'https://sfu.mirotalk.com';
+    app.get('/robots.txt', (req, res) => {
+        const blockAll = OIDC.enabled || hostCfg.protected;
+        res.type('text/plain').send(buildRobotsTxt(seoBaseUrl, { blockAll }));
+    });
+    app.get('/sitemap.xml', (req, res) => {
+        if (OIDC.enabled || hostCfg.protected) return res.status(404).sendFile(views.notFound);
+        res.type('application/xml').send(buildSitemapXml(seoBaseUrl));
+    });
     // Use all static files from the public folder
     app.use(
         express.static(dir.public, {

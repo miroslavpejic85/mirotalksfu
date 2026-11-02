@@ -20,6 +20,10 @@
             name="description"
             content="Build your own Zoom alternative with MiroTalk SFU, an open-source, self-hosted WebRTC platform powered by Mediasoup for scalable video meetings."
         />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <meta name="author" content="Miroslav Pejic" />
+        <link rel="canonical" href="{{CANONICAL_URL}}" />
+
         <!-- https://ogp.me -->
 
         <meta property="og:type" content="{{OG_TYPE}}" />
@@ -27,12 +31,77 @@
         <meta property="og:title" content="{{OG_TITLE}}" />
         <meta property="og:description" content="{{OG_DESCRIPTION}}" />
         <meta property="og:image" content="{{OG_IMAGE}}" />
-        <meta property="og:url" content="{{OG_URL}}" />
+        <meta property="og:url" content="{{CANONICAL_URL}}" />
+        <meta property="og:image:alt" content="{{OG_TITLE}}" />
+        <meta property="og:locale" content="en_US" />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="{{OG_TITLE}}" />
         <meta name="twitter:description" content="{{OG_DESCRIPTION}}" />
         <meta name="twitter:image" content="{{OG_IMAGE}}" />
+        <meta name="twitter:image:alt" content="{{OG_TITLE}}" />
+
+        <!-- Structured data (https://schema.org) -->
+
+        <script type="application/ld+json">
+            {{JSON_LD}}
+        </script>
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "What is MiroTalk SFU?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "MiroTalk SFU is an open-source WebRTC video conferencing platform built on the mediasoup SFU. You can try it in the browser or install it on your own infrastructure."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Is MiroTalk SFU free?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "The source code is free under the AGPLv3 license. Regular and Extended commercial licenses with a one-time fee are available for closed-source, rebranded or commercial use. Running your own server has its own hosting and maintenance costs."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Do I need to sign up or install anything to join a meeting?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "On the public demo you just pick a room name and join from your browser, with no download, plug-in or login. Self-hosted instances can add authentication, room passwords, lobby and host protection."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Can I self-host MiroTalk SFU?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Yes. You can deploy it with Docker or Node.js on your own server, following the self-hosting guide in the official documentation."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Are MiroTalk SFU calls end-to-end encrypted?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No. Media is encrypted in transit with DTLS-SRTP between each participant and the SFU server, which sits in the media path and routes the streams. Self-hosting gives you control over that server, but privacy and compliance still depend on how you configure and operate it."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "How can I embed MiroTalk SFU in my own app?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Use the embeddable iframe or widget, or create rooms from your backend with the REST API. Keep API secrets on the server and never expose them in the browser."
+                        }
+                    }
+                ]
+            }
+        </script>
 
         <!-- StyleSheet -->
 
@@ -88,7 +157,9 @@
                             </div>
                         </div>
                         <nav class="landing-nav" aria-label="Primary">
+                            <a class="landing-nav-link" href="#about">About</a>
                             <a class="landing-nav-link" href="#features">Features</a>
+                            <a class="landing-nav-link" href="#faq">FAQ</a>
                             <a class="landing-nav-link" href="#supportUs">Support</a>
                             <a
                                 id="navGithubLink"
@@ -225,6 +296,50 @@
                                     </a>
                                 </li>
                             </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="about" class="about section mt-48 mb-48">
+                    <div class="container-sm">
+                        <div class="about-inner text-center">
+                            <h2 class="section-title mt-0">What is MiroTalk SFU?</h2>
+                            <p class="section-paragraph">
+                                MiroTalk SFU is an open-source WebRTC video conferencing platform built on
+                                <a href="https://mediasoup.org" target="_blank" rel="noopener">mediasoup</a>. Try it
+                                right here in your browser, or install it on your own infrastructure to keep control of
+                                your data, branding and costs.
+                            </p>
+                            <div class="about-grid">
+                                <div class="about-card">
+                                    <h3 class="about-card-title">Public demo</h3>
+                                    <p class="text-sm mb-0">
+                                        Pick a room name and start talking. No download, plug-in or login required.
+                                    </p>
+                                </div>
+                                <div class="about-card">
+                                    <h3 class="about-card-title">Self-hosted</h3>
+                                    <p class="text-sm mb-0">
+                                        Deploy with Docker or Node.js on your own server and customize it to your needs.
+                                    </p>
+                                </div>
+                            </div>
+                            <p class="about-links mt-24 mb-0">
+                                <a
+                                    href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/"
+                                    target="_blank"
+                                    rel="noopener"
+                                    >Documentation</a
+                                >
+                                &middot;
+                                <a href="https://github.com/miroslavpejic85/mirotalksfu" target="_blank" rel="noopener"
+                                    >GitHub repository</a
+                                >
+                                &middot;
+                                <a href="https://docs.mirotalk.com/license/" target="_blank" rel="noopener"
+                                    >License (AGPLv3)</a
+                                >
+                            </p>
                         </div>
                     </div>
                 </section>
@@ -592,6 +707,79 @@
                             <br />
                         </div>
                         <hr />
+                    </div>
+                </section>
+
+                <section id="faq" class="faq section mt-48 mb-48">
+                    <div class="container-sm">
+                        <h2 class="section-title tac mt-0">Frequently asked questions</h2>
+                        <div class="faq-list mt-24">
+                            <details class="faq-item">
+                                <summary>What is MiroTalk SFU?</summary>
+                                <p>
+                                    MiroTalk SFU is an open-source WebRTC video conferencing platform built on the
+                                    mediasoup SFU. You can try it in the browser or install it on your own
+                                    infrastructure.
+                                </p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>Is MiroTalk SFU free?</summary>
+                                <p>
+                                    The source code is free under the
+                                    <a href="https://docs.mirotalk.com/license/" target="_blank" rel="noopener"
+                                        >AGPLv3 license</a
+                                    >. Regular and Extended commercial licenses with a one-time fee are available for
+                                    closed-source, rebranded or commercial use. Running your own server has its own
+                                    hosting and maintenance costs.
+                                </p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>Do I need to sign up or install anything to join a meeting?</summary>
+                                <p>
+                                    On the public demo you just pick a room name and join from your browser, with no
+                                    download, plug-in or login. Self-hosted instances can add authentication, room
+                                    passwords, lobby and host protection.
+                                </p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>Can I self-host MiroTalk SFU?</summary>
+                                <p>
+                                    Yes. You can deploy it with Docker or Node.js on your own server, following the
+                                    <a
+                                        href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/"
+                                        target="_blank"
+                                        rel="noopener"
+                                        >self-hosting guide</a
+                                    >.
+                                </p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>Are MiroTalk SFU calls end-to-end encrypted?</summary>
+                                <p>
+                                    No. Media is encrypted in transit with DTLS-SRTP between each participant and the
+                                    SFU server, which sits in the media path and routes the streams. Self-hosting gives
+                                    you control over that server, but privacy and compliance still depend on how you
+                                    configure and operate it.
+                                </p>
+                            </details>
+                            <details class="faq-item">
+                                <summary>How can I embed MiroTalk SFU in my own app?</summary>
+                                <p>
+                                    Use the embeddable
+                                    <a
+                                        href="https://docs.mirotalk.com/mirotalk-sfu/integration/#iframe"
+                                        target="_blank"
+                                        rel="noopener"
+                                        >iframe or widget</a
+                                    >, or create rooms from your backend with the <a href="/api/v1/docs/">REST API</a>.
+                                    Keep API secrets on the server and never expose them in the browser.
+                                </p>
+                            </details>
+                        </div>
+                        <p class="tac mt-24 mb-0">
+                            More answers in the
+                            <a href="https://docs.mirotalk.com/sites/faq/" target="_blank" rel="noopener">full FAQ</a>.
+                        </p>
                     </div>
                 </section>
 
