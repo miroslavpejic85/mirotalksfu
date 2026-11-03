@@ -147,6 +147,8 @@
                 // Avatar: morph targets follow the blendshapes, realistic lighting, optional neck rig
                 avatar: !!definition.model.avatar,
                 clipY: Number.isFinite(clipY) ? clipY : null,
+                // Unprepared model: centred, scaled and turned from its eyes when loaded (custom avatars)
+                fit: !!definition.model.fit,
                 asset: definition.model.asset,
             };
         }
@@ -211,6 +213,7 @@
      * morph targets named like the MediaPipe blendshapes (eyeBlinkLeft, jawOpen, ...). Optional:
      * an "avatarHead" bone (busts turn the head at the neck), `clipY` (straight cut of a bust, in
      * model units), `scale` and `offset`. The model covers the face, so it has no head occluder.
+     * `fit: true` accepts any rigged head or body (e.g. Ready Player Me) instead of a prepared model.
      */
     function registerAvatar3D(definition) {
         if (!definition?.model || typeof definition.model.asset !== 'string') {
@@ -228,10 +231,15 @@
                 offset: definition.model.offset,
                 scale: definition.model.scale,
                 clipY: definition.model.clipY,
+                fit: definition.model.fit,
                 occluder: false,
                 avatar: true,
             },
         });
+    }
+
+    function unregisterEffect(id) {
+        return effects.delete(id);
     }
 
     function registerFilterPreset(preset) {
@@ -425,6 +433,7 @@
     VFX.ANCHORS = ANCHORS;
     VFX.FILTER_LIMITS = FILTER_LIMITS;
     VFX.registerEffect = registerEffect;
+    VFX.unregisterEffect = unregisterEffect;
     VFX.registerFilterPreset = registerFilterPreset;
     VFX.registerAvatar = registerAvatar;
     VFX.registerAvatar3D = registerAvatar3D;

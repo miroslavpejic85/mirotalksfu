@@ -246,6 +246,28 @@ Rocketbox people (115 avatars, 40 adults with ARKit blendshapes) can be added to
 recolours hair cards that do not match the scalp texture). Licenses:
 `assets/avatars-3d/LICENSE.md`.
 
+### Your own avatar (.glb)
+
+The 3D Avatars tab accepts a link to a `.glb` or an uploaded `.glb` file (50 MB max, up to 6 avatars). The model is
+loaded in the browser only, never uploaded, and it is fitted when loaded (`model.fit: true`): the eyes come from
+the `eyeBlinkLeft`/`eyeBlinkRight` blendshapes (else `LeftEye`/`RightEye` nodes) and set the origin and the size
+(1 unit = outer eye distance), the face is turned towards +Z, and a full body is cut below the shoulders. Without
+eyes the model is refused. The blendshapes drive the expressions like the bundled avatars (the ARKit/MediaPipe
+names; the head turns rigidly, there is no neck rig). Draco geometry and KTX2 textures work: their decoders are
+only fetched for custom avatars. A link must allow cross-origin requests (CORS), otherwise download the file and
+use Upload. The **Avatar size** slider corrects the fit; avatars added from a link are remembered in this browser.
+
+```js
+VFX.registerAvatar3D({
+    id: 'avatar3d-custom-mine',
+    label: 'Mine',
+    model: { asset: 'https://example.com/me.glb', fit: true },
+});
+```
+
+Try this one (MediaPipe raccoon, CORS enabled):
+`https://storage.googleapis.com/mediapipe-tasks/face_landmarker/raccoon_head_small.glb`.
+
 ## Performance
 
 - Face detection runs in a module worker on downscaled frames (640 px wide, 480 on mobile) at 15 Hz (8 Hz on
@@ -286,6 +308,7 @@ Loaded from jsDelivr / Google storage at runtime, nothing added to `package.json
 | `face_landmarker.task` (float16/1)          | Face landmark model | Apache-2.0 |
 | `three@0.181.0` + `GLTFLoader` (lazy)       | 3D accessories      | MIT        |
 | `three` meshopt decoder, `RoomEnvironment`  | 3D avatars          | MIT        |
+| `three` Draco + KTX2 loaders (lazy)         | Custom avatars      | MIT        |
 | `@mediapipe/selfie_segmentation` (existing) | Backgrounds         | Apache-2.0 |
 
 All artwork in `assets/` (SVG and the generated glasses GLB) was created for MiroTalk and is covered by the

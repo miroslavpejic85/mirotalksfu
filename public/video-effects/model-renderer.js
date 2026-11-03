@@ -14,6 +14,7 @@
  *
  * Model convention: 1 unit = distance between the outer eye corners, origin at the anchor,
  * +X towards the subject's left (image right), +Y up, +Z out of the face (glTF front).
+ * Models that do not follow it (model.fit, custom avatars) are fitted from their eyes when loaded.
  */
 (function (root) {
     const VFX = (root.MiroTalkVFX = root.MiroTalkVFX || {});
@@ -26,6 +27,10 @@
         gltfLoaderUrl: `${THREE_CDN}/examples/jsm/loaders/GLTFLoader.js/+esm`,
         meshoptDecoderUrl: `${THREE_CDN}/examples/jsm/libs/meshopt_decoder.module.js/+esm`,
         roomEnvironmentUrl: `${THREE_CDN}/examples/jsm/environments/RoomEnvironment.js/+esm`,
+        dracoLoaderUrl: `${THREE_CDN}/examples/jsm/loaders/DRACOLoader.js/+esm`,
+        dracoDecoderPath: `${THREE_CDN}/examples/jsm/libs/draco/gltf/`,
+        ktx2LoaderUrl: `${THREE_CDN}/examples/jsm/loaders/KTX2Loader.js/+esm`,
+        ktx2TranscoderPath: `${THREE_CDN}/examples/jsm/libs/basis/`,
     });
 
     // Share of the head rotation applied to the shoulders of a bust
@@ -72,11 +77,86 @@
         return value;
     }
 
+    // Outer eye corners are ~1.43x further apart than the eye centres (adult average)
+    const EYE_CENTER_DISTANCE = 1 / 1.43;
+    // Full bodies are cut below the shoulders, like the bundled busts
+    const BODY_CUT_Y = -3.9;
+    const BODY_MIN_Y = -4.5;
+    const EYE_BLINK = Object.freeze({
+        left: /^eye[_ ]?blink[_ ]?(left|l)$/i,
+        right: /^eye[_ ]?blink[_ ]?(right|r)$/i,
+    });
+    const EYE_NODE = Object.freeze({
+        left: /^(mixamorig:?)?(left[_ ]?eye|eye[_ ]?(left|l))$/i,
+        right: /^(mixamorig:?)?(right[_ ]?eye|eye[_ ]?(right|r))$/i,
+    });
+
+    // Centre of the vertices a blink moves (the eye), in the world space of the loaded model
+    function blinkCentroid(THREE, object, pattern) {
+        const sum = new THREE.Vector3();
+        const point = new THREE.Vector3();
+        let total = 0;
+        object.traverse((child) => {
+            if (!child.isMesh || !child.morphTargetDictionary || !child.geometry?.morphAttributes?.position) return;
+            const name = Object.keys(child.morphTargetDictionary).find((key) => pattern.test(key));
+            const deltas = child.geometry.morphAttributes.position[child.morphTargetDictionary[name]];
+            if (!deltas) return;
+            const positions = child.geometry.attributes.position;
+            for (let i = 0; i < positions.count; i++) {
+                const weight = Math.hypot(deltas.getX(i), deltas.getY(i), deltas.getZ(i));
+                if (weight < 1e-6) continue;
+                point.fromBufferAttribute(positions, i);
+                // Skinned (and quantized) meshes only get their real position from the skeleton
+                if (child.isSkinnedMesh) child.applyBoneTransform(i, point);
+                point.applyMatrix4(child.matrixWorld);
+                sum.addScaledVector(point, weight);
+                total += weight;
+            }
+        });
+        return total ? sum.multiplyScalar(1 / total) : null;
+    }
+
+    function eyeNodePosition(THREE, object, pattern) {
+        let found = null;
+        object.traverse((child) => {
+            if (!found && pattern.test(child.name)) found = child.getWorldPosition(new THREE.Vector3());
+        });
+        return found;
+    }
+
+    /**
+     * Any rigged head or body (Ready Player Me, Avaturn...) to the model convention: origin between
+     * the eyes, 1 unit = outer eye distance, face towards +Z. The eyes come from the blink blendshapes
+     * (as the bundled avatars are prepared) or from the eye nodes. Bodies are cut below the shoulders.
+     */
+    function fitAvatar(THREE, object) {
+        object.updateMatrixWorld(true);
+        const left = blinkCentroid(THREE, object, EYE_BLINK.left) || eyeNodePosition(THREE, object, EYE_NODE.left);
+        const right = blinkCentroid(THREE, object, EYE_BLINK.right) || eyeNodePosition(THREE, object, EYE_NODE.right);
+        const distance = left && right ? left.distanceTo(right) : 0;
+        if (!(distance > 1e-6)) {
+            throw new VFX.VideoEffectsError(
+                'ASSET_INVALID',
+                'The avatar needs eyeBlinkLeft/eyeBlinkRight blendshapes or LeftEye/RightEye nodes'
+            );
+        }
+        const scale = EYE_CENTER_DISTANCE / distance;
+        const center = left.clone().add(right).multiplyScalar(0.5);
+        // A face looking at the viewer has its left eye on the viewer's right (+X): else turn it 180°
+        if (left.x < right.x) object.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+        object.scale.setScalar(scale);
+        object.position.copy(center).multiplyScalar(-scale).applyQuaternion(object.quaternion);
+        object.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(object);
+        return { clipY: box.min.y < BODY_MIN_Y ? BODY_CUT_Y : null };
+    }
+
     class ModelRenderer {
         constructor(options = {}) {
             this.options = { ...DEFAULT_THREE, ...options };
             this.loadPromise = null;
             this.environmentPromise = null;
+            this.decodersPromise = null;
             this.models = new Map();
             this.current = null;
             this.destroyed = false;
@@ -168,15 +248,43 @@
             return this.environmentPromise;
         }
 
-        loadModel(url) {
+        // Custom models may use Draco geometry or KTX2 textures: decoders are only fetched for them
+        enableCustomDecoders() {
+            if (!this.decodersPromise) {
+                this.decodersPromise = Promise.all([
+                    import(this.options.dracoLoaderUrl),
+                    import(this.options.ktx2LoaderUrl),
+                ])
+                    .then(([{ DRACOLoader }, { KTX2Loader }]) => {
+                        if (this.destroyed || !this.renderer) return;
+                        this.dracoLoader = new DRACOLoader().setDecoderPath(this.options.dracoDecoderPath);
+                        this.ktx2Loader = new KTX2Loader()
+                            .setTranscoderPath(this.options.ktx2TranscoderPath)
+                            .detectSupport(this.renderer);
+                        this.loader.setDRACOLoader(this.dracoLoader).setKTX2Loader(this.ktx2Loader);
+                    })
+                    .catch((error) => {
+                        // Plain models still load
+                        console.warn('[VideoEffects] Draco/KTX2 decoders unavailable', error);
+                        this.decodersPromise = null;
+                    });
+            }
+            return this.decodersPromise;
+        }
+
+        loadModel(url, fit = false) {
             if (!this.models.has(url)) {
                 const promise = this.loader.loadAsync(url).then(
-                    (gltf) => gltf.scene,
+                    (gltf) => {
+                        if (fit) gltf.scene.userData.vfxFit = fitAvatar(this.THREE, gltf.scene);
+                        return gltf.scene;
+                    },
                     (error) => {
-                        this.models.delete(url);
                         throw new VFX.VideoEffectsError('ASSET_LOAD_FAILED', `Unable to load 3D model ${url}`, error);
                     }
                 );
+                // Do not cache failures: the asset may become reachable again
+                promise.catch(() => this.models.delete(url));
                 this.models.set(url, promise);
             }
             return this.models.get(url);
@@ -221,13 +329,16 @@
             return avatar;
         }
 
-        async setModel(config, url) {
+        async setModel(definition, url) {
             await this.load();
+            if (definition.fit) await this.enableCustomDecoders();
             const [object, environment] = await Promise.all([
-                this.loadModel(url),
-                config.avatar ? this.loadEnvironment() : null,
+                this.loadModel(url, definition.fit),
+                definition.avatar ? this.loadEnvironment() : null,
             ]);
             if (this.destroyed) return;
+            // A fitted model decides its own cut (bodies are cut below the shoulders)
+            const config = object.userData.vfxFit ? { ...definition, clipY: object.userData.vfxFit.clipY } : definition;
             this.clearModel();
             const avatar = config.avatar ? this.prepareAvatar(object, config) : null;
             this.current = { object, config, avatar };
@@ -356,6 +467,8 @@
             if (this.occluder) disposeObject(this.occluder);
             this.environment?.dispose();
             this.environment = null;
+            this.dracoLoader?.dispose();
+            this.ktx2Loader?.dispose();
             if (this.renderer) {
                 this.renderer.dispose();
                 this.renderer.forceContextLoss();
@@ -368,5 +481,6 @@
 
     VFX.THREE_DEFAULTS = DEFAULT_THREE;
     VFX.ModelRenderer = ModelRenderer;
+    VFX.fitAvatar = fitAvatar;
     VFX.blendshapeWeight = blendshapeWeight;
 })(typeof globalThis !== 'undefined' ? globalThis : self);

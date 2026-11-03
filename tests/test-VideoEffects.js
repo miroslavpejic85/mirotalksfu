@@ -531,10 +531,19 @@ describe('Video effects engine', () => {
                     occluder: false,
                     avatar: true,
                     clipY: -3,
+                    fit: false,
                     asset: 'a.glb',
                 }
             );
             assert.equal(VFX.registerAvatar3D({ id: 'test-3d-head', model: { asset: 'b.glb' } }).model.clipY, null);
+            // Custom avatars: any rigged model is fitted from its eyes when loaded
+            assert.equal(
+                VFX.registerAvatar3D({ id: 'test-3d-fit', model: { asset: 'c.glb', fit: true } }).model.fit,
+                true
+            );
+            assert.equal(VFX.unregisterEffect('test-3d-fit'), true);
+            assert.equal(VFX.unregisterEffect('test-3d-fit'), false);
+            assert.equal(new VFX.EffectsManager().getEffect('test-3d-fit'), null);
             assert.throws(() => VFX.registerAvatar3D({ id: 'x' }), /model.asset/);
             assert.throws(() => VFX.registerAvatar3D({ id: 'x', model: { asset: 'a.glb', clipY: 'low' } }), /clipY/);
         });
@@ -567,6 +576,8 @@ describe('Video effects engine', () => {
         });
 
         it('defaults the three.js URLs of the avatar helpers', () => {
+            assert.match(VFX.THREE_DEFAULTS.dracoLoaderUrl, /three@[\d.]+\/examples\/jsm\/loaders\/DRACOLoader/);
+            assert.match(VFX.THREE_DEFAULTS.ktx2LoaderUrl, /three@[\d.]+\/examples\/jsm\/loaders\/KTX2Loader/);
             assert.match(VFX.THREE_DEFAULTS.meshoptDecoderUrl, /three@[\d.]+\/examples\/jsm\/libs\/meshopt_decoder/);
             assert.match(
                 VFX.THREE_DEFAULTS.roomEnvironmentUrl,
