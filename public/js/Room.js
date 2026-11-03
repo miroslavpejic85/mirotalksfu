@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.44
+ * @version 2.7.45
  *
  */
 
@@ -10635,13 +10635,35 @@ function isAnyVisualEffectOn() {
 }
 
 /**
- * "Effects on" indicators in the room: a badge on the own camera tile (open the panel / turn
- * everything off) and a dot on the camera button. Effects are remembered between meetings.
+ * "Effects on" indicators in the room: a badge on the own camera tile (open the panel), a close
+ * button above the main video control and a dot on the camera button. Effects are remembered
+ * between meetings.
  */
 function updateVideoEffectsIndicators(active = isAnyVisualEffectOn()) {
     if (!rc || !isVisualEffectsMerged()) return;
     const cameraOn = rc.producerLabel.has(RoomClient.mediaType.video);
     stopVideoButton?.classList.toggle('vfx-active-dot', active && cameraOn);
+    const videoSplit = getId('startVideoSplit');
+    let toolbarOff = videoSplit?.querySelector('.vfx-toolbar-off-btn');
+    if (videoSplit && !toolbarOff) {
+        toolbarOff = document.createElement('button');
+        toolbarOff.type = 'button';
+        toolbarOff.className = 'vfx-toolbar-off-btn hidden';
+        const toolbarOffIcon = document.createElement('i');
+        toolbarOffIcon.className = 'fas fa-xmark';
+        toolbarOff.appendChild(toolbarOffIcon);
+        toolbarOff.setAttribute(
+            'aria-label',
+            window.i18n?.t('Turn off all effects', 'labels') || 'Turn off all effects'
+        );
+        toolbarOff.addEventListener('click', (event) => {
+            event.stopPropagation();
+            getVideoEffectsPanel()?.turnOffAll();
+        });
+        videoSplit.appendChild(toolbarOff);
+        if (!isMobileDevice) setTippy(toolbarOff, 'Turn off all effects', 'top');
+    }
+    toolbarOff?.classList.toggle('hidden', !(active && cameraOn));
     const tile = cameraOn ? getId(`${rc.videoProducerId}__video`) : null;
     document.querySelectorAll('.vfx-on-badge').forEach((badge) => {
         if (badge.parentElement !== tile) badge.remove();
@@ -10667,21 +10689,9 @@ function updateVideoEffectsIndicators(active = isAnyVisualEffectOn()) {
         event.stopPropagation();
         openVideoEffectsSettings();
     });
-    const off = document.createElement('button');
-    off.type = 'button';
-    off.className = 'vfx-on-badge-off';
-    const offIcon = document.createElement('i');
-    offIcon.className = 'fas fa-xmark';
-    off.appendChild(offIcon);
-    off.setAttribute('aria-label', window.i18n?.t('Turn off all effects', 'labels') || 'Turn off all effects');
-    off.addEventListener('click', (event) => {
-        event.stopPropagation();
-        getVideoEffectsPanel()?.turnOffAll();
-    });
-    badge.append(open, off);
+    badge.appendChild(open);
     if (bottomButtons.style.display === 'none') badge.style.display = 'none';
     tile.appendChild(badge);
-    if (!isMobileDevice) setTippy(off, 'Turn off all effects', 'top');
 }
 
 async function initVideoEffects() {
@@ -11180,7 +11190,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.44',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.45',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

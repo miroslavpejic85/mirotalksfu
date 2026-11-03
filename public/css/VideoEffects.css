@@ -807,15 +807,6 @@
     font-size: 0.8rem;
 }
 
-.vfx-on-badge .vfx-on-badge-off {
-    padding: 0 9px;
-    border-left: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-#videoMediaContainer .vfx-on-badge .vfx-on-badge-off i {
-    color: #fff;
-}
-
 .vfx-on-badge button:hover {
     background: rgba(255, 255, 255, 0.12);
 }
@@ -833,6 +824,54 @@
 
 #bottomButtons #stopVideoButton.vfx-active-dot {
     position: relative;
+}
+
+#bottomButtons #startVideoSplit {
+    position: relative;
+}
+
+#bottomButtons #startVideoSplit .vfx-toolbar-off-btn {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    z-index: 3;
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(239, 68, 68, 0.55) !important;
+    border-radius: 999px;
+    background: rgba(239, 68, 68, 0.88);
+    color: #fff;
+    font-size: 0.78rem;
+}
+
+#bottomButtons #startVideoSplit .vfx-toolbar-off-btn:hover {
+    background: rgba(239, 68, 68, 1);
+}
+
+#bottomButtons #startVideoSplit .vfx-toolbar-off-btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+#bottomButtons #startVideoSplit .vfx-toolbar-off-btn i {
+    position: static;
+    display: inline-block;
+    margin: 0;
+    color: #fff !important;
+    font-size: 0.82rem;
+}
+
+@media screen and (max-width: 600px) {
+    #bottomButtons #startVideoSplit .vfx-toolbar-off-btn {
+        top: -10px;
+        right: -10px;
+        width: 32px;
+        height: 32px;
+    }
 }
 
 #bottomButtons #stopVideoButton.vfx-active-dot::after {
