@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.45
+ * @version 2.7.46
  *
  */
 
@@ -2317,7 +2317,7 @@ class RoomClient {
 
         banner.root.style.display = 'flex';
         banner.root.setAttribute('aria-hidden', 'false');
-        banner.root.classList.remove('is-reconnecting', 'is-restored', 'is-failed', 'is-interactive');
+        banner.root.classList.remove('is-reconnecting', 'is-restored', 'is-failed', 'is-planned', 'is-interactive');
         banner.root.classList.add('is-visible', `is-${state}`);
 
         if (banner.overlay) {
@@ -2393,25 +2393,28 @@ class RoomClient {
 
     showReconnectAlert(reason) {
         this.renderReconnectBanner({
-            title: 'Connection lost',
-            message: `${reason || 'Network issue'}.`,
-            meta: 'Retrying',
+            title: 'Connection interrupted',
+            message: this.getDisconnectReasonMessage(reason),
+            meta: 'Reconnecting automatically',
             icon: 'fa-solid fa-plug',
             state: 'reconnecting',
             showSpinner: true,
         });
     }
 
-    showServerRestartAlert(meta = 'Please wait') {
-        const message = 'The server is being updated. You will be reconnected automatically.';
+    showServerRestartAlert(meta = 'Reconnecting automatically') {
+        const message =
+            'MiroTalk is updating. You may be disconnected briefly while the server restarts. Please reconnect in a moment.';
         this.renderReconnectBanner({
-            title: 'Server restarting',
+            title: 'Updating MiroTalk',
             message:
-                window.i18n?.t('The server is being updated. You will be reconnected automatically.', 'dialogs') ||
-                message,
+                window.i18n?.t(
+                    'MiroTalk is updating. You may be disconnected briefly while the server restarts. Please reconnect in a moment.',
+                    'dialogs'
+                ) || message,
             meta,
             icon: 'fa-solid fa-screwdriver-wrench',
-            state: 'reconnecting',
+            state: 'planned',
             showSpinner: true,
         });
     }
@@ -2419,14 +2422,30 @@ class RoomClient {
     showMaxAttemptsAlert() {
         this.renderReconnectBanner({
             title: 'Unable to reconnect',
-            message: 'Connection could not be restored.',
-            meta: '',
+            message: 'Connection could not be restored automatically.',
+            meta: 'Please reconnect now.',
             icon: 'fa-solid fa-triangle-exclamation',
             state: 'failed',
             showSpinner: false,
-            actionLabel: 'Join Room',
+            actionLabel: 'Reconnect now',
             onAction: () => this.refreshBrowser(),
         });
+    }
+
+    getDisconnectReasonMessage(reason) {
+        switch (reason) {
+            case 'ping timeout':
+                return 'The network timed out. Trying to reconnect.';
+            case 'transport close':
+            case 'transport error':
+                return 'Your network connection changed. Trying to reconnect.';
+            case 'io server disconnect':
+                return 'The server closed the connection. Reconnecting now.';
+            case 'io client disconnect':
+                return 'Connection closed. Reconnecting now.';
+            default:
+                return 'Network issue detected. Trying to reconnect.';
+        }
     }
 
     showServerAwayMessage() {
@@ -2515,13 +2534,13 @@ class RoomClient {
         const seconds = Math.max(1, Math.round(delay / 1000));
 
         if (this.serverRestarting) {
-            this.showServerRestartAlert(`Retry in ${seconds}s`);
+            this.showServerRestartAlert(`Attempt ${attempt}/${this.maxReconnectAttempts} - Retry in ${seconds}s`);
             return;
         }
 
         this.renderReconnectBanner({
             title: 'Reconnecting',
-            message: `Attempt ${attempt} of ${this.maxReconnectAttempts}.`,
+            message: 'Trying to restore your room connection.',
             meta: `Retry in ${seconds}s`,
             icon: 'fa-solid fa-rotate-right',
             state: 'reconnecting',

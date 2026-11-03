@@ -189,18 +189,23 @@
                     <i id="disconnectBannerIcon" class="fa-solid fa-plug"></i>
                 </span>
                 <div class="disconnect-banner__copy">
-                    <span id="disconnectBannerTitle" class="disconnect-banner__title">Connection lost</span>
+                    <span id="disconnectBannerTitle" class="disconnect-banner__title">Updating MiroTalk</span>
                     <span id="disconnectBannerMessage" class="disconnect-banner__message"
-                        >Trying to restore the room connection...</span
+                        >MiroTalk is updating. You may be disconnected briefly while the server restarts. Please
+                        reconnect in a moment.</span
                     >
                     <div id="disconnectBannerStatus" class="disconnect-banner__status">
-                        <span id="disconnectBannerMeta" class="disconnect-banner__meta">Retrying...</span>
+                        <span id="disconnectBannerMeta" class="disconnect-banner__meta"
+                            >Reconnecting automatically</span
+                        >
                         <span id="disconnectBannerSpinner" class="disconnect-banner__spinner" aria-hidden="true">
                             <i class="fa-solid fa-circle-notch fa-spin"></i>
                         </span>
                     </div>
                 </div>
-                <button id="disconnectBannerAction" class="disconnect-banner__action" type="button">Join Room</button>
+                <button id="disconnectBannerAction" class="disconnect-banner__action" type="button">
+                    Reconnect now
+                </button>
             </div>
         </div>
 

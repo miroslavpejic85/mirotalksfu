@@ -257,6 +257,25 @@ body {
     animation: disconnectBannerPulse 1.8s ease-in-out infinite;
 }
 
+.disconnect-banner.is-planned .disconnect-banner__inner {
+    border-color: rgba(106, 179, 255, 0.35);
+    background:
+        radial-gradient(circle at top left, rgba(106, 179, 255, 0.2), transparent 42%),
+        linear-gradient(135deg, rgba(8, 33, 61, 0.93), rgba(18, 19, 26, 0.94));
+}
+
+.disconnect-banner.is-planned .disconnect-banner__icon-wrap {
+    background: linear-gradient(145deg, rgba(106, 179, 255, 0.34), rgba(106, 179, 255, 0.12));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 10px 24px rgba(106, 179, 255, 0.16);
+}
+
+.disconnect-banner.is-planned .disconnect-banner__meta {
+    background: rgba(106, 179, 255, 0.16);
+    border-color: rgba(106, 179, 255, 0.2);
+}
+
 .disconnect-banner.is-restored .disconnect-banner__inner {
     border-color: rgba(89, 215, 165, 0.34);
     background:
@@ -321,6 +340,13 @@ body {
     .disconnect-banner__meta,
     .disconnect-banner__action {
         font-size: 0.76rem;
+    }
+
+    .disconnect-banner__message {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 }
 
