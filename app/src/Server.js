@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.43
+ * @version 2.7.44
  *
  */
 
@@ -1161,6 +1161,7 @@ function startServer() {
     // valid join token or an allowed user name).
     app.get('/createRoomToken', createRoomTokenLimiter, async (req, res) => {
         const { room, name } = checkXSS(req.query);
+        const hostRequesterAuthenticated = isHostRequesterAuthenticated(req);
 
         if (!room || !Validator.isValidRoomName(room)) {
             return res.status(400).json({ message: 'Invalid room' });
@@ -1172,7 +1173,13 @@ function startServer() {
 
         // Creation policy only: ignore whether the room currently exists
         const creationRoomList = { has: () => false, size: roomList.size };
-        let allowed = isAllowedRoomAccess('/createRoomToken', req, hostCfg, creationRoomList, room);
+        const creationHostCfg = hostCfg.protected
+            ? {
+                  ...hostCfg,
+                  authenticated: hostRequesterAuthenticated,
+              }
+            : hostCfg;
+        let allowed = isAllowedRoomAccess('/createRoomToken', req, creationHostCfg, creationRoomList, room);
 
         if (!allowed) {
             const authHeader = req.headers.authorization || '';
@@ -1181,7 +1188,7 @@ function startServer() {
         }
 
         // Host protection only: same as the HTTP direct join by user name (never trusted with OIDC)
-        if (!allowed && !OIDC.enabled && hostCfg.authenticated) {
+        if (!allowed && !OIDC.enabled && hostRequesterAuthenticated) {
             allowed = await isRoomAllowedForUser('Create room by name', name, room);
         }
 
@@ -6722,6 +6729,12 @@ function startServer() {
 
     function updateHostAuthenticatedFlag() {
         hostCfg.authenticated = !hostCfg.protected || authHost.getAuthorizedIPs().length > 0;
+    }
+
+    function isHostRequesterAuthenticated(req) {
+        if (!hostCfg.protected) return false;
+        const ip = getIP(req);
+        return Boolean(ip && allowedIP(ip));
     }
 
     function allowedIP(ip) {

@@ -128,6 +128,7 @@ describe('GET /createRoomToken', () => {
             jwt,
             jwtKeys,
             JWT_VERIFY_OPTIONS,
+            isHostRequesterAuthenticated: (req) => req.__hostRequesterAuthenticated === true,
             isJoinTokenAuthorized: async () => joinTokenOk,
             isRoomAllowedForUser: async (msg, name) => nameAllowed && name === 'alice',
         });
@@ -138,7 +139,10 @@ describe('GET /createRoomToken', () => {
         return { handler, context };
     }
 
-    function call(handler, { room = 'new-room', authenticated = false, authorization, name } = {}) {
+    function call(
+        handler,
+        { room = 'new-room', authenticated = false, authorization, name, hostRequesterAuthenticated = false } = {}
+    ) {
         const res = {
             statusCode: 200,
             status(code) {
@@ -155,6 +159,7 @@ describe('GET /createRoomToken', () => {
             query: { room, name },
             headers: authorization ? { authorization } : {},
             oidc: { isAuthenticated: () => authenticated },
+            __hostRequesterAuthenticated: hostRequesterAuthenticated,
         };
         return Promise.resolve(handler(req, res)).then(() => res);
     }
@@ -209,7 +214,7 @@ describe('GET /createRoomToken', () => {
 
         it('allows the first room once the host is logged in, but not before', async () => {
             const loggedIn = setupRoute({ oidc: off, hostCfg: host(true) });
-            assert.equal((await call(loggedIn.handler)).statusCode, 200);
+            assert.equal((await call(loggedIn.handler, { hostRequesterAuthenticated: true })).statusCode, 200);
             const loggedOut = setupRoute({ oidc: off, hostCfg: host(false) });
             assert.equal((await call(loggedOut.handler)).statusCode, 403);
         });
@@ -228,10 +233,23 @@ describe('GET /createRoomToken', () => {
 
         it('allows a direct join by an allowed user name only while the host is logged in', async () => {
             const on = setupRoute({ oidc: off, hostCfg: host(true), roomList: existing(), nameAllowed: true });
-            assert.equal((await call(on.handler, { name: 'alice' })).statusCode, 200);
+            assert.equal((await call(on.handler, { name: 'alice', hostRequesterAuthenticated: true })).statusCode, 200);
             assert.equal((await call(on.handler, { name: 'mallory' })).statusCode, 403);
             const out = setupRoute({ oidc: off, hostCfg: host(false), roomList: existing(), nameAllowed: true });
             assert.equal((await call(out.handler, { name: 'alice' })).statusCode, 403);
+        });
+
+        it('denies unauthenticated clients from other IPs even while another host session is active', async () => {
+            const firstRoom = setupRoute({ oidc: off, hostCfg: host(true), roomList: new Map() });
+            assert.equal((await call(firstRoom.handler)).statusCode, 403);
+
+            const existingRoom = setupRoute({
+                oidc: off,
+                hostCfg: host(true),
+                roomList: existing(),
+                nameAllowed: true,
+            });
+            assert.equal((await call(existingRoom.handler, { name: 'alice' })).statusCode, 403);
         });
 
         it('never trusts a self-asserted name with OIDC enabled', async () => {
