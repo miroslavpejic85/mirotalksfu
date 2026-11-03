@@ -117,7 +117,7 @@ describe('test-Reconnect', () => {
 
         proto.updateReconnectAlert.call(client, 15000, 3);
 
-        client.banners.should.eql([{ type: 'restart', meta: 'Retry in 15s' }]);
+        client.banners.should.eql([{ type: 'restart', meta: 'Attempt 3/10 - Retry in 15s' }]);
     });
 
     it('does not include the stale client presenter flag in reconnect URLs', () => {
