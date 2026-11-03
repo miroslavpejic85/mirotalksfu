@@ -3573,6 +3573,21 @@
                                 >Powered by KLIPY</a
                             >
                         </div>
+
+                        <!-- CHAT TRANSLATION -->
+                        <div
+                            id="chatTranslate"
+                            class="hidden fadein chatTranslatePicker"
+                            role="dialog"
+                            aria-label="Translate my messages to"
+                        >
+                            <div class="chat-translate-title">Translate my messages to</div>
+                            <div id="chatTranslateList" class="chat-translate-list" role="listbox">
+                                <button type="button" class="chat-translate-item active" data-lang="" role="option">
+                                    Off
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- CHAT TYPING INDICATOR -->
@@ -3626,6 +3641,20 @@
                                             aria-expanded="false"
                                         >
                                             <span class="chat-gif-btn-label" translate="no">GIF</span>
+                                        </button>
+                                        <button
+                                            id="chatTranslateButton"
+                                            class="chat-toolbar-btn hidden"
+                                            type="button"
+                                            aria-label="Translate my messages"
+                                            aria-expanded="false"
+                                        >
+                                            <i class="fas fa-language"></i>
+                                            <span
+                                                id="chatTranslateBadge"
+                                                class="chat-translate-badge"
+                                                translate="no"
+                                            ></span>
                                         </button>
                                         <button
                                             id="chatMarkdownButton"

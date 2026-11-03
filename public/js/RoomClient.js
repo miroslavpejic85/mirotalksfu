@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.47
+ * @version 2.7.50
  *
  */
 
@@ -438,6 +438,10 @@ class RoomClient {
         this.isChatGifOpen = false;
         this.gifSearch = null; // KLIPY client config from joinRoom
         this.chatGifSearch = null; // GifSearch instance
+        this.chatTranslation = null; // chat translation config (capability flag, limits, languages)
+        this.chatTranslateLang = ''; // language picked for my outgoing messages ('' = off)
+        this.isChatTranslating = false;
+        this.isChatTranslateOpen = false;
         this.isPollOpen = false;
         this.isPollPinned = false;
         this.isPollMaximized = false;
@@ -843,6 +847,7 @@ class RoomClient {
         await this.handleRoomInfo(room);
 
         this.loadGifSearchConfig();
+        this.loadChatTranslationConfig();
 
         await this.loadDeviceAndInitTransports();
 
@@ -7936,6 +7941,7 @@ class RoomClient {
 
     setChatEmojiOpen(isOpen) {
         if (isOpen && this.isChatGifOpen) this.setChatGifOpen(false);
+        if (isOpen && this.isChatTranslateOpen) this.setChatTranslateOpen(false);
         this.isChatEmojiOpen = isOpen;
         this.getId('chatEmoji').classList.toggle('show', isOpen);
         const chatEmojiButton = this.getId('chatEmojiButton');
@@ -7992,6 +7998,7 @@ class RoomClient {
         if (!chatGif || !chatGifButton) return;
         if (isOpen && !this.chatGifSearch) return;
         if (isOpen && this.isChatEmojiOpen) this.setChatEmojiOpen(false);
+        if (isOpen && this.isChatTranslateOpen) this.setChatTranslateOpen(false);
         this.isChatGifOpen = isOpen;
         chatGif.classList.toggle('show', isOpen);
         chatGifButton.classList.toggle('is-active', isOpen);
@@ -7999,6 +8006,119 @@ class RoomClient {
         if (isOpen) {
             this.chatGifSearch.open();
             if (!this.isMobileDevice) this.getId('chatGifSearchInput')?.focus();
+        }
+    }
+
+    toggleChatTranslate() {
+        this.setChatTranslateOpen(!this.isChatTranslateOpen);
+    }
+
+    async loadChatTranslationConfig() {
+        try {
+            const cfg = await this.socket.request('getChatTranslationConfig');
+            this.chatTranslation = cfg?.enabled && Array.isArray(cfg.languages) && cfg.languages.length ? cfg : null;
+        } catch (err) {
+            console.warn('Chat translation config error', err?.message || err);
+            this.chatTranslation = null;
+        }
+        this.initChatTranslate();
+    }
+
+    // Idempotent: called once the config arrives and again when the room UI is ready (whichever is last wins).
+    initChatTranslate() {
+        const chatTranslateButton = this.getId('chatTranslateButton');
+        const chatTranslateList = this.getId('chatTranslateList');
+        if (!chatTranslateButton || !chatTranslateList) return;
+        if (!BUTTONS.chat.chatTranslateButton || !this.chatTranslation) {
+            this.selectChatTranslateLang('');
+            this.setChatTranslateOpen(false);
+            hide(chatTranslateButton);
+            return;
+        }
+        if (!chatTranslateList.querySelector('[data-lang]:not([data-lang=""])')) {
+            this.chatTranslation.languages.forEach(({ code, name }) => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'chat-translate-item';
+                item.setAttribute('role', 'option');
+                item.setAttribute('translate', 'no');
+                item.dataset.lang = code;
+                item.textContent = name;
+                chatTranslateList.appendChild(item);
+            });
+        }
+        show(chatTranslateButton);
+    }
+
+    setChatTranslateOpen(isOpen) {
+        const chatTranslate = this.getId('chatTranslate');
+        const chatTranslateButton = this.getId('chatTranslateButton');
+        if (!chatTranslate || !chatTranslateButton) return;
+        if (isOpen && !this.chatTranslation) return;
+        if (isOpen && this.isChatEmojiOpen) this.setChatEmojiOpen(false);
+        if (isOpen && this.isChatGifOpen) this.setChatGifOpen(false);
+        this.isChatTranslateOpen = isOpen;
+        chatTranslate.classList.toggle('show', isOpen);
+        chatTranslateButton.setAttribute('aria-expanded', String(isOpen));
+        if (isOpen) chatTranslate.querySelector('.chat-translate-item.active')?.scrollIntoView({ block: 'nearest' });
+    }
+
+    /**
+     * Set the language of my outgoing messages
+     * @param {string} code language code, empty to turn translation off
+     */
+    selectChatTranslateLang(code) {
+        this.chatTranslateLang = code || '';
+        const chatTranslateButton = this.getId('chatTranslateButton');
+        chatTranslateButton?.classList.toggle('is-active', !!this.chatTranslateLang);
+        const badge = this.getId('chatTranslateBadge');
+        if (badge) badge.textContent = this.chatTranslateLang.split('-')[0].toUpperCase();
+        this.getId('chatTranslateList')
+            ?.querySelectorAll('.chat-translate-item')
+            .forEach((item) => {
+                item.classList.toggle('active', (item.dataset.lang || '') === this.chatTranslateLang);
+            });
+    }
+
+    // Sync check so plain sends never yield to the event loop (e.g. sendGif restores the draft right after sending)
+    needsChatTranslation() {
+        const text = chatMessage.value.trim();
+        if (!this.chatTranslateLang || !this.chatTranslation || !text) return false;
+        if (isChatGPTOn || isDeepSeekOn || (VideoAI.enabled && VideoAI.active && this.chatPeerId === 'ChatGPT')) {
+            return false;
+        }
+        return !/^https?:\/\/\S+$/i.test(text);
+    }
+
+    /**
+     * Translate the text typed in the chat input into the picked language.
+     * On failure the text is kept in the input and nothing is sent, to never leak the untranslated message by mistake.
+     * @returns {Promise<boolean>} true when the message can be sent
+     */
+    async translateChatInput() {
+        this.isChatTranslating = true;
+        chatMessage.readOnly = true;
+        chatSendButton.disabled = true;
+        try {
+            const res = await this.socket.request('translateChatMessage', {
+                text: chatMessage.value.trim(),
+                language: this.chatTranslateLang,
+            });
+            if (!res || res.error || !res.text) {
+                this.userLog('warning', res?.error || 'Translation failed, message not sent', 'top-end');
+                return false;
+            }
+            chatMessage.value = res.text;
+            return true;
+        } catch (err) {
+            console.warn('Chat translation error', err?.message || err);
+            this.userLog('warning', 'Translation failed, message not sent', 'top-end');
+            return false;
+        } finally {
+            this.isChatTranslating = false;
+            chatMessage.readOnly = false;
+            chatSendButton.disabled = false;
+            chatMessage.focus();
         }
     }
 
@@ -8041,12 +8161,17 @@ class RoomClient {
             });
     }
 
-    sendMessage() {
+    async sendMessage() {
         if (!this.thereAreParticipants() && !isChatGPTOn && !isDeepSeekOn && !(VideoAI.enabled && VideoAI.active)) {
             this.cleanMessage();
             isChatPasteTxt = false;
             return this.userLog('info', 'No participants in the room', 'top-end');
         }
+
+        if (this.isChatTranslating) return;
+
+        // Translate my outgoing message (not for AI assistants)
+        if (this.needsChatTranslation() && !(await this.translateChatInput())) return;
 
         // Prevent long messages
         if (this.chatMessageLengthCheck && chatMessage.value.length > this.chatMessageLength) {

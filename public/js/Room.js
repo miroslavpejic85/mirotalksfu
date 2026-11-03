@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.47
+ * @version 2.7.50
  *
  */
 
@@ -715,6 +715,7 @@ async function initClient() {
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
         setTippy('chatGifButton', 'GIF', 'top');
+        setTippy('chatTranslateButton', 'Translate my messages', 'top');
         setTippy('chatShowParticipantsListBtn', 'Toggle participants list', 'bottom');
         setTippy('chatMarkdownButton', 'Markdown', 'top');
         setTippy('fileShareChatButton', 'Share the file', 'top');
@@ -2846,6 +2847,7 @@ function roomIsReady() {
     handleInputs();
     handleChatEmojiPicker();
     handleChatGifPicker();
+    handleChatTranslatePicker();
     handleRoomEmojiPicker();
     handleEditor();
     loadSettingsFromLocalStorage();
@@ -5322,6 +5324,36 @@ function handleChatGifPicker() {
     });
 
     rc.initChatGif();
+}
+
+function handleChatTranslatePicker() {
+    const chatTranslateButton = getId('chatTranslateButton');
+    const chatTranslate = getId('chatTranslate');
+    if (!chatTranslateButton || !chatTranslate) return;
+
+    chatTranslateButton.onclick = () => rc.toggleChatTranslate();
+
+    chatTranslate.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            rc.setChatTranslateOpen(false);
+            chatTranslateButton.focus();
+        }
+    });
+
+    chatTranslate.addEventListener('click', (e) => {
+        const item = e.target.closest('.chat-translate-item');
+        if (!item) return;
+        rc.selectChatTranslateLang(item.dataset.lang || '');
+        rc.setChatTranslateOpen(false);
+        chatMessage.focus();
+    });
+
+    handleClickOutside(chatTranslate, chatTranslateButton, () => {
+        if (rc.isChatTranslateOpen) rc.setChatTranslateOpen(false);
+    });
+
+    rc.initChatTranslate();
 }
 
 function handleRoomEmojiPicker() {
@@ -11190,7 +11222,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.47',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.50',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.7.47 - Configuration File
+ * MiroTalk SFU v2.7.50 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -832,6 +832,36 @@ module.exports = {
             enabled: process.env.KLIPY_API_ENABLED === 'true',
             apiKey: process.env.KLIPY_API_KEY || '',
             contentFilter: process.env.KLIPY_CONTENT_FILTER || 'high',
+        },
+
+        /**
+         * Chat Translation Configuration
+         * ==============================
+         * Optional: each participant can pick a language in the chat and their outgoing
+         * messages are translated before being sent, so others read them in that language.
+         * Uses any OpenAI-compatible chat completions endpoint (OpenAI, self-hosted, etc.).
+         * The message text is sent to that endpoint; the API key stays on the server
+         * and is NEVER exposed to the browser.
+         *
+         * Core Settings:
+         * -------------
+         * - enabled         : Enable/disable chat translation [true/false] (default: false)
+         * - basePath/apiKey/model/reasoningEffort : default to the CHATGPT_* values when not set
+         * - maxChars        : Max characters per message to translate (default: 1000)
+         * - maxTokens       : Max tokens of the translated answer (default: 1000)
+         * - rateLimit       : Max translations per peer per minute (default: 20)
+         */
+        chatTranslation: {
+            enabled: process.env.CHAT_TRANSLATION_ENABLED === 'true',
+            basePath:
+                process.env.CHAT_TRANSLATION_BASE_PATH || process.env.CHATGPT_BASE_PATH || 'https://api.openai.com/v1/',
+            apiKey: process.env.CHAT_TRANSLATION_API_KEY || process.env.CHATGPT_API_KEY || '',
+            model: process.env.CHAT_TRANSLATION_MODEL || process.env.CHATGPT_MODEL || 'gpt-6-luna',
+            reasoningEffort:
+                process.env.CHAT_TRANSLATION_REASONING_EFFORT ?? process.env.CHATGPT_REASONING_EFFORT ?? 'none',
+            maxChars: parseInt(process.env.CHAT_TRANSLATION_MAX_CHARS) || 1000,
+            maxTokens: parseInt(process.env.CHAT_TRANSLATION_MAX_TOKENS) || 1000,
+            rateLimit: parseInt(process.env.CHAT_TRANSLATION_RATE_LIMIT) || 20,
         },
 
         /**
@@ -1686,6 +1716,7 @@ module.exports = {
                 chatSaveButton: process.env.SHOW_CHAT_SAVE !== 'false',
                 chatEmojiButton: process.env.SHOW_CHAT_EMOJI !== 'false',
                 chatGifButton: process.env.SHOW_CHAT_GIF !== 'false',
+                chatTranslateButton: process.env.SHOW_CHAT_TRANSLATE !== 'false', // Shown only when chatTranslation is enabled
                 chatMarkdownButton: process.env.SHOW_CHAT_MARKDOWN !== 'false',
                 chatSpeechStartButton: process.env.SHOW_CHAT_SPEECH !== 'false',
                 chatGPT: process.env.ENABLE_CHAT_GPT !== 'false',

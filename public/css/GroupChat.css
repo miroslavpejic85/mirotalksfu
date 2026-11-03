@@ -1035,6 +1035,84 @@
     line-height: 1;
 }
 
+/* Chat translation picker */
+#chatTranslateButton {
+    position: relative;
+}
+
+.chat-translate-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: none;
+    padding: 1px 3px;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #000;
+    background: #ffff00;
+    border-radius: 5px;
+}
+
+#chatTranslateButton.is-active .chat-translate-badge {
+    display: block;
+}
+
+.chatTranslatePicker {
+    z-index: 1;
+    position: absolute;
+    left: 5px;
+    bottom: 132px;
+    width: min(260px, calc(100% - 10px));
+    max-height: min(360px, calc(100% - 140px));
+    padding: 8px;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--body-bg);
+    border: var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.chatTranslatePicker.show {
+    display: flex !important;
+}
+
+.chat-translate-title {
+    padding: 2px 6px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.chat-translate-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.chat-translate-item {
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 14px;
+    color: #fff;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.chat-translate-item:hover,
+.chat-translate-item:focus-visible {
+    background: rgba(255, 255, 255, 0.11);
+}
+
+.chat-translate-item.active {
+    background: color-mix(in srgb, var(--chat-accent) 22%, transparent);
+}
+
 /* status */
 .online,
 .offline,

@@ -85,7 +85,7 @@ href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/">Documentation</a> ·
 
 - 🎥 Video up to **8K @ 60fps** · Screen sharing · Recording · Picture-in-Picture
 - 🎭 [Video effects](public/video-effects/README.md) processed in the browser: face accessories (glasses, hats, beards, dog ears...), animated avatars that blink and talk, beauty & colour filters, background blur/replacement
-- 💬 Chat with Markdown, emoji & optional GIF search ([KLIPY](https://partner.klipy.com/) · Collaborative whiteboard and Rich text editor · File sharing
+- 💬 Chat with Markdown, emoji & optional GIF search ([KLIPY](https://partner.klipy.com/)) & optional chat translation · Collaborative whiteboard and Rich text editor · File sharing
 - 🤖 ChatGPT (OpenAI) & DeepSeek integration · VideoAI avatars · Speech recognition
 - 🔒 OIDC auth · [Host protection](https://docs.mirotalk.com/mirotalk-sfu/host-protection/) · JWT credentials · Room passwords · Lobby & spam mitigation
 - 🔌 REST API · Slack, Discord & Mattermost · Embeddable [iframe](https://docs.mirotalk.com/mirotalk-sfu/integration/#iframe) & [widget](https://docs.mirotalk.com/mirotalk-sfu/integration/#widgets-integration) · 133 languages

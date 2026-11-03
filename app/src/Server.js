@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.47
+ * @version 2.7.50
  *
  */
 
@@ -488,6 +488,33 @@ const gifSearchClientConfig =
                   : 'high',
           }
         : false;
+
+// Chat translation (OpenAI-compatible). The API key never leaves the server.
+const chatTranslationLib = require('./lib/chatTranslation');
+const chatTranslationCfg = config?.integrations?.chatTranslation || {};
+let chatTranslationClient = null;
+let chatTranslationLimiter = null;
+if (chatTranslationCfg.enabled) {
+    if (chatTranslationCfg.apiKey) {
+        const { OpenAI } = require('openai');
+        chatTranslationClient = new OpenAI({
+            baseURL: chatTranslationCfg.basePath || undefined,
+            apiKey: chatTranslationCfg.apiKey,
+        });
+        chatTranslationLimiter = chatTranslationLib.createRateLimiter(chatTranslationCfg.rateLimit || 20, 60 * 1000);
+        log.info('Chat translation enabled', { model: chatTranslationCfg.model });
+    } else {
+        log.warn('Chat translation seems enabled, but you missing the apiKey!');
+    }
+}
+// Capability flag, limits and the language list only (no credentials).
+const chatTranslationClientConfig = chatTranslationClient
+    ? {
+          enabled: true,
+          maxChars: chatTranslationCfg.maxChars || 1000,
+          languages: chatTranslationLib.getPublicLanguages(),
+      }
+    : false;
 
 function getChatGPTParams(messages) {
     const chatGPTConfig = config?.integrations?.chatGPT || {};
@@ -4312,6 +4339,60 @@ function startServer() {
             cb(gifSearchClientConfig);
         });
 
+        // Chat translation capability for joined (non-lobby) peers: flag, limits and language list only.
+        socket.on('getChatTranslationConfig', (_, cb) => {
+            if (typeof cb !== 'function') return;
+            if (!roomExists(socket)) return cb(false);
+            const { peer } = getRoomAndPeer(socket);
+            if (!peer || isPeerInLobby(peer)) return cb(false);
+            cb(chatTranslationClientConfig);
+        });
+
+        /**
+         * Translate an outgoing chat message into the language picked by the sender.
+         * Only a joined peer of the room may use it; the API key stays on the server.
+         */
+        socket.on('translateChatMessage', async ({ text, language } = {}, cb) => {
+            if (typeof cb !== 'function') return;
+
+            if (!roomExists(socket)) return cb({ error: 'Room not found' });
+            const { peer } = getRoomAndPeer(socket);
+            if (!peer || isPeerInLobby(peer)) return cb({ error: 'Room not found' });
+            if (!chatTranslationClient) return cb({ error: 'Chat translation is disabled' });
+
+            const languageName = chatTranslationLib.resolveLanguage(language);
+            if (!languageName) return cb({ error: 'Unsupported language' });
+
+            const input = chatTranslationLib.cleanText(text, chatTranslationCfg.maxChars || 1000);
+            if (!input) return cb({ error: 'Nothing to translate' });
+
+            if (!chatTranslationLimiter.allow(socket.id)) {
+                return cb({ error: 'Too many translation requests, please slow down' });
+            }
+
+            try {
+                const completion = await chatTranslationClient.chat.completions.create(
+                    chatTranslationLib.buildParams(
+                        chatTranslationCfg,
+                        chatTranslationLib.buildMessages(input, languageName)
+                    )
+                );
+                const translation = (completion.choices?.[0]?.message?.content || '').trim();
+                if (!translation) return cb({ error: 'Translation failed' });
+
+                // Never log message content, metadata only.
+                log.debug('Chat translation', { room_id: socket.room_id, language, chars: input.length });
+                cb({ text: translation, language });
+            } catch (error) {
+                log.error('Chat translation error', {
+                    room_id: socket.room_id,
+                    status: error?.status,
+                    message: error?.message,
+                });
+                cb({ error: 'Translation failed' });
+            }
+        });
+
         socket.on('getRoomInfo', async (_, cb) => {
             if (!roomExists(socket)) {
                 return cb({ error: 'Room not found' });
@@ -5988,6 +6069,8 @@ function startServer() {
         });
 
         socket.on('disconnect', (reason) => {
+            chatTranslationLimiter?.remove(socket.id);
+
             if (!roomExists(socket)) {
                 // Clean up socket listeners even if room doesn't exist
                 socket.removeAllListeners();
