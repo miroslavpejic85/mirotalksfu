@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="360" viewBox="0 0 520 360">
+    <defs>
+        <linearGradient id="fadeTop" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff" stop-opacity="0" />
+            <stop offset="0.2" stop-color="#fff" stop-opacity="1" />
+        </linearGradient>
+        <mask id="fade"><rect width="520" height="360" fill="url(#fadeTop)" /></mask>
+        <radialGradient id="fur" cx="0.5" cy="0.35" r="0.75">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#e2e7ee" />
+        </radialGradient>
+    </defs>
+    <g mask="url(#fade)">
+        <g fill="url(#fur)" stroke="#b9c2cf" stroke-width="5">
+            <circle cx="30" cy="130" r="42" /><circle cx="48" cy="190" r="42" /><circle cx="85" cy="245" r="42" /><circle cx="140" cy="285" r="42" /><circle cx="205" cy="308" r="42" /><circle cx="260" cy="314" r="42" /><circle cx="315" cy="308" r="42" /><circle cx="380" cy="285" r="42" /><circle cx="435" cy="245" r="42" /><circle cx="472" cy="190" r="42" /><circle cx="490" cy="130" r="42" />
+        </g>
+        <path
+            fill="url(#fur)"
+            fill-rule="evenodd"
+            d="M28 0 L112 0 C118 60 150 100 260 100 C370 100 402 60 408 0 L492 0 L490 130 L472 190 L435 245 L380 285 L315 308 L260 314 L205 308 L140 285 L85 245 L48 190 L30 130 Z M190 158 C190 140 330 140 330 158 C330 176 190 176 190 158 Z"
+        />
+        <g fill="none" stroke="#c9d1dc" stroke-width="5" stroke-linecap="round">
+            <path d="M70 160 q16 -14 32 0 M130 220 q16 -14 32 0 M200 255 q16 -14 32 0 M290 255 q16 -14 32 0 M360 220 q16 -14 32 0 M420 160 q16 -14 32 0" />
+            <path d="M150 120 q14 -12 28 0 M342 120 q14 -12 28 0 M240 205 q14 -12 28 0" />
+        </g>
+    </g>
+</svg>

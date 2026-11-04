@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * MiroTalk Video Effects - headwear: flower crown, golden crown, party hat, bunny ears and halo.
+ * MiroTalk Video Effects - headwear: flower crown, golden crown, party hat, Santa hat, bunny ears and halo.
  *
  * Offsets and widths are in units of the eye distance (outer eye corners), along the face axes:
  * x towards the subject's left eye, y towards the chin, z into the head. `pivot` is the point of
@@ -10,6 +10,21 @@
 (function (root) {
     const VFX = root.MiroTalkVFX;
     if (!VFX?.registerEffect) return;
+
+    VFX.registerEffect({
+        id: 'santa-hat',
+        label: 'Santa hat',
+        order: 75,
+        layers: [
+            {
+                asset: 'assets/hats/santa-hat.svg',
+                anchor: 'forehead',
+                offset: [0, 0.2, 0],
+                width: 2.3,
+                pivot: [0.5, 0.8],
+            },
+        ],
+    });
 
     VFX.registerEffect({
         id: 'flower-crown',

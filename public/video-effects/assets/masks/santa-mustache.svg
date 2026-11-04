@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="160" viewBox="0 0 400 160">
+    <defs>
+        <radialGradient id="fur" cx="0.5" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#e2e7ee" />
+        </radialGradient>
+        <path
+            id="half"
+            d="M200 62 C235 22 300 26 340 55 C368 76 384 104 368 126 C356 142 334 136 336 120 C338 104 320 96 300 102 C262 112 228 102 200 96 Z"
+        />
+    </defs>
+    <g fill="url(#fur)" stroke="#b9c2cf" stroke-width="5" stroke-linejoin="round">
+        <use href="#half" />
+        <use href="#half" transform="translate(400 0) scale(-1 1)" />
+    </g>
+    <g fill="none" stroke="#c9d1dc" stroke-width="4" stroke-linecap="round">
+        <path d="M232 58 C262 46 300 52 322 72 M232 80 C262 72 292 76 312 88" />
+        <path d="M168 58 C138 46 100 52 78 72 M168 80 C138 72 108 76 88 88" />
+    </g>
+</svg>
