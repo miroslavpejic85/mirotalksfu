@@ -17,11 +17,26 @@
 class VideoEffectsPanel {
     static STORAGE_KEY = 'videoEffectsSettings';
 
-    // Avatars added by the user (3D Avatars tab); only the ones from a link survive a reload
+    // Avatars and accessories added by the user (a .glb in the 3D Avatars tab, a picture in the Avatars
+    // and Effects tabs); only the ones from a link survive a reload
     static CUSTOM_AVATARS_KEY = 'videoEffectsCustomAvatars';
-    static CUSTOM_AVATAR_PREFIX = 'avatar3d-custom-';
+    static CUSTOM_AVATAR_PREFIXES = { avatar3d: 'avatar3d-custom-', avatar: 'avatar-custom-', face: 'effect-custom-' };
+    // Size slider range (a multiplier of the default size) per tab
+    static CUSTOM_SCALE_RANGES = { avatar3d: [0.6, 1.6], avatar: [0.6, 1.6], face: [0.4, 2.5] };
+    // Where a picture accessory goes on the face (units of the eye distance, see the built-in effects)
+    static PLACEMENTS = {
+        head: { anchor: 'forehead', offset: [0, 0.14, 0], width: 2.3, pivot: [0.5, 0.78] },
+        eyes: { anchor: 'eyes', offset: [0, 0.02, -0.08], width: 1.8, pivot: [0.5, 0.5] },
+        nose: { anchor: 'noseTip', offset: [0, 0, 0], width: 0.7, pivot: [0.5, 0.5] },
+        mouth: { anchor: 'mouth', offset: [0, 0, 0], width: 1.2, pivot: [0.5, 0.5] },
+    };
     static MAX_AVATAR_BYTES = 50 * 1024 * 1024;
+    static MAX_PICTURE_BYTES = 10 * 1024 * 1024;
     static MAX_CUSTOM_AVATARS = 6;
+    static PICTURE_EXTENSIONS = /\.(png|jpe?g|webp|gif|svg)$/i;
+    // A picture avatar is this wide, in eye distances (a face is about 2.2), with the eyes at 42% of its height
+    static PICTURE_WIDTH = 3;
+    static PICTURE_EYES_Y = 0.42;
 
     static TABS = ['background', 'face', 'avatar', 'avatar3d', 'filters'];
 
@@ -59,7 +74,8 @@ class VideoEffectsPanel {
         this.loadingEffect = null;
         this.backgroundBusy = false;
         this.urlError = '';
-        this.avatarError = '';
+        this.avatarErrors = { face: '', avatar: '', avatar3d: '' };
+        this.placement = 'head';
         this.avatarBusy = false;
         this.customAvatars = new Map();
         this.restoreCustomAvatars();
@@ -319,15 +335,49 @@ class VideoEffectsPanel {
             // A file name
         }
         name = name
-            .replace(/\.(glb|gltf)$/i, '')
+            .replace(/\.(glb|gltf|png|jpe?g|webp|gif|svg)$/i, '')
             .replace(/[_-]+/g, ' ')
             .trim();
         return name.slice(0, 24) || fallback;
     }
 
-    registerCustomAvatar({ id, label, url, scale, remote, order }) {
-        MiroTalkVFX.registerAvatar3D({ id, label, order, model: { asset: url, scale, fit: true } });
-        this.customAvatars.set(id, { label, url, scale, remote, order });
+    registerCustomAvatar({ id, label, url, scale, remote, order, category = 'avatar3d', placement = 'head' }) {
+        if (category === 'avatar3d') {
+            MiroTalkVFX.registerAvatar3D({ id, label, order, model: { asset: url, scale, fit: true } });
+        } else if (category === 'face') {
+            // A picture (hat, glasses, nose, mask...) placed on the face where the user chose
+            const place = VideoEffectsPanel.PLACEMENTS[placement];
+            MiroTalkVFX.registerEffect({
+                id,
+                label,
+                order,
+                category: 'face',
+                thumbnail: url,
+                layers: [{ ...place, asset: url, width: place.width * scale }],
+            });
+        } else {
+            // A picture (photo, drawing, sticker) placed on the face; it does not blink or talk
+            MiroTalkVFX.registerEffect({
+                id,
+                label,
+                order,
+                category: 'avatar',
+                thumbnail: url,
+                layers: [
+                    {
+                        asset: url,
+                        anchor: 'eyes',
+                        width: VideoEffectsPanel.PICTURE_WIDTH * scale,
+                        pivot: [0.5, VideoEffectsPanel.PICTURE_EYES_Y],
+                    },
+                ],
+            });
+        }
+        this.customAvatars.set(id, { label, url, scale, remote, order, category, placement });
+    }
+
+    customAvatarCount(category) {
+        return [...this.customAvatars.values()].filter((avatar) => avatar.category === category).length;
     }
 
     forgetCustomAvatar(id) {
@@ -346,22 +396,30 @@ class VideoEffectsPanel {
             console.warn('Unable to read the saved custom avatars', error);
         }
         if (!Array.isArray(saved)) return;
-        saved.slice(0, VideoEffectsPanel.MAX_CUSTOM_AVATARS).forEach((item, index) => {
+        const MAX_SAVED =
+            VideoEffectsPanel.MAX_CUSTOM_AVATARS * Object.keys(VideoEffectsPanel.CUSTOM_AVATAR_PREFIXES).length;
+        saved.slice(0, MAX_SAVED).forEach((item) => {
+            const category = Object.keys(VideoEffectsPanel.CUSTOM_AVATAR_PREFIXES).find(
+                (key) =>
+                    typeof item?.id === 'string' && item.id.startsWith(VideoEffectsPanel.CUSTOM_AVATAR_PREFIXES[key])
+            );
             const valid =
-                item &&
-                typeof item.id === 'string' &&
-                item.id.startsWith(VideoEffectsPanel.CUSTOM_AVATAR_PREFIX) &&
+                category &&
+                this.customAvatarCount(category) < VideoEffectsPanel.MAX_CUSTOM_AVATARS &&
                 typeof item.url === 'string' &&
                 /^https?:\/\//i.test(item.url);
             if (!valid) return;
+            const [min, max] = VideoEffectsPanel.CUSTOM_SCALE_RANGES[category];
             try {
                 this.registerCustomAvatar({
                     id: item.id,
                     label: String(item.label || '').slice(0, 24) || 'Avatar',
                     url: item.url,
-                    scale: Math.min(1.6, Math.max(0.6, Number(item.scale) || 1)),
+                    scale: Math.min(max, Math.max(min, Number(item.scale) || 1)),
                     remote: true,
-                    order: 1000 + index,
+                    order: 1000 + this.customAvatarCount(category),
+                    category,
+                    placement: item.placement in VideoEffectsPanel.PLACEMENTS ? item.placement : 'head',
                 });
             } catch (error) {
                 console.warn('Unable to restore a custom avatar', error);
@@ -372,7 +430,9 @@ class VideoEffectsPanel {
     saveCustomAvatars() {
         const saved = [...this.customAvatars]
             .filter(([, avatar]) => avatar.remote)
-            .map(([id, { label, url, scale }]) => ({ id, label, url, scale }));
+            .map(([id, { label, url, scale, category, placement }]) =>
+                category === 'face' ? { id, label, url, scale, placement } : { id, label, url, scale }
+            );
         try {
             localStorage.setItem(VideoEffectsPanel.CUSTOM_AVATARS_KEY, JSON.stringify(saved));
         } catch (error) {
@@ -380,20 +440,30 @@ class VideoEffectsPanel {
         }
     }
 
-    // A .glb link or file (rigged head or body): loaded once to check it, then kept in the 3D Avatars tab
-    async addCustomAvatar(url, label, remote) {
+    // A .glb link or file (rigged head or body) for the 3D Avatars tab, or a picture for the Avatars tab:
+    // loaded once to check it, then kept in its tab
+    async addCustomAvatar(category, url, label, remote) {
         const t = VideoEffectsPanel.t;
         if (this.avatarBusy) return false;
-        if (this.customAvatars.size >= VideoEffectsPanel.MAX_CUSTOM_AVATARS) {
-            this.avatarError = t('Remove a custom avatar before adding another one.');
+        if (this.customAvatarCount(category) >= VideoEffectsPanel.MAX_CUSTOM_AVATARS) {
+            this.avatarErrors[category] = t('Remove a custom avatar before adding another one.');
             this.sync();
             return false;
         }
-        const id = `${VideoEffectsPanel.CUSTOM_AVATAR_PREFIX}${Date.now().toString(36)}`;
-        this.avatarError = '';
+        const id = `${VideoEffectsPanel.CUSTOM_AVATAR_PREFIXES[category]}${Date.now().toString(36)}`;
+        this.avatarErrors[category] = '';
         this.avatarBusy = true;
         this.loadingEffect = id;
-        this.registerCustomAvatar({ id, label, url, scale: 1, remote, order: 1000 + this.customAvatars.size });
+        this.registerCustomAvatar({
+            id,
+            label,
+            url,
+            scale: 1,
+            remote,
+            order: 1000 + this.customAvatarCount(category),
+            category,
+            placement: this.placement,
+        });
         this.sync();
         try {
             await this.engine.setEffect(id);
@@ -403,10 +473,14 @@ class VideoEffectsPanel {
         } catch (error) {
             console.warn('Unable to load the custom avatar', error);
             this.forgetCustomAvatar(id);
-            if (error?.code === 'ASSET_INVALID') {
-                this.avatarError = t('This model has no face rig. It needs eye nodes or blink blendshapes.');
+            if (category !== 'avatar3d') {
+                this.avatarErrors[category] = remote
+                    ? t('This image can’t be loaded (the website may block it). Download it and use Upload.')
+                    : t('This file can’t be loaded as an image.');
+            } else if (error?.code === 'ASSET_INVALID') {
+                this.avatarErrors[category] = t('This model has no face rig. It needs eye nodes or blink blendshapes.');
             } else {
-                this.avatarError = remote
+                this.avatarErrors[category] = remote
                     ? t('This model can’t be loaded (the website may block it). Download it and use Upload.')
                     : t('This file can’t be loaded as a 3D avatar.');
             }
@@ -418,7 +492,7 @@ class VideoEffectsPanel {
         }
     }
 
-    async addCustomAvatarFromUrl(url) {
+    async addCustomAvatarFromUrl(category, url) {
         const value = (url || '').trim();
         let valid = /^https?:\/\//i.test(value);
         try {
@@ -427,23 +501,41 @@ class VideoEffectsPanel {
             valid = false;
         }
         if (!valid) {
-            this.avatarError = VideoEffectsPanel.t('Paste a link to a .glb avatar.');
+            const t = VideoEffectsPanel.t;
+            this.avatarErrors[category] =
+                category === 'avatar3d' ? t('Paste a link to a .glb avatar.') : t('Paste a link to an image.');
             this.sync();
             return false;
         }
-        return this.addCustomAvatar(value, VideoEffectsPanel.avatarLabel(value, VideoEffectsPanel.t('Avatar')), true);
+        return this.addCustomAvatar(
+            category,
+            value,
+            VideoEffectsPanel.avatarLabel(value, VideoEffectsPanel.t('Avatar')),
+            true
+        );
     }
 
-    async uploadCustomAvatar(files) {
+    async uploadCustomAvatar(category, files) {
         const t = VideoEffectsPanel.t;
         const file = Array.from(files || [])[0];
         if (!file) return false;
-        if (!/\.glb$/i.test(file.name)) {
-            this.avatarError = t('Choose a .glb file.');
-        } else if (file.size > VideoEffectsPanel.MAX_AVATAR_BYTES) {
-            this.avatarError = t('This file is too large (50 MB max).');
+        const isPicture = category !== 'avatar3d';
+        const validType = isPicture
+            ? /^image\/(png|jpe?g|webp|gif|svg\+xml)$/i.test(file.type) ||
+              VideoEffectsPanel.PICTURE_EXTENSIONS.test(file.name)
+            : /\.glb$/i.test(file.name);
+        const maxBytes = isPicture ? VideoEffectsPanel.MAX_PICTURE_BYTES : VideoEffectsPanel.MAX_AVATAR_BYTES;
+        if (!validType) {
+            this.avatarErrors[category] = isPicture
+                ? t('Choose an image file (PNG, JPG, WebP, GIF or SVG).')
+                : t('Choose a .glb file.');
+        } else if (file.size > maxBytes) {
+            this.avatarErrors[category] = isPicture
+                ? t('This image is too large (10 MB max).')
+                : t('This file is too large (50 MB max).');
         } else {
             return this.addCustomAvatar(
+                category,
                 URL.createObjectURL(file),
                 VideoEffectsPanel.avatarLabel(file.name, t('Avatar')),
                 false
@@ -472,6 +564,24 @@ class VideoEffectsPanel {
         } catch (error) {
             console.warn('Unable to resize the custom avatar', error);
         }
+    }
+
+    // Where the next picture accessory goes; the one that is on moves right away
+    async setPlacement(placement) {
+        if (!(placement in VideoEffectsPanel.PLACEMENTS)) return;
+        this.placement = placement;
+        const id = this.engine.getState().effect;
+        const accessory = this.customAvatars.get(id);
+        if (accessory?.category === 'face') {
+            this.registerCustomAvatar({ id, ...accessory, placement });
+            this.saveCustomAvatars();
+            try {
+                await this.engine.setEffect(id);
+            } catch (error) {
+                console.warn('Unable to move the custom effect', error);
+            }
+        }
+        this.sync();
     }
 
     async selectPreset(id) {
@@ -814,6 +924,7 @@ class VideoEffectsPanel {
             effectGrids: new Map(),
             effectSignatures: new Map(),
             effectIds: new Map(),
+            customAvatarControls: new Map(),
             presetCards: new Map(),
             sliders: new Map(),
         };
@@ -939,7 +1050,7 @@ class VideoEffectsPanel {
         this.renderEffectGrid(view, category);
         VideoEffectsPanel.setupRoving(grid, '.vfx-card');
         panel.appendChild(grid);
-        if (category === 'avatar3d') this.buildCustomAvatarControls(view, panel);
+        if (category in VideoEffectsPanel.CUSTOM_AVATAR_PREFIXES) this.buildCustomAvatarControls(view, panel, category);
         panel.appendChild(this.createHint(t('One effect at a time. Choose it again to remove it.')));
     }
 
@@ -983,17 +1094,19 @@ class VideoEffectsPanel {
         });
     }
 
-    // Own avatar from a .glb link or file, with a size slider for the one that is on
-    buildCustomAvatarControls(view, panel) {
+    // Own avatar from a link or a file, with a size slider for the one that is on: a .glb in the
+    // 3D Avatars tab, a picture (placed on the face, no blinking) in the Avatars tab
+    buildCustomAvatarControls(view, panel, category) {
         const t = VideoEffectsPanel.t;
+        const isPicture = category !== 'avatar3d';
         const fileInput = VideoEffectsPanel.element('input', 'hidden', {
             type: 'file',
-            accept: '.glb,model/gltf-binary',
+            accept: isPicture ? 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml' : '.glb,model/gltf-binary',
         });
         fileInput.addEventListener('change', async () => {
             const files = Array.from(fileInput.files || []);
             fileInput.value = '';
-            await this.uploadCustomAvatar(files);
+            await this.uploadCustomAvatar(category, files);
         });
 
         const row = VideoEffectsPanel.element('form', 'vfx-url-row');
@@ -1002,40 +1115,62 @@ class VideoEffectsPanel {
             inputmode: 'url',
             autocomplete: 'off',
         });
-        input.placeholder = t('Paste a .glb avatar link');
-        input.setAttribute('aria-label', t('Paste a .glb avatar link'));
+        const placeholder = isPicture ? t('Paste an image link') : t('Paste a .glb avatar link');
+        input.placeholder = placeholder;
+        input.setAttribute('aria-label', placeholder);
         const add = VideoEffectsPanel.element('button', 'vfx-link-btn', { type: 'submit' });
         add.append(VideoEffectsPanel.icon('fas fa-link'), document.createTextNode(` ${t('Add')}`));
         const upload = VideoEffectsPanel.element('button', 'vfx-link-btn', { type: 'button' });
-        upload.title = t('Upload a .glb file');
-        upload.setAttribute('aria-label', t('Upload a .glb file'));
+        const uploadLabel = isPicture ? t('Upload an image') : t('Upload a .glb file');
+        upload.title = uploadLabel;
+        upload.setAttribute('aria-label', uploadLabel);
         upload.appendChild(VideoEffectsPanel.icon('fas fa-upload'));
         upload.addEventListener('click', () => fileInput.click());
         row.append(input, add, upload);
         row.addEventListener('submit', async (event) => {
             event.preventDefault();
-            if (await this.addCustomAvatarFromUrl(input.value)) input.value = '';
+            if (await this.addCustomAvatarFromUrl(category, input.value)) input.value = '';
         });
-        view.avatarForm = { input, add, upload };
 
-        view.avatarError = VideoEffectsPanel.element('p', 'vfx-error hidden', { role: 'alert' });
-        view.avatarSize = this.createSlider({
+        const error = VideoEffectsPanel.element('p', 'vfx-error hidden', { role: 'alert' });
+        const size = this.createSlider({
             key: 'avatarSize',
-            label: t('Avatar size'),
+            label: category === 'face' ? t('Size') : t('Avatar size'),
             icon: 'fas fa-maximize',
-            min: 0.6,
-            max: 1.6,
+            min: VideoEffectsPanel.CUSTOM_SCALE_RANGES[category][0],
+            max: VideoEffectsPanel.CUSTOM_SCALE_RANGES[category][1],
             step: 0.01,
             onInput: (value) => this.setCustomAvatarSize(value),
         });
-        view.avatarSize.row.classList.add('hidden');
-        panel.append(
-            row,
-            fileInput,
-            view.avatarError,
-            view.avatarSize.row,
-            this.createHint(t('Tip: add your own 3D avatar (.glb), for example one from Ready Player Me.'))
-        );
+        size.row.classList.add('hidden');
+
+        let placementButtons = null;
+        let placementRow = null;
+        if (category === 'face') {
+            placementRow = VideoEffectsPanel.element('div', 'vfx-placement', { role: 'group' });
+            placementRow.setAttribute('aria-label', t('Place it on'));
+            const labels = { head: t('Head'), eyes: t('Eyes'), nose: t('Nose'), mouth: t('Mouth') };
+            placementButtons = new Map();
+            Object.keys(VideoEffectsPanel.PLACEMENTS).forEach((key) => {
+                const button = VideoEffectsPanel.element('button', 'vfx-link-btn', { type: 'button' });
+                button.textContent = labels[key];
+                button.addEventListener('click', () => this.setPlacement(key));
+                placementButtons.set(key, button);
+                placementRow.appendChild(button);
+            });
+        }
+
+        view.customAvatarControls.set(category, { form: { input, add, upload }, error, size, placementButtons });
+        const hint = {
+            face: t(
+                'Tip: add your own picture (PNG with a transparent background works best), then choose where it goes.'
+            ),
+            avatar: t(
+                'Tip: add your own picture, for example a cartoon or a photo (PNG with a transparent background works best).'
+            ),
+            avatar3d: t('Tip: add your own 3D avatar (.glb), for example one from Ready Player Me.'),
+        }[category];
+        panel.append(...[placementRow, row, fileInput, error, size.row, this.createHint(hint)].filter(Boolean));
     }
 
     buildFiltersTab(view, panel) {
@@ -1247,17 +1382,28 @@ class VideoEffectsPanel {
     }
 
     renderCustomAvatarControls(view, state) {
-        if (!view.avatarSize) return;
-        const { input, add, upload } = view.avatarForm;
-        add.disabled = upload.disabled = input.disabled = this.avatarBusy;
-        view.avatarError.textContent = this.avatarError;
-        view.avatarError.classList.toggle('hidden', !this.avatarError);
-        const active = this.customAvatars.get(state.effect);
-        view.avatarSize.row.classList.toggle('hidden', !active);
-        if (!active) return;
-        const { input: slider, value } = view.avatarSize;
-        if (document.activeElement !== slider) slider.value = String(active.scale);
-        value.textContent = `${Math.round(active.scale * 100)}%`;
+        view.customAvatarControls.forEach(({ form, error, size, placementButtons }, category) => {
+            const { input, add, upload } = form;
+            if (placementButtons) {
+                const accessory = this.customAvatars.get(state.effect);
+                const current = accessory?.category === category ? accessory.placement : this.placement;
+                placementButtons.forEach((button, key) => {
+                    button.classList.toggle('active', key === current);
+                    button.setAttribute('aria-pressed', String(key === current));
+                    button.disabled = this.avatarBusy;
+                });
+            }
+            add.disabled = upload.disabled = input.disabled = this.avatarBusy;
+            error.textContent = this.avatarErrors[category];
+            error.classList.toggle('hidden', !this.avatarErrors[category]);
+            const active = this.customAvatars.get(state.effect);
+            const shown = active?.category === category;
+            size.row.classList.toggle('hidden', !shown);
+            if (!shown) return;
+            const { input: slider, value } = size;
+            if (document.activeElement !== slider) slider.value = String(active.scale);
+            value.textContent = `${Math.round(active.scale * 100)}%`;
+        });
     }
 
     // ####################################################

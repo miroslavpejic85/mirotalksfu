@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
+    <defs>
+        <clipPath id="pig-eye-clip"><path d="M28 55 a27 27 0 1 0 54 0 a27 27 0 1 0 -54 0 Z" /></clipPath>
+        <radialGradient id="pig-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#7a4a4a" />
+            <stop offset="0.55" stop-color="#3a1c22" />
+            <stop offset="1" stop-color="#14070a" />
+        </radialGradient>
+        <linearGradient id="pig-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#pig-eye-clip)">
+        
+        <circle cx="55" cy="55" r="25" fill="url(#pig-eye-iris)" />
+        <path d="M65.2 55.1L77.1 55.3M65.7 57.1L75.2 59M65.5 58.6L75.6 62.1M63.9 59.8L75.8 66.2M63.7 60.6L74.3 67.4M62.5 61.6L71.7 69.7M61.3 62.8L68.7 71.9M60.6 64.3L65.7 72.8M59 65.3L63.6 77M57.6 65.9L60 76.1M55.7 64.7L56.6 75.5M54.5 64.6L53.8 76.1M53.4 65L51.5 76.3M50.8 66.1L46.6 77.3M50 64.5L45 74M48.3 64.7L41.7 74.2M47.9 62.3L38.9 71.6M45.8 61.9L36.7 68.8M46.1 60.4L34.6 67.5M44.9 59.5L35.2 63.8M43.7 58L33.9 60.6M43.1 56.6L32.4 58.1M45.2 54.7L34 54.3M44.6 52.8L32.8 50.3M44.4 51L34.9 47.5M46.1 50.7L35.8 45.8M46.2 49L35.5 41.6M47.4 47.3L39.9 39.7M48 46.4L41.4 38.4M49.2 45L44.4 36.6M50.9 45.9L46.1 35.3M52.1 45.1L48.3 32M53.9 44L53 34.6M55.5 43.1L56 33.8M57.1 43.9L59.1 33.5M58.1 44.6L61.3 34M60.3 44.5L65.1 35M60.2 47L66.8 36.9M62.6 46.9L70.3 38.7M63.8 48.1L72.7 41.1M63.5 50.2L73.6 44.4M65.3 50.4L76 45.7M64.9 52.4L75.4 49.7M66.3 53.4L76.1 52.1" stroke="#14070a" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="55" r="15.5" fill="none" stroke="#7a4a4a" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="55" r="23.5" fill="none" stroke="#14070a" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="55" r="13.8" fill="#0a0806" />
+        <path d="M28 55 a27 27 0 1 0 54 0 a27 27 0 1 0 -54 0 Z" fill="url(#pig-eye-lid)" />
+    </g>
+    <path d="M28 55 a27 27 0 1 0 54 0 a27 27 0 1 0 -54 0 Z" fill="none" stroke="#14070a" stroke-width="4" stroke-linejoin="round" />
+    
+    <ellipse cx="45.5" cy="45" rx="6" ry="4.5" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="63" cy="64" r="2.3" fill="#ffffff" fill-opacity="0.75" />
+</svg>

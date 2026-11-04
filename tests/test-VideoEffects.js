@@ -215,6 +215,7 @@ describe('Video effects engine', () => {
                 [
                     'avatar-cat',
                     'avatar-lion',
+                    'avatar-dog',
                     'avatar-bear',
                     'avatar-panda',
                     'avatar-fox',
@@ -229,6 +230,14 @@ describe('Video effects engine', () => {
                     'avatar-robot',
                     'avatar-alien',
                     'avatar-astronaut',
+                    'avatar-santa',
+                    'avatar-reindeer',
+                    'avatar-snowman',
+                    'avatar-pumpkin',
+                    'avatar-rabbit',
+                    'avatar-pig',
+                    'avatar-penguin',
+                    'avatar-owl',
                 ]
             );
             assert.equal(list[0].thumbnail, 'https://example.com/video-effects/assets/sunglasses/sunglasses.svg');

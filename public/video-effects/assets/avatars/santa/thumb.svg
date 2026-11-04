@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="640" viewBox="0 0 600 640">
+    <defs>
+        <radialGradient id="santa-skin" cx="0.5" cy="0.4" r="0.66">
+            <stop offset="0" stop-color="#ffd9c0" />
+            <stop offset="0.75" stop-color="#f4b394" />
+            <stop offset="1" stop-color="#d98a6c" />
+        </radialGradient>
+        <filter id="santa-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" /></filter>
+        <filter id="santa-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6" /></filter>
+        
+    </defs>
+    <path d="M141.9 333C142.4 338.3 142.4 344 142 349.1C141.6 354.3 140.6 359.5 139.2 364C137.8 368.5 135.9 372.7 133.7 376.1C131.6 379.5 128.9 382.3 126.2 384.3C123.4 386.2 120.3 387.4 117.2 387.7C114.1 388 110.8 387.5 107.7 386.1C104.6 384.8 101.5 382.5 98.7 379.6C95.9 376.7 93.1 373 90.9 368.8C88.7 364.7 86.7 359.8 85.2 354.8C83.8 349.9 82.7 344.3 82.1 339C81.6 333.7 81.6 328 82 322.9C82.4 317.7 83.4 312.5 84.8 308C86.2 303.5 88.1 299.3 90.3 295.9C92.4 292.5 95.1 289.7 97.8 287.7C100.6 285.8 103.7 284.6 106.8 284.3C109.9 284 113.2 284.5 116.3 285.9C119.4 287.2 122.5 289.5 125.3 292.4C128.1 295.3 130.9 299 133.1 303.2C135.3 307.3 137.3 312.2 138.8 317.2C140.2 322.1 141.3 327.7 141.9 333Z" fill="url(#santa-skin)" stroke="#a8583f" stroke-width="4" stroke-linejoin="round" />
+    <path d="M517.9 339C517.3 344.3 516.2 349.9 514.8 354.8C513.3 359.8 511.3 364.7 509.1 368.8C506.9 373 504.1 376.7 501.3 379.6C498.5 382.5 495.4 384.8 492.3 386.1C489.2 387.5 485.9 388 482.8 387.7C479.7 387.4 476.6 386.2 473.8 384.3C471.1 382.3 468.4 379.5 466.3 376.1C464.1 372.7 462.2 368.5 460.8 364C459.4 359.5 458.4 354.3 458 349.1C457.6 344 457.6 338.3 458.1 333C458.7 327.7 459.8 322.1 461.2 317.2C462.7 312.2 464.7 307.3 466.9 303.2C469.1 299 471.9 295.3 474.7 292.4C477.5 289.5 480.6 287.2 483.7 285.9C486.8 284.5 490.1 284 493.2 284.3C496.3 284.6 499.4 285.8 502.2 287.7C504.9 289.7 507.6 292.5 509.7 295.9C511.9 299.3 513.8 303.5 515.2 308C516.6 312.5 517.6 317.7 518 322.9C518.4 328 518.4 333.7 517.9 339Z" fill="url(#santa-skin)" stroke="#a8583f" stroke-width="4" stroke-linejoin="round" />
+    <defs>
+        <linearGradient id="santa-hat" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff5a52" />
+            <stop offset="0.6" stop-color="#d9202c" />
+            <stop offset="1" stop-color="#8f0f1c" />
+        </linearGradient>
+        <linearGradient id="santa-fur" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#dfe6f1" />
+        </linearGradient>
+        <radialGradient id="santa-pom" cx="0.4" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#d4dcea" />
+        </radialGradient>
+    </defs>
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#santa-skin)" />
+    <defs>
+        <radialGradient id="santa-face-rim" cx="0.5" cy="0.45" r="0.62">
+            <stop offset="0.62" stop-color="#8a3f2a" stop-opacity="0" />
+            <stop offset="1" stop-color="#8a3f2a" stop-opacity="0.2" />
+        </radialGradient>
+        <radialGradient id="santa-face-light" cx="0.36" cy="0.26" r="0.55">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.2" />
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+        </radialGradient>
+    </defs>
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#santa-face-rim)" />
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="url(#santa-face-light)" />
+    <path d="M300 66C332 66 369.7 67.7 396 80C422.3 92.3 443.7 114 458 140C472.3 166 478 204.3 482 236C486 267.7 484.3 299.7 482 330C479.7 360.3 477 390 468 418C459 446 445 475 428 498C411 521 387.3 542.7 366 556C344.7 569.3 322 578 300 578C278 578 255.3 569.3 234 556C212.7 542.7 189 521 172 498C155 475 141 446 132 418C123 390 120.3 360.3 118 330C115.7 299.7 114 267.7 118 236C122 204.3 127.7 166 142 140C156.3 114 177.7 92.3 204 80C230.3 67.7 268 66 300 66Z" fill="none" stroke="#a8583f" stroke-width="5" stroke-linejoin="round" />
+    <ellipse cx="190" cy="420" rx="40" ry="24" fill="#ff5f5f" fill-opacity="0.3" filter="url(#santa-soft)" />
+    <ellipse cx="410" cy="420" rx="40" ry="24" fill="#ff5f5f" fill-opacity="0.3" filter="url(#santa-soft)" />
+    <path d="M308 322 Q320 366 326 396" fill="none" stroke="#8a3f2a" stroke-width="9" stroke-opacity="0.22" stroke-linecap="round" filter="url(#santa-blur)" />
+    <path d="M276 398 Q300 418 324 398" fill="none" stroke="#a8583f" stroke-width="4.5" stroke-linecap="round" />
+    <path d="M280 404 Q288 410 294 404 M306 404 Q312 410 320 404" fill="none" stroke="#a8583f" stroke-width="3" stroke-linecap="round" />
+    <ellipse cx="296" cy="388" rx="10" ry="6" fill="#ffffff" fill-opacity="0.28" filter="url(#santa-blur)" />
+    <path d="M114 180 C94 256 96 318 122 346 C136 334 144 300 148 250 L156 184 Z" fill="url(#santa-fur)" stroke="#aab4c6" stroke-width="4" stroke-linejoin="round" />
+    <path d="M114 180 C94 256 96 318 122 346 C136 334 144 300 148 250 L156 184 Z" fill="url(#santa-fur)" stroke="#aab4c6" stroke-width="4" stroke-linejoin="round" transform="translate(600 0) scale(-1 1)" />
+    <path d="M118 300 C128 380 170 428 250 452 Q300 462 350 452 C430 428 472 380 482 300 C502 400 500 500 440 560 C400 608 350 636 300 636 C250 636 200 608 160 560 C100 500 98 400 118 300 Z" fill="url(#santa-fur)" stroke="#aab4c6" stroke-width="5" stroke-linejoin="round" />
+    <g fill="none" stroke="#aab4c6" stroke-width="3.5" stroke-linecap="round" stroke-opacity="0.8">
+        <path d="M168 440 Q140 500 176 540 Q196 560 214 574" />
+        <path d="M432 440 Q460 500 424 540 Q404 560 386 574" />
+        <path d="M300 540 Q276 566 300 600 Q324 566 300 540 Z" />
+        <path d="M236 520 Q222 552 246 584 M364 520 Q378 552 354 584" />
+    </g>
+    <ellipse cx="300" cy="392" rx="26" ry="18" fill="#ff5f5f" fill-opacity="0.28" filter="url(#santa-soft)" />
+    <path d="M300 432 C268 410 220 416 184 450 C166 470 178 496 204 488 C230 480 264 472 300 470 Z" fill="url(#santa-fur)" stroke="#aab4c6" stroke-width="5" stroke-linejoin="round" />
+    <path d="M300 432 C268 410 220 416 184 450 C166 470 178 496 204 488 C230 480 264 472 300 470 Z" fill="url(#santa-fur)" stroke="#aab4c6" stroke-width="5" stroke-linejoin="round" transform="translate(600 0) scale(-1 1)" />
+    <path d="M276 438 Q232 440 198 468 M324 438 Q368 440 402 468" fill="none" stroke="#aab4c6" stroke-opacity="0.7" stroke-width="3" stroke-linecap="round" />
+    <path d="M108 176 C102 70 200 12 300 12 C396 12 462 54 500 116 C524 156 540 204 536 242 C516 250 498 246 486 236 C484 210 470 180 440 164 Z" fill="url(#santa-hat)" stroke="#6e0a14" stroke-width="5" stroke-linejoin="round" />
+    <path d="M168 110 C200 56 270 36 340 40" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="12" stroke-linecap="round" filter="url(#santa-blur)" />
+    <circle cx="512" cy="258" r="32" fill="url(#santa-pom)" stroke="#aab4c6" stroke-width="5" />
+    <path d="M92 172 C92 120 150 90 300 90 C450 90 508 120 508 172 C508 208 472 216 440 202 C380 218 220 218 160 202 C128 216 92 208 92 172 Z" fill="url(#santa-fur)" stroke="#aab4c6" stroke-width="5" stroke-linejoin="round" />
+    <path d="M150 150 Q300 130 450 150" fill="none" stroke="#aab4c6" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round" />
+<g><svg x="185" y="214" width="100" height="44" viewBox="0 0 100 44" overflow="visible">
+    <path d="M4 36 Q40 0 96 18 Q100 30 92 34 Q46 16 14 42 Z" fill="#ffffff" stroke="#aab4c6" stroke-width="3" stroke-linejoin="round" />
+</svg></g>
+<g transform="translate(730 0) scale(-1 1)"><svg x="315" y="214" width="100" height="44" viewBox="0 0 100 44" overflow="visible">
+    <path d="M4 36 Q40 0 96 18 Q100 30 92 34 Q46 16 14 42 Z" fill="#ffffff" stroke="#aab4c6" stroke-width="3" stroke-linejoin="round" />
+</svg></g>
+<g><svg x="180" y="245" width="110" height="110" viewBox="0 0 110 110" overflow="visible">
+    <defs>
+        <clipPath id="santa-eye-clip"><path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" /></clipPath>
+        <radialGradient id="santa-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#8fc4ff" />
+            <stop offset="0.55" stop-color="#3f7fd0" />
+            <stop offset="1" stop-color="#1d3f7a" />
+        </radialGradient>
+        <linearGradient id="santa-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#santa-eye-clip)">
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="#fffaf4" />
+        <circle cx="55" cy="57" r="22" fill="url(#santa-eye-iris)" />
+        <path d="M64.3 57.5L74.9 58M64.5 58.6L75.4 60.4M64.9 60L74.5 62.9M64 61.9L72.6 66.7M62.2 62.3L71.7 69.4M61 63L69.8 71.7M60.5 64.3L66.1 71.9M60.2 65.3L65.1 73M58.9 66.3L62 73.8M57.3 67.2L59.2 75.7M56.5 67.1L57.7 76M54.6 65.7L54.1 78.1M53.5 65.3L51.5 76.9M52.3 65.7L49.2 75.7M50.9 65.8L47.2 73.8M49.8 64.2L43.3 73.3M48.3 64.2L41 72.1M46.9 63.4L39.4 69.4M47.3 61.4L37.5 67M46.9 60.3L38 63.9M46.6 59L35 61.7M45.6 57.8L36.9 58.5M44.6 56.6L35.9 56.2M45.7 55L37.2 53.2M46.5 54.4L37.6 51.7M45.8 52L36.7 47.1M46.8 50.8L38.4 44.5M48.1 50.5L41.3 44M48.8 49L42.2 40.4M49.5 48.3L44.7 40.8M51.4 47.9L47.2 37.5M53 48.8L50.3 37.4M54.1 47.5L53.3 38.9M55.6 48.3L56.3 37.2M56.9 47L58.7 37.8M57.5 49L60.6 39.5M59.3 49.1L64.3 40.1M61.2 48.8L65.8 42.5M61.7 49.8L68.4 42.8M62.1 51.7L71.5 44.7M62.5 52.2L70.5 47.2M63.7 53.5L73.8 49.5M63.5 55.1L73.9 52.7M64 56.3L75.4 55.5" stroke="#1d3f7a" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="13.6" fill="none" stroke="#8fc4ff" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="20.5" fill="none" stroke="#1d3f7a" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="9.9" fill="#0a0806" />
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="url(#santa-eye-lid)" />
+    </g>
+    <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="none" stroke="#3a2010" stroke-width="4" stroke-linejoin="round" />
+    <path d="M12 46 C32 22 80 22 98 44" fill="none" stroke="#3a2010" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round" />
+    <ellipse cx="46.6" cy="48.2" rx="5.3" ry="4" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62" cy="64.9" r="2" fill="#ffffff" fill-opacity="0.75" />
+</svg></g>
+<g transform="translate(730 0) scale(-1 1)"><svg x="310" y="245" width="110" height="110" viewBox="0 0 110 110" overflow="visible">
+    <defs>
+        <clipPath id="santa-eye-clip"><path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" /></clipPath>
+        <radialGradient id="santa-eye-iris" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#8fc4ff" />
+            <stop offset="0.55" stop-color="#3f7fd0" />
+            <stop offset="1" stop-color="#1d3f7a" />
+        </radialGradient>
+        <linearGradient id="santa-eye-lid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000000" stop-opacity="0.5" />
+            <stop offset="0.42" stop-color="#000000" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <g clip-path="url(#santa-eye-clip)">
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="#fffaf4" />
+        <circle cx="55" cy="57" r="22" fill="url(#santa-eye-iris)" />
+        <path d="M64.3 57.5L74.9 58M64.5 58.6L75.4 60.4M64.9 60L74.5 62.9M64 61.9L72.6 66.7M62.2 62.3L71.7 69.4M61 63L69.8 71.7M60.5 64.3L66.1 71.9M60.2 65.3L65.1 73M58.9 66.3L62 73.8M57.3 67.2L59.2 75.7M56.5 67.1L57.7 76M54.6 65.7L54.1 78.1M53.5 65.3L51.5 76.9M52.3 65.7L49.2 75.7M50.9 65.8L47.2 73.8M49.8 64.2L43.3 73.3M48.3 64.2L41 72.1M46.9 63.4L39.4 69.4M47.3 61.4L37.5 67M46.9 60.3L38 63.9M46.6 59L35 61.7M45.6 57.8L36.9 58.5M44.6 56.6L35.9 56.2M45.7 55L37.2 53.2M46.5 54.4L37.6 51.7M45.8 52L36.7 47.1M46.8 50.8L38.4 44.5M48.1 50.5L41.3 44M48.8 49L42.2 40.4M49.5 48.3L44.7 40.8M51.4 47.9L47.2 37.5M53 48.8L50.3 37.4M54.1 47.5L53.3 38.9M55.6 48.3L56.3 37.2M56.9 47L58.7 37.8M57.5 49L60.6 39.5M59.3 49.1L64.3 40.1M61.2 48.8L65.8 42.5M61.7 49.8L68.4 42.8M62.1 51.7L71.5 44.7M62.5 52.2L70.5 47.2M63.7 53.5L73.8 49.5M63.5 55.1L73.9 52.7M64 56.3L75.4 55.5" stroke="#1d3f7a" stroke-width="1.3" stroke-opacity="0.35" fill="none" />
+        <circle cx="55" cy="57" r="13.6" fill="none" stroke="#8fc4ff" stroke-width="2" stroke-opacity="0.35" />
+        <circle cx="55" cy="57" r="20.5" fill="none" stroke="#1d3f7a" stroke-width="3" stroke-opacity="0.8" />
+        <circle cx="55" cy="57" r="9.9" fill="#0a0806" />
+        <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="url(#santa-eye-lid)" />
+    </g>
+    <path d="M8 58 C26 32 84 30 102 56 C84 82 26 84 8 58 Z" fill="none" stroke="#3a2010" stroke-width="4" stroke-linejoin="round" />
+    <path d="M12 46 C32 22 80 22 98 44" fill="none" stroke="#3a2010" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round" />
+    <ellipse cx="46.6" cy="48.2" rx="5.3" ry="4" fill="#ffffff" fill-opacity="0.92" />
+    <circle cx="62" cy="64.9" r="2" fill="#ffffff" fill-opacity="0.75" />
+</svg></g>
+<g><svg x="235" y="456" width="130" height="80" viewBox="0 0 130 80" overflow="visible">
+    <defs><clipPath id="santa-mouth-smile-clip"><path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" /></clipPath></defs>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="#2e080e" />
+    <g clip-path="url(#santa-mouth-smile-clip)">
+        <path d="M6 22 Q65 34 124 22 L124 44 Q65 54 6 44 Z" fill="#fffdf8" />
+        <path d="M30 70 Q65 48 100 70 Z" fill="#e8667f" />
+    </g>
+    <path d="M8 24 Q65 34 122 24 Q114 66 65 70 Q16 66 8 24 Z" fill="none" stroke="#8a3f36" stroke-width="5" stroke-linejoin="round" />
+    <path d="M8 24 Q4 20 5 14 M122 24 Q126 20 125 14" fill="none" stroke="#8a3f36" stroke-width="4" stroke-linecap="round" />
+</svg></g>
+</svg>

@@ -539,6 +539,19 @@
     transform: none;
 }
 
+/* Where a picture accessory goes on the face */
+.vfx-placement {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.vfx-panel .vfx-placement .vfx-link-btn.active {
+    border-color: var(--vfx-accent);
+    background: color-mix(in srgb, var(--vfx-accent) 22%, var(--vfx-surface));
+}
+
 .vfx-hint,
 .vfx-note {
     color: color-mix(in srgb, var(--fg-1, #fff) 58%, transparent);

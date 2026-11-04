@@ -1511,6 +1511,580 @@ const astronautThumbFace = `    <defs>
     <path d="M300 320 Q292 360 300 372" fill="none" stroke="#a8704e" stroke-width="5" stroke-linecap="round" />
     <path d="M252 410 Q300 446 348 410" fill="none" stroke="#8a3a33" stroke-width="10" stroke-linecap="round" />`;
 
+// ---------------- Dog (golden floppy-eared) ----------------
+builders.push(() => {
+    const id = 'dog';
+    const head = ellipse(300, 330, 208, 252, 32);
+    const muzzle = ellipse(300, 462, 122, 94, 28);
+    const d = catmull(head);
+    const ear =
+        'M150 124 C70 108 22 200 30 330 C36 414 72 474 124 472 C166 462 182 384 176 300 C172 232 176 172 198 134 Z';
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-fur" cx="0.5" cy="0.38" r="0.66">
+            <stop offset="0" stop-color="#f0b868" />
+            <stop offset="0.7" stop-color="#d48c3c" />
+            <stop offset="1" stop-color="#a8651e" />
+        </radialGradient>
+        <linearGradient id="${id}-ear" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#9a5e28" />
+            <stop offset="1" stop-color="#5e3412" />
+        </linearGradient>
+        <radialGradient id="${id}-muzzle" cx="0.5" cy="0.35" r="0.65">
+            <stop offset="0" stop-color="#fff3dc" />
+            <stop offset="1" stop-color="#e9c994" />
+        </radialGradient>
+        <radialGradient id="${id}-nose" cx="0.4" cy="0.3" r="0.75">
+            <stop offset="0" stop-color="#4a3a32" />
+            <stop offset="1" stop-color="#0a0605" />
+        </radialGradient>
+        ${softFilter(`${id}-soft`, 3)}
+        ${softFilter(`${id}-blur`, 1.4)}
+    </defs>
+    <path d="${ear}" fill="url(#${id}-ear)" stroke="#3e200a" stroke-width="5" stroke-linejoin="round" />
+    <path d="${ear}" fill="url(#${id}-ear)" stroke="#3e200a" stroke-width="5" stroke-linejoin="round" transform="translate(600 0) scale(-1 1)" />
+    <path d="M70 200 C52 280 60 380 96 440 M530 200 C548 280 540 380 504 440" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" filter="url(#${id}-blur)" />
+    <path d="${d}" fill="url(#${id}-fur)" />
+${shading(`${id}-head`, d, { rim: 0.34, light: 0.22, rimColor: '#4a2404' })}
+    <path d="${d}" fill="none" stroke="#6a3a10" stroke-width="5" stroke-linejoin="round" />
+    <path d="M300 88 C346 126 350 260 338 352 L262 352 C250 260 254 126 300 88 Z" fill="#fff3dc" fill-opacity="0.85" filter="url(#${id}-soft)" />
+    <path d="M232 264 Q206 286 196 318 M368 264 Q394 286 404 318" fill="none" stroke="#6a3a10" stroke-width="5" stroke-opacity="0.3" stroke-linecap="round" filter="url(#${id}-blur)" />
+    <path d="${catmull(muzzle)}" fill="url(#${id}-muzzle)" stroke="#c9a06a" stroke-width="3" />
+    <ellipse cx="184" cy="426" rx="30" ry="16" fill="#ff8f8f" fill-opacity="0.22" filter="url(#${id}-soft)" />
+    <ellipse cx="416" cy="426" rx="30" ry="16" fill="#ff8f8f" fill-opacity="0.22" filter="url(#${id}-soft)" />
+    <path d="M256 396 C256 372 344 372 344 396 C344 424 322 440 300 442 C278 440 256 424 256 396 Z" fill="url(#${id}-nose)" />
+    <ellipse cx="282" cy="388" rx="16" ry="7" fill="#ffffff" fill-opacity="0.5" />
+    <g fill="#8a5a2a" fill-opacity="0.55">
+        <circle cx="236" cy="452" r="3.5" /><circle cx="250" cy="468" r="3.5" /><circle cx="232" cy="474" r="3.5" />
+        <circle cx="364" cy="452" r="3.5" /><circle cx="350" cy="468" r="3.5" /><circle cx="368" cy="474" r="3.5" />
+    </g>`;
+    characters.push({
+        id,
+        label: 'Dog',
+        order: 225,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: 'M28 55 a27 27 0 1 0 54 0 a27 27 0 1 0 -54 0 Z',
+                center: [55, 55],
+                irisRadius: 26,
+                iris: ['#b87a3c', '#5a3214', '#1c0e04'],
+                pupilSize: 0.55,
+                outline: '#1c0e04',
+            }),
+            closed: closedEye({ lid: 'M28 54 Q55 74 82 54', color: '#2a1608', lashes: false }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#6a3a10' }), lift: 14 },
+        mouth: { box: [250, 436, 100, 90], ...animalMouths(`${id}-mouth`, { color: '#2a1608' }) },
+    });
+});
+
+// ---------------- Santa Claus ----------------
+builders.push(() => {
+    const id = 'santa';
+    const { back, face } = humanFace(id, {
+        skin: ['#ffd9c0', '#f4b394', '#d98a6c'],
+        skinDark: '#8a3f2a',
+        outline: '#a8583f',
+        blush: '#ff5f5f',
+    });
+    const beard = `M118 300 C128 380 170 428 250 452 Q300 462 350 452 C430 428 472 380 482 300 C502 400 500 500 440 560 C400 608 350 636 300 636 C250 636 200 608 160 560 C100 500 98 400 118 300 Z`;
+    const mustache = 'M300 432 C268 410 220 416 184 450 C166 470 178 496 204 488 C230 480 264 472 300 470 Z';
+    const sideHair = 'M114 180 C94 256 96 318 122 346 C136 334 144 300 148 250 L156 184 Z';
+    const trim =
+        'M92 172 C92 120 150 90 300 90 C450 90 508 120 508 172 C508 208 472 216 440 202 C380 218 220 218 160 202 C128 216 92 208 92 172 Z';
+    const hatBody =
+        'M108 176 C102 70 200 12 300 12 C396 12 462 54 500 116 C524 156 540 204 536 242 C516 250 498 246 486 236 C484 210 470 180 440 164 Z';
+    const hatBack = `    <defs>
+        <linearGradient id="${id}-hat" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff5a52" />
+            <stop offset="0.6" stop-color="#d9202c" />
+            <stop offset="1" stop-color="#8f0f1c" />
+        </linearGradient>
+        <linearGradient id="${id}-fur" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#dfe6f1" />
+        </linearGradient>
+        <radialGradient id="${id}-pom" cx="0.4" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#d4dcea" />
+        </radialGradient>
+    </defs>`;
+    const whiteStrokeColor = '#aab4c6';
+    const beardSvg = `    <path d="${sideHair}" fill="url(#${id}-fur)" stroke="${whiteStrokeColor}" stroke-width="4" stroke-linejoin="round" />
+    <path d="${sideHair}" fill="url(#${id}-fur)" stroke="${whiteStrokeColor}" stroke-width="4" stroke-linejoin="round" transform="translate(600 0) scale(-1 1)" />
+    <path d="${beard}" fill="url(#${id}-fur)" stroke="${whiteStrokeColor}" stroke-width="5" stroke-linejoin="round" />
+    <g fill="none" stroke="${whiteStrokeColor}" stroke-width="3.5" stroke-linecap="round" stroke-opacity="0.8">
+        <path d="M168 440 Q140 500 176 540 Q196 560 214 574" />
+        <path d="M432 440 Q460 500 424 540 Q404 560 386 574" />
+        <path d="M300 540 Q276 566 300 600 Q324 566 300 540 Z" />
+        <path d="M236 520 Q222 552 246 584 M364 520 Q378 552 354 584" />
+    </g>
+    <ellipse cx="300" cy="392" rx="26" ry="18" fill="#ff5f5f" fill-opacity="0.28" filter="url(#${id}-soft)" />
+    <path d="${mustache}" fill="url(#${id}-fur)" stroke="${whiteStrokeColor}" stroke-width="5" stroke-linejoin="round" />
+    <path d="${mustache}" fill="url(#${id}-fur)" stroke="${whiteStrokeColor}" stroke-width="5" stroke-linejoin="round" transform="translate(600 0) scale(-1 1)" />
+    <path d="M276 438 Q232 440 198 468 M324 438 Q368 440 402 468" fill="none" stroke="${whiteStrokeColor}" stroke-opacity="0.7" stroke-width="3" stroke-linecap="round" />`;
+    const hatSvg = `    <path d="${hatBody}" fill="url(#${id}-hat)" stroke="#6e0a14" stroke-width="5" stroke-linejoin="round" />
+    <path d="M168 110 C200 56 270 36 340 40" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="12" stroke-linecap="round" filter="url(#${id}-blur)" />
+    <circle cx="512" cy="258" r="32" fill="url(#${id}-pom)" stroke="${whiteStrokeColor}" stroke-width="5" />
+    <path d="${trim}" fill="url(#${id}-fur)" stroke="${whiteStrokeColor}" stroke-width="5" stroke-linejoin="round" />
+    <path d="M150 150 Q300 130 450 150" fill="none" stroke="${whiteStrokeColor}" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round" />`;
+    characters.push({
+        id,
+        label: 'Santa Claus',
+        order: 370,
+        head: `${back}\n${hatBack}\n${face}\n${beardSvg}\n${hatSvg}`,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: humanEyeShape,
+                center: [55, 57],
+                irisRadius: 22,
+                iris: ['#8fc4ff', '#3f7fd0', '#1d3f7a'],
+                sclera: '#fffaf4',
+                outline: '#3a2010',
+                crease: humanCrease,
+            }),
+            closed: closedEye({
+                lid: 'M10 58 C30 76 80 76 100 56',
+                color: '#6a3a24',
+                lashes: false,
+                crease: humanCrease,
+            }),
+        },
+        brow: {
+            box: [185, 214, 100, 44],
+            svg: `    <path d="M4 36 Q40 0 96 18 Q100 30 92 34 Q46 16 14 42 Z" fill="#ffffff" stroke="${whiteStrokeColor}" stroke-width="3" stroke-linejoin="round" />`,
+            lift: 14,
+        },
+        mouth: { box: [235, 456, 130, 80], ...humanMouths(`${id}-mouth`, { lip: '#d9786a', lipDark: '#8a3f36' }) },
+    });
+});
+
+// ####################################################
+// SEASONAL CHARACTERS AND MORE ANIMALS
+// ####################################################
+
+// The same element drawn again mirrored around the centre line
+const mirrored = (element) => `${element}\n    <g transform="translate(600 0) scale(-1 1)">${element}</g>`;
+
+const ROUND_EYE = 'M28 55 a27 27 0 1 0 54 0 a27 27 0 1 0 -54 0 Z';
+
+// ---------------- Reindeer ----------------
+builders.push(() => {
+    const id = 'reindeer';
+    const d = catmull(ellipse(300, 346, 196, 240, 32));
+    const muzzle = catmull(ellipse(300, 462, 112, 82, 28));
+    const antler = (
+        stroke,
+        width
+    ) => `<g fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M226 130 C196 96 184 56 192 14" />
+        <path d="M205 96 C178 90 156 70 144 40" />
+        <path d="M193 58 C214 46 224 30 224 12" />
+        <path d="M212 112 C240 100 258 78 262 52" />
+    </g>`;
+    const ear = 'M118 262 C70 214 24 220 8 252 C30 296 84 298 122 284 Z';
+    const earInner = 'M104 262 C72 238 44 240 32 254 C50 276 82 278 108 270 Z';
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-fur" cx="0.5" cy="0.38" r="0.66">
+            <stop offset="0" stop-color="#b9824f" />
+            <stop offset="0.7" stop-color="#8f5a30" />
+            <stop offset="1" stop-color="#683d1c" />
+        </radialGradient>
+        <radialGradient id="${id}-muzzle" cx="0.5" cy="0.35" r="0.65">
+            <stop offset="0" stop-color="#f6e3c4" />
+            <stop offset="1" stop-color="#d7b184" />
+        </radialGradient>
+        <radialGradient id="${id}-nose" cx="0.36" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#ff7a7a" />
+            <stop offset="0.55" stop-color="#e5232d" />
+            <stop offset="1" stop-color="#a30f1c" />
+        </radialGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    ${mirrored(antler('#6a4420', 28))}
+    ${mirrored(antler('#e1bf8c', 15))}
+    ${mirrored(`<path d="${ear}" fill="url(#${id}-fur)" stroke="#4a2a10" stroke-width="5" stroke-linejoin="round" />`)}
+    ${mirrored(`<path d="${earInner}" fill="#e8a39a" />`)}
+    <path d="${d}" fill="url(#${id}-fur)" />
+${shading(`${id}-head`, d, { rim: 0.36, light: 0.22, rimColor: '#2a1204' })}
+    <path d="${d}" fill="none" stroke="#4a2a10" stroke-width="5" stroke-linejoin="round" />
+    <path d="${muzzle}" fill="url(#${id}-muzzle)" stroke="#b58c5c" stroke-width="3" />
+    <ellipse cx="180" cy="424" rx="30" ry="16" fill="#ff8f8f" fill-opacity="0.22" filter="url(#${id}-soft)" />
+    <ellipse cx="420" cy="424" rx="30" ry="16" fill="#ff8f8f" fill-opacity="0.22" filter="url(#${id}-soft)" />
+    <circle cx="300" cy="430" r="46" fill="#ff3b3b" fill-opacity="0.3" filter="url(#${id}-soft)" />
+    <circle cx="300" cy="430" r="38" fill="url(#${id}-nose)" stroke="#7a0c18" stroke-width="3" />
+    <ellipse cx="287" cy="416" rx="13" ry="8" fill="#ffffff" fill-opacity="0.65" transform="rotate(-24 287 416)" />`;
+    characters.push({
+        id,
+        label: 'Reindeer',
+        order: 380,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: ROUND_EYE,
+                center: [55, 55],
+                irisRadius: 26,
+                iris: ['#9a6a3a', '#4a2810', '#160a02'],
+                pupilSize: 0.55,
+                outline: '#160a02',
+            }),
+            closed: closedEye({ lid: 'M28 54 Q55 74 82 54', color: '#2a1608', lashes: false }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#4a2a10' }), lift: 14 },
+        mouth: { box: [250, 466, 100, 90], ...animalMouths(`${id}-mouth`, { color: '#3a2008' }) },
+    });
+});
+
+// ---------------- Snowman ----------------
+builders.push(() => {
+    const id = 'snowman';
+    const d = catmull(ellipse(300, 360, 224, 232, 32));
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-snow" cx="0.42" cy="0.34" r="0.7">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="0.7" stop-color="#eaf3fb" />
+            <stop offset="1" stop-color="#b7cbe0" />
+        </radialGradient>
+        <linearGradient id="${id}-carrot" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffb54a" />
+            <stop offset="1" stop-color="#e2641a" />
+        </linearGradient>
+        <linearGradient id="${id}-scarf" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#e8323c" />
+            <stop offset="1" stop-color="#b3141f" />
+        </linearGradient>
+        <linearGradient id="${id}-hat" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#3a3a46" />
+            <stop offset="0.45" stop-color="#1c1c24" />
+            <stop offset="1" stop-color="#0a0a10" />
+        </linearGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    <path d="${d}" fill="url(#${id}-snow)" />
+${shading(`${id}-head`, d, { rim: 0.3, light: 0.3, rimColor: '#4a6a8a' })}
+    <path d="${d}" fill="none" stroke="#8aa3bd" stroke-width="5" stroke-linejoin="round" />
+    <ellipse cx="170" cy="430" rx="34" ry="18" fill="#ff8f8f" fill-opacity="0.35" filter="url(#${id}-soft)" />
+    <ellipse cx="430" cy="430" rx="34" ry="18" fill="#ff8f8f" fill-opacity="0.35" filter="url(#${id}-soft)" />
+    <path d="M300 358 C334 360 372 380 440 404 C372 420 334 432 300 430 C278 420 272 372 300 358 Z" fill="url(#${id}-carrot)" stroke="#a8480c" stroke-width="4" stroke-linejoin="round" />
+    <path d="M318 372 L326 398 M346 384 L352 408 M376 392 L380 410" fill="none" stroke="#a8480c" stroke-opacity="0.6" stroke-width="3" stroke-linecap="round" />
+    <path d="M308 372 C330 372 358 386 400 400" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="5" stroke-linecap="round" />
+    <path d="M118 534 C200 576 400 576 482 534 L498 584 C410 628 190 628 102 584 Z" fill="url(#${id}-scarf)" stroke="#6e0a14" stroke-width="5" stroke-linejoin="round" />
+    <path d="M396 596 L430 636 L492 626 L470 574 Z" fill="url(#${id}-scarf)" stroke="#6e0a14" stroke-width="5" stroke-linejoin="round" />
+    <path d="M150 556 L158 600 M214 574 L220 618 M290 580 L292 626 M366 574 L362 618 M436 556 L430 600" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="5" stroke-linecap="round" />
+    <ellipse cx="300" cy="150" rx="176" ry="34" fill="url(#${id}-hat)" stroke="#000000" stroke-width="5" />
+    <path d="M214 150 L224 30 Q300 6 376 30 L386 150 Q300 174 214 150 Z" fill="url(#${id}-hat)" stroke="#000000" stroke-width="5" stroke-linejoin="round" />
+    <path d="M216 120 Q300 148 384 120 L386 150 Q300 174 214 150 Z" fill="#d9202c" stroke="#6e0a14" stroke-width="4" stroke-linejoin="round" />
+    <ellipse cx="300" cy="32" rx="76" ry="14" fill="#2c2c36" stroke="#000000" stroke-width="4" />
+    <path d="M240 60 L244 118" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="8" stroke-linecap="round" />`;
+    characters.push({
+        id,
+        label: 'Snowman',
+        order: 390,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: ROUND_EYE,
+                center: [55, 55],
+                irisRadius: 27,
+                iris: ['#4a4a52', '#1c1c22', '#050507'],
+                pupilSize: 0.01,
+                outline: '#050507',
+            }),
+            closed: closedEye({ lid: 'M28 54 Q55 72 82 54', color: '#1c1c22', lashes: false, width: 6 }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#4a3a2a', opacity: 0.9 }), lift: 14 },
+        mouth: { box: [250, 436, 100, 90], ...animalMouths(`${id}-mouth`, { color: '#2a2a32' }) },
+    });
+});
+
+// ---------------- Pumpkin ----------------
+builders.push(() => {
+    const id = 'pumpkin';
+    const lobe = (cx, rx) => catmull(ellipse(cx, 356, rx, 236, 32));
+    const outline = '#8a3a06';
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-skin" cx="0.5" cy="0.38" r="0.7">
+            <stop offset="0" stop-color="#ffb347" />
+            <stop offset="0.7" stop-color="#f08a1c" />
+            <stop offset="1" stop-color="#c25a08" />
+        </radialGradient>
+        <linearGradient id="${id}-stem" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8a9a3a" />
+            <stop offset="1" stop-color="#4a5a1c" />
+        </linearGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    <path d="M276 134 C268 88 280 44 310 18 L356 34 C336 62 330 98 342 134 Z" fill="url(#${id}-stem)" stroke="#2e3a0e" stroke-width="5" stroke-linejoin="round" />
+    <path d="M344 56 C388 34 440 56 422 98 C410 124 380 112 392 92" fill="none" stroke="#4a7a1c" stroke-width="7" stroke-linecap="round" />
+    <path d="M404 84 C440 56 490 70 484 108 C450 118 420 108 404 84 Z" fill="#5a9a22" stroke="#2e5a0c" stroke-width="4" stroke-linejoin="round" />
+    ${[lobe(132, 118), lobe(468, 118), lobe(214, 128), lobe(386, 128), lobe(300, 128)]
+        .map(
+            (lobePath) =>
+                `<path d="${lobePath}" fill="url(#${id}-skin)" stroke="${outline}" stroke-width="5" stroke-linejoin="round" />`
+        )
+        .join('\n    ')}
+${shading(`${id}-head`, lobe(300, 128), { rim: 0.2, light: 0.28, rimColor: '#6a2a02' })}
+    <path d="M214 130 C170 230 170 480 214 584 M386 130 C430 230 430 480 386 584 M300 120 C260 230 260 480 300 592 M300 120 C340 230 340 480 300 592" fill="none" stroke="${outline}" stroke-opacity="0.3" stroke-width="6" stroke-linecap="round" />
+    <ellipse cx="170" cy="430" rx="34" ry="18" fill="#ff6a4a" fill-opacity="0.3" filter="url(#${id}-soft)" />
+    <ellipse cx="430" cy="430" rx="34" ry="18" fill="#ff6a4a" fill-opacity="0.3" filter="url(#${id}-soft)" />
+    <path d="M276 392 L324 392 L300 424 Z" fill="#7a3004" stroke="#4a1c02" stroke-width="3" stroke-linejoin="round" />`;
+    characters.push({
+        id,
+        label: 'Pumpkin',
+        order: 400,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: ROUND_EYE,
+                center: [55, 55],
+                irisRadius: 26,
+                iris: ['#8a5a2a', '#3a1c08', '#120802'],
+                sclera: '#fffaf0',
+                pupilSize: 0.5,
+                outline: '#3a1c08',
+            }),
+            closed: closedEye({ lid: 'M28 54 Q55 74 82 54', color: '#4a1c02', lashes: false }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#6a2a02' }), lift: 14 },
+        mouth: { box: [250, 428, 100, 90], ...animalMouths(`${id}-mouth`, { color: '#3a1602' }) },
+    });
+});
+
+// ---------------- Rabbit ----------------
+builders.push(() => {
+    const id = 'rabbit';
+    const d = catmull(ellipse(300, 358, 206, 230, 32));
+    const muzzle = catmull(ellipse(300, 456, 96, 70, 28));
+    const ear = 'M178 214 C126 140 122 50 158 10 C202 2 256 76 270 190 Z';
+    const earInner = 'M188 186 C158 130 156 70 172 36 C198 42 234 98 248 170 Z';
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-fur" cx="0.5" cy="0.38" r="0.68">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="0.7" stop-color="#f1e8dc" />
+            <stop offset="1" stop-color="#cdbfae" />
+        </radialGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    ${mirrored(`<path d="${ear}" fill="url(#${id}-fur)" stroke="#9a8672" stroke-width="5" stroke-linejoin="round" />`)}
+    ${mirrored(`<path d="${earInner}" fill="#f6a9b8" />`)}
+    <path d="${d}" fill="url(#${id}-fur)" />
+${shading(`${id}-head`, d, { rim: 0.28, light: 0.2, rimColor: '#6a5640' })}
+    <path d="${d}" fill="none" stroke="#9a8672" stroke-width="5" stroke-linejoin="round" />
+    <ellipse cx="180" cy="430" rx="34" ry="18" fill="#ff8fa8" fill-opacity="0.4" filter="url(#${id}-soft)" />
+    <ellipse cx="420" cy="430" rx="34" ry="18" fill="#ff8fa8" fill-opacity="0.4" filter="url(#${id}-soft)" />
+    <path d="${muzzle}" fill="#fffdf8" stroke="#d9cbb8" stroke-width="3" />
+    <path d="M283 484 L299 484 L299 518 Q291 524 283 518 Z M301 484 L317 484 L317 518 Q309 524 301 518 Z" fill="#fffdf6" stroke="#9a8672" stroke-width="3" stroke-linejoin="round" />
+    <path d="M276 406 Q300 394 324 406 Q318 428 300 434 Q282 428 276 406 Z" fill="#f27a94" stroke="#b04860" stroke-width="3" stroke-linejoin="round" />
+    <ellipse cx="290" cy="402" rx="8" ry="4" fill="#ffffff" fill-opacity="0.6" />
+    <path d="M232 450 L150 438 M232 464 L146 468 M368 450 L450 438 M368 464 L454 468" fill="none" stroke="#9a8672" stroke-opacity="0.55" stroke-width="3" stroke-linecap="round" />`;
+    characters.push({
+        id,
+        label: 'Rabbit',
+        order: 410,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: ROUND_EYE,
+                center: [55, 55],
+                irisRadius: 26,
+                iris: ['#c47a8a', '#6a2a3a', '#1c0810'],
+                pupilSize: 0.55,
+                outline: '#1c0810',
+            }),
+            closed: closedEye({ lid: 'M28 54 Q55 74 82 54', color: '#4a2a34', lashes: false }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#9a8672' }), lift: 14 },
+        mouth: { box: [250, 432, 100, 90], ...animalMouths(`${id}-mouth`, { color: '#7a3a4a' }) },
+    });
+});
+
+// ---------------- Pig ----------------
+builders.push(() => {
+    const id = 'pig';
+    const d = catmull(ellipse(300, 322, 216, 258, 32));
+    const snout = catmull(ellipse(300, 428, 104, 74, 28));
+    const ear = 'M128 170 C64 126 50 56 82 22 C150 30 216 66 246 120 Z';
+    const earInner = 'M126 148 C92 120 84 82 98 56 C140 66 184 90 206 120 Z';
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-skin" cx="0.5" cy="0.38" r="0.68">
+            <stop offset="0" stop-color="#ffc0cc" />
+            <stop offset="0.7" stop-color="#f79db0" />
+            <stop offset="1" stop-color="#d9708a" />
+        </radialGradient>
+        <radialGradient id="${id}-snout" cx="0.5" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#ffd0da" />
+            <stop offset="1" stop-color="#f48aa2" />
+        </radialGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    ${mirrored(`<path d="${ear}" fill="url(#${id}-skin)" stroke="#a8486a" stroke-width="5" stroke-linejoin="round" />`)}
+    ${mirrored(`<path d="${earInner}" fill="#ee7f9a" />`)}
+    <path d="${d}" fill="url(#${id}-skin)" />
+${shading(`${id}-head`, d, { rim: 0.3, light: 0.26, rimColor: '#8a2a4a' })}
+    <path d="${d}" fill="none" stroke="#a8486a" stroke-width="5" stroke-linejoin="round" />
+    <ellipse cx="170" cy="400" rx="34" ry="20" fill="#ff5f84" fill-opacity="0.3" filter="url(#${id}-soft)" />
+    <ellipse cx="430" cy="400" rx="34" ry="20" fill="#ff5f84" fill-opacity="0.3" filter="url(#${id}-soft)" />
+    <path d="${snout}" fill="url(#${id}-snout)" stroke="#a8486a" stroke-width="4" />
+    <ellipse cx="266" cy="428" rx="17" ry="25" fill="#9a3a5a" transform="rotate(10 266 428)" />
+    <ellipse cx="334" cy="428" rx="17" ry="25" fill="#9a3a5a" transform="rotate(-10 334 428)" />
+    <ellipse cx="262" cy="418" rx="5" ry="9" fill="#ffffff" fill-opacity="0.35" />
+    <ellipse cx="330" cy="418" rx="5" ry="9" fill="#ffffff" fill-opacity="0.35" />
+    <ellipse cx="288" cy="376" rx="22" ry="7" fill="#ffffff" fill-opacity="0.35" />`;
+    characters.push({
+        id,
+        label: 'Pig',
+        order: 420,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: ROUND_EYE,
+                center: [55, 55],
+                irisRadius: 25,
+                iris: ['#7a4a4a', '#3a1c22', '#14070a'],
+                pupilSize: 0.55,
+                outline: '#14070a',
+            }),
+            closed: closedEye({ lid: 'M28 54 Q55 74 82 54', color: '#4a1c2c', lashes: false }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#a8486a' }), lift: 14 },
+        mouth: { box: [250, 494, 100, 90], ...animalMouths(`${id}-mouth`, { color: '#7a2a44' }) },
+    });
+});
+
+// ---------------- Penguin ----------------
+builders.push(() => {
+    const id = 'penguin';
+    const d = catmull(ellipse(300, 336, 220, 250, 32));
+    const face = [
+        [300, 188], [372, 214], [454, 268], [474, 348], [452, 440], [394, 516], [300, 548], [206, 516],
+        [148, 440], [126, 348], [146, 268], [228, 214],
+    ]; // prettier-ignore
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-black" cx="0.5" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#4a5062" />
+            <stop offset="0.7" stop-color="#262a36" />
+            <stop offset="1" stop-color="#0e1016" />
+        </radialGradient>
+        <radialGradient id="${id}-white" cx="0.5" cy="0.4" r="0.7">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#dfe6ee" />
+        </radialGradient>
+        <linearGradient id="${id}-beak" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffc247" />
+            <stop offset="1" stop-color="#ee8a14" />
+        </linearGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    <path d="${d}" fill="url(#${id}-black)" />
+${shading(`${id}-head`, d, { rim: 0.4, light: 0.2, rimColor: '#000000' })}
+    <path d="${d}" fill="none" stroke="#06070a" stroke-width="5" stroke-linejoin="round" />
+    <path d="${catmull(face)}" fill="url(#${id}-white)" stroke="#c4cdd8" stroke-width="3" />
+    <ellipse cx="170" cy="418" rx="40" ry="22" fill="#ffb04a" fill-opacity="0.55" filter="url(#${id}-soft)" />
+    <ellipse cx="430" cy="418" rx="40" ry="22" fill="#ffb04a" fill-opacity="0.55" filter="url(#${id}-soft)" />
+    <path d="M244 386 Q300 358 356 386 Q338 432 300 442 Q262 432 244 386 Z" fill="url(#${id}-beak)" stroke="#a8560a" stroke-width="4" stroke-linejoin="round" />
+    <path d="M250 392 Q300 408 350 392" fill="none" stroke="#a8560a" stroke-opacity="0.6" stroke-width="3" stroke-linecap="round" />
+    <ellipse cx="282" cy="378" rx="22" ry="7" fill="#ffffff" fill-opacity="0.55" />`;
+    characters.push({
+        id,
+        label: 'Penguin',
+        order: 430,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: ROUND_EYE,
+                center: [55, 55],
+                irisRadius: 26,
+                iris: ['#6a6a78', '#22222c', '#050508'],
+                pupilSize: 0.5,
+                outline: '#050508',
+            }),
+            closed: closedEye({ lid: 'M28 54 Q55 74 82 54', color: '#1c1c26', lashes: false }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#2a2e3a' }), lift: 14 },
+        mouth: { box: [250, 440, 100, 90], ...animalMouths(`${id}-mouth`, { color: '#8a3c08' }) },
+    });
+});
+
+// ---------------- Owl ----------------
+builders.push(() => {
+    const id = 'owl';
+    const d = catmull(ellipse(300, 346, 226, 246, 32));
+    const tuft = 'M132 170 C112 110 106 66 112 30 C160 50 214 86 244 130 Z';
+    const disc = (cx) => catmull(ellipse(cx, 304, 100, 96, 28));
+    const feathers = [];
+    const random = rng(53);
+    for (let i = 0; i < 40; i++) {
+        const x = 130 + random() * 340;
+        const y = 120 + random() * 260;
+        feathers.push(`M${fmt(x)} ${fmt(y)}q7 9 14 0`);
+    }
+    const headSvg = `    <defs>
+        <radialGradient id="${id}-fur" cx="0.5" cy="0.38" r="0.68">
+            <stop offset="0" stop-color="#b8895a" />
+            <stop offset="0.7" stop-color="#8a5c34" />
+            <stop offset="1" stop-color="#5e3a1c" />
+        </radialGradient>
+        <radialGradient id="${id}-disc" cx="0.5" cy="0.45" r="0.6">
+            <stop offset="0" stop-color="#fff3d8" />
+            <stop offset="1" stop-color="#ebcf9e" />
+        </radialGradient>
+        <linearGradient id="${id}-beak" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffd05a" />
+            <stop offset="1" stop-color="#e8921c" />
+        </linearGradient>
+        ${softFilter(`${id}-soft`, 3)}
+    </defs>
+    ${mirrored(`<path d="${tuft}" fill="url(#${id}-fur)" stroke="#3e2410" stroke-width="5" stroke-linejoin="round" />`)}
+    <path d="${d}" fill="url(#${id}-fur)" />
+${shading(`${id}-head`, d, { rim: 0.38, light: 0.2, rimColor: '#2a1404' })}
+    <path d="${d}" fill="none" stroke="#3e2410" stroke-width="5" stroke-linejoin="round" />
+    <path d="${feathers.join('')}" fill="none" stroke="#3e2410" stroke-opacity="0.4" stroke-width="3" stroke-linecap="round" />
+    <path d="${catmull(ellipse(300, 496, 118, 62, 28))}" fill="url(#${id}-disc)" fill-opacity="0.9" />
+    <path d="${disc(222)}" fill="url(#${id}-disc)" stroke="#a87a44" stroke-width="5" />
+    <path d="${disc(378)}" fill="url(#${id}-disc)" stroke="#a87a44" stroke-width="5" />
+    <ellipse cx="170" cy="404" rx="30" ry="16" fill="#e0805a" fill-opacity="0.25" filter="url(#${id}-soft)" />
+    <ellipse cx="430" cy="404" rx="30" ry="16" fill="#e0805a" fill-opacity="0.25" filter="url(#${id}-soft)" />
+    <path d="M270 360 Q300 344 330 360 Q322 404 300 432 Q278 404 270 360 Z" fill="url(#${id}-beak)" stroke="#a8560a" stroke-width="4" stroke-linejoin="round" />
+    <ellipse cx="290" cy="362" rx="9" ry="5" fill="#ffffff" fill-opacity="0.6" />`;
+    characters.push({
+        id,
+        label: 'Owl',
+        order: 440,
+        head: headSvg,
+        eye: {
+            box: [EYE_BOX, EYE_BOX],
+            open: eye({
+                id: `${id}-eye`,
+                shape: ROUND_EYE,
+                center: [55, 55],
+                irisRadius: 27,
+                iris: ['#fff2a0', '#f5b81f', '#b05a00'],
+                pupilSize: 0.45,
+                outline: '#2a1608',
+            }),
+            closed: closedEye({ lid: 'M28 54 Q55 74 82 54', color: '#4a2a10', lashes: false }),
+        },
+        brow: { box: [185, 214, 100, 40], svg: cartoonBrow({ color: '#5a3414' }), lift: 14 },
+        mouth: { box: [250, 428, 100, 90], ...animalMouths(`${id}-mouth`, { color: '#6a3c10' }) },
+    });
+});
+
 // ####################################################
 // OUTPUT
 // ####################################################

@@ -159,6 +159,77 @@
         ],
     });
     VFX.registerAvatar({
+        id: 'avatar-dog',
+        label: 'Dog',
+        order: 225,
+        thumbnail: 'assets/avatars/dog/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/dog/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/dog/brow.svg',
+                box: [185, 214, 100, 40],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/dog/brow.svg',
+                box: [315, 214, 100, 40],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/dog/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/dog/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/dog/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/dog/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/dog/mouth-neutral.svg',
+                box: [250, 436, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/dog/mouth-smile.svg',
+                box: [250, 436, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/dog/mouth-open.svg',
+                box: [250, 436, 100, 90],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
+    });
+    VFX.registerAvatar({
         id: 'avatar-bear',
         label: 'Bear',
         order: 230,
@@ -1088,5 +1159,573 @@
         thumbnail: 'assets/avatars/astronaut/thumb.svg',
         ...CANVAS,
         parts: [{ asset: 'assets/avatars/astronaut/helmet.svg', box: [0, 0, 600, 640] }],
+    });
+    VFX.registerAvatar({
+        id: 'avatar-santa',
+        label: 'Santa Claus',
+        order: 370,
+        thumbnail: 'assets/avatars/santa/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/santa/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/santa/brow.svg',
+                box: [185, 214, 100, 44],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/santa/brow.svg',
+                box: [315, 214, 100, 44],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/santa/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/santa/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/santa/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/santa/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/santa/mouth-neutral.svg',
+                box: [235, 456, 130, 80],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/santa/mouth-smile.svg',
+                box: [235, 456, 130, 80],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/santa/mouth-open.svg',
+                box: [235, 456, 130, 80],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
+    });
+    VFX.registerAvatar({
+        id: 'avatar-reindeer',
+        label: 'Reindeer',
+        order: 380,
+        thumbnail: 'assets/avatars/reindeer/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/reindeer/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/reindeer/brow.svg',
+                box: [185, 214, 100, 40],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/reindeer/brow.svg',
+                box: [315, 214, 100, 40],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/reindeer/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/reindeer/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/reindeer/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/reindeer/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/reindeer/mouth-neutral.svg',
+                box: [250, 466, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/reindeer/mouth-smile.svg',
+                box: [250, 466, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/reindeer/mouth-open.svg',
+                box: [250, 466, 100, 90],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
+    });
+    VFX.registerAvatar({
+        id: 'avatar-snowman',
+        label: 'Snowman',
+        order: 390,
+        thumbnail: 'assets/avatars/snowman/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/snowman/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/snowman/brow.svg',
+                box: [185, 214, 100, 40],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/snowman/brow.svg',
+                box: [315, 214, 100, 40],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/snowman/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/snowman/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/snowman/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/snowman/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/snowman/mouth-neutral.svg',
+                box: [250, 436, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/snowman/mouth-smile.svg',
+                box: [250, 436, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/snowman/mouth-open.svg',
+                box: [250, 436, 100, 90],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
+    });
+    VFX.registerAvatar({
+        id: 'avatar-pumpkin',
+        label: 'Pumpkin',
+        order: 400,
+        thumbnail: 'assets/avatars/pumpkin/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/pumpkin/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/pumpkin/brow.svg',
+                box: [185, 214, 100, 40],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/pumpkin/brow.svg',
+                box: [315, 214, 100, 40],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/pumpkin/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/pumpkin/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/pumpkin/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/pumpkin/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/pumpkin/mouth-neutral.svg',
+                box: [250, 428, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/pumpkin/mouth-smile.svg',
+                box: [250, 428, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/pumpkin/mouth-open.svg',
+                box: [250, 428, 100, 90],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
+    });
+    VFX.registerAvatar({
+        id: 'avatar-rabbit',
+        label: 'Rabbit',
+        order: 410,
+        thumbnail: 'assets/avatars/rabbit/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/rabbit/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/rabbit/brow.svg',
+                box: [185, 214, 100, 40],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/rabbit/brow.svg',
+                box: [315, 214, 100, 40],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/rabbit/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/rabbit/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/rabbit/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/rabbit/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/rabbit/mouth-neutral.svg',
+                box: [250, 432, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/rabbit/mouth-smile.svg',
+                box: [250, 432, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/rabbit/mouth-open.svg',
+                box: [250, 432, 100, 90],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
+    });
+    VFX.registerAvatar({
+        id: 'avatar-pig',
+        label: 'Pig',
+        order: 420,
+        thumbnail: 'assets/avatars/pig/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/pig/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/pig/brow.svg',
+                box: [185, 214, 100, 40],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/pig/brow.svg',
+                box: [315, 214, 100, 40],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/pig/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/pig/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/pig/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/pig/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/pig/mouth-neutral.svg',
+                box: [250, 494, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/pig/mouth-smile.svg',
+                box: [250, 494, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/pig/mouth-open.svg',
+                box: [250, 494, 100, 90],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
+    });
+    VFX.registerAvatar({
+        id: 'avatar-penguin',
+        label: 'Penguin',
+        order: 430,
+        thumbnail: 'assets/avatars/penguin/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/penguin/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/penguin/brow.svg',
+                box: [185, 214, 100, 40],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/penguin/brow.svg',
+                box: [315, 214, 100, 40],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/penguin/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/penguin/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/penguin/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/penguin/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/penguin/mouth-neutral.svg',
+                box: [250, 440, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/penguin/mouth-smile.svg',
+                box: [250, 440, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/penguin/mouth-open.svg',
+                box: [250, 440, 100, 90],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
+    });
+    VFX.registerAvatar({
+        id: 'avatar-owl',
+        label: 'Owl',
+        order: 440,
+        thumbnail: 'assets/avatars/owl/thumb.svg',
+        ...CANVAS,
+        parts: [
+            { asset: 'assets/avatars/owl/head.svg', box: [0, 0, 600, 640] },
+            {
+                asset: 'assets/avatars/owl/brow.svg',
+                box: [185, 214, 100, 40],
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/owl/brow.svg',
+                box: [315, 214, 100, 40],
+                flipX: true,
+                drive: { offsetY: { expression: 'browUp', from: 0.18, to: 0.68, min: 0, max: -22 } },
+            },
+            {
+                asset: 'assets/avatars/owl/eye-open.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/owl/eye-closed.svg',
+                box: [180, 245, 110, 110],
+                drive: { opacity: { expression: 'blinkRight', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/owl/eye-open.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6, invert: true } },
+            },
+            {
+                asset: 'assets/avatars/owl/eye-closed.svg',
+                box: [310, 245, 110, 110],
+                flipX: true,
+                drive: { opacity: { expression: 'blinkLeft', from: 0.45, to: 0.6 } },
+            },
+            {
+                asset: 'assets/avatars/owl/mouth-neutral.svg',
+                box: [250, 428, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55, invert: true },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/owl/mouth-smile.svg',
+                box: [250, 428, 100, 90],
+                drive: {
+                    opacity: [
+                        { expression: 'mouthOpen', from: 0.08, to: 0.2, invert: true },
+                        { expression: 'smile', from: 0.3, to: 0.55 },
+                    ],
+                },
+            },
+            {
+                asset: 'assets/avatars/owl/mouth-open.svg',
+                box: [250, 428, 100, 90],
+                drive: {
+                    opacity: { expression: 'mouthOpen', from: 0.08, to: 0.2 },
+                    scaleY: { expression: 'mouthOpen', from: 0.08, to: 0.75, min: 0.42, max: 1 },
+                },
+            },
+        ],
     });
 })(typeof globalThis !== 'undefined' ? globalThis : self);

@@ -159,10 +159,21 @@ subject's left (image right), +Y up, +Z out of the face. `occluder` hides the pa
 only downloaded when a 3D effect is selected. `scripts/generate-video-effects-glb.js` shows how the bundled
 glasses were generated.
 
+### Your own picture accessory
+
+The Effects tab accepts a link to an image or an uploaded image (PNG, JPG, WebP, GIF or SVG, 10 MB max, up to 6
+accessories), the same way as the avatar pictures below. Choose where it goes first: **Head** (hat, crown),
+**Eyes** (glasses, mask), **Nose** or **Mouth** (the placements use the built-in `forehead`, `eyes`, `noseTip` and
+`mouth` anchors with the offsets and pivots of the bundled hats and glasses). The accessory follows the face and
+the **Size** slider corrects the fit; changing the placement moves the one that is on. A PNG with a transparent
+background works best. Images are read in the browser only; a link must allow cross-origin requests (CORS),
+otherwise download the file and use Upload. Accessories added from a link are remembered in this browser.
+
 ## Animated head avatars
 
 `effects/avatars.js` registers cartoon heads (cat, bear, panda, robot, alien, fox, monkey, man, woman, elf, dragon,
-unicorn, two more men and women, lion) and an astronaut helmet. They replace the head, follow its movements, **blink**, **raise their brows**,
+unicorn, two more men and women, lion, dog, rabbit, pig, penguin, owl, and the seasonal Santa Claus, reindeer,
+snowman and pumpkin) and an astronaut helmet. They replace the head, follow its movements, **blink**, **raise their brows**,
 **smile** and **open the mouth while talking**.
 
 Expressions (0..1) are updated every frame:
@@ -212,6 +223,24 @@ art: outlines, gradients, soft shading, detailed eyes) and run `node scripts/gen
 it rewrites `assets/avatars/` and `effects/avatars.js`. Each avatar is ~20-35 KB, loaded only when selected.
 Flat cartoon shapes are deliberate: they stay readable in small video tiles and compress well, while fine detail
 such as fur strands shimmers when the head moves and turns into noise after video encoding.
+
+### Your own picture
+
+The Avatars tab accepts a link to an image or an uploaded image (PNG, JPG, WebP, GIF or SVG, 10 MB max, up to 6
+pictures). The picture is one layer placed on the face (`anchor: 'eyes'`, 3 eye distances wide, eyes at 42% of its
+height), so it follows the head position, size and rotation, but it **does not blink or talk**: use a PNG with a
+transparent background for the best result (an opaque picture covers the face with a rectangle). The image is read
+in the browser only, never uploaded. A link must allow cross-origin requests (CORS), otherwise download the file and
+use Upload. The **Avatar size** slider corrects the fit; pictures added from a link are remembered in this browser.
+
+```js
+VFX.registerEffect({
+    id: 'avatar-custom-mine',
+    label: 'Mine',
+    category: 'avatar',
+    layers: [{ asset: 'https://example.com/me.png', anchor: 'eyes', width: 3, pivot: [0.5, 0.42] }],
+});
+```
 
 ## Realistic 3D avatars
 
