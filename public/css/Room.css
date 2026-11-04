@@ -867,19 +867,14 @@ body {
 
 /* Pre-join: background images sit next to the devices, so give them room instead of an inner scrollbar */
 @media screen and (min-width: 1025px) {
-    /* Device buttons share a single row (no lonely button wrapping to a second line) */
+    /* Keep device buttons the same size regardless of available space or camera state. */
     .init-user:not(.no-camera) .initComands > button {
-        flex: 1 1 0;
-        width: auto;
-        min-width: 34px;
-        max-width: 56px;
+        flex: 0 0 46px;
+        width: 46px;
     }
-    /* Compact no-camera card: same single row at the card's 42px button size */
     .init-user.no-camera .initComands > button {
-        flex: 1 1 0;
-        width: auto;
-        min-width: 34px;
-        max-width: 42px;
+        flex: 0 0 46px;
+        width: 46px;
     }
     .initComands > #imageGrid {
         flex: 1 1 100%;
@@ -945,8 +940,8 @@ body {
         justify-content: center;
     }
     .init-user.no-camera .initComands > button {
-        width: 42px;
-        height: 42px;
+        width: 46px;
+        height: 46px;
     }
 }
 
