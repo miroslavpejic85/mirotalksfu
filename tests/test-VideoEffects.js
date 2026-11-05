@@ -220,24 +220,24 @@ describe('Video effects engine', () => {
                     'avatar-panda',
                     'avatar-fox',
                     'avatar-monkey',
+                    'avatar-rabbit',
+                    'avatar-pig',
+                    'avatar-penguin',
+                    'avatar-owl',
+                    'avatar-reindeer',
                     'avatar-dragon',
                     'avatar-unicorn',
-                    'avatar-man',
-                    'avatar-blackman',
-                    'avatar-woman',
-                    'avatar-blackwoman',
                     'avatar-elf',
                     'avatar-robot',
                     'avatar-alien',
                     'avatar-astronaut',
                     'avatar-santa',
-                    'avatar-reindeer',
                     'avatar-snowman',
                     'avatar-pumpkin',
-                    'avatar-rabbit',
-                    'avatar-pig',
-                    'avatar-penguin',
-                    'avatar-owl',
+                    'avatar-man',
+                    'avatar-blackman',
+                    'avatar-woman',
+                    'avatar-blackwoman',
                 ]
             );
             assert.equal(list[0].thumbnail, 'https://example.com/video-effects/assets/sunglasses/sunglasses.svg');
@@ -488,6 +488,7 @@ describe('Video effects engine', () => {
             assert.deepEqual(
                 [...avatars.map((effect) => effect.id)],
                 [
+                    'avatar3d-raccoon',
                     'avatar3d-man',
                     'avatar3d-man-2',
                     'avatar3d-woman',
@@ -497,7 +498,6 @@ describe('Video effects engine', () => {
                     'avatar3d-man-4',
                     'avatar3d-woman-4',
                     'avatar3d-man-5',
-                    'avatar3d-raccoon',
                 ]
             );
             for (const { id, is3D } of avatars) {
