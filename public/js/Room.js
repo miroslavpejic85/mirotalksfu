@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.61
+ * @version 2.7.62
  *
  */
 
@@ -6826,8 +6826,11 @@ function setupQuickDeviceSwitchDropdowns() {
     let videoMenuBackgroundBusy = false;
     let videoMenuBackgroundScrollTop = 0;
     let videoMenuBackgroundFileInput = null;
+    // "Image" was chosen: show the image grid without applying any image until one is picked
+    let videoMenuBackgroundImagePicker = false;
 
     function getVideoMenuBackgroundMode() {
+        if (videoMenuBackgroundImagePicker) return 'image';
         if (virtualBackgroundBlurLevel) return 'blur';
         if (virtualBackgroundSelectedImage) return 'image';
         if (virtualBackgroundTransparent) return 'transparent';
@@ -6837,6 +6840,7 @@ function setupQuickDeviceSwitchDropdowns() {
     async function setVideoMenuBackground(blurLevel = null, imageUrl = null) {
         if (videoMenuBackgroundBusy) return;
         videoMenuBackgroundBusy = true;
+        if (!imageUrl) videoMenuBackgroundImagePicker = false;
         buildVideoMenu();
         try {
             await rc.applyVirtualBackground(blurLevel, imageUrl, null);
@@ -6984,9 +6988,8 @@ function setupQuickDeviceSwitchDropdowns() {
         appendVideoMenuBackgroundOption(section, 'Off', mode === 'off', () => setVideoMenuBackground());
         appendVideoMenuBackgroundOption(section, 'Blur', mode === 'blur', () => setVideoMenuBackground(20));
         appendVideoMenuBackgroundOption(section, 'Image', mode === 'image', () => {
-            // Choosing "Image" applies something right away: the last used image, otherwise the first preset
-            const imageUrl = virtualBackgroundLastImage || virtualBackgrounds[0];
-            if (imageUrl) setVideoMenuBackground(null, imageUrl);
+            videoMenuBackgroundImagePicker = true;
+            buildVideoMenu();
         });
 
         if (mode === 'image') appendVideoMenuBackgroundGrid(section);
@@ -7248,6 +7251,13 @@ function setupQuickDeviceSwitchDropdowns() {
     audioDropdown.addEventListener('click', rebuildAudioMenu);
     videoToggle.addEventListener('mouseenter', rebuildVideoMenu);
     audioToggle.addEventListener('mouseenter', rebuildAudioMenu);
+
+    // Closing the menu without picking an image drops the pending "Image" choice
+    videoDropdown.addEventListener('hidden.bs.dropdown', () => {
+        if (!videoMenuBackgroundImagePicker) return;
+        videoMenuBackgroundImagePicker = false;
+        rebuildVideoMenu();
+    });
 
     // Live audio input level meters: run only while the audio menu is open
     audioDropdown.addEventListener('shown.bs.dropdown', () => {
@@ -11222,7 +11232,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.61',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.62',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
