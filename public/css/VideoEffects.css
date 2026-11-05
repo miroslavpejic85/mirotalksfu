@@ -782,7 +782,7 @@
 }
 
 /*--------------------------------------------------------------
-# Room: "Effects on" badge on the own tile, dot on the camera button
+# Room: "Effects on" badge on the own tile, turn-off button on the camera control
 --------------------------------------------------------------*/
 
 .vfx-on-badge {
@@ -844,10 +844,6 @@
     }
 }
 
-#bottomButtons #stopVideoButton.vfx-active-dot {
-    position: relative;
-}
-
 #bottomButtons #startVideoSplit {
     position: relative;
 }
@@ -894,16 +890,4 @@
         width: 32px;
         height: 32px;
     }
-}
-
-#bottomButtons #stopVideoButton.vfx-active-dot::after {
-    content: '';
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #4caf50;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
 }

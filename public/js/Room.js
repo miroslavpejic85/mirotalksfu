@@ -10678,13 +10678,12 @@ function isAnyVisualEffectOn() {
 
 /**
  * "Effects on" indicators in the room: a badge on the own camera tile (open the panel), a close
- * button above the main video control and a dot on the camera button. Effects are remembered
+ * button above the main video control. Effects are remembered
  * between meetings.
  */
 function updateVideoEffectsIndicators(active = isAnyVisualEffectOn()) {
     if (!rc || !isVisualEffectsMerged()) return;
     const cameraOn = rc.producerLabel.has(RoomClient.mediaType.video);
-    stopVideoButton?.classList.toggle('vfx-active-dot', active && cameraOn);
     const videoSplit = getId('startVideoSplit');
     let toolbarOff = videoSplit?.querySelector('.vfx-toolbar-off-btn');
     if (videoSplit && !toolbarOff) {
