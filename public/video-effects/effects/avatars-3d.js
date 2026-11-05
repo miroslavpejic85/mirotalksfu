@@ -16,70 +16,70 @@
     VFX.registerAvatar3D({
         id: 'avatar3d-man',
         label: 'Man',
-        order: 410,
+        order: 470,
         thumbnail: 'assets/avatars-3d/man/thumb.webp',
         model: { asset: 'assets/avatars-3d/man/model.glb', clipY: -3.665 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-man-2',
         label: 'Man 2',
-        order: 420,
+        order: 480,
         thumbnail: 'assets/avatars-3d/man-2/thumb.webp',
         model: { asset: 'assets/avatars-3d/man-2/model.glb', clipY: -3.593 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-woman',
         label: 'Woman',
-        order: 430,
+        order: 490,
         thumbnail: 'assets/avatars-3d/woman/thumb.webp',
         model: { asset: 'assets/avatars-3d/woman/model.glb', clipY: -4.03 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-woman-2',
         label: 'Woman 2',
-        order: 440,
+        order: 500,
         thumbnail: 'assets/avatars-3d/woman-2/thumb.webp',
         model: { asset: 'assets/avatars-3d/woman-2/model.glb', clipY: -4.042 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-man-3',
         label: 'Man 3',
-        order: 450,
+        order: 510,
         thumbnail: 'assets/avatars-3d/man-3/thumb.webp',
         model: { asset: 'assets/avatars-3d/man-3/model.glb', clipY: -3.86 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-woman-3',
         label: 'Woman 3',
-        order: 460,
+        order: 520,
         thumbnail: 'assets/avatars-3d/woman-3/thumb.webp',
         model: { asset: 'assets/avatars-3d/woman-3/model.glb', clipY: -3.886 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-man-4',
         label: 'Man 4',
-        order: 470,
+        order: 530,
         thumbnail: 'assets/avatars-3d/man-4/thumb.webp',
         model: { asset: 'assets/avatars-3d/man-4/model.glb', clipY: -3.745 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-woman-4',
         label: 'Woman 4',
-        order: 480,
+        order: 540,
         thumbnail: 'assets/avatars-3d/woman-4/thumb.webp',
         model: { asset: 'assets/avatars-3d/woman-4/model.glb', clipY: -4.003 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-man-5',
         label: 'Man 5',
-        order: 490,
+        order: 550,
         thumbnail: 'assets/avatars-3d/man-5/thumb.webp',
         model: { asset: 'assets/avatars-3d/man-5/model.glb', clipY: -3.702 },
     });
     VFX.registerAvatar3D({
         id: 'avatar3d-raccoon',
         label: 'Raccoon',
-        order: 500,
+        order: 330,
         thumbnail: 'assets/avatars-3d/raccoon/thumb.webp',
         model: { asset: 'assets/avatars-3d/raccoon/model.glb', scale: 1.7 },
     });

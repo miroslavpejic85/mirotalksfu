@@ -43,16 +43,17 @@ const ROCKETBOX = 'https://raw.githubusercontent.com/microsoft/Microsoft-Rocketb
 const THREE_CDN = 'https://cdn.jsdelivr.net/npm/three@0.181.0';
 
 const AVATARS = [
-    { id: 'man', label: 'Man', source: 'rocketbox', name: 'Male_Adult_01' },
-    { id: 'man-2', label: 'Man 2', source: 'rocketbox', name: 'Male_Adult_12' },
-    { id: 'woman', label: 'Woman', source: 'rocketbox', name: 'Female_Adult_01' },
-    { id: 'woman-2', label: 'Woman 2', source: 'rocketbox', name: 'Female_Adult_11' },
-    { id: 'man-3', label: 'Man 3', source: 'rocketbox', name: 'Male_Adult_04' },
-    { id: 'woman-3', label: 'Woman 3', source: 'rocketbox', name: 'Female_Adult_15' },
-    { id: 'man-4', label: 'Man 4', source: 'rocketbox', name: 'Male_Adult_10' },
-    { id: 'woman-4', label: 'Woman 4', source: 'rocketbox', name: 'Female_Adult_12' },
+    { id: 'man', order: 470, label: 'Man', source: 'rocketbox', name: 'Male_Adult_01' },
+    { id: 'man-2', order: 480, label: 'Man 2', source: 'rocketbox', name: 'Male_Adult_12' },
+    { id: 'woman', order: 490, label: 'Woman', source: 'rocketbox', name: 'Female_Adult_01' },
+    { id: 'woman-2', order: 500, label: 'Woman 2', source: 'rocketbox', name: 'Female_Adult_11' },
+    { id: 'man-3', order: 510, label: 'Man 3', source: 'rocketbox', name: 'Male_Adult_04' },
+    { id: 'woman-3', order: 520, label: 'Woman 3', source: 'rocketbox', name: 'Female_Adult_15' },
+    { id: 'man-4', order: 530, label: 'Man 4', source: 'rocketbox', name: 'Male_Adult_10' },
+    { id: 'woman-4', order: 540, label: 'Woman 4', source: 'rocketbox', name: 'Female_Adult_12' },
     {
         id: 'man-5',
+        order: 550,
         label: 'Man 5',
         source: 'rocketbox',
         name: 'Male_Adult_03',
@@ -61,6 +62,7 @@ const AVATARS = [
     },
     {
         id: 'raccoon',
+        order: 330,
         label: 'Raccoon',
         source: 'url',
         url: 'https://storage.googleapis.com/mediapipe-tasks/face_landmarker/raccoon_head_small.glb',
@@ -658,7 +660,7 @@ async function finalize(tools, document, file) {
 }
 
 function writeEffectsFile(entries) {
-    const lines = entries.map((entry, index) => {
+    const lines = entries.map((entry) => {
         const model = { asset: `assets/avatars-3d/${entry.id}/model.glb` };
         if (entry.scale && entry.scale !== 1) model.scale = entry.scale;
         if (entry.clipY !== null) model.clipY = entry.clipY;
@@ -669,7 +671,7 @@ function writeEffectsFile(entries) {
             '    VFX.registerAvatar3D({',
             `        id: 'avatar3d-${entry.id}',`,
             `        label: '${entry.label}',`,
-            `        order: ${410 + index * 10},`,
+            `        order: ${entry.order},`,
             `        thumbnail: 'assets/avatars-3d/${entry.id}/thumb.webp',`,
             `        model: { ${modelText} },`,
             '    });',
@@ -715,7 +717,7 @@ async function buildModels() {
         const file = path.join(OUTPUT_DIR, avatar.id, 'model.glb');
         const size = await finalize(tools, built.document, file);
         console.log(`  ${path.relative(process.cwd(), file)} ${(size / 1024).toFixed(0)} KB`);
-        entries.push({ id: avatar.id, label: avatar.label, scale: avatar.scale, clipY });
+        entries.push({ id: avatar.id, label: avatar.label, order: avatar.order, scale: avatar.scale, clipY });
     }
     writeEffectsFile(entries);
     console.log(`wrote ${path.relative(process.cwd(), EFFECTS_FILE)}`);

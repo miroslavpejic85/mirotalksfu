@@ -360,7 +360,7 @@ ${shading(`${id}-head`, d, { rim: 0.38, light: 0.2, rimColor: '#2a1504' })}
     characters.push({
         id,
         label: 'Bear',
-        order: 230,
+        order: 240,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -418,7 +418,7 @@ ${shading(`${id}-head`, d, { rim: 0.22, light: 0.15, rimColor: '#4a4436' })}
     characters.push({
         id,
         label: 'Panda',
-        order: 240,
+        order: 250,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -489,7 +489,7 @@ ${shading(`${id}-head`, d, { rim: 0.3, light: 0.25, rimColor: '#5a2004' })}
     characters.push({
         id,
         label: 'Fox',
-        order: 250,
+        order: 260,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -554,7 +554,7 @@ ${shading(`${id}-head`, catmull(head), { rim: 0.35, light: 0.18, rimColor: '#120
     characters.push({
         id,
         label: 'Monkey',
-        order: 260,
+        order: 270,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -675,7 +675,7 @@ builders.push(() => {
     characters.push({
         id,
         label: 'Robot',
-        order: 340,
+        order: 370,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -753,7 +753,7 @@ ${shading(`${id}-head`, d, { rim: 0.3, light: 0.3, rimColor: '#0f3a12' })}
     characters.push({
         id,
         label: 'Alien',
-        order: 350,
+        order: 380,
         head: headSvg,
         eye: {
             box: [128, 116],
@@ -908,7 +908,7 @@ builders.push(() => {
     characters.push({
         id,
         label: 'Man',
-        order: 290,
+        order: 430,
         head: `${back}\n${face}\n${hair}`,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -967,7 +967,7 @@ builders.push(() => {
     characters.push({
         id,
         label: 'Woman',
-        order: 310,
+        order: 450,
         head: `${hairBack}\n${back}\n${face}\n${fringe}`,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1024,7 +1024,7 @@ builders.push(() => {
     characters.push({
         id,
         label: 'Man 2',
-        order: 300,
+        order: 440,
         head: `${back}\n${face}\n${hair}`,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1098,7 +1098,7 @@ builders.push(() => {
     characters.push({
         id,
         label: 'Woman 2',
-        order: 320,
+        order: 460,
         head: `${back}\n${face}\n${hair}`,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1165,7 +1165,7 @@ builders.push(() => {
     characters.push({
         id,
         label: 'Elf',
-        order: 330,
+        order: 360,
         head: `${hairBack}\n${back}\n${face}\n${front}`,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1253,7 +1253,7 @@ ${shading(`${id}-head`, d, { rim: 0.34, light: 0.26, rimColor: '#06240f' })}
     characters.push({
         id,
         label: 'Dragon',
-        order: 270,
+        order: 340,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1330,7 +1330,7 @@ ${shading(`${id}-head`, catmull(head), { rim: 0.22, light: 0.22, rimColor: '#6a4
     characters.push({
         id,
         label: 'Unicorn',
-        order: 280,
+        order: 350,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1560,7 +1560,7 @@ ${shading(`${id}-head`, d, { rim: 0.34, light: 0.22, rimColor: '#4a2404' })}
     characters.push({
         id,
         label: 'Dog',
-        order: 225,
+        order: 230,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1633,7 +1633,7 @@ builders.push(() => {
     characters.push({
         id,
         label: 'Santa Claus',
-        order: 370,
+        order: 400,
         head: `${back}\n${hatBack}\n${face}\n${beardSvg}\n${hatSvg}`,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1721,7 +1721,7 @@ ${shading(`${id}-head`, d, { rim: 0.36, light: 0.22, rimColor: '#2a1204' })}
     characters.push({
         id,
         label: 'Reindeer',
-        order: 380,
+        order: 320,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1785,7 +1785,7 @@ ${shading(`${id}-head`, d, { rim: 0.3, light: 0.3, rimColor: '#4a6a8a' })}
     characters.push({
         id,
         label: 'Snowman',
-        order: 390,
+        order: 410,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1839,7 +1839,7 @@ ${shading(`${id}-head`, lobe(300, 128), { rim: 0.2, light: 0.28, rimColor: '#6a2
     characters.push({
         id,
         label: 'Pumpkin',
-        order: 400,
+        order: 420,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1890,7 +1890,7 @@ ${shading(`${id}-head`, d, { rim: 0.28, light: 0.2, rimColor: '#6a5640' })}
     characters.push({
         id,
         label: 'Rabbit',
-        order: 410,
+        order: 280,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -1945,7 +1945,7 @@ ${shading(`${id}-head`, d, { rim: 0.3, light: 0.26, rimColor: '#8a2a4a' })}
     characters.push({
         id,
         label: 'Pig',
-        order: 420,
+        order: 290,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -2001,7 +2001,7 @@ ${shading(`${id}-head`, d, { rim: 0.4, light: 0.2, rimColor: '#000000' })}
     characters.push({
         id,
         label: 'Penguin',
-        order: 430,
+        order: 300,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -2065,7 +2065,7 @@ ${shading(`${id}-head`, d, { rim: 0.38, light: 0.2, rimColor: '#2a1404' })}
     characters.push({
         id,
         label: 'Owl',
-        order: 440,
+        order: 310,
         head: headSvg,
         eye: {
             box: [EYE_BOX, EYE_BOX],
@@ -2184,7 +2184,7 @@ writeFile(path.join(OUT, 'astronaut/thumb.svg'), svg(W, H, `${astronautThumbFace
 descriptors.push(`    VFX.registerAvatar({
         id: 'avatar-astronaut',
         label: 'Astronaut',
-        order: 360,
+        order: 390,
         thumbnail: 'assets/avatars/astronaut/thumb.svg',
         ...CANVAS,
         parts: [{ asset: 'assets/avatars/astronaut/helmet.svg', box: [0, 0, ${W}, ${H}] }],
