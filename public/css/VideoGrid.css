@@ -21,6 +21,17 @@
     /* border: 3px solid blue; */
 }
 
+/* Keep the tiles above the bottom buttons bar instead of sitting under it (--buttons-bar-reserve is set in Room.js) */
+#videoMediaContainer,
+#videoPinMediaContainer {
+    box-sizing: border-box;
+}
+
+#videoMediaContainer:not(.no-bar-reserve),
+#videoPinMediaContainer:not(.no-bar-reserve) {
+    padding-bottom: var(--buttons-bar-reserve, 0px);
+}
+
 /* Video container with mouse light effect */
 #videoMediaContainer.mouse-light {
     background:
@@ -1439,6 +1450,7 @@ input[type='range'] {
         top 0.24s var(--ease-standard),
         left 0.24s var(--ease-standard),
         right 0.24s var(--ease-standard),
+        padding-bottom 0.24s var(--ease-standard),
         opacity 500ms,
         background 0.2s;
 }

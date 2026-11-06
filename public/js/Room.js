@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.70
+ * @version 2.7.71
  *
  */
 
@@ -6118,6 +6118,22 @@ function handleButtonsBar() {
     isDesktopDevice
         ? document.body.addEventListener('mousemove', showButtonsHandler)
         : document.body.addEventListener('touchstart', showButtonsHandler);
+    // Show/hide, wrapping on small screens and position changes all resize the bar
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncButtonsBarReserve).observe(bottomButtons);
+}
+
+// Reserve room under the video grid while the bottom bar is shown, so tiles never sit behind the buttons (like Meet)
+let buttonsBarReserve = 0;
+
+function syncButtonsBarReserve() {
+    const isBottomBar = bottomButtons.dataset.position !== 'horizontal';
+    const barHeight = isBottomBar ? bottomButtons.offsetHeight : 0;
+    const reserve = barHeight ? Math.ceil(barHeight + parseFloat(getComputedStyle(bottomButtons).marginBottom) + 6) : 0;
+    if (reserve === buttonsBarReserve) return;
+    buttonsBarReserve = reserve;
+    animateVideoLayout();
+    document.documentElement.style.setProperty('--buttons-bar-reserve', `${reserve}px`);
+    if (prefersReducedMotion()) resizeVideoMedia();
 }
 
 function handleDropdownHover(dropdownElement = null) {
@@ -11244,7 +11260,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.70',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.71',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

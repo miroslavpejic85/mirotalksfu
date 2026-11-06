@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.70
+ * @version 2.7.71
  *
  */
 
@@ -6619,6 +6619,7 @@ class RoomClient {
             bottomButtons.dataset.position = position;
             this.btnsBarPosition = position;
             this.updateButtonsBarPinnedOffset();
+            if (typeof syncButtonsBarReserve === 'function') syncButtonsBarReserve();
         }
     }
 
@@ -7046,6 +7047,9 @@ class RoomClient {
         this.videoMediaContainer.style.right = '';
         this.videoMediaContainer.style.width = contentWidth + '%';
         this.videoMediaContainer.style.height = '100%';
+        // Only the container touching the bottom of the screen reserves room for the buttons bar
+        this.videoMediaContainer.classList.remove('no-bar-reserve');
+        this.videoPinMediaContainer.classList.remove('no-bar-reserve');
         switch (position) {
             case 'speaker-bottom':
             case 'top':
@@ -7053,6 +7057,7 @@ class RoomClient {
                 this.videoPinMediaContainer.style.width = contentWidth + '%';
                 this.videoPinMediaContainer.style.height = '75%';
                 this.videoMediaContainer.style.height = '25%';
+                this.videoMediaContainer.classList.add('no-bar-reserve');
                 break;
             case 'speaker-left':
             case 'vertical':
@@ -7065,6 +7070,7 @@ class RoomClient {
                 this.videoPinMediaContainer.style.height = '75%';
                 this.videoMediaContainer.style.top = '75%';
                 this.videoMediaContainer.style.height = '25%';
+                this.videoPinMediaContainer.classList.add('no-bar-reserve');
                 break;
             case 'speaker-right':
                 this.videoPinMediaContainer.style.left = thumbnailWidth + '%';
@@ -7386,6 +7392,8 @@ class RoomClient {
         this.videoMediaContainer.style.right = '';
         this.videoMediaContainer.style.width = '100%';
         this.videoMediaContainer.style.height = '100%';
+        this.videoMediaContainer.classList.remove('no-bar-reserve');
+        this.videoPinMediaContainer.classList.remove('no-bar-reserve');
         this.resizeVideoMenuBar();
     }
 
