@@ -34,6 +34,7 @@ const advertisers = document.getElementById('advertisers');
 const supportUs = document.getElementById('supportUs');
 const footer = document.getElementById('footer');
 const navGithubLink = document.getElementById('navGithubLink');
+const appSwitcher = document.getElementById('appSwitcher');
 
 const waitingRoomHeading = document.getElementById('waitingRoomHeading');
 const waitingRoomDescription = document.getElementById('waitingRoomDescription');
@@ -87,6 +88,13 @@ let BRAND = {
         supportUs: true,
         footer: true,
         version: true,
+        appSwitcher: false,
+    },
+    appSwitcher: {
+        domain: 'mirotalk.com',
+        apps: 'sfu,p2p,c2c,bro,cme,cloud',
+        urls: {},
+        docsUrl: 'https://docs.mirotalk.com/',
     },
     whoAreYou: {
         title: 'MiroTalk SFU - Waiting for host to start the meeting',
@@ -109,7 +117,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.7.63</strong>',
+        title: '<strong>WebRTC SFU v2.7.65</strong>',
         html: `
             <div class="about-content">
                 <p class="about-description">
@@ -250,7 +258,8 @@ function setBrand(data) {
 
 function mergeBrand(current, updated) {
     for (const key of Object.keys(updated)) {
-        if (!current.hasOwnProperty(key) || typeof updated[key] !== 'object') {
+        const isObject = (value) => value && typeof value === 'object' && !Array.isArray(value);
+        if (!isObject(updated[key]) || !isObject(current[key])) {
             current[key] = updated[key];
         } else {
             mergeBrand(current[key], updated[key]);
@@ -276,6 +285,20 @@ function checkBrand() {
     !BRAND.html.supportUs && elementDisplay(supportUs, false);
     !BRAND.html.footer && elementDisplay(footer, false);
     !BRAND.html.footer && elementDisplay(navGithubLink, false);
+    if (appSwitcher) {
+        appSwitcher.hidden = !BRAND.html.appSwitcher;
+        customizeAppSwitcher();
+    }
+}
+
+// APP SWITCHER customize (attributes work even before AppSwitcher.js upgrades the element)
+function customizeAppSwitcher() {
+    const { domain, apps, urls, docsUrl } = BRAND.appSwitcher || {};
+    if (typeof domain === 'string' && domain.trim()) appSwitcher.setAttribute('domain', domain.trim());
+    const appList = Array.isArray(apps) ? apps.join(',') : apps;
+    if (typeof appList === 'string' && appList.trim()) appSwitcher.setAttribute('apps', appList);
+    if (urls && typeof urls === 'object') appSwitcher.setAttribute('urls', JSON.stringify(urls));
+    if (typeof docsUrl === 'string') appSwitcher.setAttribute('docs-url', docsUrl.trim());
 }
 
 // ELEMENT display mode

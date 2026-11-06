@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.7.63 - Configuration File
+ * MiroTalk SFU v2.7.65 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1414,6 +1414,29 @@ module.exports = {
                 supportUs: process.env.SHOW_SUPPORT_US !== 'false',
                 footer: process.env.SHOW_FOOTER !== 'false',
                 version: process.env.SHOW_VERSION !== 'false', // show app version in landing footer
+                appSwitcher: process.env.SHOW_APP_SWITCHER === 'true', // MiroTalk apps switcher in landing nav (default hidden)
+            },
+
+            /**
+             * MiroTalk Apps Switcher
+             * ----------------------
+             * Links shown in the landing nav when SHOW_APP_SWITCHER=true.
+             * Links default to https://{app}.{domain}/, optionally overridden per app.
+             */
+            appSwitcher: {
+                domain: process.env.APP_SWITCHER_DOMAIN || 'mirotalk.com',
+                apps: process.env.APP_SWITCHER_APPS || 'sfu,p2p,c2c,bro,cme,cloud', // shown apps, in order (rnd and admin are opt-in)
+                urls: {
+                    sfu: process.env.APP_SWITCHER_SFU_URL || '',
+                    p2p: process.env.APP_SWITCHER_P2P_URL || '',
+                    c2c: process.env.APP_SWITCHER_C2C_URL || '',
+                    bro: process.env.APP_SWITCHER_BRO_URL || '',
+                    cme: process.env.APP_SWITCHER_CME_URL || '',
+                    rnd: process.env.APP_SWITCHER_RND_URL || '',
+                    cloud: process.env.APP_SWITCHER_CLOUD_URL || '',
+                    admin: process.env.APP_SWITCHER_ADMIN_URL || '',
+                },
+                docsUrl: process.env.APP_SWITCHER_DOCS_URL ?? 'https://docs.mirotalk.com/', // footer link, empty hides it
             },
 
             /**
