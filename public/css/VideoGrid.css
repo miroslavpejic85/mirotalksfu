@@ -541,6 +541,12 @@ input[type='range'] {
     cursor: grabbing;
 }
 
+.screen-cam-overlay.screen-cam-snapping {
+    transition:
+        left 0.2s var(--ease-standard),
+        top 0.2s var(--ease-standard);
+}
+
 .screen-cam-overlay > .videoMenuBar {
     display: none !important;
 }
@@ -569,6 +575,39 @@ input[type='range'] {
 .screen-cam-overlay .user-hand {
     margin: 6px !important;
     font-size: 1rem !important;
+}
+
+/*--------------------------------------------------------------
+# Mobile: screen share on stage, other tiles in a strip (layoutScreenStage in VideoGrid.js)
+--------------------------------------------------------------*/
+
+#videoMediaContainer.screen-stage {
+    align-content: flex-start;
+}
+
+#videoMediaContainer.screen-stage > [data-screen-stage='main'] {
+    order: -1;
+}
+
+#videoMediaContainer.screen-stage-landscape > .Camera:not([data-screen-stage='main']) {
+    display: none !important;
+}
+
+/* Presentation marker in front of the presenter name (same cue as Meet's "presentation") */
+#videoMediaContainer.screen-stage > [data-screen-stage='main'] > .username::before {
+    content: '\f108';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    margin-right: 6px;
+    color: var(--hover-color, #4caf50);
+}
+
+.screen-stage .screen-cam-overlay {
+    left: 8px;
+    bottom: 8px;
+    width: 32% !important;
+    min-width: 88px;
+    max-width: 150px;
 }
 
 [data-cam-layout='split'] > video {

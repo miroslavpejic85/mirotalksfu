@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.65
+ * @version 2.7.70
  *
  */
 
@@ -5628,7 +5628,11 @@ function loadSettingsFromLocalStorage() {
     BtnsBarPosition.selectedIndex = localStorageSettings.buttons_bar;
     pinVideoPosition.selectedIndex = localStorageSettings.pin_grid;
     participantViewMode.value = localStorageSettings.participant_view || 'grid';
-    updateScreenCameraLayoutUI(ScreenCameraLayout.setMode(localStorageSettings.screen_cam_layout));
+    if (isMobileDevice) screenCamLayoutSelect.querySelector('option[value="split"]')?.remove();
+    ScreenCameraLayout.setSnapToCorners(isMobileDevice);
+    updateScreenCameraLayoutUI(
+        ScreenCameraLayout.setMode(mobileScreenCameraLayout(localStorageSettings.screen_cam_layout))
+    );
     rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     rc.handleVideoControls(BtnVideoControls.value);
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
@@ -10062,13 +10066,22 @@ function updateScreenCameraLayoutUI(mode) {
 }
 
 /**
+ * Split screen needs a wide tile: mobile viewers get picture in picture instead
+ * @param {string} mode separate | pip | split
+ * @returns {string}
+ */
+function mobileScreenCameraLayout(mode) {
+    return isMobileDevice && mode === 'split' ? 'pip' : mode;
+}
+
+/**
  * Set the screen share + camera layout
  * @param {string} requestedMode separate | pip | split
  * @param {boolean} persist save to local storage
  * @returns {string} applied mode
  */
 function setScreenCameraLayout(requestedMode, persist = true) {
-    const mode = ScreenCameraLayout.setMode(requestedMode);
+    const mode = ScreenCameraLayout.setMode(mobileScreenCameraLayout(requestedMode));
     updateScreenCameraLayoutUI(mode);
     if (persist) {
         localStorageSettings.screen_cam_layout = mode;
@@ -11231,7 +11244,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.65',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.70',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

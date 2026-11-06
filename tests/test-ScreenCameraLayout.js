@@ -348,6 +348,27 @@ describe('screen share camera layout', () => {
         assert.equal(videoClicks, 1, 'a later plain click still works');
     });
 
+    it('snaps the pip overlay to the nearest corner after a drag when enabled (mobile)', () => {
+        const { window, grid, camera, screen, layout, pairs } = setup();
+        layout.setMode('pip');
+        layout.setSnapToCorners(true);
+        layout.sync(pairs(), grid);
+        Object.defineProperty(screen, 'clientWidth', { value: 400 });
+        Object.defineProperty(screen, 'clientHeight', { value: 800 });
+        Object.defineProperty(camera, 'offsetWidth', { value: 100 });
+        Object.defineProperty(camera, 'offsetHeight', { value: 60 });
+        Object.defineProperty(camera, 'offsetLeft', { get: () => (parseFloat(camera.style.left) / 100) * 400 || 12 });
+        Object.defineProperty(camera, 'offsetTop', { get: () => (parseFloat(camera.style.top) / 100) * 800 || 728 });
+
+        camera.dispatchEvent(pointer(window, 'pointerdown', { clientX: 50, clientY: 750 }));
+        camera.dispatchEvent(pointer(window, 'pointermove', { clientX: 350, clientY: 100 }));
+        camera.dispatchEvent(pointer(window, 'pointerup', { clientX: 350, clientY: 100 }));
+        // Top right corner: 400 - 100 - 8 = 292px (73%), 8px (1%)
+        assert.equal(camera.style.left, '73%');
+        assert.equal(camera.style.top, '1%');
+        layout.setSnapToCorners(false);
+    });
+
     it('does not drag in split mode', () => {
         const { window, grid, camera, layout, pairs } = setup();
         layout.setMode('split');
@@ -396,7 +417,7 @@ describe('screen share camera layout', () => {
         assert.match(roomSource, /function handleAspectRatio\(\) \{\n\s+syncScreenCameraLayout\(\);/);
         assert.match(
             roomSource,
-            /updateScreenCameraLayoutUI\(ScreenCameraLayout\.setMode\(localStorageSettings\.screen_cam_layout\)\);/
+            /updateScreenCameraLayoutUI\(\s*ScreenCameraLayout\.setMode\(mobileScreenCameraLayout\(localStorageSettings\.screen_cam_layout\)\)\s*\);/
         );
         for (const mode of ['separate', 'pip', 'split']) {
             assert.match(html, new RegExp(`id="participantViewMenu"[\\s\\S]*data-screen-cam-layout="${mode}"`));
