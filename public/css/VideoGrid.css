@@ -589,8 +589,13 @@ input[type='range'] {
     order: -1;
 }
 
-#videoMediaContainer.screen-stage-landscape > .Camera:not([data-screen-stage='main']) {
+#videoMediaContainer.screen-stage-landscape > .Camera:not([data-screen-stage='main'], [focus-mode]) {
     display: none !important;
+}
+
+/* Focus mode (resizeVideoMedia is skipped): the focused tile owns the whole container */
+#videoMediaContainer.screen-stage > [focus-mode] {
+    margin: 0 !important;
 }
 
 /* Presentation marker in front of the presenter name (same cue as Meet's "presentation") */

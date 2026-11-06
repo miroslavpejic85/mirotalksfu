@@ -151,6 +151,12 @@ describe('screen share on mobile', () => {
         });
     });
 
+    it('keeps a focused tile visible in landscape stage', () => {
+        const css = fs.readFileSync(path.join(root, 'public/css/VideoGrid.css'), 'utf8');
+        assert.match(css, /\.Camera:not\(\[data-screen-stage='main'\], \[focus-mode\]\)/);
+        assert.match(css, /#videoMediaContainer\.screen-stage > \[focus-mode\] \{\s+margin: 0 !important;/);
+    });
+
     it('is wired into the room', () => {
         assert.match(html, /<script defer src="\.\.\/js\/ScreenTouchZoom\.js"><\/script>/);
         assert.match(clientSource, /remoteIsScreen && this\.isMobileDevice && ScreenTouchZoom\.attach\(d\);/);
