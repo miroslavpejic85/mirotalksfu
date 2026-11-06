@@ -38,5 +38,6 @@ We would like to extend our gratitude to the following individuals for their res
 | `kats1123`                                           | [GitHub](https://github.com/kats1123)                                                               |
 | `oe2735`                                             | [GitHub](https://github.com/oe2735)                                                                 |
 | `Liam-G`                                             | [GitHub](https://github.com/Liam-G)                                                                 |
+| `Xiangpu Song`                                       | [GitHub](https://github.com/songxpu)                                                                |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
