@@ -3364,8 +3364,9 @@ body {
 # Shortcut Table
 --------------------------------------------------------------*/
 
-#shortcutsTable {
+.shortcutsTable {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     margin: 20px 0;
     font-size: 16px;
@@ -3376,23 +3377,46 @@ body {
     border-radius: 12px;
     background: color-mix(in srgb, var(--select-bg) 64%, transparent);
 }
-#shortcutsTable th,
-#shortcutsTable td {
-    padding: 5px;
+.shortcutsTable th,
+.shortcutsTable td {
+    padding: 8px 10px;
+    vertical-align: middle;
     /* border: var(--border); */
 }
-#shortcutsTable th {
+.shortcutsTable th:first-child,
+.shortcutsTable td:first-child,
+.shortcutsTable th:nth-child(2),
+.shortcutsTable td:nth-child(2) {
+    width: 18%;
+    text-align: center;
+}
+.shortcutsTable th:last-child,
+.shortcutsTable td:last-child {
+    width: 64%;
+    text-align: left;
+}
+.shortcutsTable th {
     background: var(--body-bg);
     font-weight: bold;
 }
-#shortcutsTable td i {
+.shortcutsTable td i {
     color: #007bff;
 }
-#shortcutsTable tr:nth-child(even) {
+.shortcutsTable kbd {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid var(--room-border);
+    border-radius: 5px;
+    background: var(--body-bg);
+    color: var(--fg-1);
+    font: inherit;
+    font-size: 0.85em;
+}
+.shortcutsTable tr:nth-child(even) {
     background: var(--body-bg);
 }
 
-.settings-card #shortcutsTable {
+.settings-card .shortcutsTable {
     margin: 0;
     border: 0;
     border-radius: 0;
