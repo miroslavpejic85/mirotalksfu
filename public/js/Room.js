@@ -6118,9 +6118,10 @@ function getUUID() {
 
 function handleButtonsBar() {
     const showButtonsHandler = () => showButtons();
+    // Touch: show on tap, not on touchstart, so pinch/pan gestures (screen share zoom) never resize the grid mid-gesture
     isDesktopDevice
         ? document.body.addEventListener('mousemove', showButtonsHandler)
-        : document.body.addEventListener('touchstart', showButtonsHandler);
+        : document.body.addEventListener('click', showButtonsHandler);
     // Show/hide, wrapping on small screens and position changes all resize the bar
     if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncButtonsBarReserve).observe(bottomButtons);
 }
