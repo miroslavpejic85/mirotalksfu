@@ -945,6 +945,7 @@ if (speechRecognition) {
                 chatMessage.value = transcript;
             }
             if (isVoiceCommandsEnabled && isVoiceCommandSupported) {
+                showVoiceCaption(transcript);
                 execVoiceCommands(transcript);
             }
         }
@@ -958,6 +959,7 @@ if (speechRecognition) {
     recognition.onend = function () {
         console.log('Speech recognition stopped');
         isSpeechRecRunning = false;
+        hideVoiceCaption();
         show(chatSpeechStartButton);
         hide(chatSpeechStopButton);
         setColor(chatSpeechStopButton, 'white');
@@ -1028,6 +1030,48 @@ function switchRecognitionLanguage(lang) {
 function printCommand(command) {
     console.log('Detected', { command: command });
     userLog('info', `Voice command: ${command}`, 'top-end', 2000);
+}
+
+let voiceCaption;
+let voiceCaptionTimer;
+
+function getVoiceCaption() {
+    if (voiceCaption) return voiceCaption;
+    voiceCaption = document.createElement('div');
+    voiceCaption.className = 'voice-caption';
+    voiceCaption.setAttribute('role', 'status');
+    voiceCaption.setAttribute('aria-live', 'polite');
+
+    const dot = document.createElement('span');
+    dot.className = 'voice-caption-dot';
+
+    const label = document.createElement('span');
+    label.className = 'voice-caption-label';
+    label.textContent = window.i18n?.t('You say', 'labels') || 'You say';
+
+    const text = document.createElement('span');
+    text.className = 'voice-caption-text';
+
+    voiceCaption.append(dot, label, text);
+    document.body.appendChild(voiceCaption);
+    return voiceCaption;
+}
+
+// Shows the heard phrase; the border turns green when it is a known command
+function showVoiceCaption(transcript) {
+    const phrase = transcript.trim();
+    const caption = getVoiceCaption();
+    const isCommand = Object.values(languageHandlers[currentLanguage].commands).includes(phrase.toLowerCase());
+    caption.querySelector('.voice-caption-text').textContent = `“${phrase}”`;
+    caption.classList.toggle('is-matched', isCommand);
+    caption.classList.add('is-visible');
+    clearTimeout(voiceCaptionTimer);
+    voiceCaptionTimer = setTimeout(hideVoiceCaption, 2800);
+}
+
+function hideVoiceCaption() {
+    clearTimeout(voiceCaptionTimer);
+    voiceCaption?.classList.remove('is-visible');
 }
 
 function openSettingsTab(tabButton) {
