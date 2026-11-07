@@ -100,7 +100,7 @@ function flashCheckingState() {
 function checkRoom() {
     flashCheckingState();
     axios
-        .post('/isRoomActive', { roomId: roomId })
+        .post(`/isRoomActive?room=${encodeURIComponent(roomId)}`, { roomId: roomId }) // ?room= lets a load balancer route to the room's node
         .then(function (response) {
             const isActive = response.data.message;
             console.log('Room active status:', isActive);

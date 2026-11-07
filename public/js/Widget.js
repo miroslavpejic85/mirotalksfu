@@ -486,11 +486,15 @@ class MiroTalkWidget {
             return;
         }
         try {
-            const response = await fetch(`${this.protocol}://${this.domain}/isWidgetRoomActive`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomId: this.roomId }),
-            });
+            // ?room= lets a load balancer route the check to the room's node
+            const response = await fetch(
+                `${this.protocol}://${this.domain}/isWidgetRoomActive?room=${encodeURIComponent(this.roomId)}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roomId: this.roomId }),
+                }
+            );
 
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
