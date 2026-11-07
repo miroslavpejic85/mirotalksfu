@@ -2412,14 +2412,22 @@ body {
 }
 
 #tabSipPhone .sip-advanced-details > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     color: var(--fg-1);
     cursor: pointer;
     font-weight: 700;
+    list-style: none;
 }
 
-#tabSipPhone .sip-advanced-details > summary::marker,
 #tabSipPhone .sip-advanced-details > summary::-webkit-details-marker {
-    color: var(--fg-1);
+    display: none;
+}
+
+#tabSipPhone .sip-advanced-details[open] > summary {
+    margin-bottom: 12px;
 }
 
 /* SIP phone: status bar */
@@ -2577,31 +2585,37 @@ body {
     font-weight: 700;
 }
 
+#tabSipPhone details > summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Same + / × indicator as the landing FAQ */
+#tabSipPhone details > summary::after {
+    content: '+';
+    flex-shrink: 0;
+    margin-left: 8px;
+    font-size: 1.4rem;
+    font-weight: 400;
+    line-height: 1;
+    color: color-mix(in srgb, var(--fg-1) 60%, transparent);
+    transition: color var(--motion-fast, 0.15s) ease;
+}
+
+#tabSipPhone details > summary:hover::after {
+    color: var(--fg-1);
+}
+
+#tabSipPhone details[open] > summary::after {
+    content: '\00d7';
+}
+
 #tabSipPhone details.sip-card > summary {
     cursor: pointer;
     list-style: none;
 }
 
-#tabSipPhone details.sip-card > summary::-webkit-details-marker {
-    display: none;
-}
-
-#tabSipPhone details.sip-card > summary::after {
-    content: '\f078';
-    margin-left: 8px;
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    font-size: 0.75rem;
-    color: color-mix(in srgb, var(--fg-1) 60%, transparent);
-    transition: transform var(--motion-fast, 0.15s) ease;
-}
-
 #tabSipPhone details.sip-card[open] > summary {
     margin-bottom: 12px;
-}
-
-#tabSipPhone details.sip-card[open] > summary::after {
-    transform: rotate(180deg);
 }
 
 #tabSipPhone .sip-account-summary {
@@ -3378,6 +3392,13 @@ body {
     background: var(--body-bg);
 }
 
+.settings-card #shortcutsTable {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
 /*--------------------------------------------------------------
 # RTMP settings
 --------------------------------------------------------------*/
@@ -3430,8 +3451,11 @@ body {
 }
 
 .rtmp-section {
-    padding: 18px 0;
-    border-top: 1px solid var(--border-subtle);
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid var(--room-border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--select-bg) 40%, transparent);
 }
 
 .rtmp-section-heading {
@@ -3894,6 +3918,9 @@ body {
     z-index: 2;
     margin: 14px -14px 0;
     padding: 16px 14px 10px;
+    border: 0;
+    border-top: 1px solid var(--border-subtle);
+    border-radius: 0;
     background: var(--room-panel-raised);
     box-shadow: 0 -10px 14px -8px rgba(0, 0, 0, 0.35);
 }
@@ -3903,10 +3930,19 @@ body {
 }
 
 .rtmp-section-heading h4 {
-    text-transform: uppercase;
-    color: var(--fg-3);
-    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: color-mix(in srgb, var(--fg-1) 80%, transparent);
+    font-size: 0.85rem;
     font-weight: 700;
+}
+
+#mySettings .rtmp-section-heading h4 i {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font-size: 0.85rem;
 }
 
 /* `#mySettings p` adds inline-flex, auto margin and padding that misalign the descriptions */
@@ -4109,10 +4145,6 @@ body {
     border-radius: 8px;
 }
 
-#tabWhip .whip-destination {
-    padding-top: 8px;
-}
-
 .whip-input-row {
     display: flex;
     gap: 8px;
@@ -4298,11 +4330,11 @@ body {
 }
 
 .whip-ingest-card {
-    margin-top: 6px;
-    padding: 14px;
-    border: 1px solid var(--border-subtle);
-    border-radius: 10px;
-    background: var(--surface-1);
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid var(--room-border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--select-bg) 40%, transparent);
 }
 
 .whip-ingest-header {
@@ -4755,11 +4787,96 @@ body {
     line-height: 1.45;
 }
 
-.share-media-field label {
+/* One card per settings group (camera, screen sharing, microphone, speakers); the fields inside become flat rows */
+.settings-card {
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid var(--room-border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--select-bg) 40%, transparent);
+}
+
+#mySettings .settings-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 4px;
+    color: color-mix(in srgb, var(--fg-1) 80%, transparent);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+#mySettings .settings-card-title i {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font-size: 0.85rem;
+}
+
+.settings-card > .settings-field {
+    padding: 12px 0;
+}
+
+/* Rows toggled through `.hidden` must not leave stray dividers behind */
+.settings-card > .settings-field:not(.hidden) ~ .settings-field:not(.hidden) {
+    border-top: 1px solid color-mix(in srgb, var(--room-border) 88%, transparent);
+}
+
+.settings-card > .settings-field:last-child {
+    padding-bottom: 0;
+}
+
+/* Cards made only of permission-gated rows, or of action buttons, disappear when nothing in them is visible */
+.settings-card-rows:not(:has(tr:not(.hidden))),
+.settings-card > .settings-field:has(> .room-action-grid):not(:has(.room-action-card:not(.hidden))) {
+    display: none;
+}
+
+/* `#mySettings select` caps the width at 310px and adds a top margin; here the select sits right under its label */
+#mySettings .settings-field > select {
+    width: 100%;
+    max-width: none;
+    margin-top: 10px;
+}
+
+#mySettings .settings-field > .speaker-select-row,
+#mySettings .settings-field > .volume-container,
+#mySettings .settings-field > .output-volume-row {
+    margin-top: 10px;
+}
+
+#mySettings .settings-field > .volume-container {
+    width: 100%;
+}
+
+#mySettings .settings-field > .theme-color-picker {
+    margin-bottom: 0;
+}
+
+#mySettings .settings-field > .room-bg-hint {
     display: block;
-    margin-bottom: 8px;
-    color: var(--fg-1);
-    font-weight: 600;
+    margin-top: 6px;
+    padding: 0;
+}
+
+/* Toggle-only rows: the card already provides the frame, so the table goes flat */
+.settings-card .settingsTable {
+    margin-bottom: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.settings-card .settingsTable td:first-child {
+    padding-left: 0;
+}
+
+.settings-card .settingsTable td:last-child {
+    padding-right: 0;
+}
+
+.settings-card .settings-field:has(> .settingsTable) {
+    padding-block: 2px;
 }
 
 .share-media-row {
@@ -9278,6 +9395,30 @@ hr {
     border-radius: 10px !important;
 }
 
+.avatar-search {
+    position: relative;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    max-width: 200px;
+}
+
+#mySettings .avatar-search i {
+    position: absolute;
+    inset-inline-start: 10px;
+    margin: 0;
+    padding: 0;
+    color: color-mix(in srgb, var(--fg-1) 50%, transparent);
+    font-size: 0.75rem;
+    pointer-events: none;
+}
+
+#mySettings .avatar-search .avatarSearch {
+    width: 100%;
+    max-width: none;
+    padding-inline-start: 30px !important;
+}
+
 #avatarVideoAIcontainer {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -9354,11 +9495,6 @@ hr {
     display: block;
 }
 
-.container-flex {
-    display: flex;
-    flex-direction: column;
-}
-
 .avatar-config-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -9371,6 +9507,10 @@ hr {
     margin-top: 0;
 }
 
+#mySettings .avatar-config-row select:last-child {
+    grid-column: 1 / -1;
+}
+
 @media screen and (max-width: 830px) {
     .avatar-config-row {
         grid-template-columns: 1fr;
@@ -9379,10 +9519,6 @@ hr {
 
 #avatarVoicePreview {
     display: none;
-}
-
-#avatarVideoAIStart {
-    margin-bottom: 5px;
 }
 
 /* Empty chat illustration and message */

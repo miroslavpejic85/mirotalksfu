@@ -736,223 +736,285 @@
                             <h3>Room settings</h3>
                             <p>Manage access, invitations, and your in-room preferences.</p>
                         </div>
-                        <table class="settingsTable">
-                            <tr class="room-id-row">
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-person-shelter"></i>
-                                        <p id="roomId">xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button
-                                        id="copyRoomUrlBtn"
-                                        class="settings-icon-btn"
-                                        type="button"
-                                        aria-label="Share room link"
-                                    >
-                                        <i class="fas fa-share-alt" aria-hidden="true"></i>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fa-solid fa-person-shelter"></i>
+                                <span>Room</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr class="room-id-row">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-person-shelter"></i>
+                                                <p id="roomId">xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="copyRoomUrlBtn"
+                                                class="settings-icon-btn"
+                                                type="button"
+                                                aria-label="Share room link"
+                                            >
+                                                <i class="fas fa-share-alt" aria-hidden="true"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="settings-field">
+                                <div class="room-action-grid">
+                                    <button id="activeRoomsButton" class="hidden btn-custom room-action-card">
+                                        <i class="fa-solid fa-circle-dot"></i>
+                                        <p>Active rooms</p>
                                     </button>
-                                </td>
-                            </tr>
-                        </table>
-                        <hr />
-                        <div class="room-action-grid">
-                            <button id="activeRoomsButton" class="hidden btn-custom room-action-card">
-                                <i class="fa-solid fa-circle-dot"></i>
-                                <p>Active rooms</p>
-                            </button>
-                            <button id="joinLockButton" class="hidden btn-custom room-action-card">
-                                <i class="fas fa-door-closed orange"></i>
-                                <p class="orange">Lock room</p>
-                            </button>
-                            <button id="joinUnlockButton" class="hidden btn-custom room-action-card">
-                                <i class="fas fa-door-open red"></i>
-                                <p class="red">Unlock room</p>
-                            </button>
-                            <button id="lockRoomButton" class="hidden btn-custom room-action-card">
-                                <i class="fas fa-lock-open orange"></i>
-                                <p class="orange">Set room password</p>
-                            </button>
-                            <button id="unlockRoomButton" class="hidden btn-custom room-action-card">
-                                <i class="fas fa-lock red"></i>
-                                <p class="red">Remove room password</p>
-                            </button>
-                            <button id="fileShareButton" class="hidden btn-custom room-action-card">
-                                <i class="fas fa-folder-open"></i>
-                                <p>File sharing</p>
-                            </button>
-                            <button id="sendEmailInvitation" class="hidden btn-custom room-action-card">
-                                <i class="fas fa-envelope-circle-check"></i>
-                                <p id="roomSendEmail" class="cp">Send email invitation</p>
-                            </button>
+                                    <button id="joinLockButton" class="hidden btn-custom room-action-card">
+                                        <i class="fas fa-door-closed orange"></i>
+                                        <p class="orange">Lock room</p>
+                                    </button>
+                                    <button id="joinUnlockButton" class="hidden btn-custom room-action-card">
+                                        <i class="fas fa-door-open red"></i>
+                                        <p class="red">Unlock room</p>
+                                    </button>
+                                    <button id="lockRoomButton" class="hidden btn-custom room-action-card">
+                                        <i class="fas fa-lock-open orange"></i>
+                                        <p class="orange">Set room password</p>
+                                    </button>
+                                    <button id="unlockRoomButton" class="hidden btn-custom room-action-card">
+                                        <i class="fas fa-lock red"></i>
+                                        <p class="red">Remove room password</p>
+                                    </button>
+                                    <button id="fileShareButton" class="hidden btn-custom room-action-card">
+                                        <i class="fas fa-folder-open"></i>
+                                        <p>File sharing</p>
+                                    </button>
+                                    <button id="sendEmailInvitation" class="hidden btn-custom room-action-card">
+                                        <i class="fas fa-envelope-circle-check"></i>
+                                        <p id="roomSendEmail" class="cp">Send email invitation</p>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <hr />
-                        <table class="settingsTable">
-                            <tr id="broadcastingButton" class="hidden">
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-wifi"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Broadcast mode</strong>
-                                            <small>Present one-way to a large audience</small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md title">
-                                        <input id="switchBroadcasting" class="form-check-input" type="checkbox" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="lobbyButton" class="hidden">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-shield-halved"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Waiting room</strong>
-                                            <small>Approve people before they join</small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md title">
-                                        <input id="switchLobby" class="form-check-input" type="checkbox" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="pitchBarButton">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-microphone-lines"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Microphone level</strong>
-                                            <small>Show your input volume</small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input id="switchPitchBar" class="form-check-input" type="checkbox" checked />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="soundsButton">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-music"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Meeting sounds</strong>
-                                            <small>Play audio alerts for room events</small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input id="switchSounds" class="form-check-input" type="checkbox" checked />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="shareOnJoinButton">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-share-alt"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Room link on join</strong>
-                                            <small>Show the sharing prompt when you enter</small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input id="switchShare" class="form-check-input" type="checkbox" checked />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="showCameraOffParticipantsButton">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-video-slash"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Camera-off participants</strong>
-                                            <small>Keep their tiles visible in the grid</small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchShowCameraOffParticipants"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="keepButtonsVisibleButton">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-eye"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Keep controls visible</strong>
-                                            <small>Do not auto-hide the meeting toolbar</small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input id="switchKeepButtonsVisible" class="form-check-input" type="checkbox" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="keepAwakeButton">
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-mobile-screen"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Keep device awake</strong>
-                                            <small>
-                                                Prevent sleep while the meeting is visible, even with the camera on
-                                            </small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input id="switchKeepAwake" class="form-check-input" type="checkbox" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="chatPinButton">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-map-pin"></i>
-                                        <span class="settings-option-copy">
-                                            <strong>Pin chat when opened</strong>
-                                            <small>Keep chat beside the meeting view</small>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input id="switchChatPin" class="form-check-input" type="checkbox" checked />
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                        <hr />
-                        <table class="settingsTable">
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-clock"></i>
-                                        <p id="sessionTime">00:00:00</p>
-                                    </div>
-                                </td>
-                                <td></td>
-                            </tr>
-                        </table>
+                        <div class="settings-card settings-card-rows">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Moderation</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr id="broadcastingButton" class="hidden">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-wifi"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Broadcast mode</strong>
+                                                    <small>Present one-way to a large audience</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input
+                                                    id="switchBroadcasting"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="lobbyButton" class="hidden">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-shield-halved"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Waiting room</strong>
+                                                    <small>Approve people before they join</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input id="switchLobby" class="form-check-input" type="checkbox" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-sliders"></i>
+                                <span>Preferences</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr id="pitchBarButton">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-microphone-lines"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Microphone level</strong>
+                                                    <small>Show your input volume</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchPitchBar"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="soundsButton">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-music"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Meeting sounds</strong>
+                                                    <small>Play audio alerts for room events</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchSounds"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="shareOnJoinButton">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-share-alt"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Room link on join</strong>
+                                                    <small>Show the sharing prompt when you enter</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchShare"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="showCameraOffParticipantsButton">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-video-slash"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Camera-off participants</strong>
+                                                    <small>Keep their tiles visible in the grid</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchShowCameraOffParticipants"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="keepButtonsVisibleButton">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-eye"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Keep controls visible</strong>
+                                                    <small>Do not auto-hide the meeting toolbar</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchKeepButtonsVisible"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="keepAwakeButton">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-mobile-screen"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Keep device awake</strong>
+                                                    <small>
+                                                        Prevent sleep while the meeting is visible, even with the camera
+                                                        on
+                                                    </small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input id="switchKeepAwake" class="form-check-input" type="checkbox" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="chatPinButton">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-map-pin"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Pin chat when opened</strong>
+                                                    <small>Keep chat beside the meeting view</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchChatPin"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-clock"></i>
+                                <span>Session</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr>
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-clock"></i>
+                                                <p id="sessionTime">00:00:00</p>
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="tabVideoDevices" class="tabcontent">
@@ -963,51 +1025,56 @@
                                 are below.
                             </p>
                         </div>
-                        <div id="cameraSettingsDiv">
-                            <div class="title">
+                        <div id="cameraSettingsDiv" class="settings-card">
+                            <h4 class="settings-card-title">
                                 <i class="fas fa-video"></i>
-                                <p>Video Source:</p>
+                                <span>Camera</span>
+                            </h4>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fas fa-video"></i>
+                                    <p>Video Source:</p>
+                                </div>
+                                <select id="videoSelect" class="form-select text-light bg-dark"></select>
                             </div>
-                            <br />
-                            <select id="videoSelect" class="form-select text-light bg-dark"></select>
-                            <br />
-                            <div class="title">
-                                <i class="fas fa-palette"></i>
-                                <p>Camera Quality:</p>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fas fa-palette"></i>
+                                    <p>Camera Quality:</p>
+                                </div>
+                                <select id="videoQuality" class="form-select text-light bg-dark">
+                                    <option value="default">Default</option>
+                                    <option value="qvga">Low (320×240)</option>
+                                    <option value="vga">Standard (640×480)</option>
+                                    <option value="hd">HD (720p)</option>
+                                    <option value="fhd">Full HD (1080p)</option>
+                                    <option value="2k">2k</option>
+                                    <option value="4k">4K</option>
+                                    <option value="6k">6k</option>
+                                    <option value="8k">8K</option>
+                                </select>
                             </div>
-                            <select id="videoQuality" class="form-select text-light bg-dark">
-                                <option value="default">Default</option>
-                                <option value="qvga">Low (320×240)</option>
-                                <option value="vga">Standard (640×480)</option>
-                                <option value="hd">HD (720p)</option>
-                                <option value="fhd">Full HD (1080p)</option>
-                                <option value="2k">2k</option>
-                                <option value="4k">4K</option>
-                                <option value="6k">6k</option>
-                                <option value="8k">8K</option>
-                            </select>
-                            <br />
-                            <div class="title">
-                                <i class="fa-solid fa-camera"></i>
-                                <p>Camera FPS:</p>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-camera"></i>
+                                    <p>Camera FPS:</p>
+                                </div>
+                                <select id="videoFps" class="form-select text-light bg-dark">
+                                    <option value="max">Maximum</option>
+                                    <option value="60">60 fps</option>
+                                    <option value="30">30 fps</option>
+                                    <option value="15">15 fps</option>
+                                    <option value="5">5 fps</option>
+                                </select>
                             </div>
-                            <br />
-                            <select id="videoFps" class="form-select text-light bg-dark">
-                                <option value="max">Maximum</option>
-                                <option value="60">60 fps</option>
-                                <option value="30">30 fps</option>
-                                <option value="15">15 fps</option>
-                                <option value="5">5 fps</option>
-                            </select>
                         </div>
 
-                        <div id="ScreenSettingsDiv" class="hidden">
-                            <hr id="screenSettingsDivider" />
-                            <div class="settings-section-intro">
-                                <h3>Screen sharing</h3>
-                                <p>Set the resolution and frame rate used when you share your screen.</p>
-                            </div>
-                            <div id="ScreenQualityDiv">
+                        <div id="ScreenSettingsDiv" class="settings-card hidden">
+                            <h4 class="settings-card-title">
+                                <i class="fa-solid fa-desktop"></i>
+                                <span>Screen sharing</span>
+                            </h4>
+                            <div id="ScreenQualityDiv" class="settings-field">
                                 <div class="title">
                                     <i class="fas fa-palette"></i>
                                     <p>Screen Quality:</p>
@@ -1022,13 +1089,11 @@
                                     <option value="8k">8K</option>
                                 </select>
                             </div>
-                            <br />
-                            <div id="ScreenFpsDiv">
+                            <div id="ScreenFpsDiv" class="settings-field">
                                 <div class="title">
                                     <i class="fa-solid fa-desktop"></i>
                                     <p>Screen FPS:</p>
                                 </div>
-                                <br />
                                 <select id="screenFps" class="form-select text-light bg-dark">
                                     <option value="max">Maximum</option>
                                     <option value="60">60 fps</option>
@@ -1037,8 +1102,7 @@
                                     <option value="5">5 fps</option>
                                 </select>
                             </div>
-                            <br />
-                            <div id="ScreenOptimizationDiv" class="hidden">
+                            <div id="ScreenOptimizationDiv" class="settings-field hidden">
                                 <div class="title">
                                     <i class="fa-solid fa-rocket"></i>
                                     <p id="screenOptimizationLabel">Screen Optimization:</p>
@@ -1078,27 +1142,31 @@
                             <h3>Audio</h3>
                             <p>Select your microphone and speakers, then adjust call audio behavior.</p>
                         </div>
-                        <div id="micSettingsDiv">
-                            <div class="title">
+                        <div id="micSettingsDiv" class="settings-card">
+                            <h4 class="settings-card-title">
                                 <i class="fas fa-microphone"></i>
-                                <p>Microphone:</p>
+                                <span>Microphone</span>
+                            </h4>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fas fa-microphone"></i>
+                                    <p>Microphone:</p>
+                                </div>
+                                <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
+                                <div class="volume-container">
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                    <div class="volume-bar"></div>
+                                </div>
                             </div>
-                            <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
-                            <br />
-                            <div class="volume-container">
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                                <div class="volume-bar"></div>
-                            </div>
-                            <br />
-                            <div id="micOptionsButton">
+                            <div id="micOptionsButton" class="settings-field">
                                 <table class="settingsTable">
                                     <tr id="noiseSuppressionButton">
                                         <td>
@@ -1118,81 +1186,85 @@
                                         </td>
                                     </tr>
                                 </table>
-                                <hr />
                             </div>
-                            <br />
                         </div>
-                        <div id="speakerSelectDiv">
-                            <div class="title">
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
                                 <i class="fas fa-headphones"></i>
-                                <p>Speaker:</p>
+                                <span>Speakers</span>
+                            </h4>
+                            <div id="speakerSelectDiv" class="settings-field">
+                                <div class="title">
+                                    <i class="fas fa-headphones"></i>
+                                    <p>Speaker:</p>
+                                </div>
+                                <div class="speaker-select-row">
+                                    <select id="speakerSelect" class="form-select text-light bg-dark"></select>
+                                    <button id="speakerTestBtn" class="btn-custom">
+                                        <i class="fa-solid fa-circle-play"></i>
+                                        <p>Test</p>
+                                    </button>
+                                </div>
                             </div>
-                            <br />
-                            <div class="speaker-select-row">
-                                <select id="speakerSelect" class="form-select text-light bg-dark"></select>
-                                <button id="speakerTestBtn" class="btn-custom">
-                                    <i class="fa-solid fa-circle-play"></i>
-                                    <p>Test</p>
-                                </button>
+                            <div id="speakerVolumeDiv" class="settings-field">
+                                <div class="title">
+                                    <i class="fas fa-volume-high"></i>
+                                    <p>Output volume:</p>
+                                </div>
+                                <div class="output-volume-row">
+                                    <input
+                                        id="speakerVolume"
+                                        class="output-volume-slider"
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        step="1"
+                                        value="100"
+                                    />
+                                    <span id="speakerVolumeValue" class="output-volume-value">100%</span>
+                                </div>
                             </div>
-                            <br />
                         </div>
-                        <div id="speakerVolumeDiv">
-                            <div class="title">
-                                <i class="fas fa-volume-high"></i>
-                                <p>Output volume:</p>
+                        <div id="audioFocusControlsDiv" class="settings-card hidden">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-sliders"></i>
+                                <span>Options</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr id="dominantSpeakerFocusDiv" class="hidden">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-eye"></i>
+                                                <p>Speaker Focus</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input
+                                                    id="switchDominantSpeakerFocus"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="pushToTalkDiv" class="hidden">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-hand-pointer"></i>
+                                                <p>Push to talk</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input id="switchPushToTalk" class="form-check-input" type="checkbox" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
-                            <div class="output-volume-row">
-                                <input
-                                    id="speakerVolume"
-                                    class="output-volume-slider"
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    step="1"
-                                    value="100"
-                                />
-                                <span id="speakerVolumeValue" class="output-volume-value">100%</span>
-                            </div>
-                            <br />
                         </div>
-                        <div id="audioFocusControlsDiv" class="hidden">
-                            <hr />
-                            <table class="settingsTable">
-                                <tr id="dominantSpeakerFocusDiv" class="hidden">
-                                    <td>
-                                        <div class="title">
-                                            <i class="fa-solid fa-eye"></i>
-                                            <p>Speaker Focus</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-check form-switch form-switch-md title">
-                                            <input
-                                                id="switchDominantSpeakerFocus"
-                                                class="form-check-input"
-                                                type="checkbox"
-                                            />
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr id="pushToTalkDiv" class="hidden">
-                                    <td>
-                                        <div class="title">
-                                            <i class="fa-solid fa-hand-pointer"></i>
-                                            <p>Push to talk</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-check form-switch form-switch-md title">
-                                            <input id="switchPushToTalk" class="form-check-input" type="checkbox" />
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <hr />
-                        </div>
-                        <br />
                     </div>
 
                     <div id="tabNotifications" class="tabcontent">
@@ -1200,33 +1272,49 @@
                             <h3>Email notifications</h3>
                             <p>Choose which room events should send an email alert.</p>
                         </div>
-                        <div id="notificationsModeDiv">
-                            <div class="title">
-                                <i class="fas fa-envelope"></i>
-                                <p>Email</p>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-bell"></i>
+                                <span>Notifications</span>
+                            </h4>
+                            <div id="notificationsModeDiv" class="settings-field">
+                                <div class="title">
+                                    <i class="fas fa-envelope"></i>
+                                    <p>Email</p>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="notifyEmailInput"
+                                    class="form-control"
+                                    placeholder="Enter email"
+                                />
                             </div>
-                            <input type="text" id="notifyEmailInput" class="form-control" placeholder="Enter email" />
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fas fa-bell"></i>
+                                    <p>Events:</p>
+                                </div>
+                                <table class="settingsTable">
+                                    <tr id="notifyUserJoinBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-user-plus"></i>
+                                                <p>First User Join</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input
+                                                    id="switchNotifyUserJoin"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
-                        <br />
-                        <div class="title">
-                            <i class="fas fa-bell"></i>
-                            <p>Events:</p>
-                        </div>
-                        <table class="settingsTable">
-                            <tr id="notifyUserJoinBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-user-plus"></i>
-                                        <p>First User Join</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md title">
-                                        <input id="switchNotifyUserJoin" class="form-check-input" type="checkbox" />
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
                         <div class="buttons-container">
                             <button id="notifyEmailCleanBtn" class="btn-custom">
                                 <i class="fas fa-trash"></i> Clean
@@ -1242,287 +1330,329 @@
                             <h3>Participant permissions</h3>
                             <p>Set how everyone enters and what participants can do in this room.</p>
                         </div>
-                        <table class="settingsTable">
-                            <tr id="everyoneFollowMeBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-street-view gold"></i>
-                                        <p>Everyone Follows Me</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input id="switchEveryoneFollowMe" class="form-check-input" type="checkbox" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyonePrivacyBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-circle-user"></i>
-                                        <p>Start in Privacy Mode</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryonePrivacy"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneMuteBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-microphone-slash"></i>
-                                        <p>Everyone starts muted</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md title">
-                                        <input id="switchEveryoneMute" class="form-check-input" type="checkbox" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneHideBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-video-slash"></i>
-                                        <p>Everyone starts hidden</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneHidden"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneNoiseSuppressionBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-ear-listen"></i>
-                                        <p>Everyone starts without noise suppression</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneNoiseSuppressionOff"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr id="everyoneCantUnmuteBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-microphone red"></i>
-                                        <p>Restrict Self-Unmute</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantUnmute"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantUnhideBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-video red"></i>
-                                        <p>Restrict Self-Unhide</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantUnhide"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantShareScreenBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-display red"></i>
-                                        <p>Disable Screen Sharing</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantShareScreen"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantDrawScreenAnnotationsBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-pen-ruler red"></i>
-                                        <p>Presenter-only Screen Annotations</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantDrawScreenAnnotations"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantChatPubliclyBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-comments red"></i>
-                                        <p>Disable Public Chat</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantChatPublicly"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantChatPrivatelyBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-comments red"></i>
-                                        <p>Disable Private Chat</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantChatPrivately"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantChatGPTBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-robot red"></i>
-                                        <p>Disable ChatGPT</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantChatChatGPT"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantChatDeepSeek">
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-robot red"></i>
-                                        <p>Disable DeepSeek</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantChatDeepSeek"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantMediaSharingBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fab fa-youtube red"></i>
-                                        <p>Disable Media Sharing</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantMediaSharing"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="everyoneCantPollsBtn">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-chart-bar red"></i>
-                                        <p>Presenter-only Polls</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchEveryoneCantPolls"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            checked
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="disconnectAllOnLeave">
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-users-slash red"></i>
-                                        <p>Disconnect all on Exit</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input
-                                            id="switchDisconnectAllOnLeave"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
+                        <div class="settings-card settings-card-rows">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-users-gear"></i>
+                                <span>Participants</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr id="everyoneFollowMeBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-street-view gold"></i>
+                                                <p>Everyone Follows Me</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneFollowMe"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyonePrivacyBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-circle-user"></i>
+                                                <p>Start in Privacy Mode</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryonePrivacy"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneMuteBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-microphone-slash"></i>
+                                                <p>Everyone starts muted</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input
+                                                    id="switchEveryoneMute"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneHideBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-video-slash"></i>
+                                                <p>Everyone starts hidden</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneHidden"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneNoiseSuppressionBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-ear-listen"></i>
+                                                <p>Everyone starts without noise suppression</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneNoiseSuppressionOff"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="settings-card settings-card-rows">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-ban"></i>
+                                <span>Media restrictions</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr id="everyoneCantUnmuteBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-microphone red"></i>
+                                                <p>Restrict Self-Unmute</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantUnmute"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneCantUnhideBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-video red"></i>
+                                                <p>Restrict Self-Unhide</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantUnhide"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneCantShareScreenBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-display red"></i>
+                                                <p>Disable Screen Sharing</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantShareScreen"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneCantDrawScreenAnnotationsBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-pen-ruler red"></i>
+                                                <p>Presenter-only Screen Annotations</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantDrawScreenAnnotations"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="settings-card settings-card-rows">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-comments"></i>
+                                <span>Chat and AI</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr id="everyoneCantChatPubliclyBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-comments red"></i>
+                                                <p>Disable Public Chat</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantChatPublicly"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneCantChatPrivatelyBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-comments red"></i>
+                                                <p>Disable Private Chat</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantChatPrivately"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneCantChatGPTBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-robot red"></i>
+                                                <p>Disable ChatGPT</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantChatChatGPT"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneCantChatDeepSeek">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-robot red"></i>
+                                                <p>Disable DeepSeek</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantChatDeepSeek"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="settings-card settings-card-rows">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-ellipsis"></i>
+                                <span>Other</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr id="everyoneCantMediaSharingBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fab fa-youtube red"></i>
+                                                <p>Disable Media Sharing</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantMediaSharing"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="everyoneCantPollsBtn">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-chart-bar red"></i>
+                                                <p>Presenter-only Polls</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEveryoneCantPolls"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="disconnectAllOnLeave">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-users-slash red"></i>
+                                                <p>Disconnect all on Exit</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchDisconnectAllOnLeave"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="tabRecording" class="tabcontent">
@@ -1530,55 +1660,60 @@
                             <h3>Recording</h3>
                             <p>Control who can record and where meeting recordings are saved.</p>
                         </div>
-                        <div id="recordingTypeField" class="recording-type-field">
-                            <div class="title">
-                                <i class="fa-solid fa-film"></i>
-                                <p>Recording type</p>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fa-solid fa-record-vinyl"></i>
+                                <span>Recording</span>
+                            </h4>
+                            <div id="recordingTypeField" class="settings-field recording-type-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-film"></i>
+                                    <p>Recording type</p>
+                                </div>
+                                <select id="recordingTypeSelect" class="form-select text-light bg-dark">
+                                    <option value="camera">Camera</option>
+                                    <option id="recordingScreenOption" value="screen">Screen/Window</option>
+                                </select>
+                                <p class="recording-field-hint">Audio from all participants is included.</p>
                             </div>
-                            <select id="recordingTypeSelect" class="form-select text-light bg-dark">
-                                <option value="camera">Camera</option>
-                                <option id="recordingScreenOption" value="screen">Screen/Window</option>
-                            </select>
-                            <p class="recording-field-hint">Audio from all participants is included.</p>
-                        </div>
-                        <div id="roomRecordingOptions" class="hidden">
-                            <hr />
-                            <table class="settingsTable">
-                                <tr id="roomHostOnlyRecording" class="hidden">
-                                    <td>
-                                        <div class="title">
-                                            <i class="fa-solid fa-user-shield"></i>
-                                            <p>Only presenter can record</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-check form-switch form-switch-md title">
-                                            <input
-                                                id="switchHostOnlyRecording"
-                                                class="form-check-input"
-                                                type="checkbox"
-                                            />
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr id="roomRecordingServer" class="hidden">
-                                    <td>
-                                        <div class="title">
-                                            <i class="fas fa-cloud-arrow-up"></i>
-                                            <p>Save recording on server</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-check form-switch form-switch-md title">
-                                            <input
-                                                id="switchServerRecording"
-                                                class="form-check-input"
-                                                type="checkbox"
-                                            />
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
+                            <div id="roomRecordingOptions" class="settings-field hidden">
+                                <table class="settingsTable">
+                                    <tr id="roomHostOnlyRecording" class="hidden">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-user-shield"></i>
+                                                <p>Only presenter can record</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input
+                                                    id="switchHostOnlyRecording"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="roomRecordingServer" class="hidden">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-cloud-arrow-up"></i>
+                                                <p>Save recording on server</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input
+                                                    id="switchServerRecording"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                         <div class="recording-controls">
                             <button id="recordingActionButton" class="hidden btn-custom">
@@ -1942,57 +2077,75 @@
                             <p>Select an avatar and voice to present in the meeting.</p>
                         </div>
                         <div class="avatarsVideoAI">
-                            <div id="avatarVideoAIPreviewContainer" class="avatar-preview-container">
-                                <div id="avatarVideoAISpinner" class="loading-spinner">
-                                    <div class="spinner-ring"></div>
-                                    <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+                            <div class="settings-card">
+                                <h4 class="settings-card-title">
+                                    <i class="fas fa-robot"></i>
+                                    <span>Avatar</span>
+                                </h4>
+                                <div class="settings-field">
+                                    <div id="avatarVideoAIPreviewContainer" class="avatar-preview-container">
+                                        <div id="avatarVideoAISpinner" class="loading-spinner">
+                                            <div class="spinner-ring"></div>
+                                            <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+                                        </div>
+                                        <img id="avatarVideoAIPreview" src="" alt="Avatar Preview" class="hidden" />
+                                    </div>
+                                    <div id="avatarVideoAISelectedName" class="avatarSelectedName"></div>
                                 </div>
-                                <img id="avatarVideoAIPreview" src="" alt="Avatar Preview" class="hidden" />
+                                <div class="settings-field">
+                                    <div class="avatarSearchRow">
+                                        <div id="avatarVideoAICount" class="avatarCount"></div>
+                                        <div class="avatar-search">
+                                            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                                            <input
+                                                id="avatarSearchInput"
+                                                type="text"
+                                                class="form-control avatarSearch"
+                                                placeholder="Search avatars..."
+                                            />
+                                        </div>
+                                    </div>
+                                    <div id="avatarVideoAIcontainer"></div>
+                                </div>
                             </div>
-                            <div id="avatarVideoAISelectedName" class="avatarSelectedName"></div>
-                            <hr />
-                            <div class="container-flex">
-                                <div class="avatarSearchRow">
-                                    <div id="avatarVideoAICount" class="avatarCount"></div>
-                                    <input
-                                        id="avatarSearchInput"
-                                        type="text"
-                                        class="form-control avatarSearch"
-                                        placeholder="Search avatars..."
-                                    />
+                            <div class="settings-card">
+                                <h4 class="settings-card-title">
+                                    <i class="fas fa-play"></i>
+                                    <span>Session</span>
+                                </h4>
+                                <div class="settings-field">
+                                    <div class="avatar-config-row">
+                                        <select
+                                            id="avatarProvider"
+                                            class="form-select text-light bg-dark select-with-icon select-icon-provider"
+                                        >
+                                            <option value="liveavatar">Provider - LiveAvatar</option>
+                                            <option value="anam">Provider - Anam</option>
+                                        </select>
+                                        <select
+                                            id="avatarQuality"
+                                            class="form-select text-light bg-dark select-with-icon select-icon-quality"
+                                        >
+                                            <option value="low">Avatar Quality - Low (360p)</option>
+                                            <option value="medium">Avatar Quality - Medium (480p)</option>
+                                            <option value="high" selected>Avatar Quality - High (720p)</option>
+                                            <option value="very_high">Avatar Quality - Very High (1080p)</option>
+                                        </select>
+                                        <select
+                                            id="avatarVoiceIDs"
+                                            name="avatarVoiceIDs"
+                                            class="form-select text-light bg-dark select-with-icon select-icon-mic"
+                                        >
+                                            <option value="">Select Avatar Voice</option>
+                                        </select>
+                                    </div>
+                                    <audio id="avatarVoicePreview"></audio>
                                 </div>
-                                <div id="avatarVideoAIcontainer"></div>
-                                <hr />
-                                <div class="avatar-config-row">
-                                    <select
-                                        id="avatarProvider"
-                                        class="form-select text-light bg-dark select-with-icon select-icon-provider"
-                                    >
-                                        <option value="liveavatar">Provider - LiveAvatar</option>
-                                        <option value="anam">Provider - Anam</option>
-                                    </select>
-                                    <select
-                                        id="avatarQuality"
-                                        class="form-select text-light bg-dark select-with-icon select-icon-quality"
-                                    >
-                                        <option value="low">Avatar Quality - Low (360p)</option>
-                                        <option value="medium">Avatar Quality - Medium (480p)</option>
-                                        <option value="high" selected>Avatar Quality - High (720p)</option>
-                                        <option value="very_high">Avatar Quality - Very High (1080p)</option>
-                                    </select>
-                                    <select
-                                        id="avatarVoiceIDs"
-                                        name="avatarVoiceIDs"
-                                        class="form-select text-light bg-dark select-with-icon select-icon-mic"
-                                    >
-                                        <option value="">Select Avatar Voice</option>
-                                    </select>
+                                <div class="settings-field">
+                                    <button id="avatarVideoAIStart" class="btn-custom">
+                                        <i class="fas fa-play"></i> Start Avatar Session
+                                    </button>
                                 </div>
-                                <audio id="avatarVoicePreview"></audio>
-                                <button id="avatarVideoAIStart" class="btn-custom">
-                                    <i class="fas fa-play"></i> Start Avatar Session
-                                </button>
-                                <hr />
                             </div>
                         </div>
                     </div>
@@ -2002,23 +2155,28 @@
                             <h3>Share media</h3>
                             <p>Play a video or audio source for everyone in the room.</p>
                         </div>
-                        <div class="share-media-field">
-                            <label for="shareMediaUrlInput">Video or audio URL</label>
-                            <div class="share-media-row">
-                                <input
-                                    id="shareMediaUrlInput"
-                                    type="url"
-                                    placeholder="Paste a video or audio URL..."
-                                    maxlength="2048"
-                                />
-                                <button id="videoShareButton" class="btn-custom">
-                                    <i class="fas fa-share-nodes"></i>
-                                    <p>Share</p>
-                                </button>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fab fa-youtube"></i>
+                                <span>Video or audio URL</span>
+                            </h4>
+                            <div class="settings-field share-media-field">
+                                <div class="share-media-row">
+                                    <input
+                                        id="shareMediaUrlInput"
+                                        type="url"
+                                        placeholder="Paste a video or audio URL..."
+                                        aria-label="Video or audio URL"
+                                        maxlength="2048"
+                                    />
+                                    <button id="videoShareButton" class="btn-custom">
+                                        <i class="fas fa-share-nodes"></i>
+                                        <p>Share</p>
+                                    </button>
+                                </div>
+                                <p class="share-media-hint">Supported: YouTube links, .mp4, .mp3, .webm, .ogg</p>
                             </div>
-                            <p class="share-media-hint">Supported: YouTube links, .mp4, .mp3, .webm, .ogg</p>
                         </div>
-                        <br />
                         <button id="videoCloseBtn" class="hidden btn-custom">
                             <i class="fas fa-times"></i>
                             <p>Close Video or Audio</p>
@@ -2051,7 +2209,9 @@
                             <section class="rtmp-section" aria-labelledby="rtmpDestinationTitle">
                                 <div class="rtmp-section-heading">
                                     <div>
-                                        <h4 id="rtmpDestinationTitle">Destination</h4>
+                                        <h4 id="rtmpDestinationTitle">
+                                            <i class="fa-solid fa-bullseye"></i>Destination
+                                        </h4>
                                     </div>
                                 </div>
                                 <div class="rtmp-default-destination">
@@ -2129,7 +2289,7 @@
                             <div class="rtmp-section rtmp-sources" aria-labelledby="rtmpSourceTitle">
                                 <div class="rtmp-section-heading">
                                     <div>
-                                        <h4 id="rtmpSourceTitle">Source</h4>
+                                        <h4 id="rtmpSourceTitle"><i class="fa-solid fa-video"></i>Source</h4>
                                     </div>
                                 </div>
                                 <div class="rtmp-mode-tabs" role="tablist" aria-labelledby="rtmpSourceTitle">
@@ -2268,7 +2428,7 @@
                             <section class="rtmp-section rtmp-output" aria-labelledby="rtmpOutputTitle">
                                 <div class="rtmp-section-heading">
                                     <div>
-                                        <h4 id="rtmpOutputTitle">Live output</h4>
+                                        <h4 id="rtmpOutputTitle"><i class="fa-solid fa-link"></i>Live output</h4>
                                         <p>The active RTMP address appears here after streaming starts.</p>
                                     </div>
                                 </div>
@@ -2331,7 +2491,12 @@
                             aria-live="polite"
                         ></p>
 
-                        <section class="rtmp-section whip-destination" aria-label="Destination">
+                        <section class="rtmp-section whip-destination" aria-labelledby="whipDestinationTitle">
+                            <div class="rtmp-section-heading">
+                                <div>
+                                    <h4 id="whipDestinationTitle"><i class="fa-solid fa-bullseye"></i>Destination</h4>
+                                </div>
+                            </div>
                             <div class="rtmp-field">
                                 <label for="whipEndpoint">Endpoint URL</label>
                                 <div class="whip-input-row">
@@ -2399,7 +2564,7 @@
                         <section class="rtmp-section" aria-labelledby="whipSourceTitle">
                             <div class="rtmp-section-heading">
                                 <div>
-                                    <h4 id="whipSourceTitle">Source</h4>
+                                    <h4 id="whipSourceTitle"><i class="fa-solid fa-video"></i>Source</h4>
                                 </div>
                             </div>
                             <div class="whip-source-grid">
@@ -2541,113 +2706,127 @@
                             <h3>Keyboard shortcuts</h3>
                             <p>Enable quick keyboard controls and review the available keys.</p>
                         </div>
-                        <table class="settingsTable">
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fa-solid fa-keyboard"></i>
-                                        <p>Shortcuts</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md">
-                                        <input id="switchShortcuts" class="form-check-input" type="checkbox" />
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                        <div>
-                            <table id="shortcutsTable">
-                                <thead>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fas fa-sliders"></i>
+                                <span>Options</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table class="settingsTable">
                                     <tr>
-                                        <th>Shortcut</th>
-                                        <th>Icon</th>
-                                        <th>Action</th>
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-keyboard"></i>
+                                                <p>Shortcuts</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input id="switchShortcuts" class="form-check-input" type="checkbox" />
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><i class="fa-solid fa-a"></i></td>
-                                        <td><i class="fas fa-microphone"></i></td>
-                                        <td><strong>Toggle</strong> microphone</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-v"></i></td>
-                                        <td><i class="fas fa-video"></i></td>
-                                        <td><strong>Toggle</strong> camera</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-s"></i></td>
-                                        <td><i class="fas fa-desktop"></i></td>
-                                        <td><strong>Toggle</strong> screen</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-h"></i></td>
-                                        <td><i class="fas fa-hand-paper"></i></td>
-                                        <td><strong>Toggle</strong> raise hand</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-c"></i></td>
-                                        <td><i class="fas fa-comments"></i></td>
-                                        <td><strong>Toggle</strong> chat</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-o"></i></td>
-                                        <td><i class="fas fa-cogs"></i></td>
-                                        <td><strong>Toggle</strong> settings</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-x"></i></td>
-                                        <td><i class="fas fa-user"></i></td>
-                                        <td><strong>Toggle</strong> hide myself</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-r"></i></td>
-                                        <td><i class="fas fa-record-vinyl"></i></td>
-                                        <td><strong>Toggle</strong> recording</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-j"></i></td>
-                                        <td><i class="fas fa-face-smile"></i></td>
-                                        <td><strong>Toggle</strong> emoji</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-k"></i></td>
-                                        <td><i class="fas fa-closed-captioning"></i></td>
-                                        <td><strong>Toggle</strong> captions</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-p"></i></td>
-                                        <td><i class="fas fa-square-poll-horizontal"></i></td>
-                                        <td><strong>Toggle</strong> polls</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-e"></i></td>
-                                        <td><i class="fas fa-pen-to-square"></i></td>
-                                        <td><strong>Toggle</strong> editor</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-w"></i></td>
-                                        <td><i class="fas fa-chalkboard-teacher"></i></td>
-                                        <td><strong>Toggle</strong> whiteboard</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-d"></i></td>
-                                        <td><i class="fas fa-images"></i></td>
-                                        <td><strong>Toggle</strong> document PIP</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-t"></i></td>
-                                        <td><i class="fas fas fa-camera-retro"></i></td>
-                                        <td><strong>Snapshot</strong> screen/window/tab</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-f"></i></td>
-                                        <td><i class="fas fa-folder-open"></i></td>
-                                        <td><strong>Share</strong> the file</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fa-solid fa-keyboard"></i>
+                                <span>Shortcuts</span>
+                            </h4>
+                            <div class="settings-field">
+                                <table id="shortcutsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Shortcut</th>
+                                            <th>Icon</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><i class="fa-solid fa-a"></i></td>
+                                            <td><i class="fas fa-microphone"></i></td>
+                                            <td><strong>Toggle</strong> microphone</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-v"></i></td>
+                                            <td><i class="fas fa-video"></i></td>
+                                            <td><strong>Toggle</strong> camera</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-s"></i></td>
+                                            <td><i class="fas fa-desktop"></i></td>
+                                            <td><strong>Toggle</strong> screen</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-h"></i></td>
+                                            <td><i class="fas fa-hand-paper"></i></td>
+                                            <td><strong>Toggle</strong> raise hand</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-c"></i></td>
+                                            <td><i class="fas fa-comments"></i></td>
+                                            <td><strong>Toggle</strong> chat</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-o"></i></td>
+                                            <td><i class="fas fa-cogs"></i></td>
+                                            <td><strong>Toggle</strong> settings</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-x"></i></td>
+                                            <td><i class="fas fa-user"></i></td>
+                                            <td><strong>Toggle</strong> hide myself</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-r"></i></td>
+                                            <td><i class="fas fa-record-vinyl"></i></td>
+                                            <td><strong>Toggle</strong> recording</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-j"></i></td>
+                                            <td><i class="fas fa-face-smile"></i></td>
+                                            <td><strong>Toggle</strong> emoji</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-k"></i></td>
+                                            <td><i class="fas fa-closed-captioning"></i></td>
+                                            <td><strong>Toggle</strong> captions</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-p"></i></td>
+                                            <td><i class="fas fa-square-poll-horizontal"></i></td>
+                                            <td><strong>Toggle</strong> polls</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-e"></i></td>
+                                            <td><i class="fas fa-pen-to-square"></i></td>
+                                            <td><strong>Toggle</strong> editor</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-w"></i></td>
+                                            <td><i class="fas fa-chalkboard-teacher"></i></td>
+                                            <td><strong>Toggle</strong> whiteboard</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-d"></i></td>
+                                            <td><i class="fas fa-images"></i></td>
+                                            <td><strong>Toggle</strong> document PIP</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-t"></i></td>
+                                            <td><i class="fas fas fa-camera-retro"></i></td>
+                                            <td><strong>Snapshot</strong> screen/window/tab</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fa-solid fa-f"></i></td>
+                                            <td><i class="fas fa-folder-open"></i></td>
+                                            <td><strong>Share</strong> the file</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -2781,93 +2960,109 @@
                             <h3>Video layout</h3>
                             <p>Control participant arrangement, controls, tile shape, and cropping.</p>
                         </div>
-                        <div class="title">
-                            <i class="fa-solid fa-table-cells-large"></i>
-                            <p>Participant view:</p>
-                        </div>
-                        <br />
-                        <select id="participantViewMode" class="form-select text-light bg-dark">
-                            <option value="grid">Grid</option>
-                            <option value="speaker-top">Speaker top</option>
-                            <option value="speaker-bottom">Speaker bottom</option>
-                            <option value="speaker-left">Speaker left</option>
-                            <option value="speaker-right">Speaker right</option>
-                            <option value="speaker-1:1">Speaker 1:1</option>
-                            <option value="livestream">Livestream</option>
-                        </select>
-                        <br />
-                        <div id="pinUnpinGridDiv" class="hidden">
-                            <div class="title">
-                                <i class="fa-solid fa-map-pin"></i>
-                                <p>Pin video position:</p>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fa-solid fa-users-viewfinder"></i>
+                                <span>Participant view</span>
+                            </h4>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-table-cells-large"></i>
+                                    <p>Participant view:</p>
+                                </div>
+                                <select id="participantViewMode" class="form-select text-light bg-dark">
+                                    <option value="grid">Grid</option>
+                                    <option value="speaker-top">Speaker top</option>
+                                    <option value="speaker-bottom">Speaker bottom</option>
+                                    <option value="speaker-left">Speaker left</option>
+                                    <option value="speaker-right">Speaker right</option>
+                                    <option value="speaker-1:1">Speaker 1:1</option>
+                                    <option value="livestream">Livestream</option>
+                                </select>
                             </div>
-                            <br />
-                            <select id="pinVideoPosition" class="form-select text-light bg-dark">
-                                <option value="speaker-left">Left</option>
-                                <option value="speaker-top">Top</option>
-                                <option value="speaker-bottom">Bottom</option>
-                                <option value="speaker-right">Right</option>
-                                <option value="speaker-1:1">Full screen</option>
-                            </select>
+                            <div id="pinUnpinGridDiv" class="settings-field hidden">
+                                <div class="title">
+                                    <i class="fa-solid fa-map-pin"></i>
+                                    <p>Pin video position:</p>
+                                </div>
+                                <select id="pinVideoPosition" class="form-select text-light bg-dark">
+                                    <option value="speaker-left">Left</option>
+                                    <option value="speaker-top">Top</option>
+                                    <option value="speaker-bottom">Bottom</option>
+                                    <option value="speaker-right">Right</option>
+                                    <option value="speaker-1:1">Full screen</option>
+                                </select>
+                            </div>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-clone"></i>
+                                    <p>Camera while screen sharing:</p>
+                                </div>
+                                <select id="screenCamLayoutSelect" class="form-select text-light bg-dark">
+                                    <option value="separate">Separate tiles</option>
+                                    <option value="pip">Picture in Picture</option>
+                                    <option value="split">Split screen</option>
+                                </select>
+                            </div>
                         </div>
-                        <br />
-                        <div class="title">
-                            <i class="fa-solid fa-clone"></i>
-                            <p>Camera while screen sharing:</p>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fa-solid fa-border-all"></i>
+                                <span>Video tiles</span>
+                            </h4>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-tv"></i>
+                                    <p>Aspect ratio:</p>
+                                </div>
+                                <select id="BtnAspectRatio" class="form-select text-light bg-dark">
+                                    <option value="0">default</option>
+                                    <option value="1">4:3</option>
+                                    <option value="2">16:9</option>
+                                    <option value="3">1:1</option>
+                                    <option value="4">1:2</option>
+                                </select>
+                            </div>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-film"></i>
+                                    <p>Video Object fit:</p>
+                                </div>
+                                <select id="BtnVideoObjectFit" class="form-select text-light bg-dark">
+                                    <option value="fill">Stretch to fill</option>
+                                    <option value="contain">Fit entire video</option>
+                                    <option value="cover">Fill and crop</option>
+                                    <option value="scale-down">Fit without enlarging</option>
+                                    <option value="none">Original size</option>
+                                </select>
+                            </div>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-circle-play"></i>
+                                    <p>Video Controls:</p>
+                                </div>
+                                <select id="BtnVideoControls" class="form-select text-light bg-dark">
+                                    <option value="off">Hidden</option>
+                                    <option value="on">Visible</option>
+                                </select>
+                            </div>
                         </div>
-                        <br />
-                        <select id="screenCamLayoutSelect" class="form-select text-light bg-dark">
-                            <option value="separate">Separate tiles</option>
-                            <option value="pip">Picture in Picture</option>
-                            <option value="split">Split screen</option>
-                        </select>
-                        <br />
-                        <div class="title">
-                            <i class="fa-solid fa-up-down-left-right"></i>
-                            <p>Buttons bar:</p>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Controls</span>
+                            </h4>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-up-down-left-right"></i>
+                                    <p>Buttons bar:</p>
+                                </div>
+                                <select id="BtnsBarPosition" class="form-select text-light bg-dark">
+                                    <option value="vertical">Vertical</option>
+                                    <option value="horizontal">Horizontal</option>
+                                </select>
+                            </div>
                         </div>
-                        <br />
-                        <select id="BtnsBarPosition" class="form-select text-light bg-dark">
-                            <option value="vertical">Vertical</option>
-                            <option value="horizontal">Horizontal</option>
-                        </select>
-                        <br />
-                        <div class="title">
-                            <i class="fa-solid fa-tv"></i>
-                            <p>Aspect ratio:</p>
-                        </div>
-                        <br />
-                        <select id="BtnAspectRatio" class="form-select text-light bg-dark">
-                            <option value="0">default</option>
-                            <option value="1">4:3</option>
-                            <option value="2">16:9</option>
-                            <option value="3">1:1</option>
-                            <option value="4">1:2</option>
-                        </select>
-                        <br />
-                        <div class="title">
-                            <i class="fa-solid fa-film"></i>
-                            <p>Video Object fit:</p>
-                        </div>
-                        <br />
-                        <select id="BtnVideoObjectFit" class="form-select text-light bg-dark">
-                            <option value="fill">Stretch to fill</option>
-                            <option value="contain">Fit entire video</option>
-                            <option value="cover">Fill and crop</option>
-                            <option value="scale-down">Fit without enlarging</option>
-                            <option value="none">Original size</option>
-                        </select>
-                        <br />
-                        <div class="title">
-                            <i class="fa-solid fa-circle-play"></i>
-                            <p>Video Controls:</p>
-                        </div>
-                        <br />
-                        <select id="BtnVideoControls" class="form-select text-light bg-dark">
-                            <option value="off">Hidden</option>
-                            <option value="on">Visible</option>
-                        </select>
-                        <br />
                     </div>
 
                     <div id="tabStyling" class="tabcontent">
@@ -2875,156 +3070,174 @@
                             <h3>Appearance</h3>
                             <p>Personalize the interface theme.</p>
                         </div>
-                        <div class="title">
-                            <i class="fa-solid fa-palette"></i>
-                            <p>Theme:</p>
-                        </div>
-                        <br />
-                        <select id="selectTheme" class="form-select text-light bg-dark">
-                            <option value="default">Default</option>
-                            <option value="dark">Dark</option>
-                            <option value="grey">Grey</option>
-                            <option value="green">Green</option>
-                            <option value="blue">Blue</option>
-                            <option value="red">Red</option>
-                            <option value="purple">Purple</option>
-                            <option value="orange">Orange</option>
-                            <option value="pink">Pink</option>
-                            <option value="yellow">Yellow</option>
-                        </select>
-                        <div id="themeCardsGrid" class="theme-cards-grid">
-                            <div class="theme-card" data-theme="default" data-index="0">
-                                <i class="fa-solid fa-circle-dot"></i>
-                                <span>Default</span>
-                            </div>
-                            <div class="theme-card" data-theme="dark" data-index="1">
-                                <i class="fa-solid fa-moon"></i>
-                                <span>Dark</span>
-                            </div>
-                            <div class="theme-card" data-theme="grey" data-index="2">
-                                <i class="fa-solid fa-cloud"></i>
-                                <span>Grey</span>
-                            </div>
-                            <div class="theme-card" data-theme="green" data-index="3">
-                                <i class="fa-solid fa-leaf"></i>
-                                <span>Green</span>
-                            </div>
-                            <div class="theme-card" data-theme="blue" data-index="4">
-                                <i class="fa-solid fa-droplet"></i>
-                                <span>Blue</span>
-                            </div>
-                            <div class="theme-card" data-theme="red" data-index="5">
-                                <i class="fa-solid fa-fire"></i>
-                                <span>Red</span>
-                            </div>
-                            <div class="theme-card" data-theme="purple" data-index="6">
-                                <i class="fa-solid fa-gem"></i>
-                                <span>Purple</span>
-                            </div>
-                            <div class="theme-card" data-theme="orange" data-index="7">
-                                <i class="fa-solid fa-sun"></i>
-                                <span>Orange</span>
-                            </div>
-                            <div class="theme-card" data-theme="pink" data-index="8">
-                                <i class="fa-solid fa-heart"></i>
-                                <span>Pink</span>
-                            </div>
-                            <div class="theme-card" data-theme="yellow" data-index="9">
-                                <i class="fa-solid fa-star"></i>
-                                <span>Yellow</span>
-                            </div>
-                        </div>
-                        <br />
-                        <div class="title">
-                            <i class="fas fa-fill-drip"></i>
-                            <p>Custom theme:</p>
-                        </div>
-                        <br />
-                        <input id="themeColorPicker" class="theme-color-picker" type="text" />
-                        <br />
-                        <table class="settingsTable">
-                            <tr>
-                                <td>
-                                    <div class="title">
-                                        <i class="fas fa-save"></i>
-                                        <p>Keep custom color</p>
+                        <div class="settings-card">
+                            <h4 class="settings-card-title">
+                                <i class="fa-solid fa-palette"></i>
+                                <span>Theme</span>
+                            </h4>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-palette"></i>
+                                    <p>Theme:</p>
+                                </div>
+                                <select id="selectTheme" class="form-select text-light bg-dark">
+                                    <option value="default">Default</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="grey">Grey</option>
+                                    <option value="green">Green</option>
+                                    <option value="blue">Blue</option>
+                                    <option value="red">Red</option>
+                                    <option value="purple">Purple</option>
+                                    <option value="orange">Orange</option>
+                                    <option value="pink">Pink</option>
+                                    <option value="yellow">Yellow</option>
+                                </select>
+                                <div id="themeCardsGrid" class="theme-cards-grid">
+                                    <div class="theme-card" data-theme="default" data-index="0">
+                                        <i class="fa-solid fa-circle-dot"></i>
+                                        <span>Default</span>
                                     </div>
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch form-switch-md title">
-                                        <input id="keepCustomTheme" class="form-check-input" type="checkbox" />
+                                    <div class="theme-card" data-theme="dark" data-index="1">
+                                        <i class="fa-solid fa-moon"></i>
+                                        <span>Dark</span>
                                     </div>
-                                </td>
-                            </tr>
-                        </table>
-                        <br />
-                        <div id="roomBackgroundSection" class="hidden">
-                            <hr />
-                            <div class="title">
+                                    <div class="theme-card" data-theme="grey" data-index="2">
+                                        <i class="fa-solid fa-cloud"></i>
+                                        <span>Grey</span>
+                                    </div>
+                                    <div class="theme-card" data-theme="green" data-index="3">
+                                        <i class="fa-solid fa-leaf"></i>
+                                        <span>Green</span>
+                                    </div>
+                                    <div class="theme-card" data-theme="blue" data-index="4">
+                                        <i class="fa-solid fa-droplet"></i>
+                                        <span>Blue</span>
+                                    </div>
+                                    <div class="theme-card" data-theme="red" data-index="5">
+                                        <i class="fa-solid fa-fire"></i>
+                                        <span>Red</span>
+                                    </div>
+                                    <div class="theme-card" data-theme="purple" data-index="6">
+                                        <i class="fa-solid fa-gem"></i>
+                                        <span>Purple</span>
+                                    </div>
+                                    <div class="theme-card" data-theme="orange" data-index="7">
+                                        <i class="fa-solid fa-sun"></i>
+                                        <span>Orange</span>
+                                    </div>
+                                    <div class="theme-card" data-theme="pink" data-index="8">
+                                        <i class="fa-solid fa-heart"></i>
+                                        <span>Pink</span>
+                                    </div>
+                                    <div class="theme-card" data-theme="yellow" data-index="9">
+                                        <i class="fa-solid fa-star"></i>
+                                        <span>Yellow</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fas fa-fill-drip"></i>
+                                    <p>Custom theme:</p>
+                                </div>
+                                <input id="themeColorPicker" class="theme-color-picker" type="text" />
+                            </div>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr>
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-save"></i>
+                                                <p>Keep custom color</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input id="keepCustomTheme" class="form-check-input" type="checkbox" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="roomBackgroundSection" class="settings-card hidden">
+                            <h4 class="settings-card-title">
                                 <i class="fa-solid fa-image"></i>
-                                <p>Room background:</p>
+                                <span>Room background</span>
+                            </h4>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-image"></i>
+                                    <p>Room background:</p>
+                                </div>
+                                <p class="room-bg-hint">Only you can see it. Saved in this browser.</p>
+                                <div id="roomBackgroundGrid" class="room-bg-grid">
+                                    <button
+                                        id="roomBackgroundNone"
+                                        type="button"
+                                        class="room-bg-card"
+                                        data-bg-type="none"
+                                    >
+                                        <i class="fa-solid fa-ban"></i>
+                                        <span>None</span>
+                                    </button>
+                                    <button
+                                        id="roomBackgroundUpload"
+                                        type="button"
+                                        class="room-bg-card"
+                                        data-bg-type="upload"
+                                    >
+                                        <i class="fa-solid fa-upload"></i>
+                                        <span>Upload</span>
+                                    </button>
+                                    <button
+                                        id="roomBackgroundCustom"
+                                        type="button"
+                                        class="room-bg-card room-bg-thumb hidden"
+                                        data-bg-type="custom"
+                                    ></button>
+                                </div>
+                                <input id="roomBackgroundFile" type="file" accept="image/*" hidden />
                             </div>
-                            <p class="room-bg-hint">Only you can see it. Saved in this browser.</p>
-                            <div id="roomBackgroundGrid" class="room-bg-grid">
-                                <button id="roomBackgroundNone" type="button" class="room-bg-card" data-bg-type="none">
-                                    <i class="fa-solid fa-ban"></i>
-                                    <span>None</span>
-                                </button>
-                                <button
-                                    id="roomBackgroundUpload"
-                                    type="button"
-                                    class="room-bg-card"
-                                    data-bg-type="upload"
-                                >
-                                    <i class="fa-solid fa-upload"></i>
-                                    <span>Upload</span>
-                                </button>
-                                <button
-                                    id="roomBackgroundCustom"
-                                    type="button"
-                                    class="room-bg-card room-bg-thumb hidden"
-                                    data-bg-type="custom"
-                                ></button>
+                            <div class="settings-field">
+                                <div class="title">
+                                    <i class="fa-solid fa-circle-half-stroke"></i>
+                                    <p>Background dim:</p>
+                                </div>
+                                <div class="output-volume-row">
+                                    <input
+                                        id="roomBackgroundDim"
+                                        class="output-volume-slider"
+                                        type="range"
+                                        min="0"
+                                        max="80"
+                                        step="5"
+                                        value="35"
+                                    />
+                                    <span id="roomBackgroundDimValue" class="output-volume-value">35%</span>
+                                </div>
                             </div>
-                            <input id="roomBackgroundFile" type="file" accept="image/*" hidden />
-                            <br />
-                            <div class="title">
-                                <i class="fa-solid fa-circle-half-stroke"></i>
-                                <p>Background dim:</p>
+                            <div class="settings-field">
+                                <table class="settingsTable">
+                                    <tr>
+                                        <td>
+                                            <div class="title">
+                                                <i class="fa-solid fa-globe"></i>
+                                                <p>Use in all my rooms</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md title">
+                                                <input
+                                                    id="roomBackgroundAllRooms"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
-                            <div class="output-volume-row">
-                                <input
-                                    id="roomBackgroundDim"
-                                    class="output-volume-slider"
-                                    type="range"
-                                    min="0"
-                                    max="80"
-                                    step="5"
-                                    value="35"
-                                />
-                                <span id="roomBackgroundDimValue" class="output-volume-value">35%</span>
-                            </div>
-                            <br />
-                            <table class="settingsTable">
-                                <tr>
-                                    <td>
-                                        <div class="title">
-                                            <i class="fa-solid fa-globe"></i>
-                                            <p>Use in all my rooms</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-check form-switch form-switch-md title">
-                                            <input
-                                                id="roomBackgroundAllRooms"
-                                                class="form-check-input"
-                                                type="checkbox"
-                                            />
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <br />
                         </div>
                     </div>
 
