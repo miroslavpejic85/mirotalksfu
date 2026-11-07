@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.71
+ * @version 2.7.72
  *
  */
 
@@ -5266,7 +5266,7 @@ class RoomClient {
                     remoteIsScreen && this.setTippy(cl.id, 'Toggle camera layout', 'bottom');
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
-                    this.setTippy(pv.id, '🔊 Volume', 'bottom');
+                    this.setTippy(pv.id, 'Volume', 'bottom');
                 }
 
                 // Use helper function to set audio volume
@@ -5611,7 +5611,7 @@ class RoomClient {
             this.setTippy(sf.id, 'Send file', 'bottom');
             this.setTippy(sv.id, 'Send video', 'bottom');
             this.setTippy(au.id, 'Mute', 'bottom');
-            this.setTippy(pv.id, '🔊 Volume', 'bottom');
+            this.setTippy(pv.id, 'Volume', 'bottom');
             this.setTippy(pn.id, 'Pin', 'bottom');
             this.setTippy(gl.id, 'Geolocation', 'bottom');
             this.setTippy(rcb.id, 'Remote control', 'bottom');

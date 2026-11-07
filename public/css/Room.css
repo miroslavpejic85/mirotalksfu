@@ -641,12 +641,16 @@ body {
 .init-user select {
     flex: 1 1 100%;
     width: 100%;
-    min-height: 44px;
+    height: 46px;
+    min-height: 46px;
     margin: 0;
-    padding: 10px 36px 10px 12px;
+    padding: 0 36px 0 42px;
     background-color: var(--select-bg) !important;
     color: white;
-    font-size: var(--font-sm);
+    font-size: 15px;
+    font-weight: var(--fw-medium, 500);
+    line-height: normal;
+    text-overflow: ellipsis;
     border: 1px solid var(--room-border);
     border-radius: var(--radius-md);
     box-shadow: none;
@@ -660,6 +664,15 @@ body {
 
 .init-user select:hover {
     border-color: var(--room-border-strong);
+}
+
+.init-user select:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-style: dashed;
+    border-color: var(--room-border);
+    filter: grayscale(1);
+    box-shadow: none;
 }
 
 .init-user select:focus {
@@ -2278,11 +2291,13 @@ body {
     margin-top: 1rem;
     width: auto;
     max-width: 310px;
-    height: 40px;
+    height: 46px;
     color: #fff;
+    font-size: 15px;
+    line-height: normal;
     background-color: var(--select-bg) !important;
     border: var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     box-shadow: none;
     cursor: pointer;
 }
@@ -7160,6 +7175,48 @@ select:focus-visible {
 select option {
     background-color: var(--select-bg);
     color: #fff;
+}
+
+/* Selects with a leading icon (replaces emoji prefixes); the icon and chevron are background layers */
+:root {
+    --select-icon-chevron: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    --select-icon-video: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolygon points='23 7 16 12 23 17 23 7'/%3e%3crect x='1' y='5' width='15' height='14' rx='2' ry='2'/%3e%3c/svg%3e");
+    --select-icon-mic: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z'/%3e%3cpath d='M19 10v2a7 7 0 0 1-14 0v-2'/%3e%3cline x1='12' y1='19' x2='12' y2='23'/%3e%3cline x1='8' y1='23' x2='16' y2='23'/%3e%3c/svg%3e");
+    --select-icon-speaker: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'/%3e%3cpath d='M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07'/%3e%3c/svg%3e");
+    --select-icon-quality: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cline x1='4' y1='21' x2='4' y2='14'/%3e%3cline x1='4' y1='10' x2='4' y2='3'/%3e%3cline x1='12' y1='21' x2='12' y2='12'/%3e%3cline x1='12' y1='8' x2='12' y2='3'/%3e%3cline x1='20' y1='21' x2='20' y2='16'/%3e%3cline x1='20' y1='12' x2='20' y2='3'/%3e%3cline x1='1' y1='14' x2='7' y2='14'/%3e%3cline x1='9' y1='8' x2='15' y2='8'/%3e%3cline x1='17' y1='16' x2='23' y2='16'/%3e%3c/svg%3e");
+    --select-icon-provider: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3crect x='2' y='2' width='20' height='8' rx='2' ry='2'/%3e%3crect x='2' y='14' width='20' height='8' rx='2' ry='2'/%3e%3cline x1='6' y1='6' x2='6.01' y2='6'/%3e%3cline x1='6' y1='18' x2='6.01' y2='18'/%3e%3c/svg%3e");
+}
+
+select.select-with-icon {
+    padding-left: 42px;
+    appearance: none;
+    background-repeat: no-repeat, no-repeat;
+    background-position:
+        14px center,
+        right 14px center;
+    background-size:
+        18px 18px,
+        14px 14px;
+}
+
+select.select-with-icon.select-icon-video {
+    background-image: var(--select-icon-video), var(--select-icon-chevron);
+}
+
+select.select-with-icon.select-icon-mic {
+    background-image: var(--select-icon-mic), var(--select-icon-chevron);
+}
+
+select.select-with-icon.select-icon-speaker {
+    background-image: var(--select-icon-speaker), var(--select-icon-chevron);
+}
+
+select.select-with-icon.select-icon-quality {
+    background-image: var(--select-icon-quality), var(--select-icon-chevron);
+}
+
+select.select-with-icon.select-icon-provider {
+    background-image: var(--select-icon-provider), var(--select-icon-chevron);
 }
 
 .hidden {

@@ -296,17 +296,17 @@
                     <button id="initExitButton" class="fas fa-sign-out-alt red" aria-label="Leave meeting"></button>
                     <select
                         id="initVideoSelect"
-                        class="form-select text-light bg-dark"
+                        class="form-select text-light bg-dark select-with-icon select-icon-video"
                         aria-label="Select camera"
                     ></select>
                     <select
                         id="initMicrophoneSelect"
-                        class="form-select text-light bg-dark"
+                        class="form-select text-light bg-dark select-with-icon select-icon-mic"
                         aria-label="Select microphone"
                     ></select>
                     <select
                         id="initSpeakerSelect"
-                        class="form-select text-light bg-dark"
+                        class="form-select text-light bg-dark select-with-icon select-icon-speaker"
                         aria-label="Speakers"
                     ></select>
                     <div
@@ -976,15 +976,15 @@
                                 <p>Camera Quality:</p>
                             </div>
                             <select id="videoQuality" class="form-select text-light bg-dark">
-                                <option value="default">🎥&nbsp;Default</option>
-                                <option value="qvga">🎥&nbsp;Low (320×240)</option>
-                                <option value="vga">🎥&nbsp;Standard (640×480)</option>
-                                <option value="hd">🎥&nbsp;HD (720p)</option>
-                                <option value="fhd">🎥&nbsp;Full HD (1080p)</option>
-                                <option value="2k">🎥&nbsp;2k</option>
-                                <option value="4k">🎥&nbsp;4K</option>
-                                <option value="6k">🎥&nbsp;6k</option>
-                                <option value="8k">🎥&nbsp;8K</option>
+                                <option value="default">Default</option>
+                                <option value="qvga">Low (320×240)</option>
+                                <option value="vga">Standard (640×480)</option>
+                                <option value="hd">HD (720p)</option>
+                                <option value="fhd">Full HD (1080p)</option>
+                                <option value="2k">2k</option>
+                                <option value="4k">4K</option>
+                                <option value="6k">6k</option>
+                                <option value="8k">8K</option>
                             </select>
                             <br />
                             <div class="title">
@@ -1013,13 +1013,13 @@
                                     <p>Screen Quality:</p>
                                 </div>
                                 <select id="screenQuality" class="form-select text-light bg-dark">
-                                    <option value="default">🖥&nbsp;Default</option>
-                                    <option value="hd">🖥&nbsp;HD</option>
-                                    <option value="fhd">🖥&nbsp;FULL HD</option>
-                                    <option value="2k">🖥&nbsp;2k</option>
-                                    <option value="4k">🖥&nbsp;4K</option>
-                                    <option value="6k">🖥&nbsp;6k</option>
-                                    <option value="8k">🖥&nbsp;8K</option>
+                                    <option value="default">Default</option>
+                                    <option value="hd">HD</option>
+                                    <option value="fhd">FULL HD</option>
+                                    <option value="2k">2k</option>
+                                    <option value="4k">4K</option>
+                                    <option value="6k">6k</option>
+                                    <option value="8k">8K</option>
                                 </select>
                             </div>
                             <br />
@@ -1044,9 +1044,9 @@
                                     <p id="screenOptimizationLabel">Screen Optimization:</p>
                                 </div>
                                 <select id="screenOptimization" class="form-select text-light bg-dark">
-                                    <option value="default">🖥&nbsp;None</option>
-                                    <option value="detail">🖥&nbsp;Text and detail</option>
-                                    <option value="motion">🖥&nbsp;Motion and video</option>
+                                    <option value="default">None</option>
+                                    <option value="detail">Text and detail</option>
+                                    <option value="motion">Motion and video</option>
                                 </select>
                             </div>
                         </div>
@@ -1535,7 +1535,7 @@
                                 <i class="fa-solid fa-film"></i>
                                 <p>Recording type</p>
                             </div>
-                            <select id="recordingTypeSelect">
+                            <select id="recordingTypeSelect" class="form-select text-light bg-dark">
                                 <option value="camera">Camera</option>
                                 <option id="recordingScreenOption" value="screen">Screen/Window</option>
                             </select>
@@ -1964,11 +1964,17 @@
                                 <div id="avatarVideoAIcontainer"></div>
                                 <hr />
                                 <div class="avatar-config-row">
-                                    <select id="avatarProvider" class="form-select text-light bg-dark">
+                                    <select
+                                        id="avatarProvider"
+                                        class="form-select text-light bg-dark select-with-icon select-icon-provider"
+                                    >
                                         <option value="liveavatar">Provider - LiveAvatar</option>
                                         <option value="anam">Provider - Anam</option>
                                     </select>
-                                    <select id="avatarQuality" class="form-select text-light bg-dark">
+                                    <select
+                                        id="avatarQuality"
+                                        class="form-select text-light bg-dark select-with-icon select-icon-quality"
+                                    >
                                         <option value="low">Avatar Quality - Low (360p)</option>
                                         <option value="medium">Avatar Quality - Medium (480p)</option>
                                         <option value="high" selected>Avatar Quality - High (720p)</option>
@@ -1977,7 +1983,7 @@
                                     <select
                                         id="avatarVoiceIDs"
                                         name="avatarVoiceIDs"
-                                        class="form-select text-light bg-dark"
+                                        class="form-select text-light bg-dark select-with-icon select-icon-mic"
                                     >
                                         <option value="">Select Avatar Voice</option>
                                     </select>

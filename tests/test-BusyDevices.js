@@ -209,7 +209,7 @@ describe('busy or broken default media devices', () => {
 
         assert.deepEqual(
             select.options.map((o) => o.innerText),
-            ['📹 camera 1', '🎤 microphone 2', '🔈 speaker 3']
+            ['camera 1', 'microphone 2', 'speaker 3']
         );
     });
 });

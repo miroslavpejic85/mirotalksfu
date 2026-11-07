@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.71
+ * @version 2.7.72
  *
  */
 
@@ -126,7 +126,11 @@ const sinkId = 'sinkId' in HTMLMediaElement.prototype;
 
 const lS = new LocalStorage();
 
-const localStorageSettings = lS.getLocalStorageSettings() || lS.SFU_SETTINGS;
+const storedSettings = lS.getLocalStorageSettings();
+const localStorageSettings = storedSettings || lS.SFU_SETTINGS;
+// On mobile the buttons bar is visible by default (no mouse to reveal it), unless the user chose otherwise
+if (isMobileDevice && storedSettings?.keep_buttons_visible === undefined)
+    localStorageSettings.keep_buttons_visible = true;
 
 const locallyHiddenPeerIds = new Set();
 
@@ -1164,13 +1168,13 @@ async function addChild(device, els) {
         option.value = device.deviceId;
         switch (kind) {
             case 'videoinput':
-                option.innerText = `📹 ` + (device.label || `camera ${el.length + 1}`);
+                option.innerText = device.label || `camera ${el.length + 1}`;
                 break;
             case 'audioinput':
-                option.innerText = `🎤 ` + (device.label || `microphone ${el.length + 1}`);
+                option.innerText = device.label || `microphone ${el.length + 1}`;
                 break;
             case 'audiooutput':
-                option.innerText = `🔈 ` + (device.label || `speaker ${el.length + 1}`);
+                option.innerText = device.label || `speaker ${el.length + 1}`;
                 break;
             default:
                 break;
@@ -2478,8 +2482,8 @@ function handleInitVideoOffClick() {
 }
 
 function checkInitAudio(isAudioAllowed) {
+    // The speaker stays selectable: you can still hear others while your microphone is off
     initMicrophoneSelect.disabled = !isAudioAllowed;
-    initSpeakerSelect.disabled = !isAudioAllowed;
     isAudioAllowed ? sound('joined') : sound('left');
 }
 
@@ -2595,7 +2599,7 @@ function copyRoomURL() {
     tmpInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
-    userLog('info', 'Meeting URL copied to clipboard 👍', 'top-end');
+    userLog('info', 'Meeting URL copied to clipboard', 'top-end');
 }
 
 function copyToClipboard(txt, showTxt = true) {
@@ -2607,8 +2611,8 @@ function copyToClipboard(txt, showTxt = true) {
     navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
     showTxt
-        ? userLog('info', `${txt} copied to clipboard 👍`, 'top-end')
-        : userLog('info', `Copied to clipboard 👍`, 'top-end');
+        ? userLog('info', `${txt} copied to clipboard`, 'top-end')
+        : userLog('info', `Copied to clipboard`, 'top-end');
 }
 
 function shareRoomByEmail() {
@@ -4703,6 +4707,7 @@ function handleSelects() {
         isButtonsBarOver = isKeepButtonsVisible = e.currentTarget.checked;
         localStorageSettings.keep_buttons_visible = isButtonsBarOver;
         lS.setSettings(localStorageSettings);
+        syncButtonsBarReserve();
         const status = isButtonsBarOver ? 'enabled' : 'disabled';
         userLog(isButtonsBarOver ? 'success' : 'info', `Buttons always visible ${status}`, 'top-end', 1800);
         e.target.blur();
@@ -6126,12 +6131,13 @@ function handleButtonsBar() {
     if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncButtonsBarReserve).observe(bottomButtons);
 }
 
-// Reserve room under the video grid while the bottom bar is shown, so tiles never sit behind the buttons (like Meet)
+// Reserve room under the video grid only while the bottom bar is kept visible ("Buttons always visible"),
+// so tiles never sit behind it. When the bar auto-hides on mouse move, the grid stays still.
 let buttonsBarReserve = 0;
 
 function syncButtonsBarReserve() {
     const isBottomBar = bottomButtons.dataset.position !== 'horizontal';
-    const barHeight = isBottomBar ? bottomButtons.offsetHeight : 0;
+    const barHeight = isBottomBar && localStorageSettings.keep_buttons_visible ? bottomButtons.offsetHeight : 0;
     const reserve = barHeight ? Math.ceil(barHeight + parseFloat(getComputedStyle(bottomButtons).marginBottom) + 6) : 0;
     if (reserve === buttonsBarReserve) return;
     buttonsBarReserve = reserve;
@@ -11264,7 +11270,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.71',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.72',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
