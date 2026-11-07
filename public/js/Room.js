@@ -42,8 +42,12 @@ const showDocumentPipBtn = !isEmbedded && 'documentPictureInPicture' in window;
  * @property {number} reconnectionDelay - How long to initially wait before attempting a new reconnection (in ms). Default: 1000. Here, set to 3000.
  * @property {number} reconnectionDelayMax - Maximum amount of time to wait between reconnections (in ms). Default: 5000. Here, set to 15000.
  * @property {number} timeout - Connection timeout before an error is emitted (in ms). Default: 20000.
+ * @property {Object} query - Sends the room id with the handshake so a load balancer can keep all peers of a room on the same node.
  */
+let room_id = getRoomId();
+
 const socket = io({
+    query: { room: room_id },
     transports: ['websocket'],
     reconnection: true,
     reconnectionAttempts: 10,
@@ -366,7 +370,6 @@ let showCameraOffParticipants = localStorageSettings.show_camera_off_participant
 let lobbyParticipantsCount = 0;
 let chatMessagesId = 0;
 
-let room_id = getRoomId();
 let room_password = getRoomPassword();
 let room_duration = getRoomDuration();
 let peer_name = getPeerName();
