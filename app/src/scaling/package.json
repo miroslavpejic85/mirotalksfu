@@ -1,0 +1,29 @@
+{
+    "name": "mediasoup-scaling",
+    "version": "1.0.0",
+    "description": "Horizontal scaling for mediasoup v3 SFUs: multi-worker rooms (pipeToRouter) and a Redis cluster with one room per node",
+    "main": "index.js",
+    "private": true,
+    "license": "AGPL-3.0",
+    "keywords": [
+        "mediasoup",
+        "sfu",
+        "webrtc",
+        "scaling",
+        "pipeToRouter",
+        "redis",
+        "cluster"
+    ],
+    "engines": {
+        "node": ">=18"
+    },
+    "peerDependencies": {
+        "ioredis": "^5.0.0 || ^6.0.0",
+        "mediasoup": "^3.11.0"
+    },
+    "peerDependenciesMeta": {
+        "ioredis": {
+            "optional": true
+        }
+    }
+}

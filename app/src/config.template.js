@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.7.75 - Configuration File
+ * MiroTalk SFU v2.7.80 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1924,6 +1924,45 @@ module.exports = {
         room: {
             maxParticipants: parseInt(process.env.ROOM_MAX_PARTICIPANTS) || 1000, // Maximum participants per room
             lobby: process.env.ROOM_LOBBY === 'true', // Enable lobby feature
+        },
+    },
+
+    /**
+     * Horizontal Scaling Configuration (optional, disabled by default)
+     * ===============================================================
+     * Two independent levels, enable one or both:
+     *
+     * 1. Multi-worker rooms (single server)
+     *    A room fills its router up to `maxPeersPerRouter` peers, then spills onto a new router on the
+     *    least loaded mediasoup worker. Producers are piped between the routers (router.pipeToRouter),
+     *    so one big room can use several CPU cores. No extra infrastructure needed.
+     *
+     * 2. Cluster (several servers, needs Redis)
+     *    Every room is hosted entirely by one node. Nodes register themselves in Redis, new rooms are placed
+     *    on the least loaded node and every room entry point (/join, /whoAreYou, WHIP) redirects the browser
+     *    to the node hosting the room. REST API stats/meetings/activeRooms are aggregated cluster-wide.
+     *    Requirements:
+     *    - A private Redis/Valkey reachable by every node (standalone or managed, Redis Cluster mode is not supported)
+     *    - Every node reachable on its own public URL (SCALING_NODE_URL) with its own SFU_ANNOUNCED_IP
+     *    - Same secrets on every node (JWT_KEY, API_KEY_SECRET, HOST_USERS, OIDC...)
+     *
+     * Docs: https://docs.mirotalk.com/mirotalk-sfu/scalability/
+     */
+    scaling: {
+        multiWorkerRooms: {
+            enabled: process.env.SCALING_MULTI_WORKER_ROOMS === 'true',
+            maxPeersPerRouter: parseInt(process.env.SCALING_MAX_PEERS_PER_ROUTER) || 20, // Peers per router before spilling to another worker
+        },
+        cluster: {
+            enabled: process.env.SCALING_CLUSTER === 'true',
+            redisUrl: process.env.SCALING_REDIS_URL || 'redis://localhost:6379',
+            nodeId: process.env.SCALING_NODE_ID || '', // Unique per node, defaults to hostname-pid
+            nodeUrl: process.env.SCALING_NODE_URL || '', // Public URL of THIS node, e.g. https://sfu1.example.com (required)
+            keyPrefix: process.env.SCALING_KEY_PREFIX || 'mirotalksfu', // Redis keys/channels prefix
+            heartbeatInterval: parseInt(process.env.SCALING_HEARTBEAT_INTERVAL) || 5, // Seconds between node heartbeats
+            nodeTtl: parseInt(process.env.SCALING_NODE_TTL) || 15, // Seconds before a silent node is considered dead
+            roomReservationTtl: parseInt(process.env.SCALING_ROOM_RESERVATION_TTL) || 600, // Seconds a placed room stays reserved before its first peer joins
+            maxPeersPerNode: parseInt(process.env.SCALING_MAX_PEERS_PER_NODE) || 0, // Stop placing new rooms on a node above this (0 = unlimited)
         },
     },
 

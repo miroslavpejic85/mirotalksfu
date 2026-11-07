@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.75
+ * @version 2.7.80
  *
  */
 
@@ -96,6 +96,8 @@ const { parseHostUsers, findHostUser } = require('./HostUsers');
 const Room = require('./Room');
 const Peer = require('./Peer');
 const WhipServer = require('./WhipServer');
+const { createScaling } = require('./scaling');
+const scalingAdapter = require('./ScalingAdapter');
 const { assignFallbackPresenter, isConfiguredPresenter, isOidcConfiguredPresenter } = require('./PresenterManager');
 const ServerApi = require('./ServerApi');
 const { getForcedExitTargets, scheduleForcedDisconnect } = require('./ForcedExit');
@@ -631,6 +633,9 @@ let announcedAddress = webRtcServerActive
 const workers = [];
 let nextMediasoupWorkerIdx = 0;
 
+// Horizontal scaling (optional): multi-worker rooms and multi-node cluster, no-op when disabled
+const scaling = createScaling(config?.scaling, { log: new Logger('Scaling') });
+
 // Autodetect announcedAddress with multiple fallback services
 if (!announcedAddress && IP === '0.0.0.0') {
     const detectPublicIp = async () => {
@@ -807,6 +812,15 @@ function startServer() {
 
         next();
     });
+
+    // Horizontal scaling: room entry points (join, waiting room, WHIP ingest) are redirected to
+    // the cluster node hosting the room. No-op unless SCALING_CLUSTER=true.
+    app.use(
+        scaling.createRoutingMiddleware({
+            getRoomId: scalingAdapter.getRoutedRoomId,
+            isValidRoomName: (roomId) => Validator.isValidRoomName(roomId),
+        })
+    );
 
     // WHIP ingestion uses its own Bearer auth, so it is registered before the OIDC session middleware
     whipServer.register(app, { limiter: whipLimiter });
@@ -1026,11 +1040,11 @@ function startServer() {
     });
 
     // Check if room active (exists)
-    app.post('/isRoomActive', (req, res) => {
+    app.post('/isRoomActive', async (req, res) => {
         const { roomId } = checkXSS(req.body);
 
         if (roomId && (hostCfg.protected || hostCfg.user_auth || OIDC.enabled)) {
-            const roomActive = roomList.has(roomId);
+            const roomActive = roomList.has(roomId) || (await scaling.isRoomActive(roomId));
             if (roomActive) log.debug('isRoomActive', { roomId, roomActive });
             res.status(200).json({ message: roomActive });
         } else {
@@ -1039,9 +1053,12 @@ function startServer() {
     });
 
     // Check if Widget room active (exists)
-    app.post('/isWidgetRoomActive', (req, res) => {
+    app.post('/isWidgetRoomActive', async (req, res) => {
         const { roomId } = checkXSS(req.body);
-        const roomWidgetActive = roomId && roomId === widget.roomId && roomList.has(roomId);
+        const roomWidgetActive =
+            Boolean(roomId) &&
+            roomId === widget.roomId &&
+            (roomList.has(roomId) || (await scaling.isRoomActive(roomId)));
         log.debug('isWidgetRoomActive', { roomId, roomWidgetActive });
         res.status(200).json({ message: roomWidgetActive });
     });
@@ -1980,7 +1997,7 @@ function startServer() {
     // REST API
     // ####################################################
 
-    app.get(restApi.basePath + '/stats', (req, res) => {
+    app.get(restApi.basePath + '/stats', async (req, res) => {
         try {
             // Check if endpoint allowed
             if (restApi.allowed && !restApi.allowed.stats) {
@@ -2001,7 +2018,15 @@ function startServer() {
                 return res.status(403).json({ error: 'Unauthorized!' });
             }
 
-            const { timestamp, totalRooms, totalUsers } = api.getStats(roomList);
+            const stats = api.getStats(roomList);
+
+            // Cluster: add the rooms hosted by the other nodes
+            for (const remoteRoom of await scaling.getRemoteRooms()) {
+                stats.totalRooms += 1;
+                stats.totalUsers += remoteRoom.peers || 0;
+            }
+
+            const { timestamp, totalRooms, totalUsers } = stats;
 
             res.json({
                 success: true,
@@ -2025,7 +2050,7 @@ function startServer() {
     });
 
     // request meetings list
-    app.get(restApi.basePath + '/meetings', (req, res) => {
+    app.get(restApi.basePath + '/meetings', async (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.meetings) {
             return res.status(403).json({
@@ -2042,8 +2067,11 @@ function startServer() {
             });
             return res.status(403).json({ error: 'Unauthorized!' });
         }
-        // Get meetings
+        // Get meetings (cluster: plus the meetings hosted by the other nodes)
         const meetings = api.getMeetings(roomList);
+        for (const { result } of await scaling.requestAll('getMeetings')) {
+            if (Array.isArray(result)) meetings.push(...result);
+        }
         res.json({ meetings: meetings });
         // log.debug the output if all done
         log.debug('MiroTalk get meetings - Authorized', {
@@ -2141,7 +2169,7 @@ function startServer() {
     });
 
     // request WHIP ingest endpoint + per-room Bearer token
-    app.post(restApi.basePath + '/whip', (req, res) => {
+    app.post(restApi.basePath + '/whip', async (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.whip) {
             return res.status(403).json({
@@ -2167,7 +2195,11 @@ function startServer() {
         }
         try {
             const token = whipServer.createToken({ roomId: room, name, expire });
-            const whip = `https://${host}/whip/${encodeURIComponent(room)}`;
+            // Cluster: publish straight to the node hosting the room (WHIP clients may drop auth on redirects)
+            const nodeUrl = roomList.has(room) ? null : await scaling.getRoomNodeUrl(room);
+            const whip = nodeUrl
+                ? `${nodeUrl}/whip/${encodeURIComponent(room)}`
+                : `https://${host}/whip/${encodeURIComponent(room)}`;
             res.json({ whip, token });
             log.debug('MiroTalk get whip - Authorized', { room, whip });
         } catch (error) {
@@ -2177,7 +2209,7 @@ function startServer() {
     });
 
     // request end meeting room endpoint
-    app.delete(restApi.basePath + '/meeting/:room', (req, res) => {
+    app.delete(restApi.basePath + '/meeting/:room', async (req, res) => {
         try {
             // Check if endpoint allowed
             if (restApi.allowed && !restApi.allowed.meetingEnd) {
@@ -2199,7 +2231,12 @@ function startServer() {
             // End the meeting
             const { room } = req.params;
             const { redirect, message } = req.body || {};
-            const result = api.endMeeting(roomList, room, redirect, message);
+            let result = api.endMeeting(roomList, room, redirect, message);
+            // Cluster: the meeting may be hosted by another node
+            if (!result.success) {
+                const remote = await scaling.requestRoomOwner(room, 'endMeeting', { room, redirect, message });
+                if (remote?.result) result = remote.result;
+            }
             const status = result.success ? 200 : 404;
             res.status(status).json(result);
             // log.debug the output if all done
@@ -2256,7 +2293,7 @@ function startServer() {
     // ####################################################
 
     // request active rooms endpoint
-    app.get(restApi.basePath + '/activeRooms', activeRoomsLimiter, (req, res) => {
+    app.get(restApi.basePath + '/activeRooms', activeRoomsLimiter, async (req, res) => {
         // Check if endpoint allowed
         if (!config.ui?.rooms?.showActive) {
             return res.status(403).json({
@@ -2269,8 +2306,15 @@ function startServer() {
         const { host } = req.headers;
         const api = new ServerApi(host);
 
-        // Get active rooms
+        // Get active rooms (cluster: plus the rooms hosted by the other nodes, joined through this host)
         const activeRooms = api.getActiveRooms(roomList);
+        for (const remoteRoom of await scaling.getRemoteRooms()) {
+            activeRooms.push({
+                id: remoteRoom.id,
+                peers: remoteRoom.peers,
+                join: 'https://' + host + '/' + remoteRoom.id,
+            });
+        }
         res.json({ activeRooms: activeRooms });
 
         // log.debug the output if all done
@@ -2501,11 +2545,36 @@ function startServer() {
         try {
             await createWorkers();
             startServer();
+            await startScaling();
         } catch (err) {
             log.error('Create Worker ERROR --->', err);
             process.exit(1);
         }
     })();
+
+    // Joins the cluster when SCALING_CLUSTER=true (never throws, falls back to standalone)
+    async function startScaling() {
+        const { multiWorkerRooms, cluster } = scaling.getStatus();
+        log.info('Horizontal scaling', {
+            multiWorkerRooms: multiWorkerRooms.enabled,
+            maxPeersPerRouter: multiWorkerRooms.enabled ? multiWorkerRooms.maxPeersPerRouter : undefined,
+            cluster: cluster.enabled,
+        });
+        const clusterStarted = await scaling.start({
+            getLocalRooms: () => roomList,
+            describeRoom: scalingAdapter.describeRoom,
+            getPlacementRoomId: scalingAdapter.getPlacementRoomId,
+            rpcHandlers: {
+                getMeetings: () => new ServerApi().getMeetings(roomList),
+                endMeeting: ({ room, redirect, message }) =>
+                    new ServerApi().endMeeting(roomList, room, redirect, message),
+            },
+        });
+        if (!clusterStarted) return;
+        // Host protection: a host login on any node unlocks the rooms on every node
+        await scalingAdapter.shareHostLogins(scaling, authHost, hostCfg);
+        log.info('Cluster mode active', scaling.getStatus().cluster);
+    }
 
     async function createWorkers() {
         const { numWorkers } = config.mediasoup;
@@ -2563,9 +2632,14 @@ function startServer() {
             }, 120000);
             */
         }
+
+        scaling.setWorkers(workers);
     }
 
     async function getMediasoupWorker() {
+        // Multi-worker rooms: least loaded worker, otherwise round-robin
+        const leastLoaded = scaling.pickWorker();
+        if (leastLoaded) return leastLoaded;
         const worker = workers[nextMediasoupWorkerIdx];
         if (++nextMediasoupWorkerIdx === workers.length) nextMediasoupWorkerIdx = 0;
         return worker;
@@ -2665,8 +2739,17 @@ function startServer() {
             socket.room_id = room_id;
 
             try {
+                // Cluster: another node already hosts (or reserved) this room, send the client there
+                const placement = await scaling.claimRoom(room_id);
+                if (!placement.local && placement.url) {
+                    socket.room_id = null;
+                    log.debug('[createRoom] - Room hosted by another node', { room_id, node_id: placement.nodeId });
+                    return callback({ redirect: placement.url });
+                }
+
                 const worker = await getMediasoupWorker();
-                const room = await new Room(room_id, worker, io).ready();
+                const routerPool = scaling.createRoomRouterPool(room_id, config.mediasoup.router.mediaCodecs);
+                const room = await new Room(room_id, worker, io, { routerPool }).ready();
                 // Another socket may have created the same room while the router was being created:
                 // keep the first one and release this router instead of silently leaking it.
                 if (roomList.has(room_id)) {
@@ -6925,6 +7008,13 @@ async function gracefulShutdown(signal) {
         server.close(() => {
             log.info('HTTP server closed');
         });
+
+        // 1b. Leave the cluster (if enabled) so new rooms are placed on the other nodes
+        try {
+            await scaling.stop();
+        } catch (err) {
+            log.error('Error leaving the cluster:', err.message);
+        }
 
         // 2. Notify all connected clients (in-room and lobby) the server is restarting,
         // then give the message time to flush before tearing anything down

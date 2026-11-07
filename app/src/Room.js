@@ -12,7 +12,7 @@ const { audioLevelObserverEnabled, activeSpeakerObserverEnabled } = config.media
 const TIME_LIMIT_GRACE_MS = 15000;
 
 module.exports = class Room {
-    constructor(room_id, worker, io) {
+    constructor(room_id, worker, io, options = {}) {
         this.id = room_id;
         // Unique, one-time-use identifier for this specific room/conference instance.
         // Generated when the room is created (first peer joins) and destroyed with the room
@@ -99,6 +99,8 @@ module.exports = class Room {
         this.webRtcTransport = config.mediasoup.webRtcTransport;
         this.router = null;
         this.routerSettings = config.mediasoup.router;
+        // Optional (horizontal scaling): spreads this room over several mediasoup workers
+        this.routerPool = options.routerPool || null;
         this.routerReady = this.createTheRouter();
 
         // RTMP configuration
@@ -328,6 +330,7 @@ module.exports = class Room {
         });
 
         this.router = router;
+        this.routerPool?.setMainRouter(router, this.worker);
         const observerPromises = [];
         if (this.audioLevelObserverEnabled) {
             log.debug('Audio Level Observer enabled, starting observation...');
@@ -377,8 +380,48 @@ module.exports = class Room {
         this.closeAudioLevelObserver();
         this.closeActiveSpeakerObserver();
         this.rtmpStreaming.closeAll();
+        this.routerPool?.close();
         this.closeRouter();
         log.debug('Room closed', { room_id: this.id });
+    }
+
+    // ####################################################
+    // MULTI-WORKER ROUTERS (optional, see scaling/RoomRouterPool)
+    // ####################################################
+
+    // Router hosting the peer's transports: always the main router without a router pool
+    getPeerRouter(socket_id) {
+        return this.routerPool?.getPeerRouter(socket_id) || this.router;
+    }
+
+    async assignPeerRouter(socket_id) {
+        return this.routerPool ? this.routerPool.assignPeer(socket_id) : this.router;
+    }
+
+    // Makes a producer consumable on the given router (no-op when it already lives there)
+    async ensureProducerOnRouter(producerId, router) {
+        if (!this.routerPool) return;
+        const ownerId = this.getProducerOwnerId(producerId);
+        const source = ownerId ? this.getPeerRouter(ownerId) : this.router;
+        await this.routerPool.pipeProducer(producerId, source, router);
+    }
+
+    async ensureDataProducerOnRouter(dataProducerId, router) {
+        if (!this.routerPool) return;
+        const ownerId = this.getDataProducerOwnerId(dataProducerId);
+        const source = ownerId ? this.getPeerRouter(ownerId) : this.router;
+        await this.routerPool.pipeDataProducer(dataProducerId, source, router);
+    }
+
+    getDataProducerOwnerId(dataProducerId) {
+        for (const [peerId, peer] of this.peers) {
+            if (peer.dataProducers?.has(dataProducerId)) return peerId;
+        }
+        return null;
+    }
+
+    getRouterStats() {
+        return this.routerPool ? this.routerPool.getStats() : null;
     }
 
     // ####################################################
@@ -441,6 +484,8 @@ module.exports = class Room {
         if (!this.audioLevelObserverEnabled || !this.audioLevelObserver || this.audioLevelObserver.closed) return;
 
         try {
+            // Observers live on the main router
+            await this.ensureProducerOnRouter(producer.producerId, this.router);
             await this.audioLevelObserver.addProducer(producer);
             log.debug('Producer added to audio level observer', { producer });
         } catch (error) {
@@ -504,6 +549,7 @@ module.exports = class Room {
             return;
 
         try {
+            await this.ensureProducerOnRouter(producer.producerId, this.router);
             await this.activeSpeakerObserver.addProducer(producer);
             log.debug('Producer added to active speaker observer', { producer });
         } catch (error) {
@@ -713,6 +759,8 @@ module.exports = class Room {
 
         peer.close();
 
+        this.routerPool?.releasePeer(socket_id);
+
         this.delPeer(peer);
 
         // WHIP ingest peers never keep a room alive on their own
@@ -747,7 +795,9 @@ module.exports = class Room {
     // WebRTC TRANSPORT
     // ####################################################
 
-    getWebRtcTransportOptions() {
+    getWebRtcTransportOptions(router = this.router) {
+        // Overflow routers carry the WebRtcServer of their own worker
+        const webRtcServer = router?.appData?.webRtcServer || this.webRtcServer;
         const {
             iceConsentTimeout = 35,
             initialAvailableOutgoingBitrate,
@@ -758,7 +808,7 @@ module.exports = class Room {
             maxReceiveMessageSize = 262144,
         } = this.webRtcTransport;
         return {
-            ...(this.webRtcServerActive ? { webRtcServer: this.webRtcServer } : { listenInfos: listenInfos }),
+            ...(this.webRtcServerActive ? { webRtcServer } : { listenInfos: listenInfos }),
             enableUdp: true,
             enableTcp: true,
             preferUdp: true,
@@ -781,19 +831,22 @@ module.exports = class Room {
             throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
         }
 
-        const webRtcTransportOptions = this.getWebRtcTransportOptions();
-
-        log.debug('webRtcTransportOptions ----->', webRtcTransportOptions);
-
+        let router = this.router;
         let transport;
         try {
-            transport = await this.router.createWebRtcTransport(webRtcTransportOptions);
+            router = await this.assignPeerRouter(socket_id);
+
+            const webRtcTransportOptions = this.getWebRtcTransportOptions(router);
+
+            log.debug('webRtcTransportOptions ----->', webRtcTransportOptions);
+
+            transport = await router.createWebRtcTransport(webRtcTransportOptions);
             if (!transport) {
                 throw new Error('Failed to create WebRTC Transport');
             }
         } catch (error) {
             // Worker died or was closed (e.g. server restart/update): expected, keep it out of error logs/Sentry
-            if (error?.name === 'WorkerClosedError' || this.router?.closed) {
+            if (error?.name === 'WorkerClosedError' || router?.closed) {
                 log.debug('WebRTC Transport not created, mediasoup worker closed', { error: error.message, socket_id });
                 const workerClosedError = new Error('Media server unavailable');
                 workerClosedError.name = 'WorkerClosedError';
@@ -817,6 +870,8 @@ module.exports = class Room {
 
         if (!peer) {
             if (!transport.closed) transport.close();
+            // The peer may have left while its router was being assigned
+            this.routerPool?.releasePeer(socket_id);
             throw new Error(`Peer with socket ID ${socket_id} left before transport could be added`);
         }
 
@@ -1075,7 +1130,31 @@ module.exports = class Room {
             throw error;
         }
 
-        if (!this.router.canConsume({ producerId, rtpCapabilities })) {
+        const router = this.getPeerRouter(socket_id);
+
+        try {
+            await this.ensureProducerOnRouter(producerId, router);
+        } catch (error) {
+            const producerGone = !this.getProducerById(producerId);
+            log.warn('Failed to pipe producer to the consumer router', {
+                producerId,
+                peer_name,
+                producerGone,
+                error: error.message,
+            });
+            const pipeError = new Error(
+                producerGone
+                    ? `Producer with ID ${producerId} is no longer available`
+                    : `Failed to route producer ${producerId} to peer ${peer_name}`
+            );
+            if (producerGone) {
+                pipeError.code = 'PRODUCER_NOT_FOUND';
+                pipeError.retryable = false;
+            }
+            throw pipeError;
+        }
+
+        if (!router.canConsume({ producerId, rtpCapabilities })) {
             throw new Error(
                 `Cannot consume producer for peer ${peer_name} with ID ${producerId} type ${type}, router validation failed`
             );
@@ -1228,6 +1307,18 @@ module.exports = class Room {
 
         const peer = this.getPeer(socket_id);
         const { peer_name } = peer;
+
+        try {
+            await this.ensureDataProducerOnRouter(dataProducerId, this.getPeerRouter(socket_id));
+        } catch (error) {
+            log.warn(`Skipped data consumer for peer ${peer_name}, data producer not routable`, {
+                dataProducerId,
+                error: error.message,
+            });
+            const pipeError = new Error(`Data producer ${dataProducerId} is no longer available: ${error.message}`);
+            pipeError.transient = true;
+            throw pipeError;
+        }
 
         let result;
         try {

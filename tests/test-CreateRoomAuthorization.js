@@ -7,6 +7,7 @@ const vm = require('vm');
 const sinon = require('sinon');
 const jwt = require('jsonwebtoken');
 const { getJwtKeys } = require('../app/src/JwtSecret');
+const { createScaling } = require('../app/src/scaling');
 
 const serverSource = fs.readFileSync(path.join(__dirname, '..', 'app', 'src', 'Server.js'), 'utf8');
 const slice = (from, to) => serverSource.slice(serverSource.indexOf(from), serverSource.indexOf(to));
@@ -38,6 +39,9 @@ describe('Room creation authorization (Socket.IO createRoom)', () => {
             getIpSocket: () => '127.0.0.1',
             checkCreateRoomLimit: () => true,
             getMediasoupWorker: async () => ({}),
+            // Horizontal scaling disabled (default): always local, no router pool
+            scaling: createScaling(),
+            config: { mediasoup: { router: { mediaCodecs: [] } } },
             io: {},
             Room: class {
                 constructor(id) {

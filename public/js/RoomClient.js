@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.75
+ * @version 2.7.80
  *
  */
 
@@ -678,7 +678,9 @@ class RoomClient {
         // CREATE ROOM AND JOIN
         // ####################################################
 
-        this.createRoom(this.room_id).then(async () => {
+        this.createRoom(this.room_id).then(async (proceed) => {
+            // Cluster: the page is being moved to the server node hosting this room
+            if (proceed === false) return;
             const data = {
                 room_id: this.room_id,
                 peer_info: this.peer_info,
@@ -720,7 +722,7 @@ class RoomClient {
 
     async createRoom(room_id) {
         const token = await this.getCreateRoomToken(room_id);
-        await this.socket
+        const response = await this.socket
             .request('createRoom', {
                 room_id,
                 token,
@@ -728,6 +730,20 @@ class RoomClient {
             .catch((err) => {
                 console.log('Create room:', err);
             });
+        // Horizontal scaling: another server node hosts this room, reload the same page there
+        if (response?.redirect) {
+            try {
+                const target = new URL(window.location.pathname + window.location.search, response.redirect);
+                if (target.origin !== window.location.origin) {
+                    console.log('Create room: hosted by another server node', target.origin);
+                    window.location.replace(target.toString());
+                    return false;
+                }
+            } catch (err) {
+                console.warn('Create room: invalid redirect', err);
+            }
+        }
+        return true;
     }
 
     // Short-lived token proving the OIDC session is a configured presenter (presenters.list), null otherwise
