@@ -1029,7 +1029,6 @@ function switchRecognitionLanguage(lang) {
 
 function printCommand(command) {
     console.log('Detected', { command: command });
-    userLog('info', `Voice command: ${command}`, 'top-end', 2000);
 }
 
 let voiceCaption;
