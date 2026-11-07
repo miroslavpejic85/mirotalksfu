@@ -75,6 +75,22 @@ const languageHandlers = {
             roomLock: 'lock the room',
             roomUnlock: 'unlock the room',
             about: 'show the about',
+            fullScreen: 'toggle full screen',
+            pictureInPicture: 'toggle picture in picture',
+            emojiOn: 'open the emoji',
+            chatClean: 'clean the chat',
+            chatSave: 'save the chat',
+            whiteboardUndo: 'undo the whiteboard',
+            whiteboardRedo: 'redo the whiteboard',
+            whiteboardClean: 'clean the whiteboard',
+            whiteboardSave: 'save the whiteboard',
+            settingsAudio: 'open the audio settings',
+            settingsVideo: 'open the video settings',
+            settingsRecording: 'open the recording settings',
+            settingsVideoEffects: 'open the video effects',
+            settingsVirtualBackground: 'open the virtual background',
+            settingsLanguages: 'open the language settings',
+            settingsShortcuts: 'open the shortcuts',
             email: 'open email',
             google: 'open google',
             googleTr: 'open google translate',
@@ -86,6 +102,7 @@ const languageHandlers = {
             github: 'open github',
             survey: 'open survey',
             recognizeBangla: 'recognize bangla',
+            recognizeEnglish: 'recognize english',
             recognizeItalian: 'recognize italian',
             recognizeSpanish: 'recognize spanish',
             recognizeFrench: 'recognize french',
@@ -145,6 +162,22 @@ const languageHandlers = {
             roomLock: 'রুম লক করো',
             roomUnlock: 'রুম আনলক করো',
             about: 'সম্পর্কিত দেখাও',
+            fullScreen: 'ফুল স্ক্রিন পরিবর্তন করো',
+            pictureInPicture: 'পিকচার ইন পিকচার পরিবর্তন করো',
+            emojiOn: 'ইমোজি খুলো',
+            chatClean: 'চ্যাট পরিষ্কার করো',
+            chatSave: 'চ্যাট সংরক্ষণ করো',
+            whiteboardUndo: 'হোয়াইটবোর্ড আনডু করো',
+            whiteboardRedo: 'হোয়াইটবোর্ড রিডু করো',
+            whiteboardClean: 'হোয়াইটবোর্ড পরিষ্কার করো',
+            whiteboardSave: 'হোয়াইটবোর্ড সংরক্ষণ করো',
+            settingsAudio: 'অডিও সেটিংস খুলো',
+            settingsVideo: 'ভিডিও সেটিংস খুলো',
+            settingsRecording: 'রেকর্ডিং সেটিংস খুলো',
+            settingsVideoEffects: 'ভিডিও ইফেক্ট খুলো',
+            settingsVirtualBackground: 'ভার্চুয়াল ব্যাকগ্রাউন্ড খুলো',
+            settingsLanguages: 'ভাষা সেটিংস খুলো',
+            settingsShortcuts: 'শর্টকাট খুলো',
             email: 'ইমেইল খুলো',
             google: 'গুগল খুলো',
             googleTr: 'গুগল অনুবাদ খুলো',
@@ -215,6 +248,22 @@ const languageHandlers = {
             roomLock: 'bloquear la sala',
             roomUnlock: 'desbloquear la sala',
             about: 'mostrar información',
+            fullScreen: 'alternar pantalla completa',
+            pictureInPicture: 'alternar imagen en imagen',
+            emojiOn: 'abrir emoji',
+            chatClean: 'limpiar chat',
+            chatSave: 'guardar chat',
+            whiteboardUndo: 'deshacer pizarra',
+            whiteboardRedo: 'rehacer pizarra',
+            whiteboardClean: 'limpiar pizarra',
+            whiteboardSave: 'guardar pizarra',
+            settingsAudio: 'abrir configuración de audio',
+            settingsVideo: 'abrir configuración de video',
+            settingsRecording: 'abrir configuración de grabación',
+            settingsVideoEffects: 'abrir efectos de video',
+            settingsVirtualBackground: 'abrir fondo virtual',
+            settingsLanguages: 'abrir configuración de idioma',
+            settingsShortcuts: 'abrir atajos',
             email: 'abrir correo',
             google: 'abrir google',
             googleTr: 'abrir google translate',
@@ -286,6 +335,22 @@ const languageHandlers = {
             roomLock: 'verrouiller la salle',
             roomUnlock: 'déverrouiller la salle',
             about: 'montrer à propos',
+            fullScreen: 'basculer le plein écran',
+            pictureInPicture: "basculer l'image dans l'image",
+            emojiOn: 'ouvrir les émojis',
+            chatClean: 'nettoyer le chat',
+            chatSave: 'enregistrer le chat',
+            whiteboardUndo: 'annuler le tableau blanc',
+            whiteboardRedo: 'rétablir le tableau blanc',
+            whiteboardClean: 'effacer le tableau blanc',
+            whiteboardSave: 'sauvegarder le tableau blanc',
+            settingsAudio: 'ouvrir les paramètres audio',
+            settingsVideo: 'ouvrir les paramètres vidéo',
+            settingsRecording: "ouvrir les paramètres d'enregistrement",
+            settingsVideoEffects: 'ouvrir les effets vidéo',
+            settingsVirtualBackground: "ouvrir l'arrière-plan virtuel",
+            settingsLanguages: 'ouvrir les paramètres de langue',
+            settingsShortcuts: 'ouvrir les raccourcis',
             email: 'ouvrir email',
             google: 'ouvrir google',
             googleTr: 'ouvrir google translate',
@@ -357,6 +422,22 @@ const languageHandlers = {
             roomLock: 'blocca sala',
             roomUnlock: 'sblocca sala',
             about: 'mostra informazioni',
+            fullScreen: 'attiva schermo intero',
+            pictureInPicture: 'attiva picture in picture',
+            emojiOn: 'apri emoji',
+            chatClean: 'pulisci chat',
+            chatSave: 'salva chat',
+            whiteboardUndo: 'annulla lavagna',
+            whiteboardRedo: 'ripeti lavagna',
+            whiteboardClean: 'pulisci lavagna',
+            whiteboardSave: 'salva lavagna',
+            settingsAudio: 'apri impostazioni audio',
+            settingsVideo: 'apri impostazioni video',
+            settingsRecording: 'apri impostazioni registrazione',
+            settingsVideoEffects: 'apri effetti video',
+            settingsVirtualBackground: 'apri sfondo virtuale',
+            settingsLanguages: 'apri impostazioni lingua',
+            settingsShortcuts: 'apri scorciatoie',
             email: 'apri email',
             google: 'apri google',
             googleTr: 'apri google translate',
@@ -428,6 +509,22 @@ const languageHandlers = {
             roomLock: 'Raum sperren',
             roomUnlock: 'Raum entsperren',
             about: 'Info anzeigen',
+            fullScreen: 'Vollbild umschalten',
+            pictureInPicture: 'Bild-in-Bild umschalten',
+            emojiOn: 'Emoji öffnen',
+            chatClean: 'Chat leeren',
+            chatSave: 'Chat speichern',
+            whiteboardUndo: 'Whiteboard rückgängig',
+            whiteboardRedo: 'Whiteboard wiederholen',
+            whiteboardClean: 'Whiteboard leeren',
+            whiteboardSave: 'Whiteboard speichern',
+            settingsAudio: 'Audioeinstellungen öffnen',
+            settingsVideo: 'Videoeinstellungen öffnen',
+            settingsRecording: 'Aufnahmeeinstellungen öffnen',
+            settingsVideoEffects: 'Videoeffekte öffnen',
+            settingsVirtualBackground: 'virtuellen Hintergrund öffnen',
+            settingsLanguages: 'Spracheinstellungen öffnen',
+            settingsShortcuts: 'Tastenkürzel öffnen',
             email: 'E-Mail öffnen',
             google: 'Google öffnen',
             googleTr: 'Google Übersetzer öffnen',
@@ -499,6 +596,22 @@ const languageHandlers = {
             roomLock: 'trancar sala',
             roomUnlock: 'destrancar sala',
             about: 'mostrar sobre',
+            fullScreen: 'alternar tela cheia',
+            pictureInPicture: 'alternar imagem em imagem',
+            emojiOn: 'abrir emoji',
+            chatClean: 'limpar chat',
+            chatSave: 'salvar chat',
+            whiteboardUndo: 'desfazer quadro branco',
+            whiteboardRedo: 'refazer quadro branco',
+            whiteboardClean: 'limpar quadro branco',
+            whiteboardSave: 'salvar quadro branco',
+            settingsAudio: 'abrir configurações de áudio',
+            settingsVideo: 'abrir configurações de vídeo',
+            settingsRecording: 'abrir configurações de gravação',
+            settingsVideoEffects: 'abrir efeitos de vídeo',
+            settingsVirtualBackground: 'abrir fundo virtual',
+            settingsLanguages: 'abrir configurações de idioma',
+            settingsShortcuts: 'abrir atalhos',
             email: 'abrir e-mail',
             google: 'abrir google',
             googleTr: 'abrir google translate',
@@ -570,6 +683,22 @@ const languageHandlers = {
             roomLock: 'ルームをロック',
             roomUnlock: 'ルームをアンロック',
             about: '情報を表示',
+            fullScreen: 'フルスクリーンを切り替え',
+            pictureInPicture: 'ピクチャーインピクチャーを切り替え',
+            emojiOn: '絵文字を開く',
+            chatClean: 'チャットをクリア',
+            chatSave: 'チャットを保存',
+            whiteboardUndo: 'ホワイトボードを元に戻す',
+            whiteboardRedo: 'ホワイトボードをやり直す',
+            whiteboardClean: 'ホワイトボードをクリア',
+            whiteboardSave: 'ホワイトボードを保存',
+            settingsAudio: '音声設定を開く',
+            settingsVideo: 'ビデオ設定を開く',
+            settingsRecording: '録画設定を開く',
+            settingsVideoEffects: 'ビデオエフェクトを開く',
+            settingsVirtualBackground: '仮想背景を開く',
+            settingsLanguages: '言語設定を開く',
+            settingsShortcuts: 'ショートカットを開く',
             email: 'メールを開く',
             google: 'Googleを開く',
             googleTr: 'Google翻訳を開く',
@@ -641,6 +770,22 @@ const languageHandlers = {
             roomLock: '锁定房间',
             roomUnlock: '解锁房间',
             about: '显示关于信息',
+            fullScreen: '切换全屏',
+            pictureInPicture: '切换画中画',
+            emojiOn: '开启表情',
+            chatClean: '清空聊天',
+            chatSave: '保存聊天',
+            whiteboardUndo: '撤销白板',
+            whiteboardRedo: '重做白板',
+            whiteboardClean: '清空白板',
+            whiteboardSave: '保存白板',
+            settingsAudio: '开启音频设置',
+            settingsVideo: '开启视频设置',
+            settingsRecording: '开启录制设置',
+            settingsVideoEffects: '开启视频特效',
+            settingsVirtualBackground: '开启虚拟背景',
+            settingsLanguages: '开启语言设置',
+            settingsShortcuts: '开启快捷键',
             email: '打开电子邮件',
             google: '打开谷歌',
             googleTr: '打开谷歌翻译',
@@ -712,6 +857,22 @@ const languageHandlers = {
             roomLock: 'قفل الغرفة',
             roomUnlock: 'فتح قفل الغرفة',
             about: 'عرض المعلومات',
+            fullScreen: 'تبديل ملء الشاشة',
+            pictureInPicture: 'تبديل صورة داخل صورة',
+            emojiOn: 'فتح الرموز التعبيرية',
+            chatClean: 'مسح الدردشة',
+            chatSave: 'حفظ الدردشة',
+            whiteboardUndo: 'تراجع السبورة',
+            whiteboardRedo: 'إعادة السبورة',
+            whiteboardClean: 'مسح السبورة',
+            whiteboardSave: 'حفظ السبورة',
+            settingsAudio: 'فتح إعدادات الصوت',
+            settingsVideo: 'فتح إعدادات الفيديو',
+            settingsRecording: 'فتح إعدادات التسجيل',
+            settingsVideoEffects: 'فتح مؤثرات الفيديو',
+            settingsVirtualBackground: 'فتح الخلفية الافتراضية',
+            settingsLanguages: 'فتح إعدادات اللغة',
+            settingsShortcuts: 'فتح الاختصارات',
             email: 'فتح البريد الإلكتروني',
             google: 'فتح جوجل',
             googleTr: 'فتح ترجمة جوجل',
@@ -736,6 +897,13 @@ const languageHandlers = {
         },
     },
 };
+
+// Transcripts are lowercased before matching, so the commands must be lowercase too
+Object.values(languageHandlers).forEach((handler) => {
+    Object.keys(handler.commands).forEach((key) => {
+        handler.commands[key] = handler.commands[key].toLowerCase();
+    });
+});
 
 const browser = {
     newroom: '/newroom',
@@ -862,6 +1030,12 @@ function printCommand(command) {
     userLog('info', `Voice command: ${command}`, 'top-end', 2000);
 }
 
+function openSettingsTab(tabButton) {
+    if (tabButton.classList.contains('hidden')) return;
+    if (!rc.isMySettingsOpen) settingsButton.click();
+    tabButton.click();
+}
+
 function execVoiceCommands(transcript) {
     switch (transcript.trim().toLowerCase()) {
         case languageHandlers[currentLanguage].commands.shareRoom:
@@ -945,6 +1119,7 @@ function execVoiceCommands(transcript) {
             chatCloseButton.click();
             break;
         case languageHandlers[currentLanguage].commands.toggleTr:
+            printCommand(languageHandlers[currentLanguage].commands.toggleTr);
             transcriptionButton.click();
             break;
         case languageHandlers[currentLanguage].commands.whiteboardOn:
@@ -969,7 +1144,7 @@ function execVoiceCommands(transcript) {
             break;
         case languageHandlers[currentLanguage].commands.recordingResume:
             printCommand(languageHandlers[currentLanguage].commands.recordingResume);
-            recordingResume.click();
+            resumeRecButton.click();
             break;
         case languageHandlers[currentLanguage].commands.recordingOff:
             printCommand(languageHandlers[currentLanguage].commands.recordingOff);
@@ -985,11 +1160,11 @@ function execVoiceCommands(transcript) {
             break;
         case languageHandlers[currentLanguage].commands.participantsOn:
             printCommand(languageHandlers[currentLanguage].commands.participantsOn);
-            chatButton.click();
+            if (!rc.isParticipantsOpen) participantsButton.click();
             break;
         case languageHandlers[currentLanguage].commands.participantsOff:
             printCommand(languageHandlers[currentLanguage].commands.participantsOff);
-            chatCloseButton.click();
+            if (rc.isParticipantsOpen) participantsButton.click();
             break;
         case languageHandlers[currentLanguage].commands.participantsVideoOff:
             printCommand(languageHandlers[currentLanguage].commands.participantsVideoOff);
@@ -1092,6 +1267,70 @@ function execVoiceCommands(transcript) {
             printCommand(languageHandlers[currentLanguage].commands.survey);
             survey.enabled && openURL(survey.url, true);
             sound('open');
+            break;
+        case languageHandlers[currentLanguage].commands.fullScreen:
+            printCommand(languageHandlers[currentLanguage].commands.fullScreen);
+            fullScreenButton.click();
+            break;
+        case languageHandlers[currentLanguage].commands.pictureInPicture:
+            printCommand(languageHandlers[currentLanguage].commands.pictureInPicture);
+            documentPiPButton.click();
+            break;
+        case languageHandlers[currentLanguage].commands.emojiOn:
+            printCommand(languageHandlers[currentLanguage].commands.emojiOn);
+            emojiRoomButton.click();
+            break;
+        case languageHandlers[currentLanguage].commands.chatClean:
+            printCommand(languageHandlers[currentLanguage].commands.chatClean);
+            chatCleanButton.click();
+            break;
+        case languageHandlers[currentLanguage].commands.chatSave:
+            printCommand(languageHandlers[currentLanguage].commands.chatSave);
+            chatSaveButton.click();
+            break;
+        case languageHandlers[currentLanguage].commands.whiteboardUndo:
+            printCommand(languageHandlers[currentLanguage].commands.whiteboardUndo);
+            wbIsOpen && whiteboardUndoBtn.click();
+            break;
+        case languageHandlers[currentLanguage].commands.whiteboardRedo:
+            printCommand(languageHandlers[currentLanguage].commands.whiteboardRedo);
+            wbIsOpen && whiteboardRedoBtn.click();
+            break;
+        case languageHandlers[currentLanguage].commands.whiteboardClean:
+            printCommand(languageHandlers[currentLanguage].commands.whiteboardClean);
+            wbIsOpen && whiteboardCleanBtn.click();
+            break;
+        case languageHandlers[currentLanguage].commands.whiteboardSave:
+            printCommand(languageHandlers[currentLanguage].commands.whiteboardSave);
+            wbIsOpen && whiteboardSaveBtn.click();
+            break;
+        case languageHandlers[currentLanguage].commands.settingsAudio:
+            printCommand(languageHandlers[currentLanguage].commands.settingsAudio);
+            openSettingsTab(tabAudioDevicesBtn);
+            break;
+        case languageHandlers[currentLanguage].commands.settingsVideo:
+            printCommand(languageHandlers[currentLanguage].commands.settingsVideo);
+            openSettingsTab(tabVideoDevicesBtn);
+            break;
+        case languageHandlers[currentLanguage].commands.settingsRecording:
+            printCommand(languageHandlers[currentLanguage].commands.settingsRecording);
+            openSettingsTab(tabRecordingBtn);
+            break;
+        case languageHandlers[currentLanguage].commands.settingsVideoEffects:
+            printCommand(languageHandlers[currentLanguage].commands.settingsVideoEffects);
+            openSettingsTab(tabVideoEffectsBtn);
+            break;
+        case languageHandlers[currentLanguage].commands.settingsVirtualBackground:
+            printCommand(languageHandlers[currentLanguage].commands.settingsVirtualBackground);
+            openSettingsTab(tabVirtualBackgroundBtn);
+            break;
+        case languageHandlers[currentLanguage].commands.settingsLanguages:
+            printCommand(languageHandlers[currentLanguage].commands.settingsLanguages);
+            openSettingsTab(tabLanguagesBtn);
+            break;
+        case languageHandlers[currentLanguage].commands.settingsShortcuts:
+            printCommand(languageHandlers[currentLanguage].commands.settingsShortcuts);
+            openSettingsTab(tabShortcutsBtn);
             break;
         case languageHandlers[currentLanguage].commands.recognizeBangla:
             printCommand(languageHandlers[currentLanguage].commands.recognizeBangla);
