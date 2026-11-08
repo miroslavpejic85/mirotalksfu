@@ -590,12 +590,15 @@
                         <!-- VIEW & SETTINGS -->
                         <div
                             class="device-menu-header extra-menu-group"
-                            data-buttons="hideMeButton,fullScreenButton,openNetworkSettingsButton,restartICEButton,aboutButton"
+                            data-buttons="hideMeButton,keepControlsVisibleButton,fullScreenButton,openNetworkSettingsButton,restartICEButton,aboutButton"
                         >
                             VIEW & SETTINGS
                         </div>
                         <button id="hideMeButton" class="hidden">
                             <i id="hideMeIcon" class="fas fa-user"></i> Hide Me
+                        </button>
+                        <button id="keepControlsVisibleButton" class="hidden" aria-pressed="false">
+                            <i id="keepControlsVisibleIcon" class="fas fa-eye"></i> Keep controls visible
                         </button>
                         <button id="fullScreenButton" class="hidden">
                             <i id="fullScreenIcon" class="fas fa-expand-alt"></i> Full Screen

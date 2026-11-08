@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.81
+ * @version 2.7.82
  *
  */
 
@@ -2715,6 +2715,7 @@ function roomIsReady() {
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
     BUTTONS.main.hideMeButton && show(hideMeButton);
+    show(keepControlsVisibleButton);
     if (BUTTONS.settings.tabRecording) {
         show(startRecButton);
     } else {
@@ -3247,6 +3248,15 @@ function disable(elem, disabled) {
         return;
     }
     elem.disabled = disabled;
+}
+
+/**
+ * Sync the extra menu "Keep controls visible" button with the settings switch
+ */
+function syncKeepControlsVisibleButton() {
+    const active = switchKeepButtonsVisible.checked;
+    keepControlsVisibleButton.setAttribute('aria-pressed', String(active));
+    setColor(keepControlsVisibleIcon, active ? 'red' : 'white');
 }
 
 function setColor(elem, color) {
@@ -4707,10 +4717,16 @@ function handleSelects() {
         isButtonsBarOver = isKeepButtonsVisible = e.currentTarget.checked;
         localStorageSettings.keep_buttons_visible = isButtonsBarOver;
         lS.setSettings(localStorageSettings);
+        syncKeepControlsVisibleButton();
         syncButtonsBarReserve();
         const status = isButtonsBarOver ? 'enabled' : 'disabled';
         userLog(isButtonsBarOver ? 'success' : 'info', `Buttons always visible ${status}`, 'top-end', 1800);
         e.target.blur();
+    };
+
+    keepControlsVisibleButton.onclick = () => {
+        switchKeepButtonsVisible.checked = !switchKeepButtonsVisible.checked;
+        switchKeepButtonsVisible.dispatchEvent(new Event('change'));
     };
 
     // Wake Lock for mobile/tablet
@@ -5611,6 +5627,7 @@ function loadSettingsFromLocalStorage() {
     switchShowCameraOffParticipants.checked = showCameraOffParticipants;
     switchShare.checked = notify;
     switchKeepButtonsVisible.checked = isKeepButtonsVisible;
+    syncKeepControlsVisibleButton();
     switchChatPin.checked = isChatPinEnabled;
     switchShortcuts.checked = isShortcutsEnabled;
     switchBroadcasting.checked = isBroadcastingEnabled;
@@ -11269,7 +11286,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.81',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.82',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
