@@ -1,0 +1,55 @@
+# Shared cluster state (room owners, node load, heartbeats). Private, never exposed outside the cluster.
+# Data is short-lived: if Redis restarts, nodes re-register on their next heartbeat.
+# If Redis is down, every node keeps serving its own rooms (standalone fallback).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: redis
+    labels:
+        app: redis
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: redis
+    template:
+        metadata:
+            labels:
+                app: redis
+        spec:
+            securityContext:
+                runAsNonRoot: true
+                runAsUser: 999
+                runAsGroup: 999
+            containers:
+                - name: redis
+                  image: valkey/valkey:8-alpine
+                  args: ['--save', '', '--appendonly', 'no']
+                  ports:
+                      - name: redis
+                        containerPort: 6379
+                  readinessProbe:
+                      tcpSocket:
+                          port: redis
+                      periodSeconds: 5
+                  resources:
+                      requests:
+                          cpu: 50m
+                          memory: 64Mi
+                      limits:
+                          memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: redis
+    labels:
+        app: redis
+spec:
+    type: ClusterIP
+    selector:
+        app: redis
+    ports:
+        - name: redis
+          port: 6379
+          targetPort: redis

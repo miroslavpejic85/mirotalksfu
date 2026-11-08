@@ -1,0 +1,39 @@
+# kubectl apply -k kubernetes/production
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mirotalk
+
+resources:
+    - namespace.yaml
+    - redis.yaml
+    - mirotalksfu.yaml
+    - ingress.yaml
+
+# Cluster-wide settings, the same on every node (per-node values are set in mirotalksfu.yaml)
+configMapGenerator:
+    - name: mirotalksfu-cluster
+      literals:
+          - NODE_DOMAIN=example.com # Node URLs become https://<node-name>.<NODE_DOMAIN>
+          - SERVER_HOST_URL=https://meet.example.com
+          - NODE_ENV=production
+          - SFU_SERVER=true
+          - SFU_LISTEN_IP=0.0.0.0
+          - SFU_MIN_PORT=40000
+          - SFU_NUM_WORKERS=4 # <= vCPUs per node, opens ports SFU_MIN_PORT..SFU_MIN_PORT+SFU_NUM_WORKERS
+          - SERVER_LISTEN_PORT=3010
+          - TRUST_PROXY=true
+          - SCALING_MULTI_WORKER_ROOMS=true
+          - SCALING_CLUSTER=true
+          - SCALING_REDIS_URL=redis://redis.mirotalk.svc.cluster.local:6379
+    # Uncomment together with the config volume in mirotalksfu.yaml to use your own config.js
+    # - name: mirotalksfu-config
+    #   files:
+    #       - config.js
+
+# Your regular MiroTalk .env (secrets, features...), mounted read-only at /src/.env
+# Create it first: cp ../../.env.template .env
+secretGenerator:
+    - name: mirotalksfu-env
+      files:
+          - .env

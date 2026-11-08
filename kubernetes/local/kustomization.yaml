@@ -1,0 +1,68 @@
+# Local test overlay: one k3s node (sfu1) in Docker on your machine, same manifests as production.
+# Used by ./run.sh, see the "Test locally" section of ../README.md
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mirotalk
+
+resources:
+    - ../production
+
+configMapGenerator:
+    - name: mirotalksfu-cluster
+      behavior: merge
+      literals:
+          - NODE_DOMAIN=localhost:8443
+          - SERVER_HOST_URL=https://meet.localhost:8443
+          - SFU_NUM_WORKERS=2
+
+patches:
+    # Browser runs on the host: media goes to the ports Docker publishes on 127.0.0.1
+    - patch: |-
+          apiVersion: apps/v1
+          kind: DaemonSet
+          metadata:
+              name: mirotalksfu
+          spec:
+              template:
+                  spec:
+                      containers:
+                          - name: mirotalksfu
+                            imagePullPolicy: IfNotPresent
+                            env:
+                                - name: SFU_ANNOUNCED_IP
+                                  value: 127.0.0.1
+    # *.localhost hosts with Traefik's self-signed certificate instead of Let's Encrypt
+    - target:
+          kind: Ingress
+          name: mirotalksfu
+      patch: |-
+          - op: remove
+            path: /metadata/annotations
+          - op: replace
+            path: /spec
+            value:
+                ingressClassName: traefik
+                tls:
+                    - hosts: [meet.localhost, sfu1.localhost]
+                rules:
+                    - host: meet.localhost
+                      http:
+                          paths:
+                              - path: /
+                                pathType: Prefix
+                                backend:
+                                    service:
+                                        name: mirotalksfu
+                                        port:
+                                            name: http
+                    - host: sfu1.localhost
+                      http:
+                          paths:
+                              - path: /
+                                pathType: Prefix
+                                backend:
+                                    service:
+                                        name: mirotalksfu
+                                        port:
+                                            name: http

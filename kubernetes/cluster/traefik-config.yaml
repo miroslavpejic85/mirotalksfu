@@ -1,0 +1,24 @@
+# k3s bundled Traefik: one pod per node bound to host ports 80/443.
+# Traffic for sfuN.example.com therefore enters Traefik on node sfuN and stays on that node.
+# Copy to /var/lib/rancher/k3s/server/manifests/traefik-config.yaml on the server, or kubectl apply it.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+    name: traefik
+    namespace: kube-system
+spec:
+    valuesContent: |-
+        deployment:
+          kind: DaemonSet
+        updateStrategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxUnavailable: 1
+            maxSurge: 0
+        ports:
+          web:
+            hostPort: 80
+          websecure:
+            hostPort: 443
+        service:
+          type: ClusterIP

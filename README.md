@@ -186,6 +186,8 @@ Open [https://localhost:3010](https://localhost:3010) - done!
 
 > **Note:** Edit `app/src/config.js`, `.env`, and `docker-compose.yml` to customize your setup.
 
+> **Kubernetes:** to run on several bare-metal / VDS servers with k3s and cluster mode, see [kubernetes/README.md](kubernetes/README.md).
+
 </details>
 
 <details>

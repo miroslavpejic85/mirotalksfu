@@ -1,0 +1,115 @@
+# MiroTalk SFU: one pod per labelled node (mirotalk/sfu=true), on the host network.
+# - WebRTC media goes straight to the node public IP on SFU_MIN_PORT..SFU_MIN_PORT+SFU_NUM_WORKERS (udp+tcp)
+# - HTTP/WebSocket (3010) is reached only through Traefik on the same node (Service below)
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+    name: mirotalksfu
+    labels:
+        app: mirotalksfu
+spec:
+    selector:
+        matchLabels:
+            app: mirotalksfu
+    # Pods are replaced only when you delete them, so a config change never ends live meetings by itself
+    updateStrategy:
+        type: OnDelete
+    template:
+        metadata:
+            labels:
+                app: mirotalksfu
+        spec:
+            hostNetwork: true
+            dnsPolicy: ClusterFirstWithHostNet
+            nodeSelector:
+                mirotalk/sfu: 'true'
+            # The app notifies clients, leaves the cluster and closes workers, force-exiting after 30s
+            terminationGracePeriodSeconds: 45
+            securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
+            containers:
+                - name: mirotalksfu
+                  image: mirotalk/sfu:latest
+                  envFrom:
+                      - configMapRef:
+                            name: mirotalksfu-cluster
+                  # Per-node values. Kubernetes env always wins over the mounted .env (dotenv never overrides).
+                  env:
+                      - name: NODE_NAME
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: spec.nodeName
+                      - name: NODE_IP
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: status.hostIP
+                      - name: SFU_ANNOUNCED_IP
+                        value: '$(NODE_IP)'
+                      - name: SCALING_NODE_ID
+                        value: '$(NODE_NAME)'
+                      - name: SCALING_NODE_URL
+                        value: 'https://$(NODE_NAME).$(NODE_DOMAIN)'
+                  ports:
+                      - name: http
+                        containerPort: 3010
+                        protocol: TCP
+                  readinessProbe:
+                      tcpSocket:
+                          port: 3010
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                  # No CPU limit: CFS throttling causes audio/video glitches. Keep SFU_NUM_WORKERS <= node vCPUs.
+                  resources:
+                      requests:
+                          cpu: '1'
+                          memory: 1Gi
+                      limits:
+                          memory: 4Gi
+                  volumeMounts:
+                      - name: env
+                        mountPath: /src/.env
+                        subPath: .env
+                        readOnly: true
+                      # Uncomment to use your own app/src/config.js (see README)
+                      # - name: config
+                      #   mountPath: /src/app/src/config.js
+                      #   subPath: config.js
+                      #   readOnly: true
+                      # Uncomment when RECORDING_ENABLED=true (see README)
+                      # - name: rec
+                      #   mountPath: /src/app/rec
+            volumes:
+                - name: env
+                  secret:
+                      secretName: mirotalksfu-env
+                # - name: config
+                #   configMap:
+                #       name: mirotalksfu-config
+                # - name: rec
+                #   hostPath:
+                #       path: /var/lib/mirotalksfu/rec
+                #       type: DirectoryOrCreate
+---
+# Traefik on node X reaches only the MiroTalk pod on node X:
+# - nativelb: Traefik sends traffic to the ClusterIP instead of picking pod IPs itself
+# - internalTrafficPolicy Local: kube-proxy keeps ClusterIP traffic on the same node
+apiVersion: v1
+kind: Service
+metadata:
+    name: mirotalksfu
+    labels:
+        app: mirotalksfu
+    annotations:
+        traefik.ingress.kubernetes.io/service.nativelb: 'true'
+spec:
+    type: ClusterIP
+    internalTrafficPolicy: Local
+    selector:
+        app: mirotalksfu
+    ports:
+        - name: http
+          port: 3010
+          targetPort: 3010
+          protocol: TCP

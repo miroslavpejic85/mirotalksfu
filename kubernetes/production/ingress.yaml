@@ -1,0 +1,48 @@
+# One host per SFU node + the shared entry host. Keep this list in sync with your nodes and DNS:
+#   meet.example.com  -> A records of every SFU node
+#   sfuN.example.com  -> A record of node sfuN (the host name must equal the Kubernetes node name)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: mirotalksfu
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+spec:
+    ingressClassName: traefik
+    tls:
+        - secretName: mirotalksfu-tls
+          hosts:
+              - meet.example.com
+              - sfu1.example.com
+              - sfu2.example.com
+    rules:
+        - host: meet.example.com
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: mirotalksfu
+                            port:
+                                name: http
+        - host: sfu1.example.com
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: mirotalksfu
+                            port:
+                                name: http
+        - host: sfu2.example.com
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: mirotalksfu
+                            port:
+                                name: http
