@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.80
+ * @version 2.7.81
  *
  */
 
@@ -1923,7 +1923,13 @@ class RoomClient {
     };
 
     handleNewProducers = async (data, reconcile = false) => {
-        if (data.length > 0) {
+        // newProducers can arrive while the device/transports are still loading during join;
+        // joinAllowed() requests all producers (getProducers) right after that setup completes
+        if (!this.device || !this.consumerTransport) {
+            console.debug('Device or consumer transport not ready yet, skipping newProducers', data);
+            return;
+        }
+        if (data?.length > 0) {
             if (!reconcile) {
                 console.log('SocketOn New producers', {
                     data,
