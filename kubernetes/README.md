@@ -1,7 +1,7 @@
 <h1 align="center">MiroTalk SFU on Kubernetes (k3s, bare metal / VDS)</h1>
 
 <p align="center">
-    <img src="kubernetes.jpg" alt="MiroTalk SFU on Kubernetes" width="800">
+   <img src="kubernetes.jpg" alt="MiroTalk SFU on Kubernetes">
 </p>
 
 Run MiroTalk SFU on one or more bare-metal / VDS servers with [k3s](https://k3s.io), using the
