@@ -1,4 +1,4 @@
-# MiroTalk SFU on Kubernetes (k3s, bare metal / VDS)
+<h1 align="center">MiroTalk SFU on Kubernetes (k3s, bare metal / VDS)</h1>
 
 <p align="center">
     <img src="kubernetes.jpg" alt="MiroTalk SFU on Kubernetes" width="800">
