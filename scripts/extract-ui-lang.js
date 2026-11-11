@@ -17,6 +17,10 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const HTML_FILE = path.join(ROOT, 'public/views/Room.html');
+// Other pages that load I18n.js; their static HTML is translated by the same dictionary.
+const EXTRA_HTML_FILES = ['login.html', 'whoAreYou.html', 'RtmpStreamer.html'].map((file) =>
+    path.join(ROOT, 'public/views', file)
+);
 const LANG_DIR = path.join(ROOT, 'public/lang');
 const OUT_FILE = path.join(LANG_DIR, 'en.json');
 
@@ -309,6 +313,7 @@ seedCuratedKeys();
 getRoomJsFiles().forEach(scanJs);
 scanVideoEffectLabels();
 scanHtml(HTML_FILE);
+EXTRA_HTML_FILES.forEach(scanHtml);
 
 const output = {};
 for (const [ns, set] of Object.entries(buckets)) {
