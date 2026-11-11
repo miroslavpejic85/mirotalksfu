@@ -39,5 +39,6 @@ We would like to extend our gratitude to the following individuals for their res
 | `oe2735`                                             | [GitHub](https://github.com/oe2735)                                                                 |
 | `Liam-G`                                             | [GitHub](https://github.com/Liam-G)                                                                 |
 | `Xiangpu Song`                                       | [GitHub](https://github.com/songxpu)                                                                |
+| `Marc Schneider`                                     | [GitHub](https://github.com/snrmwg)                                                                 |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
