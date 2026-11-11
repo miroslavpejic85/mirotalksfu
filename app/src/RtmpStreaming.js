@@ -63,6 +63,11 @@ class RtmpStreaming {
             return false;
         }
 
+        if (!this.rtmp.fromFile) {
+            log.warn('[startRTMP] RTMP file streaming is disabled by server config');
+            return false;
+        }
+
         if (this.rtmpFileStreamer) {
             log.debug('[startRTMP] Already in progress');
             return false;
@@ -133,6 +138,11 @@ class RtmpStreaming {
     ) {
         if (!this.rtmp || !this.rtmp.enabled) {
             log.debug('[startRTMPfromURL] Server is not enabled or missing the config');
+            return false;
+        }
+
+        if (!this.rtmp.fromUrl) {
+            log.warn('[startRTMPfromURL] RTMP URL streaming is disabled by server config');
             return false;
         }
 

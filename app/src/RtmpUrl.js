@@ -10,6 +10,7 @@ const http = require('http');
 const https = require('https');
 const os = require('node:os');
 const path = require('node:path');
+const { Transform } = require('node:stream');
 const { pipeline } = require('node:stream/promises');
 const Validator = require('./Validator');
 
@@ -18,6 +19,13 @@ const log = new Logger('RtmpUrl');
 
 const MAX_REDIRECTS = 5;
 const REQUEST_TIMEOUT_MS = 15000;
+const DEFAULT_MAX_DOWNLOAD_BYTES = 1024 * 1024 * 1024; // 1 GB
+const DEFAULT_DOWNLOAD_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+
+function positiveNumber(value, fallback) {
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 ? n : fallback;
+}
 
 // Header signatures of non audio/video payloads that FFmpeg would still probe and
 // demux (e.g. the VobSub subtitle demuxer), used to reject them before spawning FFmpeg
@@ -35,6 +43,8 @@ class RtmpUrl {
         this.inputResponse = null;
         this.tempDir = null;
         this.stopping = false;
+        this.maxDownloadBytes = positiveNumber(config.media?.rtmp?.urlMaxDownloadSize, DEFAULT_MAX_DOWNLOAD_BYTES);
+        this.downloadTimeoutMs = positiveNumber(config.media?.rtmp?.urlDownloadTimeout, DEFAULT_DOWNLOAD_TIMEOUT_MS);
     }
 
     /**
@@ -91,17 +101,60 @@ class RtmpUrl {
         });
     }
 
+    /**
+     * Download the validated response to a temp file, bounded by a byte cap and a total
+     * wall-clock deadline (the request timeout alone is only an inactivity timeout).
+     * Any partial file is removed on failure.
+     * @param {string} inputVideoURL
+     * @returns {Promise<string>} path of the downloaded file
+     */
     async downloadValidatedFile(inputVideoURL) {
-        const inputStream = await this.openValidatedStream(inputVideoURL);
-        this.inputResponse = inputStream;
-        this.tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mirotalk-rtmp-'));
-        const inputFilePath = path.join(this.tempDir, 'input-media');
+        const maxBytes = this.maxDownloadBytes;
+        const controller = new AbortController();
+        const deadline = setTimeout(() => {
+            const err = new Error(`Input video URL download exceeded ${this.downloadTimeoutMs} ms`);
+            controller.abort(err);
+            if (this.inputRequest) this.inputRequest.destroy(err);
+            if (this.inputResponse) this.inputResponse.destroy(err);
+        }, this.downloadTimeoutMs);
 
-        await pipeline(inputStream, fs.createWriteStream(inputFilePath));
-        this.inputResponse = null;
-        this.inputRequest = null;
-        await this.assertSupportedMedia(inputFilePath);
-        return inputFilePath;
+        try {
+            const inputStream = await this.openValidatedStream(inputVideoURL);
+            this.inputResponse = inputStream;
+            if (controller.signal.aborted) throw controller.signal.reason;
+
+            const contentLength = Number(inputStream.headers?.['content-length']);
+            if (Number.isFinite(contentLength) && contentLength > maxBytes) {
+                throw new Error(`Input video URL is too large (${contentLength} > ${maxBytes} bytes)`);
+            }
+
+            this.tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mirotalk-rtmp-'));
+            const inputFilePath = path.join(this.tempDir, 'input-media');
+
+            let received = 0;
+            const byteLimiter = new Transform({
+                transform(chunk, _encoding, callback) {
+                    received += chunk.length;
+                    if (received > maxBytes) {
+                        return callback(new Error(`Input video URL exceeded the maximum size of ${maxBytes} bytes`));
+                    }
+                    callback(null, chunk);
+                },
+            });
+
+            await pipeline(inputStream, byteLimiter, fs.createWriteStream(inputFilePath), {
+                signal: controller.signal,
+            });
+            this.inputResponse = null;
+            this.inputRequest = null;
+            await this.assertSupportedMedia(inputFilePath);
+            return inputFilePath;
+        } catch (error) {
+            this.closeInput();
+            throw controller.signal.aborted && controller.signal.reason ? controller.signal.reason : error;
+        } finally {
+            clearTimeout(deadline);
+        }
     }
 
     /**

@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.7.84 - Configuration File
+ * MiroTalk SFU v2.7.85 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -235,6 +235,8 @@ module.exports = {
          * - enabled            : Enable/disable RTMP streaming (default: false)
          * - fromFile           : Enable local file streaming (default: true)
          * - fromUrl            : Enable URL streaming (default: true)
+         * - urlMaxDownloadSize : Max bytes downloaded for URL streaming (default: 1GB)
+         * - urlDownloadTimeout : Max total time in ms to download a URL stream input (default: 10 min)
          * - fromStream         : Enable live stream input (default: true)
          * - maxStreams         : Maximum simultaneous streams (default: 1)
          * - allowCustomUrl     : Allow presenters to set a custom RTMP destination (default: false)
@@ -358,6 +360,8 @@ module.exports = {
             enabled: process.env.RTMP_ENABLED === 'true',
             fromFile: process.env.RTMP_FROM_FILE !== 'false',
             fromUrl: process.env.RTMP_FROM_URL !== 'false',
+            urlMaxDownloadSize: parseInt(process.env.RTMP_URL_MAX_DOWNLOAD_SIZE) || 1 * 1024 * 1024 * 1024, // 1GB
+            urlDownloadTimeout: parseInt(process.env.RTMP_URL_DOWNLOAD_TIMEOUT) || 10 * 60 * 1000, // 10 min
             fromStream: process.env.RTMP_FROM_STREAM !== 'false',
             maxStreams: parseInt(process.env.RTMP_MAX_STREAMS) || 1,
             allowCustomUrl: process.env.RTMP_ALLOW_CUSTOM_URL === 'true',

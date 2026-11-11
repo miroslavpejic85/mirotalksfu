@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.84
+ * @version 2.7.85
  *
  */
 
@@ -5810,6 +5810,11 @@ function startServer() {
         socket.on('startRTMP', async (dataObject, cb) => {
             if (!roomExists(socket)) return;
 
+            if (!rtmpEnabled || !rtmpCfg.fromFile) {
+                log.warn('startRTMP rejected: RTMP file streaming is disabled');
+                return cb(false);
+            }
+
             const totalActive = getRtmpTotalActiveStreamsCount();
             if (rtmpCfg && totalActive >= rtmpCfg.maxStreams) {
                 log.warn('RTMP max streams reached', { total: totalActive, maxStreams: rtmpCfg.maxStreams });
@@ -5868,6 +5873,11 @@ function startServer() {
 
         socket.on('startRTMPfromURL', async (dataObject, cb) => {
             if (!roomExists(socket)) return;
+
+            if (!rtmpEnabled || !rtmpCfg.fromUrl) {
+                log.warn('startRTMPfromURL rejected: RTMP URL streaming is disabled');
+                return cb(false);
+            }
 
             const totalActive = getRtmpTotalActiveStreamsCount();
             if (rtmpCfg && totalActive >= rtmpCfg.maxStreams) {
