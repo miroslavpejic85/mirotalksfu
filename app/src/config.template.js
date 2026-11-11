@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.7.85 - Configuration File
+ * MiroTalk SFU v2.7.86 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.

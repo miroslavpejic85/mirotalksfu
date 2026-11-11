@@ -3,6 +3,7 @@
 const util = require('util');
 const colors = require('colors');
 const config = require('./config');
+const { redact } = require('./LogRedactor');
 
 config.system?.console?.colors ? colors.enable() : colors.disable();
 
@@ -36,7 +37,7 @@ module.exports = class Logger {
             ...extra,
         };
         if (op && typeof op === 'object' && Object.keys(op).length > 0) {
-            logObj.data = op;
+            logObj.data = redact(op);
         }
         LOGS_JSON_PRETTY ? console.log(JSON.stringify(logObj, null, 2)) : console.log(JSON.stringify(logObj));
     }
@@ -50,7 +51,7 @@ module.exports = class Logger {
             } else {
                 console.debug(
                     '[' + this.getDateTime() + '] [' + this.appName + '] ' + msg,
-                    util.inspect(op, options),
+                    util.inspect(redact(op), options),
                     this.timeElapsedMs
                 );
             }
@@ -62,7 +63,10 @@ module.exports = class Logger {
         if (LOGS_JSON) {
             this.jsonLog('log', this.appName, msg, op);
         } else {
-            console.log('[' + this.getDateTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
+            console.log(
+                '[' + this.getDateTime() + '] [' + this.appName + '] ' + msg,
+                util.inspect(redact(op), options)
+            );
         }
     }
 
@@ -72,7 +76,7 @@ module.exports = class Logger {
         } else {
             console.info(
                 '[' + this.getDateTime() + '] [' + this.appName + '] ' + colors.green(msg),
-                util.inspect(op, options)
+                util.inspect(redact(op), options)
             );
         }
     }
@@ -83,7 +87,7 @@ module.exports = class Logger {
         } else {
             console.warn(
                 '[' + this.getDateTime() + '] [' + this.appName + '] ' + colors.yellow(msg),
-                util.inspect(op, options)
+                util.inspect(redact(op), options)
             );
         }
     }
@@ -94,7 +98,7 @@ module.exports = class Logger {
         } else {
             console.error(
                 '[' + this.getDateTime() + '] [' + this.appName + '] ' + colors.red(msg),
-                util.inspect(op, options)
+                util.inspect(redact(op), options)
             );
         }
     }
