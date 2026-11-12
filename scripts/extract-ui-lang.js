@@ -17,6 +17,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const HTML_FILE = path.join(ROOT, 'public/views/Room.html');
+const VIEWS_DIR = path.join(ROOT, 'public/views');
 const LANG_DIR = path.join(ROOT, 'public/lang');
 const OUT_FILE = path.join(LANG_DIR, 'en.json');
 
@@ -108,6 +109,16 @@ function getRoomJsFiles() {
     let match;
     while ((match = scriptRe.exec(html))) files.add(path.join(ROOT, 'public/js', match[1]));
     return [...files];
+}
+
+// Room.html plus every other view that loads I18n.js (same dictionary at runtime).
+function getI18nPages() {
+    const pages = new Set([HTML_FILE]);
+    for (const name of fs.readdirSync(VIEWS_DIR).filter((file) => file.endsWith('.html'))) {
+        const file = path.join(VIEWS_DIR, name);
+        if (/<script[^>]+src\s*=\s*['"]\.\.\/js\/I18n\.js['"]/i.test(fs.readFileSync(file, 'utf8'))) pages.add(file);
+    }
+    return [...pages];
 }
 
 // Video effect and filter preset names come from the effect descriptors (label: '...')
@@ -308,7 +319,7 @@ function scanHtml(file) {
 seedCuratedKeys();
 getRoomJsFiles().forEach(scanJs);
 scanVideoEffectLabels();
-scanHtml(HTML_FILE);
+getI18nPages().forEach(scanHtml);
 
 const output = {};
 for (const [ns, set] of Object.entries(buckets)) {
