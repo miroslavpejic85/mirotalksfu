@@ -18,15 +18,25 @@ const generateRoomBtn = document.getElementById('generateRoomButton');
 // From the /login response (HOST_USERS displayname)
 let loginDisplayName = '';
 
+// Keeps the English source so I18n.js can re-translate the attribute on a live language switch.
+function setTranslatedAttribute(element, attribute, source, namespace) {
+    element[`__i18nAttr_${attribute}`] = source;
+    element.setAttribute(attribute, window.i18n?.t(source, namespace) || source);
+}
+
 const togglePasswordBtn = document.getElementById('togglePassword');
 if (togglePasswordBtn) {
     togglePasswordBtn.onclick = () => {
         const isPassword = passwordInput.type === 'password';
         passwordInput.type = isPassword ? 'text' : 'password';
         togglePasswordBtn.querySelector('i').className = isPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
-        const label = isPassword ? 'Hide password' : 'Show password';
-        togglePasswordBtn.title = label;
-        togglePasswordBtn.setAttribute('aria-label', label);
+        setTranslatedAttribute(togglePasswordBtn, 'title', isPassword ? 'Hide password' : 'Show password', 'buttons');
+        setTranslatedAttribute(
+            togglePasswordBtn,
+            'aria-label',
+            isPassword ? 'Hide password' : 'Show password',
+            'buttons'
+        );
         togglePasswordBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
     };
 }
@@ -69,7 +79,11 @@ if (generateRoomBtn) {
         if (custom && custom.offsetParent !== null) {
             custom.value = uuid;
         } else if (selectRoom && selectRoom.style.display !== 'none') {
-            popup('warning', 'Random room is available for Admin users only');
+            popup(
+                'warning',
+                window.i18n?.t('Random room is available for Admin users only', 'toasts') ||
+                    'Random room is available for Admin users only'
+            );
         }
     };
 }
@@ -92,12 +106,20 @@ if (shareRoomBtn) {
         }
         const roomUrl = window.location.origin + '/join/?room=' + roomName;
         if (navigator.share) {
-            navigator.share({ title: 'Join my room', url: roomUrl }).catch(() => {});
+            const shareTitle = window.i18n?.t('Join my room', 'labels') || 'Join my room';
+            navigator.share({ title: shareTitle, url: roomUrl }).catch(() => {});
         } else {
             navigator.clipboard
                 .writeText(roomUrl)
-                .then(() => popup('success', 'Room link copied to clipboard!'))
-                .catch(() => popup('warning', 'Failed to copy link'));
+                .then(() =>
+                    popup(
+                        'success',
+                        window.i18n?.t('Room link copied to clipboard!', 'toasts') || 'Room link copied to clipboard!'
+                    )
+                )
+                .catch(() =>
+                    popup('warning', window.i18n?.t('Failed to copy link', 'toasts') || 'Failed to copy link')
+                );
         }
     };
 }
@@ -186,7 +208,7 @@ function login() {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.id = 'customRoomInput';
-                    input.placeholder = 'Enter room name';
+                    setTranslatedAttribute(input, 'placeholder', 'Enter room name', 'labels');
                     input.className = 'form-input';
                     input.maxLength = 32;
                     selectRoom.parentNode.insertBefore(input, selectRoom);
@@ -220,10 +242,16 @@ function login() {
                 console.error(error);
                 setLoginLoading(false);
                 if (error.response && error.response.status === 429) {
-                    const msg = error.response.data?.message || 'Too many login attempts. Please try again later.';
+                    const msg =
+                        error.response.data?.message ||
+                        window.i18n?.t('Too many login attempts. Please try again later.', 'labels') ||
+                        'Too many login attempts. Please try again later.';
                     showLoginError(msg);
                 } else {
-                    showLoginError('Invalid credentials. Please try again.');
+                    showLoginError(
+                        window.i18n?.t('Invalid credentials. Please try again.', 'labels') ||
+                            'Invalid credentials. Please try again.'
+                    );
                 }
             });
         return;

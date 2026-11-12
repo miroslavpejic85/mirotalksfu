@@ -143,6 +143,33 @@ describe('dynamic dropdown key extraction', () => {
         execFileSync(process.execPath, [script]);
         assert.equal(fs.readFileSync(path.join(fixtureLangDir, 'it.json'), 'utf8'), before);
     });
+
+    it('scans the scripts of every page that loads I18n.js, incl. conditional attributes and waiting room texts', () => {
+        fs.writeFileSync(
+            path.join(fixtureRoot, 'public/views/whoAreYou.html'),
+            '<script defer src="../js/I18n.js"></script><script async src="../js/WhoAreYou.js"></script>'
+        );
+        fs.writeFileSync(
+            path.join(fixtureRoot, 'public/views/landing.html'),
+            '<script defer src="../js/Landing.js"></script><p>Landing only</p>'
+        );
+        fs.writeFileSync(
+            path.join(fixtureRoot, 'public/js/WhoAreYou.js'),
+            `
+            setTranslatedAttribute(btn, 'title', muted ? 'Unmute' : 'Mute', 'buttons');
+            setTranslatedAttribute(btn, 'title', 'Pause music', 'buttons');
+            statusEl.textContent = getWaitingRoomText('waitingRoomReady', 'Room is ready! Joining...');
+            `
+        );
+        fs.writeFileSync(path.join(fixtureRoot, 'public/js/I18n.js'), '');
+        fs.writeFileSync(path.join(fixtureRoot, 'public/js/Landing.js'), "el.textContent = 'Landing script';");
+        execFileSync(process.execPath, [script]);
+        const english = JSON.parse(fs.readFileSync(path.join(fixtureLangDir, 'en.json'), 'utf8'));
+        for (const label of ['Unmute', 'Mute', 'Pause music']) assert.equal(english.buttons[label], label);
+        assert.equal(english.labels['Room is ready! Joining...'], 'Room is ready! Joining...');
+        assert.ok(!Object.hasOwn(english.labels, 'Landing only'));
+        assert.ok(!Object.hasOwn(english.labels, 'Landing script'));
+    });
 });
 
 describe('dynamic native dropdown translations', () => {
@@ -431,5 +458,31 @@ describe('waiting room elapsed time (whoAreYou)', () => {
         assert.equal(text(window), 'Waiting for 1 minute');
         elapseMinutes(window, 3);
         assert.equal(text(window), 'Waiting for 3 minutes');
+    });
+
+    it('translates the default BRAND texts in native mode but keeps custom texts without a key', () => {
+        const dict = { 'Waiting for {minutes}': 'Wacht al {minutes}', 'Just started waiting': 'Wacht net' };
+        const i18n = {
+            googleAllowed: false,
+            isNative: () => true,
+            getLang: () => 'nl',
+            t: (value) => dict[value] || value,
+        };
+        let window = load({
+            brand: { whoAreYou: { waitingRoomElapsedJust: 'Just started waiting' } },
+            i18n,
+            brandReady: true,
+        });
+        assert.equal(text(window), 'Wacht net');
+        elapseMinutes(window, 3);
+        assert.equal(text(window), 'Wacht al 3 minuten');
+        window.close();
+
+        window = load({
+            brand: { whoAreYou: { waitingRoomElapsedJust: 'Custom welcome text' } },
+            i18n,
+            brandReady: true,
+        });
+        assert.equal(text(window), 'Custom welcome text');
     });
 });

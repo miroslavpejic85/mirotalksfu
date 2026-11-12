@@ -102,12 +102,15 @@ function unescapeJs(str) {
     return str.replace(/\\(['"\\])/g, '$1').replace(/\\n/g, ' ');
 }
 
-function getRoomJsFiles() {
-    const html = fs.readFileSync(HTML_FILE, 'utf8');
+// Local scripts loaded by every I18n page (runtime strings share the same dictionary).
+function getI18nJsFiles() {
     const files = new Set();
     const scriptRe = /<script[^>]+src\s*=\s*['"]\.\.\/js\/([^'"?#]+\.js)['"]/gi;
-    let match;
-    while ((match = scriptRe.exec(html))) files.add(path.join(ROOT, 'public/js', match[1]));
+    for (const page of getI18nPages()) {
+        const html = fs.readFileSync(page, 'utf8');
+        let match;
+        while ((match = scriptRe.exec(html))) files.add(path.join(ROOT, 'public/js', match[1]));
+    }
     return [...files];
 }
 
@@ -236,8 +239,15 @@ function scanJs(file) {
     while ((m = namespacedTranslateRe.exec(src))) add(m[4], unescapeJs(m[2]));
 
     const translatedAttributeRe =
-        /_?setTranslatedAttribute\(\s*[^,]+,\s*(['"])[^'"]+\1,\s*(['"])((?:\\.|(?!\2).)*)\2,\s*(['"])(tooltips|buttons|labels|dialogs|toasts)\4\s*\)/g;
-    while ((m = translatedAttributeRe.exec(src))) add(m[5], unescapeJs(m[3]));
+        /_?setTranslatedAttribute\(\s*[^,]+,\s*(['"])[^'"]+\1,\s*(?:[^,?()]+\?\s*)?(['"])((?:\\.|(?!\2).)*)\2(?:\s*:\s*(['"])((?:\\.|(?!\4).)*)\4)?,\s*(['"])(tooltips|buttons|labels|dialogs|toasts)\6\s*\)/g;
+    while ((m = translatedAttributeRe.exec(src))) {
+        add(m[7], unescapeJs(m[3]));
+        if (m[5]) add(m[7], unescapeJs(m[5]));
+    }
+
+    // Waiting room texts (whoAreYou): BRAND value or English fallback, translated at runtime.
+    const waitingRoomTextRe = /\bgetWaitingRoomText\(\s*[^,]+,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
+    while ((m = waitingRoomTextRe.exec(src))) add('labels', unescapeJs(m[2]));
 
     const dropdownRe =
         /\bcreate(?:Responsive)?Dropdown(?:Range)?Item\(\s*[^,]+,\s*(?:[^,?()]+\?\s*)?(['"])((?:\\.|(?!\1).)*)\1(?:\s*:\s*(['"])((?:\\.|(?!\3).)*)\3)?/g;
@@ -317,7 +327,7 @@ function scanHtml(file) {
 // ####################################################
 
 seedCuratedKeys();
-getRoomJsFiles().forEach(scanJs);
+getI18nJsFiles().forEach(scanJs);
 scanVideoEffectLabels();
 getI18nPages().forEach(scanHtml);
 

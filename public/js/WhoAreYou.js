@@ -38,10 +38,10 @@ if (roomId && roomId !== 'whoAreYou') {
 function updateElapsedTime() {
     const seconds = Math.floor((Date.now() - waitStartTime) / 1000);
     if (seconds < 60) {
-        waitingElapsedText.textContent = getWaitingRoomBrand('waitingRoomElapsedJust', 'Just started waiting');
+        waitingElapsedText.textContent = getWaitingRoomText('waitingRoomElapsedJust', 'Just started waiting');
     } else {
         const minutes = Math.floor(seconds / 60);
-        const template = getWaitingRoomBrand('waitingRoomElapsedMinutes', 'Waiting for {minutes}');
+        const template = getWaitingRoomText('waitingRoomElapsedMinutes', 'Waiting for {minutes}');
         waitingElapsedText.textContent = template.replace('{minutes}', formatMinutes(minutes));
     }
 }
@@ -74,6 +74,18 @@ function getWaitingRoomBrand(key, fallback) {
     } catch (e) {
         return fallback;
     }
+}
+
+// BRAND defaults are English: translate them like the static page; custom texts without a key stay as-is.
+function getWaitingRoomText(key, fallback) {
+    const text = getWaitingRoomBrand(key, fallback);
+    return window.i18n?.t?.(text, 'labels') || text;
+}
+
+// Keeps the English source so I18n.js can re-translate the attribute on a live language switch.
+function setTranslatedAttribute(element, attribute, source, namespace) {
+    element[`__i18nAttr_${attribute}`] = source;
+    element.setAttribute(attribute, window.i18n?.t?.(source, namespace) || source);
 }
 
 if (roomId && roomId !== 'whoAreYou') {
@@ -112,13 +124,13 @@ function checkRoom() {
                     waitingAudio = null;
                 }
                 playSound('roomActive');
-                statusEl.textContent = getWaitingRoomBrand('waitingRoomReady', 'Room is ready! Joining...');
+                statusEl.textContent = getWaitingRoomText('waitingRoomReady', 'Room is ready! Joining...');
                 statusEl.classList.add('ready');
                 setTimeout(function () {
                     window.location.href = '/join/' + encodeURIComponent(roomId);
                 }, 800);
             } else if (!isActive) {
-                statusEl.textContent = getWaitingRoomBrand(
+                statusEl.textContent = getWaitingRoomText(
                     'waitingRoomWaiting',
                     'Waiting for host to start the meeting...'
                 );
@@ -126,10 +138,7 @@ function checkRoom() {
             }
         })
         .catch(function () {
-            statusEl.textContent = getWaitingRoomBrand(
-                'waitingRoomWaiting',
-                'Waiting for host to start the meeting...'
-            );
+            statusEl.textContent = getWaitingRoomText('waitingRoomWaiting', 'Waiting for host to start the meeting...');
             scheduleNextCheck();
         });
 }
@@ -197,13 +206,13 @@ function initWaitingAudio() {
         if (audioPlaying) {
             waitingAudio.pause();
             audioIcon.className = 'fa-solid fa-play';
-            audioBtn.title = 'Play music';
+            setTranslatedAttribute(audioBtn, 'title', 'Play music', 'buttons');
         } else {
             waitingAudio.play().catch(function (err) {
                 console.warn('Audio play blocked:', err.message);
             });
             audioIcon.className = 'fa-solid fa-pause';
-            audioBtn.title = 'Pause music';
+            setTranslatedAttribute(audioBtn, 'title', 'Pause music', 'buttons');
         }
         audioPlaying = !audioPlaying;
     };
@@ -211,7 +220,7 @@ function initWaitingAudio() {
     audioMuteBtn.onclick = function () {
         waitingAudio.muted = !waitingAudio.muted;
         audioMuteIcon.className = waitingAudio.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
-        audioMuteBtn.title = waitingAudio.muted ? 'Unmute' : 'Mute';
+        setTranslatedAttribute(audioMuteBtn, 'title', waitingAudio.muted ? 'Unmute' : 'Mute', 'buttons');
     };
 }
 
