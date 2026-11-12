@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.87
+ * @version 2.7.88
  *
  */
 
@@ -2183,6 +2183,9 @@ async function whoAreYou() {
             showMobileAudioGuidance();
             if (default_name && !force_peer_name) showPeerNameInUseOnOpen(default_name);
         },
+        willClose: () => {
+            hideMobileAudioGuidance();
+        },
         didClose: () => {
             if (onInitModalClosed) {
                 onInitModalClosed();
@@ -2265,11 +2268,10 @@ function mergeConfig(current, updated) {
     return current;
 }
 
-function showMobileAudioGuidance() {
+function showMobileAudioGuidance(autoCloseMs = 6000) {
     if (!isMobileDevice || !BUTTONS.main.startAudioButton || !isEnumerateAudioDevices) return;
 
-    const initUserContainer = document.getElementById('initUser');
-    if (!initUserContainer || initUserContainer.querySelector('#mobileAudioGuidance')) return;
+    if (document.getElementById('mobileAudioGuidance')) return;
 
     const guidance =
         parserResult.os.name === 'iOS'
@@ -2278,8 +2280,9 @@ function showMobileAudioGuidance() {
 
     const audioGuidanceDiv = document.createElement('div');
     audioGuidanceDiv.id = 'mobileAudioGuidance';
-    audioGuidanceDiv.className = 'mic-guidance';
-    audioGuidanceDiv.setAttribute('role', 'note');
+    audioGuidanceDiv.className = 'mic-guidance-popup';
+    audioGuidanceDiv.setAttribute('role', 'status');
+    audioGuidanceDiv.setAttribute('aria-live', 'polite');
 
     const icon = document.createElement('i');
     icon.className = 'fas fa-info-circle';
@@ -2287,8 +2290,31 @@ function showMobileAudioGuidance() {
 
     const text = document.createElement('p');
     text.textContent = guidance;
-    audioGuidanceDiv.append(icon, text);
-    initUserContainer.appendChild(audioGuidanceDiv);
+
+    const autoCloseTimer = setTimeout(hideMobileAudioGuidance, autoCloseMs);
+
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'mic-guidance-close';
+    closeButton.setAttribute('aria-label', 'Close');
+    closeButton.innerHTML = '<i class="fas fa-times" aria-hidden="true"></i>';
+    closeButton.addEventListener('click', () => {
+        clearTimeout(autoCloseTimer);
+        hideMobileAudioGuidance();
+    });
+
+    const progressBar = document.createElement('div');
+    progressBar.className = 'mic-guidance-progress';
+    progressBar.setAttribute('aria-hidden', 'true');
+    progressBar.style.animationDuration = `${autoCloseMs}ms`;
+
+    audioGuidanceDiv.append(icon, text, closeButton, progressBar);
+    document.body.appendChild(audioGuidanceDiv);
+}
+
+function hideMobileAudioGuidance() {
+    const audioGuidanceDiv = document.getElementById('mobileAudioGuidance');
+    if (audioGuidanceDiv) audioGuidanceDiv.remove();
 }
 
 function handleAudio() {
@@ -11286,7 +11312,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.87',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.88',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
