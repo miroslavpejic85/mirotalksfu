@@ -86,6 +86,14 @@
                     },
                     {
                         "@type": "Question",
+                        "name": "How many participants can join a room?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "There is no hard limit on rooms or participants. MiroTalk SFU routes media through a Selective Forwarding Unit built on mediasoup, so each participant sends their audio and video only once to the server, which forwards it to the others. This makes it a good fit for large meetings, webinars, classes and events. Real capacity depends on your server's CPU, bandwidth and configuration: you can add mediasoup workers, spread a big room over several CPU cores, or run several servers behind a load balancer or the built-in Redis cluster. See the scalability guide in the official documentation."
+                        }
+                    },
+                    {
+                        "@type": "Question",
                         "name": "Are MiroTalk SFU calls end-to-end encrypted?",
                         "acceptedAnswer": {
                             "@type": "Answer",
@@ -768,6 +776,24 @@
                                         target="_blank"
                                         rel="noopener"
                                         >self-hosting guide</a
+                                    >.
+                                </p>
+                            </details>
+                            <details class="faq-item" name="faq">
+                                <summary>How many participants can join a room?</summary>
+                                <p>
+                                    There is no hard limit on rooms or participants. MiroTalk SFU routes media through a
+                                    Selective Forwarding Unit built on mediasoup, so each participant sends their audio
+                                    and video only once to the server, which forwards it to the others. This makes it a
+                                    good fit for large meetings, webinars, classes and events. Real capacity depends on
+                                    your server's CPU, bandwidth and configuration: you can add mediasoup workers,
+                                    spread a big room over several CPU cores, or run several servers behind a load
+                                    balancer or the built-in Redis cluster. See the
+                                    <a
+                                        href="https://docs.mirotalk.com/mirotalk-sfu/scalability/"
+                                        target="_blank"
+                                        rel="noopener"
+                                        >scalability guide</a
                                     >.
                                 </p>
                             </details>
