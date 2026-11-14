@@ -48,6 +48,9 @@ $ docker build -t mirotalk/nms:latest .
 
 # Multi-platform build requires a docker-container builder (one-time setup)
 $ docker buildx create --name multiarch --driver docker-container --use
+
+# On later builds the builder already exists, just select it
+$ docker buildx use multiarch
 $ docker buildx inspect --bootstrap
 
 # Log in to your registry

@@ -1,11 +1,11 @@
 {
     "name": "mirotalk-rtmp-nms",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "MiroTalk RTMP Node Media Server",
     "main": "server.js",
     "scripts": {
         "start": "node src/server.js",
-        "start-dev": "nodemon src/server.js"
+        "dev": "node --watch src/server.js"
     },
     "keywords": [
         "rtmp",
@@ -20,7 +20,6 @@
         "node-media-server": "^2.7.0"
     },
     "devDependencies": {
-        "uuid": "11.1.0",
-        "nodemon": "^3.1.10"
+        "uuid": "14.0.3"
     }
 }
