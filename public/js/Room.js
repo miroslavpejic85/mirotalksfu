@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.11
+ * @version 2.8.12
  *
  */
 
@@ -6411,8 +6411,9 @@ async function playSpeaker(deviceId = null, name, path = '../sounds/') {
 
 async function sound(name, force = false) {
     if (!isSoundEnabled && !force) return;
-    let sound = '../sounds/' + name + '.wav';
-    let audio = new Audio(sound);
+    const sound = '../sounds/' + name + '.wav';
+    if (window.NotificationSounds?.play(sound)) return;
+    const audio = new Audio(sound);
     try {
         audio.volume = 0.5;
         await audio.play();
@@ -11350,7 +11351,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.11',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.12',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
