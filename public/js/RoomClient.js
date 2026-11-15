@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.90
+ * @version 2.7.91
  *
  */
 
@@ -3741,6 +3741,7 @@ class RoomClient {
             this.localAudioStream = stream;
             const audioElement = this.getId(producerId);
             if (audioElement) audioElement.srcObject = stream;
+            this.syncRecordingAudio();
             getMicrophoneVolumeIndicator(stream);
         }
         userLog(
@@ -4655,6 +4656,7 @@ class RoomClient {
             track.stop();
         });
         audio.parentNode.removeChild(audio);
+        this.syncRecordingAudio();
 
         console.log(`[${event}] audio-element-count`, this.localAudioEl.childElementCount);
     }
@@ -5424,6 +5426,7 @@ class RoomClient {
                     audioConsumers: this.audioConsumers,
                 });
             }
+            this.syncRecordingAudio();
         }
 
         this.consumers.get(consumer_id).close();
@@ -5844,6 +5847,8 @@ class RoomClient {
         elem.srcObject = consumerStream;
         if (type !== mediaType.audio) {
             this.hideVideoLoaderOnPlay(elem);
+        } else {
+            this.syncRecordingAudio();
         }
         console.log(who + ' Success attached media ' + type);
     }
@@ -10702,6 +10707,7 @@ class RoomClient {
                 ? this.startDesktopRecording(options, audioMixerTracks)
                 : this.startMobileRecording(options, audioMixerTracks);
         } catch (err) {
+            this.releaseRecordingAudioMixer();
             this.handleRecordingError('Exception while creating MediaRecorder: ' + err);
         }
     }
@@ -10734,6 +10740,7 @@ class RoomClient {
 
             this.initRecording();
         } catch (err) {
+            this.releaseRecordingAudioMixer();
             this.handleRecordingError('Unable to record the camera + audio: ' + err, false);
         }
     }
@@ -10784,6 +10791,7 @@ class RoomClient {
                 this.initRecording();
             })
             .catch((err) => {
+                this.releaseRecordingAudioMixer();
                 this.handleRecordingError('Unable to record the screen + audio: ' + err, false);
             });
     }
@@ -10842,6 +10850,27 @@ class RoomClient {
             }
         }
         return audioStream;
+    }
+
+    // The recording mix is built at start: keep it in sync with participants who join later,
+    // consumers re-created (mic change, screen audio, transport recovery) and local mic replacements.
+    syncRecordingAudio() {
+        if (!this.audioRecorder?.audioDestination) return;
+        try {
+            this.audioRecorder.syncTracks(this.getAudioStreamFromAudioElements().getAudioTracks());
+        } catch (err) {
+            console.warn('Recording audio sync failed', err);
+        }
+    }
+
+    releaseRecordingAudioMixer() {
+        if (!this.audioRecorder) return;
+        try {
+            this.audioRecorder.stopMixedAudioStream();
+        } catch (err) {
+            console.warn('Recording audio mixer release failed', err);
+        }
+        this.audioRecorder = null;
     }
 
     handleMediaRecorder() {
@@ -11260,7 +11289,7 @@ class RoomClient {
             }
             if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
             this.event(_EVENTS.stopRec);
-            this.audioRecorder.stopMixedAudioStream();
+            this.releaseRecordingAudioMixer();
             this.recordingAction(enums.recording.stop);
             this.sound('recStop');
         }
