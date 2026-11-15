@@ -5555,11 +5555,11 @@ class RoomClient {
         pb.style.height = '1%';
         pm.appendChild(pb);
 
+        BUTTONS.videoOff.audioVolumeInput &&
+            eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
         BUTTONS.videoOff.pinVideoButton &&
             !this.isMobileDevice &&
             eVc.appendChild(this.createResponsiveDropdownItem(pn, 'Pin', 'compact'));
-        BUTTONS.videoOff.audioVolumeInput &&
-            eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
         if (remotePeer) {
             BUTTONS.videoOff.presenterRoleButton &&
                 canInteract &&

@@ -430,6 +430,14 @@
     overflow-wrap: anywhere;
 }
 
+.navbar-dropdown-control > i {
+    flex-shrink: 0;
+    min-width: 20px;
+    font-size: 1rem;
+    text-align: center;
+    box-sizing: content-box;
+}
+
 .navbar-dropdown-control input[type='range'] {
     width: 88px;
     max-width: 40vw;
