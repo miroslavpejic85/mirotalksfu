@@ -22,6 +22,9 @@ module.exports = class Peer {
             peer_lobby,
         } = peer_info;
 
+        // Security: never keep the auth token on the peer, peer_info is shared with other room members
+        delete peer_info.peer_token;
+
         this.id = socket_id;
         this.peer_info = peer_info;
         this.peer_uuid = peer_uuid;

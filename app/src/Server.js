@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.10
+ * @version 2.8.11
  *
  */
 
@@ -2943,6 +2943,10 @@ function startServer() {
                 browser_version,
             } = data.peer_info;
             let { peer_name } = data.peer_info;
+
+            // Security: peer_token is a replayable bearer credential, consumed here and never stored on the peer
+            // (peer_info is broadcast to other members via room.toJson(), producers, webhooks...)
+            delete data.peer_info.peer_token;
 
             let is_presenter = peer_presenter;
             let authenticatedUsername = null;

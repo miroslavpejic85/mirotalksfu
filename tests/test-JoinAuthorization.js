@@ -83,6 +83,7 @@ describe('Socket.IO join authorization', () => {
                 constructor(peerId, data) {
                     this.id = peerId;
                     this.peer_name = data.peer_info.peer_name;
+                    this.peer_info = data.peer_info;
                 }
                 updatePeerInfo() {}
             },
@@ -168,6 +169,21 @@ describe('Socket.IO join authorization', () => {
         assert.equal(result.recUploadToken, 'recording-token');
         assert.equal(result.rtmpStreamToken, 'stream-token');
         assert.equal(state.room.addPeer.callCount, 1);
+    });
+
+    it('authenticates with peer_token but never stores or broadcasts it', async () => {
+        const state = setup({}, 'room-a');
+        state.token.presenter = 'true';
+        const result = await joinExistingRoom(state);
+        assert.equal(result.id, 'room-a');
+        assert.equal(state.room.addPeer.callCount, 1);
+        const storedPeer = state.room.addPeer.firstCall.args[0];
+        assert.equal(storedPeer.authUser, 'alice');
+        assert.equal(Object.values(state.presenters['room-a'])[0].is_presenter, true);
+        assert.equal('peer_token' in storedPeer.peer_info, false);
+        assert.equal(JSON.stringify([...state.room.getPeers()]).includes('signed-alice-token'), false);
+        assert.equal(state.context.handleJoinWebHook.callCount, 1);
+        assert.equal('peer_token' in state.context.handleJoinWebHook.firstCall.args[2], false);
     });
 
     it('waits for the asynchronous authorization verdict before admission', async () => {

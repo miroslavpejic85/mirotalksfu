@@ -25,6 +25,16 @@ describe('test-Peer', () => {
         once: () => {},
     });
 
+    it('never stores the auth token, so it is not serialized to other room members', () => {
+        const peer = new Peer('peer-id', {
+            peer_info: { peer_uuid: 'peer-uuid', peer_name: 'Host', peer_token: 'signed-host-token' },
+        });
+
+        peer.peer_info.should.not.have.property('peer_token');
+        JSON.stringify([...new Map([[peer.id, peer]])]).should.not.containEql('signed-host-token');
+        peer.peer_name.should.equal('Host');
+    });
+
     it('creates a simulcast producer whose encodings have no scalabilityMode', async () => {
         const peer = createPeer();
         const handlers = {};
