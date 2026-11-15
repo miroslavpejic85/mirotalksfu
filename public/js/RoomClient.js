@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.12
+ * @version 2.8.13
  *
  */
 
@@ -2414,7 +2414,14 @@ class RoomClient {
         }
 
         const hide = () => {
-            banner.root.classList.remove('is-visible', 'is-reconnecting', 'is-restored', 'is-failed', 'is-interactive');
+            banner.root.classList.remove(
+                'is-visible',
+                'is-reconnecting',
+                'is-restored',
+                'is-failed',
+                'is-planned',
+                'is-interactive'
+            );
             banner.root.setAttribute('aria-hidden', 'true');
             banner.root.style.display = 'none';
             if (banner.overlay) {
@@ -2459,7 +2466,7 @@ class RoomClient {
                     'dialogs'
                 ) || message,
             meta,
-            icon: 'fa-solid fa-screwdriver-wrench',
+            icon: 'fa-solid fa-server',
             state: 'planned',
             showSpinner: true,
         });

@@ -5,8 +5,10 @@ require('should');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const { JSDOM } = require('jsdom');
 
 const roomClientSource = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'RoomClient.js'), 'utf8');
+const roomHtml = fs.readFileSync(path.join(__dirname, '..', 'public', 'views', 'Room.html'), 'utf8');
 
 describe('test-Reconnect', () => {
     let getReconnectDirectJoinURL;
@@ -118,6 +120,55 @@ describe('test-Reconnect', () => {
         proto.updateReconnectAlert.call(client, 15000, 3);
 
         client.banners.should.eql([{ type: 'restart', meta: 'Attempt 3/10 - Retry in 15s' }]);
+    });
+
+    it('renders the restart card and switches back to the restored banner', () => {
+        const document = new JSDOM(roomHtml).window.document;
+        const client = {
+            getId: (id) => document.getElementById(id),
+            maxReconnectAttempts: 120,
+            serverRestarting: true,
+        };
+        for (const method of [
+            'cacheReconnectBannerElements',
+            'getReconnectBanner',
+            'renderReconnectBanner',
+            'showServerRestartAlert',
+            'updateReconnectAlert',
+            'hideReconnectBanner',
+        ]) {
+            client[method] = proto[method].bind(client);
+        }
+
+        client.showServerRestartAlert();
+        const banner = document.getElementById('disconnectBanner');
+        const overlay = document.getElementById('disconnectOverlay');
+        banner.classList.contains('is-planned').should.be.true();
+        banner.getAttribute('aria-hidden').should.equal('false');
+        overlay.classList.contains('is-visible').should.be.true();
+        document.getElementById('disconnectBannerIcon').className.should.equal('fa-solid fa-server');
+        document.getElementById('disconnectBannerTitle').textContent.should.equal('Updating MiroTalk');
+        document
+            .getElementById('disconnectBannerMessage')
+            .textContent.should.equal(
+                'MiroTalk is updating. You may be disconnected briefly while the server restarts. Please reconnect in a moment.'
+            );
+        document.getElementById('disconnectBannerMeta').textContent.should.equal('Reconnecting automatically');
+        document.getElementById('disconnectBannerSpinner').style.display.should.equal('inline-flex');
+
+        client.updateReconnectAlert(15000, 3);
+        document.getElementById('disconnectBannerMeta').textContent.should.equal('Attempt 3/120 - Retry in 15s');
+
+        client.renderReconnectBanner({ title: 'Back online', message: 'Connection restored.', state: 'restored' });
+        banner.classList.contains('is-planned').should.be.false();
+        banner.classList.contains('is-restored').should.be.true();
+        overlay.classList.contains('is-visible').should.be.false();
+
+        client.showServerRestartAlert();
+        client.hideReconnectBanner();
+        banner.classList.contains('is-planned').should.be.false();
+        banner.getAttribute('aria-hidden').should.equal('true');
+        overlay.getAttribute('aria-hidden').should.equal('true');
     });
 
     it('does not include the stale client presenter flag in reconnect URLs', () => {

@@ -257,23 +257,81 @@ body {
     animation: disconnectBannerPulse 1.8s ease-in-out infinite;
 }
 
+.disconnect-banner.is-planned {
+    top: 50%;
+    width: min(calc(100% - 32px), 460px);
+    transform: translate(-50%, -50%);
+}
+
 .disconnect-banner.is-planned .disconnect-banner__inner {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-areas:
+        'icon title'
+        'message message'
+        'status status';
+    gap: 0 16px;
+    width: 100%;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    padding: 24px;
+    overflow-y: auto;
+    pointer-events: auto;
     border-color: rgba(106, 179, 255, 0.35);
     background:
-        radial-gradient(circle at top left, rgba(106, 179, 255, 0.2), transparent 42%),
-        linear-gradient(135deg, rgba(8, 33, 61, 0.93), rgba(18, 19, 26, 0.94));
+        radial-gradient(circle at top left, rgba(106, 179, 255, 0.18), transparent 45%),
+        linear-gradient(135deg, #10243b, #12131a);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.disconnect-banner.is-planned .disconnect-banner__copy {
+    display: contents;
 }
 
 .disconnect-banner.is-planned .disconnect-banner__icon-wrap {
+    grid-area: icon;
+    width: 52px;
+    height: 52px;
     background: linear-gradient(145deg, rgba(106, 179, 255, 0.34), rgba(106, 179, 255, 0.12));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.12),
         0 10px 24px rgba(106, 179, 255, 0.16);
 }
 
+.disconnect-banner.is-planned .disconnect-banner__title {
+    grid-area: title;
+    align-self: center;
+    font-size: 1.12rem;
+}
+
+.disconnect-banner.is-planned .disconnect-banner__message {
+    grid-area: message;
+    display: block;
+    margin: 20px 0;
+    overflow: visible;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.disconnect-banner.is-planned .disconnect-banner__status {
+    grid-area: status;
+    flex-wrap: wrap;
+    margin: 0;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .disconnect-banner.is-planned .disconnect-banner__meta {
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
     background: rgba(106, 179, 255, 0.16);
     border-color: rgba(106, 179, 255, 0.2);
+}
+
+.disconnect-banner.is-planned + .disconnect-overlay {
+    background: rgba(4, 9, 18, 0.64);
 }
 
 .disconnect-banner.is-restored .disconnect-banner__inner {
