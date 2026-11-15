@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.91
+ * @version 2.8.10
  *
  */
 
@@ -235,6 +235,9 @@ const enums = {
         started: 'Started conference recording',
         start: 'Start conference recording',
         stop: 'Stop conference recording',
+        serverStart: 'Server recording started',
+        serverActive: 'Server recording in progress',
+        serverStop: 'Server recording stopped',
     },
     //...
 };
@@ -532,6 +535,7 @@ class RoomClient {
         this._recordingSave = null;
         this._forcedExitPending = false;
         this.audioRecorder = null;
+        this._serverRecording = null; // pure server-side recording state of the room
         this.screenAudioRecorder = null; // mixes participant audio with system/tab audio
         this.recScreenStream = null;
         this.recScreenAudioTracks = []; // raw system/tab audio tracks to stop on recording end
@@ -975,6 +979,15 @@ class RoomClient {
                     show(roomRecordingServer);
                 }
                 switchServerRecording.checked = this.recording.recSyncServerRecording;
+            }
+            if (this.recording?.recServerSide) {
+                // The server records the room itself: browser recording type and upload options do not apply
+                console.log('07.1 ----> PURE SERVER-SIDE RECORDING ENABLED', room.serverRecording);
+                this.recording.recSyncServerRecording = false;
+                hide(roomRecordingServer);
+                hide(recordingTypeField);
+                show(recordingServerSideField);
+                this.setServerRecordingState(room.serverRecording, true, true);
             }
             console.log('07.1 ----> SERVER SYNC RECORDING', this.recording);
             // ###################################################################################################
@@ -1819,6 +1832,7 @@ class RoomClient {
         this.socket.on('updateRoomModerator', this.handleUpdateRoomModeratorData);
         this.socket.on('updateRoomModeratorALL', this.handleUpdateRoomModeratorALLData);
         this.socket.on('recordingAction', this.handleRecordingActionData);
+        this.socket.on('serverRecording', this.handleServerRecordingData);
         this.socket.on('endRTMP', this.handleEndRTMP);
         this.socket.on('errorRTMP', this.handleErrorRTMP);
         this.socket.on('endRTMPfromURL', this.handleEndRTMPfromURL);
@@ -2136,6 +2150,11 @@ class RoomClient {
     handleRecordingActionData = (data) => {
         console.log('SocketOn Recording action:', data);
         this.handleRecordingAction(data);
+    };
+
+    handleServerRecordingData = (data) => {
+        console.log('SocketOn Server recording:', data);
+        this.setServerRecordingState(data, true);
     };
 
     handleEndRTMP = (data) => {
@@ -5771,6 +5790,7 @@ class RoomClient {
                 this.socket.off('updateRoomModerator');
                 this.socket.off('updateRoomModeratorALL');
                 this.socket.off('recordingAction');
+                this.socket.off('serverRecording');
                 this.socket.off('endRTMP');
                 this.socket.off('errorRTMP');
                 this.socket.off('endRTMPfromURL');
@@ -6267,6 +6287,51 @@ class RoomClient {
         return this._isRecording;
     }
 
+    // ####################################################
+    // PURE SERVER-SIDE RECORDING
+    // ####################################################
+
+    isServerRecording() {
+        return !!this._serverRecording?.active;
+    }
+
+    async requestServerRecording(action) {
+        try {
+            const response = await this.socket.request('serverRecording', { action });
+            // The server broadcasts the new state to everyone; apply it now as well for this peer
+            if (action === 'start' && response?.active) this.setServerRecordingState(response, false);
+        } catch (error) {
+            console.error('Server recording request failed', error);
+            // socket.request rejects with the server's error string
+            const message = typeof error === 'string' ? error : error?.message;
+            this.userLog('warning', message || 'Server recording request failed', 'top-end', 6000);
+        }
+    }
+
+    // joining: the recording was already running when this peer joined (consent notice, no sound)
+    setServerRecordingState(data, notify = true, joining = false) {
+        const active = !!data?.active;
+        const wasActive = this.isServerRecording();
+        this._serverRecording = active ? { active, startedAt: data.startedAt } : null;
+
+        // Always refresh the UI: the start broadcast can arrive before the room info enabling this mode
+        if (typeof handleServerRecordingUi === 'function') {
+            handleServerRecordingUi(this, active, Math.max(0, Math.floor((data?.elapsedMs || 0) / 1000)));
+        }
+        if (!notify || active === wasActive) return;
+        this.handleRecordingAction({
+            peer_name: !data?.peer_name || data.peer_name === 'auto' ? 'Server' : data.peer_name,
+            peer_avatar: '',
+            peer_id: '',
+            action: active
+                ? joining
+                    ? enums.recording.serverActive
+                    : enums.recording.serverStart
+                : enums.recording.serverStop,
+        });
+        if (!joining) this.sound(active ? 'recStart' : 'recStop');
+    }
+
     showRecordingIndicator() {
         this._getRecIndicators().forEach((el) => {
             el.classList.add('active');
@@ -6460,10 +6525,13 @@ class RoomClient {
                 switch (data.action) {
                     case enums.recording.started:
                     case enums.recording.start:
+                    case enums.recording.serverStart:
+                    case enums.recording.serverActive:
                         html = html + '<br/> Your presence implies you agree to being recorded';
                         toastMessage(6000);
                         break;
                     case enums.recording.stop:
+                    case enums.recording.serverStop:
                         toastMessage(3000);
                         break;
                     //...
@@ -6488,7 +6556,13 @@ class RoomClient {
                 timerProgressBar: true,
                 toast: true,
                 timer: duration,
-                title: title || (data.action === enums.recording.stop ? 'Recording stopped' : 'Recording started'),
+                title:
+                    title ||
+                    ([enums.recording.stop, enums.recording.serverStop].includes(data.action)
+                        ? 'Recording stopped'
+                        : data.action === enums.recording.serverActive
+                          ? 'Recording is ON'
+                          : 'Recording started'),
                 html: html,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -10665,6 +10739,7 @@ class RoomClient {
     }
 
     startRecording() {
+        if (this.recording?.recServerSide) return this.requestServerRecording('start');
         if (
             this._recordingSave?.pending ||
             this._forcedExitPending ||
@@ -11264,6 +11339,10 @@ class RoomClient {
     }
 
     stopRecording() {
+        if (this.recording?.recServerSide && !this.mediaRecorder) {
+            this.requestServerRecording('stop');
+            return this._recordingSave?.promise;
+        }
         if (this.mediaRecorder) {
             this.toggleVideoAudioTabs(false);
             // Capture the elapsed time text BEFORE stopRec event resets it to '0s'

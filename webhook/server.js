@@ -27,6 +27,14 @@ app.post('/webhook-endpoint', (req, res) => {
             console.log('User disconnected:', data);
             // Add your custom logic here
             break;
+        case 'serverRecordingStarted':
+            console.log('Server recording started:', data);
+            // Add your custom logic here
+            break;
+        case 'serverRecordingCompleted':
+            console.log('Server recording completed:', data);
+            // e.g. send each participant file to your transcription pipeline
+            break;
         default:
             console.error('Unknown event type');
             break;

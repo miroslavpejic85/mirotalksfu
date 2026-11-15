@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.91
+ * @version 2.8.10
  *
  */
 
@@ -2744,6 +2744,8 @@ function roomIsReady() {
     show(keepControlsVisibleButton);
     if (BUTTONS.settings.tabRecording) {
         show(startRecButton);
+        // A server-side recording may already be running when joining
+        refreshServerRecordingButtons();
     } else {
         hide(startRecButton);
         hide(tabRecordingBtn);
@@ -3364,12 +3366,14 @@ function secondsToHms(d) {
     return hDisplay + ' ' + mDisplay + ' ' + sDisplay;
 }
 
-function startRecordingTimer() {
-    recElapsedTime = 0;
+function startRecordingTimer(initialSeconds = 0) {
+    recElapsedTime = initialSeconds;
     recTimer = setInterval(function printTime() {
-        if (rc.isRecording()) {
+        if (rc.isRecording() || rc.isServerRecording()) {
             recElapsedTime++;
             recordingStatus.innerText = secondsToHms(recElapsedTime);
+            // The local tile may be created after a server-side recording was already running
+            if (rc.isServerRecording()) rc.showRecordingIndicator();
             rc._getRecIndicators().forEach((el) => {
                 el.innerHTML = '🔴 ' + (recordingStatus.innerText !== '0s' ? recordingStatus.innerText : 'REC');
             });
@@ -3379,6 +3383,38 @@ function startRecordingTimer() {
 function stopRecordingTimer() {
     clearInterval(recTimer);
     recordingStatus.innerText = '0s';
+}
+
+// Pure server-side recording: one room-wide recording, shown to everyone and managed by who may record
+function canManageServerRecording() {
+    // Same rule as the server: with host-only recording, only presenters manage it
+    return !!BUTTONS.settings.tabRecording && (!hostOnlyRecording || isPresenter);
+}
+
+function refreshServerRecordingButtons(client = rc) {
+    if (!client?.recording?.recServerSide) return;
+    const active = client.isServerRecording();
+    hide(pauseRecButton);
+    hide(resumeRecButton);
+    if (!canManageServerRecording()) {
+        hide(startRecButton);
+        hide(stopRecButton);
+        return;
+    }
+    active ? hide(startRecButton) : show(startRecButton);
+    active ? show(stopRecButton) : hide(stopRecButton);
+}
+
+function handleServerRecordingUi(client, active, elapsedSeconds = 0) {
+    refreshServerRecordingButtons(client);
+    if (!client.recording?.recServerSide) return;
+    active ? show(recordingTime) : hide(recordingTime);
+    recordingActionButton.querySelector('p').textContent = active ? 'Stop recording' : 'Start recording';
+    recordingActionButton.classList.toggle('recording-active', active);
+    stopRecordingTimer();
+    if (active) startRecordingTimer(elapsedSeconds);
+    isRecording = active;
+    active ? client.showRecordingIndicator() : client.hideRecordingIndicator();
 }
 
 // ####################################################
@@ -5909,6 +5945,7 @@ function handleRoomClientEvents() {
             hide(roomRecordingServer);
             show(recordingMessage);
             hostOnlyRecording = true;
+            refreshServerRecordingButtons();
         }
     });
     rc.on(RoomClient.EVENTS.hostOnlyRecordingOff, () => {
@@ -5916,10 +5953,11 @@ function handleRoomClientEvents() {
             console.log('Room event: host only recording disabled');
             show(startRecButton);
             show(recordingActionButton);
-            show(recordingTypeField);
+            if (!rc.recording?.recServerSide) show(recordingTypeField);
             hide(roomHostOnlyRecording);
             hide(recordingMessage);
             hostOnlyRecording = false;
+            refreshServerRecordingButtons();
         }
     });
     rc.on(RoomClient.EVENTS.startRTMP, () => {
@@ -11312,7 +11350,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.7.91',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.10',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

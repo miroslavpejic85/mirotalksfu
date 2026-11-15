@@ -3,6 +3,7 @@
 const { v4: uuidv4 } = require('uuid');
 const config = require('./config');
 const RtmpStreaming = require('./RtmpStreaming');
+const { ServerRecorder } = require('./ServerRecording');
 const Logger = require('./Logger');
 const log = new Logger('Room');
 
@@ -48,7 +49,11 @@ module.exports = class Room {
             recSyncServerToS3: (config?.integrations?.s3?.enabled && config?.media?.recording?.uploadToS3) || false,
             recSyncServerRecording: config?.media?.recording?.enabled || false,
             recSyncServerEndpoint: config?.media?.recording?.endpoint || '',
+            recServerSide: config?.media?.recording?.serverSide?.enabled === true,
         };
+        // Pure server-side recording of the room (see ServerRecording.js), null when not recording
+        this.serverRecorder = null;
+        this.serverRecordingAutoStarted = false;
         // ##########################
 
         this.notifications = {
@@ -131,6 +136,7 @@ module.exports = class Room {
             sessionId: this.sessionId,
             broadcasting: this._isBroadcasting,
             recording: this.recording,
+            serverRecording: this.getServerRecordingState(),
             config: {
                 isLocked: this._isLocked,
                 isLobbyEnabled: this._isLobbyEnabled,
@@ -320,6 +326,72 @@ module.exports = class Room {
     }
 
     // ####################################################
+    // SERVER-SIDE RECORDING
+    // ####################################################
+
+    isServerRecordingEnabled() {
+        return this.recording.recServerSide === true;
+    }
+
+    isServerRecordingActive() {
+        return !!this.serverRecorder?.isActive();
+    }
+
+    getServerRecordingState() {
+        if (!this.isServerRecordingActive()) return { active: false };
+        const { startedAt, startedBy } = this.serverRecorder.getState();
+        // elapsedMs lets clients show the right timer whatever their clock
+        return { active: true, startedAt, startedBy, elapsedMs: Date.now() - startedAt };
+    }
+
+    startServerRecording({ baseDir, startedBy = null, onComplete = null } = {}) {
+        if (!this.isServerRecordingEnabled()) throw new Error('Server-side recording is disabled');
+        if (this.isServerRecordingActive()) return this.getServerRecordingState();
+
+        const serverSide = config?.media?.recording?.serverSide || {};
+        const recorder = new ServerRecorder({
+            roomId: this.id,
+            sessionId: this.sessionId,
+            baseDir,
+            ffmpegPath: serverSide.ffmpegPath,
+            portRange: { min: serverSide.portMin || 52000, max: serverSide.portMax || 52999 },
+            mixed: serverSide.mixed !== false,
+            keepRawTracks: serverSide.keepRawTracks === true,
+            format: serverSide.format || 'ogg',
+            bitrate: serverSide.bitrate || '64k',
+            onComplete,
+        });
+        recorder.start({ startedBy });
+        this.serverRecorder = recorder;
+
+        for (const [peerId, peer] of this.peers) {
+            for (const producer of peer.producers.values()) {
+                this.addProducerToServerRecording(peerId, producer);
+            }
+        }
+        return this.getServerRecordingState();
+    }
+
+    addProducerToServerRecording(socket_id, producer) {
+        if (!this.isServerRecordingActive() || producer?.kind !== 'audio') return;
+        const peer = this.peers.get(socket_id);
+        if (!peer) return;
+        this.serverRecorder.addProducer({
+            producer,
+            router: this.getPeerRouter(socket_id),
+            peer: { id: socket_id, uuid: peer.peer_uuid, name: peer.peer_name },
+        });
+    }
+
+    // Resolves with the recording result once the files are finalized (null when not recording)
+    stopServerRecording({ reason = 'stopped', postProcess = true } = {}) {
+        const recorder = this.serverRecorder;
+        if (!recorder) return Promise.resolve(null);
+        this.serverRecorder = null;
+        return recorder.stop({ reason, postProcess });
+    }
+
+    // ####################################################
     // ROUTER
     // ####################################################
 
@@ -377,6 +449,10 @@ module.exports = class Room {
 
     async close() {
         this.clearTimeLimit();
+        // Before the router closes: the recorder detaches its consumers and finalizes in the background
+        this.stopServerRecording({ reason: 'room closed' }).catch((error) =>
+            log.error('Server recording stop on room close failed', error.message)
+        );
         this.closeAudioLevelObserver();
         this.closeActiveSpeakerObserver();
         this.rtmpStreaming.closeAll();
@@ -1060,6 +1136,8 @@ module.exports = class Room {
             this.clearVideoTextAnnotations(id);
             this.clearVideoDrawingAnnotations(id);
         });
+
+        this.addProducerToServerRecording(socket_id, peerProducer);
 
         const producerTransport = peer.getTransport(producerTransportId);
 

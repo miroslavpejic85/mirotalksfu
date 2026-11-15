@@ -21,7 +21,7 @@ services:
         volumes:
             - ./app/src/config.js:/src/app/src/config.js:ro
             - ./.env:/src/.env:ro
-            # Mandatory volume if `RECORDING_ENABLED=true` in the .env
+            # Mandatory volume if `RECORDING_ENABLED=true` or `RECORDING_SERVER_SIDE_ENABLED=true` in the .env
             # - ./app/rec:/src/app/rec
             # Mandatory volume if `RTMP_FROM_FILE=true` in the .env
             # - ./app/rtmp:/src/app/rtmp

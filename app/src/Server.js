@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.7.91
+ * @version 2.8.10
  *
  */
 
@@ -549,6 +549,16 @@ const recMaxFileSize = config?.media?.recording?.maxFileSize || 1 * 1024 * 1024 
 const serverRecordingEnabled = config?.media?.recording?.enabled || false;
 if (serverRecordingEnabled) {
     log.debug('Server Recording enabled creating dir', dir.rtmp);
+    if (!fs.existsSync(dir.rec)) {
+        fs.mkdirSync(dir.rec, { recursive: true });
+    }
+}
+
+// Pure server-side recording (mediasoup -> files, no browser)
+const serverSideRecordingCfg = config?.media?.recording?.serverSide || {};
+const serverSideRecordingEnabled = serverSideRecordingCfg.enabled === true;
+if (serverSideRecordingEnabled) {
+    log.debug('Server-side recording enabled creating dir', dir.rec);
     if (!fs.existsSync(dir.rec)) {
         fs.mkdirSync(dir.rec, { recursive: true });
     }
@@ -1587,6 +1597,84 @@ function startServer() {
     // RECORDING HANDLERS
     // ####################################################
 
+    // ####################################################
+    // PURE SERVER-SIDE RECORDING
+    // ####################################################
+
+    function sendServerRecordingWebhook(event, data) {
+        if (!webhook.enabled) return;
+        axios
+            .post(webhook.url, { event, data: { timestamp: log.getDateTime(false), ...data } }, { timeout: 5000 })
+            .then((response) => log.debug(`${event} event tracked:`, response.data))
+            .catch((error) => log.error(`Error tracking ${event} event:`, error.message));
+    }
+
+    function startRoomServerRecording(room, startedBy) {
+        if (!serverSideRecordingEnabled || !room?.isServerRecordingEnabled()) return null;
+        if (room.isServerRecordingActive()) return room.getServerRecordingState();
+        if (!fs.existsSync(dir.rec)) fs.mkdirSync(dir.rec, { recursive: true });
+
+        const room_id = room.id;
+        const session_id = room.getSessionId();
+        const state = room.startServerRecording({
+            baseDir: dir.rec,
+            startedBy,
+            onComplete: (result) => handleServerRecordingComplete(room_id, session_id, result),
+        });
+        room.sendToAll('serverRecording', { ...state, action: 'start', peer_name: startedBy });
+        sendServerRecordingWebhook('serverRecordingStarted', { room_id, session_id, started_by: startedBy });
+        return state;
+    }
+
+    function stopRoomServerRecording(room, stoppedBy) {
+        if (!room?.isServerRecordingActive()) return false;
+        room.stopServerRecording({ reason: `stopped by ${stoppedBy}` }).catch((error) =>
+            log.error('Server-side recording stop failed', { room_id: room.id, error: error.message })
+        );
+        room.sendToAll('serverRecording', { active: false, action: 'stop', peer_name: stoppedBy });
+        return true;
+    }
+
+    async function handleServerRecordingComplete(room_id, session_id, result) {
+        if (!result) return;
+
+        const s3Keys = [];
+        const shouldUploadToS3 = config?.integrations?.s3?.enabled && config?.media?.recording?.uploadToS3;
+        if (shouldUploadToS3 && result.files?.length) {
+            const bucket = config?.integrations?.s3?.bucket;
+            let allUploaded = true;
+            for (const filePath of result.files) {
+                // Keeps the recording folder in the key: recordings/<room>/ServerRec_.../<file>
+                const fileName = path.relative(dir.rec, filePath).split(path.sep).join('/');
+                try {
+                    const upload = await uploadToS3(filePath, fileName, room_id, bucket, s3Client);
+                    if (upload?.key) s3Keys.push(upload.key);
+                    else allUploaded = false;
+                } catch (error) {
+                    allUploaded = false;
+                    log.error('Server-side recording S3 upload failed', { file: filePath, error: error.message });
+                }
+            }
+            // Same as browser recordings: the local copy is removed once safely stored on S3
+            if (allUploaded && result.dir) {
+                try {
+                    fs.rmSync(result.dir, { recursive: true, force: true });
+                } catch (error) {
+                    log.error('Server-side recording local cleanup failed', { dir: result.dir, error: error.message });
+                }
+            }
+        }
+
+        sendServerRecordingWebhook('serverRecordingCompleted', {
+            room_id,
+            session_id,
+            status: result.status,
+            folder: result.folder,
+            files: (result.files || []).map((filePath) => path.relative(dir.rec, filePath).split(path.sep).join('/')),
+            s3_keys: s3Keys,
+            manifest: result.manifest,
+        });
+    }
     async function uploadToS3(filePath, fileName, roomId, bucket, s3Client) {
         if (!fs.existsSync(filePath)) return false;
 
@@ -2414,6 +2502,7 @@ function startServer() {
                       }
                     : false,
                 server_recording: config?.media?.recording?.enabled ? config.media.recording : false,
+                server_side_recording: serverSideRecordingEnabled ? serverSideRecordingCfg : false,
             },
 
             // Communication Integrations
@@ -3103,6 +3192,16 @@ function startServer() {
             }
 
             handleJoinWebHook(room.id, room.getSessionId(), data.peer_info);
+
+            // Pure server-side recording in auto mode: start once, when the room starts
+            if (config?.media?.recording?.serverSide?.autoStart && !room.serverRecordingAutoStarted) {
+                room.serverRecordingAutoStarted = true;
+                try {
+                    startRoomServerRecording(room, 'auto');
+                } catch (error) {
+                    log.error('Server-side recording auto start failed', { room_id: room.id, error: error.message });
+                }
+            }
 
             // Notify main room when a peer joins a breakout room
             if (socket.room_id.includes('_breakout_')) {
@@ -5175,6 +5274,39 @@ function startServer() {
             room.broadCast(socket.id, 'recordingAction', data);
         });
 
+        socket.on('serverRecording', (dataObject, cb) => {
+            const callback = typeof cb === 'function' ? cb : () => {};
+
+            if (!roomExists(socket)) return callback({ error: 'Room not found' });
+            if (!serverSideRecordingEnabled) return callback({ error: 'Server-side recording is disabled' });
+
+            const action = dataObject?.action;
+            if (!['start', 'stop', 'status'].includes(action)) return callback({ error: 'Invalid action' });
+
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!peer || isPeerInLobby(peer)) return callback({ error: 'Not allowed' });
+
+            if (action === 'status') return callback(room.getServerRecordingState());
+
+            // Resolve identity from server-side state; host-only recording restricts it to presenters
+            const peerName = peer.peer_info?.peer_name || peer.peer_name;
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peerName, peer.peer_info?.peer_uuid);
+            if (room.isHostOnlyRecording() && !isPresenter) {
+                return callback({ error: 'Only the host can manage the recording' });
+            }
+
+            try {
+                if (action === 'start') {
+                    return callback(startRoomServerRecording(room, peerName) || { error: 'Recording unavailable' });
+                }
+                stopRoomServerRecording(room, peerName);
+                return callback({ active: false });
+            } catch (error) {
+                log.error('Server-side recording action failed', { room_id: room.id, action, error: error.message });
+                return callback({ error: `Unable to ${action} the server recording` });
+            }
+        });
+
         socket.on('refreshParticipantsCount', () => {
             if (!roomExists(socket)) return;
 
@@ -7036,6 +7168,11 @@ async function gracefulShutdown(signal) {
         log.debug(`Closing ${roomList.size} active rooms...`);
         for (const [roomId, room] of roomList.entries()) {
             try {
+                // Close the raw server-side recording tracks (no post-processing, it would outlast the shutdown)
+                if (room.isServerRecordingActive?.()) {
+                    await room.stopServerRecording({ reason: 'server shutdown', postProcess: false });
+                }
+
                 // Stop any active RTMP streams
                 if (room.isRtmpFileStreamerActive()) {
                     await room.stopRTMP();

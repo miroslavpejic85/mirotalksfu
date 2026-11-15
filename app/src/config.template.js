@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.7.91 - Configuration File
+ * MiroTalk SFU v2.8.10 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -204,6 +204,24 @@ module.exports = {
          * - rateLimit      : Per-IP rate limit for /recSync* upload requests
          *                    (default: 300 requests / 60s) to mitigate flooding.
          *
+         * Pure Server-Side Recording (serverSide):
+         * ------------------------
+         * The server records the room itself from mediasoup (PlainTransport), no browser involved:
+         * one audio file per participant aligned on the recording timeline, an optional mixed file
+         * and a manifest.json, saved in <dir>/ServerRec_<room>_<date>_<session>/. Participants joining
+         * later, mic changes and reconnects are recorded. Audio only (ideal for transcripts).
+         * When enabled, the Record button starts/stops this recording instead of the browser one.
+         * - enabled        : Enable pure server-side recording [true/false] (default false)
+         * - autoStart      : Start automatically when the room starts, stop when it empties [true/false]
+         * - mixed          : Also create a single mixed audio file [true/false] (default true)
+         * - keepRawTracks  : Keep the raw per-producer tracks after post-processing [true/false]
+         * - format         : Format of the participant/mixed files: ogg (Opus, default), mp3, m4a (AAC), wav.
+         *                    Raw tracks are always Ogg Opus (written as received, no transcoding)
+         * - bitrate        : Bitrate of the participant/mixed files (default '64k', ignored for wav)
+         * - portMin/Max    : Local UDP port range (127.0.0.1 only, no firewall rule needed) used by
+         *                    mediasoup to forward the audio to the recorder, one port per recorded track
+         * - ffmpegPath     : FFmpeg binary, used once at stop to build the aligned/mixed files
+         *
          * Docker Note:
          * ------------
          * - When running in Docker, ensure the recording directory exists and is properly mounted:
@@ -222,6 +240,17 @@ module.exports = {
             rateLimit: {
                 windowMs: parseInt(process.env.RECORDING_RATE_LIMIT_WINDOW_MS) || 60 * 1000,
                 max: parseInt(process.env.RECORDING_RATE_LIMIT_MAX) || 300,
+            },
+            serverSide: {
+                enabled: process.env.RECORDING_SERVER_SIDE_ENABLED === 'true',
+                autoStart: process.env.RECORDING_SERVER_SIDE_AUTO_START === 'true',
+                mixed: process.env.RECORDING_SERVER_SIDE_MIXED !== 'false',
+                keepRawTracks: process.env.RECORDING_SERVER_SIDE_KEEP_RAW_TRACKS === 'true',
+                format: process.env.RECORDING_SERVER_SIDE_FORMAT || 'ogg',
+                bitrate: process.env.RECORDING_SERVER_SIDE_BITRATE || '64k',
+                portMin: parseInt(process.env.RECORDING_SERVER_SIDE_PORT_MIN) || 52000,
+                portMax: parseInt(process.env.RECORDING_SERVER_SIDE_PORT_MAX) || 52999,
+                ffmpegPath: process.env.RECORDING_SERVER_SIDE_FFMPEG_PATH || RTMP_FFMPEG_PATH,
             },
         },
 

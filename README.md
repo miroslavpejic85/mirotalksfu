@@ -83,7 +83,7 @@ href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/">Documentation</a> ·
 
 <br/>
 
-- 🎥 Video up to **8K @ 60fps** · Screen sharing · Recording · Picture-in-Picture
+- 🎥 Video up to **8K @ 60fps** · Screen sharing · Recording (browser or pure server-side, per-participant audio) · Picture-in-Picture
 - 🎭 [Video effects](public/video-effects/README.md) processed in the browser: face accessories (glasses, hats, beards, dog ears...), animated avatars that blink and talk, beauty & colour filters, background blur/replacement
 - 💬 Chat with Markdown, emoji & optional GIF search ([KLIPY](https://partner.klipy.com/)) & optional chat translation · Collaborative whiteboard and Rich text editor · File sharing
 - 🤖 ChatGPT (OpenAI) & DeepSeek integration · VideoAI avatars · Speech recognition
