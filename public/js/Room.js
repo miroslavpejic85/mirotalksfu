@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.13
+ * @version 2.8.14
  *
  */
 
@@ -2551,9 +2551,13 @@ function checkMedia() {
 async function shareRoom(useNavigator = false) {
     if (navigator.share && useNavigator) {
         try {
-            await navigator.share({ url: RoomURL });
+            // url is passed separately so share targets can still load its preview metadata
+            await navigator.share({ text: getInviteText(false), url: RoomURL });
             userLog('info', 'Room Shared successfully', 'top-end');
         } catch (err) {
+            // User closed the share sheet: nothing to do
+            if (err?.name === 'AbortError') return;
+            console.error('Navigator share error', err);
             share();
         }
     } else {
@@ -2573,14 +2577,15 @@ async function shareRoom(useNavigator = false) {
             }),
             showDenyButton: true,
             showCancelButton: true,
-            confirmButtonText: `Copy URL`,
+            confirmButtonText: `Copy invite`,
             denyButtonText: `Email invite`,
             cancelButtonText: `Close`,
+            focusConfirm: true,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                copyRoomURL();
+                copyRoomInvite();
             } else if (result.isDenied) {
                 shareRoomByEmail();
             }
@@ -2617,25 +2622,59 @@ function makeRoomPopupQR() {
     });
 }
 
-function copyRoomURL() {
-    let tmpInput = document.createElement('input');
-    document.body.appendChild(tmpInput);
-    tmpInput.value = RoomURL;
-    tmpInput.select();
-    tmpInput.setSelectionRange(0, 99999); // For mobile devices
-    navigator.clipboard.writeText(tmpInput.value);
-    document.body.removeChild(tmpInput);
-    userLog('info', 'Meeting URL copied to clipboard', 'top-end');
+function getInviteText(includeUrl = true) {
+    const lines = [`Join my ${BRAND.app.name} meeting: ${room_id}`];
+    if (includeUrl) lines.push(RoomURL);
+    const roomPassword = room_password || rc?.RoomPassword;
+    if (isRoomLocked && roomPassword) lines.push(`Password: ${roomPassword}`);
+    return lines.join('\n');
 }
 
-function copyToClipboard(txt, showTxt = true) {
-    let tmpInput = document.createElement('input');
+async function copyTextToClipboard(text) {
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+    } catch (err) {
+        console.warn('Clipboard API error', err);
+    }
+    const tmpInput = document.createElement('textarea');
+    tmpInput.value = text;
+    tmpInput.setAttribute('readonly', '');
+    tmpInput.style.position = 'fixed';
+    tmpInput.style.opacity = '0';
     document.body.appendChild(tmpInput);
-    tmpInput.value = txt;
     tmpInput.select();
-    tmpInput.setSelectionRange(0, 99999); // For mobile devices
-    navigator.clipboard.writeText(tmpInput.value);
+    tmpInput.setSelectionRange(0, text.length); // For mobile devices
+    let copied = false;
+    try {
+        copied = document.execCommand('copy');
+    } catch (err) {
+        console.warn('execCommand copy error', err);
+    }
     document.body.removeChild(tmpInput);
+    return copied;
+}
+
+async function copyRoomURL() {
+    if (await copyTextToClipboard(RoomURL)) {
+        userLog('info', 'Meeting URL copied to clipboard', 'top-end');
+    } else {
+        shareRoom();
+    }
+}
+
+async function copyRoomInvite() {
+    (await copyTextToClipboard(getInviteText()))
+        ? userLog('info', 'Invite copied to clipboard', 'top-end')
+        : userLog('warning', 'Unable to copy the invite, please copy the URL manually', 'top-end');
+}
+
+async function copyToClipboard(txt, showTxt = true) {
+    if (!(await copyTextToClipboard(txt))) {
+        return userLog('error', 'Unable to copy to clipboard', 'top-end', 6000);
+    }
     showTxt
         ? userLog('info', `${txt} copied to clipboard`, 'top-end')
         : userLog('info', `Copied to clipboard`, 'top-end');
@@ -11351,7 +11390,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.13',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.14',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

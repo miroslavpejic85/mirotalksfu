@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.13
+ * @version 2.8.14
  *
  */
 
@@ -9359,15 +9359,11 @@ class RoomClient {
     };
 
     copyToClipboard(id) {
-        const text = this.getId(id).innerText;
-        navigator.clipboard
-            .writeText(text)
-            .then(() => {
-                this.userLog('success', 'Message copied!', 'top-end', 1000);
-            })
-            .catch((err) => {
-                this.userLog('error', err, 'top-end', 6000);
-            });
+        copyTextToClipboard(this.getId(id).innerText).then((copied) =>
+            copied
+                ? this.userLog('success', 'Message copied!', 'top-end', 1000)
+                : this.userLog('error', 'Unable to copy to clipboard', 'top-end', 6000)
+        );
     }
 
     formatMsg(msg) {
