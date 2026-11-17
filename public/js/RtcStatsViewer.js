@@ -5,7 +5,8 @@
 // health rules: RtcStatsAnalyzer.js.
 
 const API_KEY_STORAGE = 'rtcStatsViewerApiKey';
-const CHART_HEIGHT = 220;
+const MOBILE_QUERY = window.matchMedia('(max-width: 640px)');
+const chartHeight = () => (MOBILE_QUERY.matches ? 180 : 220);
 const COLORS = ['#3b82f6', '#22c55e', '#fbbf24', '#ef4444', '#a855f7', '#06b6d4', '#f97316', '#ec4899', '#84cc16'];
 
 const STATUS_TEXT = { good: 'Good', fair: 'Fair', poor: 'Poor' };
@@ -76,6 +77,73 @@ function showNotice(id, message, isError = false) {
     node.textContent = message || '';
     node.classList.toggle('error', isError);
     node.hidden = !message;
+    if (message && isError) node.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function setLoading(loading) {
+    $('loadingBar').hidden = !loading;
+    document.body.classList.toggle('busy', loading);
+}
+
+// Wait for a paint so a loading state shows before heavy synchronous parsing
+const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
+
+// Help text shown on hover, keyboard focus and tap (title tooltips do not exist on touch screens)
+function helpAttrs(text) {
+    return text ? { 'data-help': text, tabindex: '0' } : {};
+}
+
+function initHelpTips() {
+    const tip = el('div', { id: 'helpTip', className: 'help-tip', role: 'tooltip', hidden: true });
+    document.body.append(tip);
+    let current = null;
+    let pointerType = 'mouse';
+
+    const show = (target) => {
+        if (current && current !== target) current.removeAttribute('aria-describedby');
+        current = target;
+        target.setAttribute('aria-describedby', 'helpTip');
+        tip.textContent = target.dataset.help;
+        tip.hidden = false;
+        const rect = target.getBoundingClientRect();
+        const box = tip.getBoundingClientRect();
+        const margin = 8;
+        const left = Math.min(
+            Math.max(margin, rect.left + rect.width / 2 - box.width / 2),
+            window.innerWidth - box.width - margin
+        );
+        const top = rect.top - box.height - margin < margin ? rect.bottom + margin : rect.top - box.height - margin;
+        tip.style.left = `${left}px`;
+        tip.style.top = `${top}px`;
+    };
+    const hide = () => {
+        if (!current) return;
+        current.removeAttribute('aria-describedby');
+        current = null;
+        tip.hidden = true;
+    };
+
+    document.addEventListener('pointerdown', (e) => (pointerType = e.pointerType || 'mouse'), true);
+    document.addEventListener('pointerover', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        const target = e.target.closest?.('[data-help]');
+        if (target) target !== current && show(target);
+        else hide();
+    });
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest?.('[data-help]');
+        if (!target) return hide();
+        if (target === current && pointerType !== 'mouse') hide();
+        else show(target);
+    });
+    document.addEventListener('focusin', (e) => {
+        const target = e.target.closest?.('[data-help]');
+        if (target && pointerType !== 'touch') show(target);
+    });
+    document.addEventListener('focusout', (e) => e.target === current && hide());
+    document.addEventListener('keydown', (e) => e.key === 'Escape' && hide());
+    window.addEventListener('scroll', hide, { passive: true, capture: true });
+    window.addEventListener('resize', hide);
 }
 
 function card(title, iconName, ...children) {
@@ -295,12 +363,44 @@ function renderDumps() {
     const visible = state.dumps
         .filter((dump) => dumpMatches(dump, query))
         .sort((a, b) => (b.startTime ?? b.modified) - (a.startTime ?? a.modified));
-    $('dumpCount').textContent = `${visible.length} / ${state.dumps.length}`;
+    $('dumpCount').textContent = query
+        ? `${visible.length} of ${state.dumps.length}`
+        : `${state.dumps.length} dump${state.dumps.length === 1 ? '' : 's'}`;
 
     const body = $('dumpsBody');
     body.replaceChildren();
     if (!visible.length) {
-        body.append(el('tr', {}, el('td', { colspan: 7, className: 'muted', text: 'No dumps found.' })));
+        const empty = query
+            ? el(
+                  'div',
+                  { className: 'empty-state' },
+                  icon('fa-magnifying-glass'),
+                  el('div', { className: 'empty-title', text: `No dumps match "${$('dumpSearch').value.trim()}"` }),
+                  el(
+                      'button',
+                      {
+                          className: 'btn',
+                          onclick: () => {
+                              $('dumpSearch').value = '';
+                              renderDumps();
+                              $('dumpSearch').focus();
+                          },
+                      },
+                      icon('fa-xmark'),
+                      ' Clear filter'
+                  )
+              )
+            : el(
+                  'div',
+                  { className: 'empty-state' },
+                  icon('fa-inbox'),
+                  el('div', { className: 'empty-title', text: 'No dumps yet' }),
+                  el('div', {
+                      className: 'muted',
+                      text: 'Dumps of the calls on this server will appear here, one per participant.',
+                  })
+              );
+        body.append(el('tr', { className: 'empty-row' }, el('td', { colspan: 7 }, empty)));
         return;
     }
     for (const dump of visible) {
@@ -309,39 +409,52 @@ function renderDumps() {
         body.append(
             el(
                 'tr',
-                { className: dump.name === state.selectedDump?.name ? 'selected' : '' },
-                el('td', { text: formatDate(started ?? dump.modified) }),
-                el('td', { text: dump.conference || '-' }),
+                {
+                    className: `clickable${dump.name === state.selectedDump?.name ? ' selected' : ''}`,
+                    // The whole row opens the analysis, the buttons keep their own action
+                    onclick: (e) => !e.target.closest('button') && viewServerDump(dump, e.currentTarget),
+                },
+                el('td', { className: 'c-started', text: formatDate(started ?? dump.modified) }),
+                el('td', { className: 'c-room', text: dump.conference || '-' }),
                 el(
                     'td',
-                    { title: dump.userAgent || '' },
+                    { className: 'c-user', title: dump.userAgent || '' },
                     el('div', { className: 'mono', text: dump.user || '-' }),
                     el('div', { className: 'muted mono', text: dump.session || '' })
                 ),
                 el(
                     'td',
-                    {},
+                    { className: 'c-tags' },
                     (dump.tags || []).map((tag) => el('span', { className: 'tag', text: tag }))
                 ),
                 el(
                     'td',
-                    {},
+                    { className: 'c-duration' },
                     dump.active ? el('span', { className: 'tag live', text: 'recording' }) : formatDuration(duration)
                 ),
-                el('td', { text: formatBytes(dump.size) }),
+                el('td', { className: 'c-size', text: formatBytes(dump.size) }),
                 el(
                     'td',
                     { className: 'actions' },
                     el(
                         'button',
-                        { className: 'btn primary', title: 'Analyze', onclick: () => viewServerDump(dump) },
+                        {
+                            className: 'btn primary analyze',
+                            title: 'Analyze',
+                            onclick: (e) => viewServerDump(dump, e.currentTarget.closest('tr')),
+                        },
                         icon('fa-magnifying-glass-chart'),
                         ' Analyze'
                     ),
                     ' ',
                     el(
                         'button',
-                        { className: 'btn', title: 'Download', onclick: () => downloadServerDump(dump) },
+                        {
+                            className: 'btn',
+                            title: 'Download',
+                            'aria-label': 'Download',
+                            onclick: () => downloadServerDump(dump),
+                        },
                         icon('fa-download')
                     ),
                     ' ',
@@ -350,6 +463,7 @@ function renderDumps() {
                         {
                             className: 'btn danger',
                             title: dump.active ? 'Still recording' : 'Delete',
+                            'aria-label': 'Delete',
                             disabled: dump.active,
                             onclick: () => deleteServerDump(dump),
                         },
@@ -365,11 +479,22 @@ async function fetchDumpBlob(dump) {
     return (await api(dumpUrl(dump.name))).blob();
 }
 
-async function viewServerDump(dump) {
+async function viewServerDump(dump, row = null) {
+    if (state.opening) return;
+    state.opening = true;
+    const button = row?.querySelector('.analyze');
+    button?.classList.add('loading');
+    button?.querySelector('i')?.classList.replace('fa-magnifying-glass-chart', 'fa-spinner');
+    setLoading(true);
     try {
         await openDump(await fetchDumpBlob(dump), dump.name, dump);
     } catch (err) {
         showNotice('viewerNotice', `Unable to open ${dump.name}: ${err.message}`, true);
+    } finally {
+        state.opening = false;
+        setLoading(false);
+        button?.classList.remove('loading');
+        button?.querySelector('i')?.classList.replace('fa-spinner', 'fa-magnifying-glass-chart');
     }
 }
 
@@ -551,6 +676,7 @@ async function openDump(blob, name, serverDump = null) {
     }
     let data;
     try {
+        await nextFrame();
         data = await rtcstatsShared.readDump(blob);
     } catch (err) {
         throw new Error('Unrecognized dump format');
@@ -567,6 +693,8 @@ async function openDump(blob, name, serverDump = null) {
     $('dumpName').textContent = name || 'Dump';
     $('downloadBtn').hidden = !serverDump;
     updateAnalyzeButton();
+    // The browser / phone back button returns to the dump list
+    if (!history.state?.rtcAnalysis) history.pushState({ rtcAnalysis: true }, '');
     showAnalysis(true);
     renderTabs('overview');
 }
@@ -642,12 +770,24 @@ async function openExternalAnalysis() {
 }
 
 async function openLocalFile(file) {
-    if (!file) return;
+    if (!file || state.opening) return;
+    state.opening = true;
+    setLoading(true);
     try {
         await openDump(file, file.name);
     } catch (err) {
         showNotice('viewerNotice', `Unable to open ${file.name}: ${err.message}`, true);
+    } finally {
+        state.opening = false;
+        setLoading(false);
     }
+}
+
+function closeAnalysis() {
+    if ($('analysisView').hidden) return;
+    showAnalysis(false);
+    // New dumps may have arrived while analyzing
+    if (getApiKey()) loadDumps({ silent: true });
 }
 
 function showAnalysis(visible) {
@@ -694,18 +834,24 @@ function tabBadge(id, analysis) {
     }
 }
 
-function renderTabs(activeTab) {
+function renderTabs(activeTab, { focus = false } = {}) {
+    const switching = state.activeTab !== activeTab;
     state.activeTab = activeTab;
     const analysis = state.analysis;
     $('tabs').replaceChildren(
         ...TABS.map((tab) => {
             const badge = tabBadge(tab.id, analysis);
+            const active = tab.id === activeTab;
             return el(
                 'button',
                 {
-                    className: `tab${tab.id === activeTab ? ' active' : ''}`,
+                    className: `tab${active ? ' active' : ''}`,
                     role: 'tab',
-                    'aria-selected': tab.id === activeTab ? 'true' : 'false',
+                    id: `tab-${tab.id}`,
+                    'aria-selected': active ? 'true' : 'false',
+                    'aria-controls': 'tabContent',
+                    tabindex: active ? '0' : '-1',
+                    'data-tab': tab.id,
                     onclick: () => renderTabs(tab.id),
                 },
                 icon(tab.icon),
@@ -714,6 +860,8 @@ function renderTabs(activeTab) {
             );
         })
     );
+    $('tabContent').setAttribute('aria-labelledby', `tab-${activeTab}`);
+    revealActiveTab(focus);
     destroyCharts();
     const content = $('tabContent');
     content.replaceChildren();
@@ -726,6 +874,39 @@ function renderTabs(activeTab) {
         advanced: renderAdvanced,
     }[activeTab];
     render(content, analysis);
+    if (switching) scrollToTabContent();
+}
+
+// Keep the active tab visible in the horizontally scrolling bar (mobile)
+function revealActiveTab(focus) {
+    const bar = $('tabs');
+    const active = bar.querySelector('.tab.active');
+    if (!active) return;
+    if (bar.scrollWidth > bar.clientWidth) {
+        bar.scrollLeft = active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2;
+    }
+    if (focus) active.focus();
+}
+
+// After switching tab from far down the page, start reading the new tab from its top
+function scrollToTabContent() {
+    const top = $('tabContent').getBoundingClientRect().top + window.scrollY - $('tabs').offsetHeight - 8;
+    if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
+}
+
+function initTabKeyboard() {
+    $('tabs').addEventListener('keydown', (e) => {
+        const index = TABS.findIndex((tab) => tab.id === state.activeTab);
+        const next = {
+            ArrowRight: index + 1,
+            ArrowLeft: index - 1,
+            Home: 0,
+            End: TABS.length - 1,
+        }[e.key];
+        if (next === undefined || !state.analysis) return;
+        e.preventDefault();
+        renderTabs(TABS[(next + TABS.length) % TABS.length].id, { focus: true });
+    });
 }
 
 // ####################################################
@@ -746,8 +927,8 @@ function renderOverview(content, analysis) {
     const kpi = (label, value, status, help) =>
         el(
             'div',
-            { className: 'kpi', title: help },
-            el('div', { className: 'kpi-label', text: label }),
+            { className: `kpi${help ? ' has-help' : ''}`, ...helpAttrs(help) },
+            el('div', { className: 'kpi-label' }, label, help ? icon('fa-circle-question help-icon') : null),
             el('div', { className: `kpi-value ${status || ''}`, text: value })
         );
 
@@ -864,7 +1045,14 @@ function metricRow(name, metric, value, display) {
         el(
             'div',
             { className: 'metric-top' },
-            el('span', { className: 'metric-name', title: METRIC_HELP[metric] || '', text: name }),
+            el(
+                'span',
+                {
+                    className: `metric-name${METRIC_HELP[metric] ? ' has-help' : ''}`,
+                    ...helpAttrs(METRIC_HELP[metric]),
+                },
+                name
+            ),
             el('span', { className: 'metric-value', text: display ?? formatMetric(metric, value) })
         ),
         gauge(metric, value)
@@ -1156,10 +1344,10 @@ function renderMedia(content, analysis) {
         }
         const table = el(
             'div',
-            { className: 'table-wrap' },
+            { className: 'table-wrap stack-wrap' },
             el(
                 'table',
-                {},
+                { className: 'stack' },
                 el(
                     'thead',
                     {},
@@ -1185,14 +1373,14 @@ function renderMedia(content, analysis) {
                         el(
                             'tr',
                             {},
-                            el('td', { className: 'mono', text: streamLabel(s) }),
-                            el('td', { text: s.codec || '-' }),
-                            el('td', { text: s.height ? `${s.width}x${s.height}` : '-' }),
-                            el('td', { text: formatMetric('fps', s.fps) }),
-                            el('td', { text: formatBitrate(s.bitrate) }),
-                            el('td', { text: formatMetric('packetLoss', s.packetLoss) }),
-                            el('td', { text: formatMetric('jitter', s.jitter) }),
-                            el('td', {}, pill(s.status))
+                            el('td', { className: 'mono stack-head', text: streamLabel(s) }),
+                            el('td', { 'data-label': 'Codec', text: s.codec || '-' }),
+                            el('td', { 'data-label': 'Resolution', text: s.height ? `${s.width}x${s.height}` : '-' }),
+                            el('td', { 'data-label': 'Frame rate', text: formatMetric('fps', s.fps) }),
+                            el('td', { 'data-label': 'Bitrate', text: formatBitrate(s.bitrate) }),
+                            el('td', { 'data-label': 'Packet loss', text: formatMetric('packetLoss', s.packetLoss) }),
+                            el('td', { 'data-label': 'Jitter', text: formatMetric('jitter', s.jitter) }),
+                            el('td', { 'data-label': 'Status' }, pill(s.status))
                         )
                     )
                 )
@@ -1318,12 +1506,15 @@ function renderClient(content, analysis) {
         el(
             'tr',
             { className: request.result === 'failure' ? 'problem' : '' },
-            el('td', { className: 'mono', text: formatOffset(request.time - session.first) }),
-            el('td', { text: request.api === 'getDisplayMedia' ? 'Screen share' : 'Camera / microphone' }),
-            el('td', { text: describeConstraints(request.constraints) }),
+            el('td', { className: 'mono', 'data-label': 'Time', text: formatOffset(request.time - session.first) }),
+            el('td', {
+                className: 'stack-head',
+                text: request.api === 'getDisplayMedia' ? 'Screen share' : 'Camera / microphone',
+            }),
+            el('td', { 'data-label': 'Asked for', text: describeConstraints(request.constraints) }),
             el(
                 'td',
-                {},
+                { 'data-label': 'Result' },
                 request.result === 'success'
                     ? pill('good', 'Success')
                     : request.result === 'failure'
@@ -1331,6 +1522,7 @@ function renderClient(content, analysis) {
                       : pill(null, 'No answer')
             ),
             el('td', {
+                'data-label': 'Details',
                 text: request.error
                     ? `${request.error.name}${request.error.message ? `: ${request.error.message}` : ''}`
                     : isNum(request.duration)
@@ -1346,10 +1538,10 @@ function renderClient(content, analysis) {
             rows.length
                 ? el(
                       'div',
-                      { className: 'table-wrap' },
+                      { className: 'table-wrap stack-wrap' },
                       el(
                           'table',
-                          {},
+                          { className: 'stack' },
                           el(
                               'thead',
                               {},
@@ -1431,8 +1623,8 @@ function renderLogs(content, analysis) {
                         { className: 'time mono', title: formatDate(event.timestamp) },
                         formatOffset(event.timestamp - first)
                     ),
-                    el('td', { className: 'mono', text: event.source }),
-                    el('td', { className: 'mono', text: event.type }),
+                    el('td', { className: 'mono source', text: event.source }),
+                    el('td', { className: 'mono type', text: event.type }),
                     el(
                         'td',
                         { className: 'value' },
@@ -1474,7 +1666,7 @@ function renderLogs(content, analysis) {
             ),
             el(
                 'div',
-                { className: 'table-wrap', style: 'max-height:640px' },
+                { className: 'table-wrap tall' },
                 el(
                     'table',
                     { className: 'events-table' },
@@ -1904,7 +2096,12 @@ function renderChart(container, { title, unit, series }) {
     const box = el(
         'div',
         { className: 'chart' },
-        el('div', { className: 'chart-title', text: unit ? `${title} (${unit})` : title })
+        el(
+            'div',
+            { className: 'chart-title' },
+            el('span', { text: unit ? `${title} (${unit})` : title }),
+            el('span', { className: 'chart-hint', text: 'Drag to zoom · double-click to reset' })
+        )
     );
     container.append(box);
 
@@ -1919,8 +2116,8 @@ function renderChart(container, { title, unit, series }) {
     const axis = { stroke: '#8b95a5', grid: { stroke: '#2a2d35', width: 1 }, ticks: { stroke: '#2a2d35' } };
     const chart = new uPlot(
         {
-            width: Math.max(box.clientWidth - 20, 280),
-            height: CHART_HEIGHT,
+            width: chartWidth(box),
+            height: chartHeight(),
             scales: { x: { time: true } },
             cursor: { drag: { x: true, y: false } },
             series: [
@@ -1961,10 +2158,14 @@ function renderCharts(container, charts) {
     }
 }
 
+function chartWidth(box) {
+    return Math.max(box.clientWidth - 20, 160);
+}
+
 function resizeCharts() {
     for (const chart of state.charts) {
         const box = chart.root.parentElement;
-        if (box && box.clientWidth) chart.setSize({ width: Math.max(box.clientWidth - 20, 280), height: CHART_HEIGHT });
+        if (box && box.clientWidth) chart.setSize({ width: chartWidth(box), height: chartHeight() });
     }
 }
 
@@ -1972,8 +2173,23 @@ function resizeCharts() {
 // INIT
 // ####################################################
 
+function setKeyVisible(visible) {
+    const label = visible ? 'Hide the API key' : 'Show the API key';
+    const button = $('toggleKeyBtn');
+    $('apiKeyInput').type = visible ? 'text' : 'password';
+    button.setAttribute('aria-pressed', String(visible));
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    button.querySelector('i').className = `fa-solid ${visible ? 'fa-eye-slash' : 'fa-eye'}`;
+}
+
 function initDropZone() {
     const zone = $('dropZone');
+    zone.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        $('fileInput').click();
+    });
     let depth = 0;
     document.addEventListener('dragenter', (e) => {
         e.preventDefault();
@@ -2000,6 +2216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!key) return;
         sessionStorage.setItem(API_KEY_STORAGE, key);
         $('apiKeyInput').value = '';
+        setKeyVisible(false);
         loadDumps();
     });
     $('refreshBtn').addEventListener('click', () => loadDumps());
@@ -2016,16 +2233,21 @@ document.addEventListener('DOMContentLoaded', () => {
         openLocalFile(e.target.files[0]);
         e.target.value = '';
     });
-    $('backBtn').addEventListener('click', () => {
-        showAnalysis(false);
-        // New dumps may have arrived while analyzing
-        if (getApiKey()) loadDumps({ silent: true });
+    $('toggleKeyBtn').addEventListener('click', () => {
+        setKeyVisible($('apiKeyInput').type === 'password');
+        $('apiKeyInput').focus();
     });
+    $('backBtn').addEventListener('click', () => (history.state?.rtcAnalysis ? history.back() : closeAnalysis()));
+    window.addEventListener('popstate', closeAnalysis);
+    // A reload keeps the history entry but not the opened dump
+    if (history.state?.rtcAnalysis) history.replaceState(null, '');
     $('downloadBtn').addEventListener('click', () => state.selectedDump && downloadServerDump(state.selectedDump));
     $('analyzeBtn').addEventListener('click', openExternalAnalysis);
     loadViewerConfig();
     initDropZone();
     initAutoRefresh();
+    initHelpTips();
+    initTabKeyboard();
 
     let resizeTimer;
     window.addEventListener('resize', () => {

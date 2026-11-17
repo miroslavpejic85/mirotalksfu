@@ -8,7 +8,9 @@
         <meta charset="utf-8" />
         <meta name="robots" content="noindex, nofollow" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <meta name="theme-color" content="#0f1117" />
+        <meta name="color-scheme" content="dark" />
         <meta name="referrer" content="no-referrer" />
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
@@ -17,6 +19,7 @@
         <link rel="stylesheet" type="text/css" href="../css/RtcStatsViewer.css" />
     </head>
     <body>
+        <div id="loadingBar" class="loading-bar" role="progressbar" aria-label="Loading dump" hidden></div>
         <div class="container">
             <div class="header">
                 <div class="header-left">
@@ -28,11 +31,13 @@
                 </div>
                 <div>
                     <label class="btn" for="fileInput" title="Open a local RTCStats or webrtc-internals dump">
-                        <i class="fa-solid fa-folder-open"></i> Open file
+                        <i class="fa-solid fa-folder-open"></i> <span class="btn-label">Open file</span>
                     </label>
                     <input type="file" id="fileInput" hidden />
                 </div>
             </div>
+
+            <div id="viewerNotice" class="notice error" role="alert" hidden></div>
 
             <!-- Library: server dumps + local files -->
             <div id="libraryView">
@@ -46,16 +51,46 @@
                                 <span class="slider"></span>
                                 Auto-refresh
                             </label>
-                            <button id="refreshBtn" class="btn" title="Reload the dump list">
-                                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                            <button id="refreshBtn" class="btn" title="Reload the dump list" aria-label="Refresh">
+                                <i class="fa-solid fa-arrows-rotate"></i> <span class="btn-label">Refresh</span>
                             </button>
-                            <button id="deleteAllBtn" class="btn danger" title="Delete all finished dumps" hidden>
-                                <i class="fa-solid fa-trash-can"></i> Delete all
+                            <button
+                                id="deleteAllBtn"
+                                class="btn danger"
+                                title="Delete all finished dumps"
+                                aria-label="Delete all"
+                                hidden
+                            >
+                                <i class="fa-solid fa-trash-can"></i> <span class="btn-label">Delete all</span>
                             </button>
                         </div>
                     </div>
                     <form id="authForm" class="auth-form" autocomplete="off">
-                        <input type="password" id="apiKeyInput" placeholder="API key (API_KEY_SECRET)" required />
+                        <p class="hint auth-hint">
+                            Enter the server API key to browse the dumps collected by this server. No key? You can still
+                            open a dump saved on this device below.
+                        </p>
+                        <div class="password-field">
+                            <input
+                                type="password"
+                                id="apiKeyInput"
+                                placeholder="API key (API_KEY_SECRET)"
+                                aria-label="API key"
+                                autocapitalize="off"
+                                spellcheck="false"
+                                required
+                            />
+                            <button
+                                type="button"
+                                id="toggleKeyBtn"
+                                class="reveal-btn"
+                                title="Show the API key"
+                                aria-label="Show the API key"
+                                aria-pressed="false"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
                         <button type="submit" class="btn primary"><i class="fa-solid fa-key"></i> Connect</button>
                     </form>
                     <div id="dumpsPanel" hidden>
@@ -66,12 +101,12 @@
                                 id="dumpSearch"
                                 placeholder="Filter by room, participant, tag, file..."
                             />
-                            <span class="muted" id="dumpCount"></span>
-                            <button id="logoutBtn" class="btn icon" title="Forget the API key">
+                            <span class="muted" id="dumpCount" aria-live="polite"></span>
+                            <button id="logoutBtn" class="btn icon" title="Forget the API key" aria-label="Sign out">
                                 <i class="fa-solid fa-right-from-bracket"></i>
                             </button>
                         </div>
-                        <div class="table-wrap">
+                        <div class="table-wrap dumps-wrap">
                             <table class="dumps-table">
                                 <thead>
                                     <tr>
@@ -91,19 +126,23 @@
                     <div id="serverNotice" class="notice" hidden></div>
                 </section>
 
-                <div id="dropZone" class="drop-zone">
+                <label id="dropZone" class="drop-zone" for="fileInput" tabindex="0">
                     <i class="fa-solid fa-file-arrow-up"></i>
-                    Drop an RTCStats or chrome://webrtc-internals dump here (read locally in your browser)
-                </div>
+                    <span class="drop-title">
+                        <span class="for-pointer">Drop a dump here or <u>browse</u></span>
+                        <span class="for-touch">Tap to open a dump from this device</span>
+                    </span>
+                    <span class="drop-sub"
+                        >RTCStats or chrome://webrtc-internals dump · read locally, nothing is uploaded</span
+                    >
+                </label>
             </div>
-
-            <div id="viewerNotice" class="notice error" hidden></div>
 
             <!-- Analysis of one dump -->
             <section id="analysisView" hidden>
                 <div class="breadcrumb">
-                    <button id="backBtn" class="btn" title="Back to all dumps">
-                        <i class="fa-solid fa-arrow-left"></i> All dumps
+                    <button id="backBtn" class="btn" title="Back to all dumps" aria-label="Back to all dumps">
+                        <i class="fa-solid fa-arrow-left"></i> <span class="btn-label">All dumps</span>
                     </button>
                     <span class="crumb-name mono" id="dumpName"></span>
                     <button
@@ -114,12 +153,12 @@
                     >
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> <span id="analyzeLabel"></span>
                     </button>
-                    <button id="downloadBtn" class="btn icon" title="Download this dump" hidden>
+                    <button id="downloadBtn" class="btn icon" title="Download this dump" aria-label="Download" hidden>
                         <i class="fa-solid fa-download"></i>
                     </button>
                 </div>
-                <nav class="tabs" id="tabs" role="tablist"></nav>
-                <div id="tabContent"></div>
+                <nav class="tabs" id="tabs" role="tablist" aria-label="Analysis sections"></nav>
+                <div id="tabContent" role="tabpanel"></div>
             </section>
         </div>
 
