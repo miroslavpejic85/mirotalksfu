@@ -166,7 +166,9 @@ describe('Socket.IO join authorization', () => {
         state.data.peer_info.peer_name = 'Custom display name';
         const result = await joinExistingRoom(state);
         assert.equal(result.id, 'room-a');
-        assert.equal(result.recUploadToken, 'recording-token');
+        // Recording upload tokens are issued per recording (getRecUploadToken), never on join
+        assert.equal(result.recUploadToken, undefined);
+        assert.equal(state.context.createRecUploadToken.callCount, 0);
         assert.equal(result.rtmpStreamToken, 'stream-token');
         assert.equal(state.room.addPeer.callCount, 1);
     });

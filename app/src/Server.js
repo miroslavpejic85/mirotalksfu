@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.16
+ * @version 2.8.17
  *
  */
 
@@ -261,13 +261,35 @@ function decodeToken(jwtToken) {
 // Lifetime of the per-session server recording upload token (must outlive long recordings)
 const recUploadTokenExp = config?.media?.recording?.uploadTokenExp || '24h';
 
-// Create a signed upload token bound to a specific room. It proves the requester
-// actually passed the Socket.IO `join` auth for that room before allowing writes
-// to the recording directory via the /recSync* endpoints.
-function createRecUploadToken(roomId) {
-    return jwt.sign({ scope: 'rec-upload', roomId: String(roomId) }, jwtKeys.recUpload, {
-        expiresIn: recUploadTokenExp,
-    });
+// Create a signed upload capability for ONE server-generated recording file. It is issued over
+// the joined peer's socket when that peer starts a recording, so it can never be used to write
+// another peer's file. It is also bound to the room session (a recreated room rejects it) and to
+// the uploader's identity (a ban revokes it).
+function createRecUploadToken({ roomId, sessionId, fileName, peerUuid, authUser }) {
+    return jwt.sign(
+        {
+            scope: 'rec-upload',
+            roomId: String(roomId),
+            sessionId: String(sessionId),
+            fileName: String(fileName),
+            peerUuid: typeof peerUuid === 'string' ? peerUuid : null,
+            authUser: authUser ? String(authUser) : null,
+        },
+        jwtKeys.recUpload,
+        { expiresIn: recUploadTokenExp }
+    );
+}
+
+const REC_DATE_TIME_PATTERN = /^\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}$/;
+
+// Unique, unguessable recording file name (Rec_<room>_<date>_<time>_<session>_<nonce>.webm).
+// The client may supply its local date/time so the name reflects the recorder's clock.
+function createRecFileName(roomId, sessionId, clientDateTime) {
+    const dateTime = REC_DATE_TIME_PATTERN.test(clientDateTime)
+        ? clientDateTime
+        : new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '_');
+    const nonce = uuidv4().replace(/-/g, '').slice(0, 12);
+    return `Rec_${roomId}_${dateTime}_${sessionId}_${nonce}.webm`;
 }
 
 // Create a signed token bound to a room, authorizing the /rtmp streamer page opened by
@@ -1542,14 +1564,6 @@ function startServer() {
         }
     }
 
-    function getRoomIdFromFilename(fileName) {
-        const parts = fileName.split('_');
-        if (parts.length >= 2) {
-            return parts[1];
-        }
-        throw new Error('Invalid file name format');
-    }
-
     // Extract the recording upload token from an Authorization: Bearer header or query param
     function getRecUploadToken(req) {
         const auth = req.headers['authorization'] || '';
@@ -1559,8 +1573,8 @@ function startServer() {
     }
 
     // Authorize /recSync* requests: recording must be enabled and the caller must
-    // present a valid, unexpired upload token issued on join. The room the token was
-    // issued for is stored on req and later matched against the target file's room.
+    // present a valid, unexpired upload token issued for one recording file. The token
+    // claims are stored on req and later matched against the requested file and room.
     function checkRecUploadToken(req, res, next) {
         if (!serverRecordingEnabled) {
             return res.status(403).json({ error: 'Recording disabled' });
@@ -1571,15 +1585,38 @@ function startServer() {
                 return res.status(401).json({ error: 'Missing upload token' });
             }
             const decoded = jwt.verify(token, jwtKeys.recUpload, JWT_VERIFY_OPTIONS);
-            if (!decoded || decoded.scope !== 'rec-upload' || !decoded.roomId) {
+            if (
+                !decoded ||
+                decoded.scope !== 'rec-upload' ||
+                !decoded.roomId ||
+                !decoded.sessionId ||
+                !decoded.fileName
+            ) {
                 return res.status(401).json({ error: 'Invalid upload token' });
             }
-            req.recUploadRoomId = String(decoded.roomId);
+            req.recUpload = {
+                roomId: String(decoded.roomId),
+                sessionId: String(decoded.sessionId),
+                fileName: String(decoded.fileName),
+                peerUuid: decoded.peerUuid || null,
+                authUser: decoded.authUser || null,
+            };
             next();
         } catch (err) {
             log.warn('[recSync] Rejected upload with invalid token', { error: err.message });
             return res.status(401).json({ error: 'Invalid or expired upload token' });
         }
+    }
+
+    // The token only authorizes the exact file it was issued for, in the same room session,
+    // while its uploader is not banned. Returns an error message or null when authorized.
+    function getRecUploadDenial(req, fileName) {
+        const { roomId, sessionId, fileName: tokenFileName, peerUuid, authUser } = req.recUpload || {};
+        if (!tokenFileName || fileName !== tokenFileName) return 'Upload token file mismatch';
+        const room = roomList.get(roomId);
+        if (!room || room.getSessionId() !== sessionId) return 'Upload token session expired';
+        if (room.isBanned(peerUuid, authUser)) return 'Upload token revoked';
+        return null;
     }
 
     function deleteFile(filePath) {
@@ -1742,14 +1779,16 @@ function startServer() {
             const start = Date.now();
 
             const { fileName } = checkXSS(req.query);
-            const roomId = getRoomIdFromFilename(fileName);
+
+            const denial = getRecUploadDenial(req, fileName);
+            if (denial) {
+                log.warn('[recSync] Rejected upload', { fileName, reason: denial });
+                return res.status(403).json({ error: denial });
+            }
+
+            const roomId = req.recUpload.roomId;
 
             isValidRequest(req, fileName, roomId);
-
-            // The upload token must have been issued for this exact room
-            if (req.recUploadRoomId !== roomId) {
-                throw new Error('Invalid room ID');
-            }
 
             const filePath = path.resolve(dir.rec, fileName);
             const passThrough = new PassThrough();
@@ -1790,14 +1829,15 @@ function startServer() {
     app.post('/recSyncFixWebm', recSyncLimiter, checkRecUploadToken, async (req, res) => {
         try {
             const { fileName, durationMs } = checkXSS(req.query);
-            const roomId = getRoomIdFromFilename(fileName);
+
+            const denial = getRecUploadDenial(req, fileName);
+            if (denial) {
+                return res.status(403).json({ message: denial });
+            }
+
+            const roomId = req.recUpload.roomId;
 
             isValidRequest(req, fileName, roomId, durationMs, false);
-
-            // The upload token must have been issued for this exact room
-            if (req.recUploadRoomId !== roomId) {
-                return res.status(403).json({ message: 'Upload token room mismatch' });
-            }
 
             const filePath = path.resolve(dir.rec, fileName);
 
@@ -1829,14 +1869,15 @@ function startServer() {
             const start = Date.now();
 
             const { fileName, durationMs } = checkXSS(req.query);
-            const roomId = getRoomIdFromFilename(fileName);
+
+            const denial = getRecUploadDenial(req, fileName);
+            if (denial) {
+                return res.status(403).json({ error: denial });
+            }
+
+            const roomId = req.recUpload.roomId;
 
             isValidRequest(req, fileName, roomId, durationMs, false);
-
-            // The upload token must have been issued for this exact room
-            if (req.recUploadRoomId !== roomId) {
-                return res.status(403).json({ error: 'Upload token room mismatch' });
-            }
 
             const filePath = path.resolve(dir.rec, fileName);
 
@@ -3213,12 +3254,6 @@ function startServer() {
             }
 
             const roomJson = room.toJson();
-
-            // Issue a per-session, room-bound token authorizing this peer to upload
-            // its own server recording chunks via the /recSync* endpoints.
-            if (serverRecordingEnabled) {
-                roomJson.recUploadToken = createRecUploadToken(room.id);
-            }
 
             // Same for the /rtmp streamer page (camera/screen -> RTMP).
             if (rtmpEnabled && rtmpCfg?.fromStream) {
@@ -5276,6 +5311,44 @@ function startServer() {
             log.debug('Recording action', data);
 
             room.broadCast(socket.id, 'recordingAction', data);
+        });
+
+        // Issue the upload capability for one new browser recording synced to the server (/recSync*).
+        // The file name is generated here, so a token can only ever write the file it was issued for.
+        socket.on('getRecUploadToken', (dataObject, cb) => {
+            const callback = typeof cb === 'function' ? cb : () => {};
+
+            if (!serverRecordingEnabled) return callback({ error: 'Recording disabled' });
+            if (!roomExists(socket)) return callback({ error: 'Room not found' });
+
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!peer || isPeerInLobby(peer)) return callback({ error: 'Not allowed' });
+
+            const peerName = peer.peer_info?.peer_name;
+            const peerUuid = peer.peer_info?.peer_uuid;
+            if (room.isBanned(peerUuid, peer.authUser)) return callback({ error: 'Not allowed' });
+
+            if (room.isHostOnlyRecording() && !isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid)) {
+                return callback({ error: 'Only the host can record' });
+            }
+
+            const sessionId = room.getSessionId();
+            const fileName = createRecFileName(room.id, sessionId, dataObject?.dateTime);
+            if (sanitizeFilename(fileName) !== fileName || !Validator.isValidRecFileNameFormat(fileName)) {
+                return callback({ error: 'Recording is not supported for this room name' });
+            }
+
+            const token = createRecUploadToken({
+                roomId: room.id,
+                sessionId,
+                fileName,
+                peerUuid,
+                authUser: peer.authUser,
+            });
+
+            log.debug('Recording upload token issued', { room_id: room.id, peer_name: peerName, fileName });
+
+            callback({ fileName, token });
         });
 
         socket.on('serverRecording', (dataObject, cb) => {

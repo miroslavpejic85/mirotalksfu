@@ -30,7 +30,7 @@ async function tick() {
     await new Promise((resolve) => setImmediate(resolve));
 }
 
-function createHarness({ server = false, s3 = false, state = 'recording' } = {}) {
+function createHarness({ server = false, s3 = false, state = 'recording', authorize } = {}) {
     const events = [];
     const timers = [];
     const listeners = {};
@@ -45,6 +45,7 @@ function createHarness({ server = false, s3 = false, state = 'recording' } = {})
         recShowInfo: true,
         recCodecs: 'video/webm',
         getDataTimeString: () => 'test',
+        getDataTimeStringFormat: () => '2026_01_01_00_00_00',
         bytesToSize: (size) => `${size} bytes`,
         userLog: (...args) => events.push(['toast', ...args]),
         recordingTypeSelect: controls,
@@ -122,7 +123,14 @@ function createHarness({ server = false, s3 = false, state = 'recording' } = {})
         recScreenAudioTracks: [],
         recSyncTime: 4000,
         recSyncChunkSize: 2,
-        recUploadToken: 'test-token',
+        socket: {
+            off() {},
+            request: async (type) => {
+                assert.equal(type, 'getRecUploadToken');
+                if (authorize) return authorize();
+                return { fileName: 'test.webm', token: 'test-token' };
+            },
+        },
         recording: {
             recSyncServerRecording: server,
             recSyncServerToS3: s3,
@@ -132,7 +140,6 @@ function createHarness({ server = false, s3 = false, state = 'recording' } = {})
         event() {},
         recordingAction() {},
         sound() {},
-        getServerRecFileName: () => 'test.webm',
         saveLastRecordingInfo() {},
         showRecordingInfo() {},
         handleServerRecordingStop: () => events.push('server-info'),
@@ -275,6 +282,36 @@ describe('recording finalization before room exit', () => {
             assert.ok(h.events.indexOf('server-info') < h.events.indexOf('exit-room'));
         });
     }
+
+    it('uploads only to the server-issued file name with its per-recording token', async () => {
+        const h = createHarness({ server: true });
+        const requests = [];
+        h.context.axios.post = async (url, chunk, options) => {
+            requests.push([url, options.headers.Authorization]);
+            return { data: 'ok' };
+        };
+        h.data(new Blob(['ab']));
+        h.stopEvent();
+        await h.client.saveRecording('issued file');
+        assert.equal(requests[0][0], 'https://record.example/recSync?fileName=test.webm');
+        assert.ok(requests.every(([, auth]) => auth === 'Bearer test-token'));
+    });
+
+    it('stops without uploading when the server refuses the recording upload', async () => {
+        const h = createHarness({ server: true, authorize: async () => Promise.reject('Only the host can record') });
+        let requests = 0;
+        h.context.axios.post = async () => {
+            requests++;
+            return { data: 'ok' };
+        };
+        h.data(new Blob(['data']));
+        await tick();
+        assert.equal(h.events.includes('stop'), true);
+        h.stopEvent();
+        await assert.rejects(h.client.saveRecording('refused'), /Only the host can record/);
+        assert.equal(requests, 0);
+        assert.equal(h.events.includes('server-info'), false);
+    });
 
     it('propagates upload failures and does not finalize an incomplete server recording', async () => {
         const h = createHarness({ server: true });

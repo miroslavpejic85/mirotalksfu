@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.8.16 - Configuration File
+ * MiroTalk SFU v2.8.17 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -198,8 +198,9 @@ module.exports = {
          *
          * Upload Security:
          * ------------------------
-         * - uploadTokenExp : Lifetime of the per-session upload token issued on join and
-         *                    required by the /recSync* endpoints (default '24h'). Must be
+         * - uploadTokenExp : Lifetime of the per-recording upload token, issued when a peer starts
+         *                    a recording and bound to that one file, required by the /recSync*
+         *                    endpoints (default '24h'). Must be
          *                    long enough to outlast the longest expected recording.
          * - rateLimit      : Per-IP rate limit for /recSync* upload requests
          *                    (default: 300 requests / 60s) to mitigate flooding.

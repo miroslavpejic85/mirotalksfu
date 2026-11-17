@@ -28,7 +28,7 @@ const recordingDirectory = path.join(__dirname, 'rec');
 // Flag to enable/disable server recording
 const isServerRecordingEnabled = true;
 
-// Secret used to verify the per-session upload token.
+// Secret used to verify the per-recording upload token.
 // IMPORTANT: must match JWT_SECRET on the main MiroTalk SFU server that issues the token.
 // Fail closed: refuse to start with a missing, weak or publicly known secret.
 const JWT_MIN_LENGTH = 32;
@@ -79,14 +79,8 @@ function getRecUploadToken(req) {
     return null;
 }
 
-// Parse the roomId embedded in a recording filename (Rec_<roomId>_<...>.webm)
-function getRoomIdFromFilename(fileName) {
-    const parts = String(fileName).split('_');
-    return parts.length >= 2 ? parts[1] : null;
-}
-
-// Authorize /recSync uploads: require a valid, unexpired token issued on join whose
-// room matches the room encoded in the target filename.
+// Authorize /recSync uploads: require a valid, unexpired token issued by the main server for
+// one recording file, and only allow writes to that exact file (never another peer's recording).
 function checkRecUploadToken(req, res, next) {
     try {
         const token = getRecUploadToken(req);
@@ -94,12 +88,12 @@ function checkRecUploadToken(req, res, next) {
             return res.status(401).send('Missing upload token');
         }
         const decoded = jwt.verify(token, jwtKey, { algorithms: ['HS256'] });
-        if (!decoded || decoded.scope !== 'rec-upload' || !decoded.roomId) {
+        if (!decoded || decoded.scope !== 'rec-upload' || !decoded.roomId || !decoded.fileName) {
             return res.status(401).send('Invalid upload token');
         }
         const { fileName } = req.query;
-        if (!fileName || getRoomIdFromFilename(fileName) !== String(decoded.roomId)) {
-            return res.status(403).send('Upload token room mismatch');
+        if (!fileName || fileName !== String(decoded.fileName)) {
+            return res.status(403).send('Upload token file mismatch');
         }
         next();
     } catch (err) {

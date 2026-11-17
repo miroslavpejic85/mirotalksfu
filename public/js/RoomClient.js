@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.16
+ * @version 2.8.17
  *
  */
 
@@ -546,7 +546,7 @@ class RoomClient {
         };
         this.recSyncTime = 4000; // 4 sec
         this.recSyncChunkSize = 1000000; // 1MB
-        this.recUploadToken = ''; // Per-session token authorizing /recSync* uploads (issued on join)
+        this.recUploadToken = ''; // Per-recording token authorizing /recSync* uploads of recServerFileName
         this.rtmpStreamToken = ''; // Per-session token authorizing the /rtmp streamer page (issued on join)
         this.sessionId = ''; // Server-side unique conference-instance ID (issued on join)
 
@@ -842,9 +842,6 @@ class RoomClient {
                 // ##########################################
                 this.peers = new Map(JSON.parse(room.peers));
                 // ##########################################
-
-                // Store the per-session token used to authorize server recording uploads
-                if (room.recUploadToken) this.recUploadToken = room.recUploadToken;
 
                 // Store the per-session token used to authorize the RTMP streamer page
                 if (room.rtmpStreamToken) this.rtmpStreamToken = room.rtmpStreamToken;
@@ -11063,7 +11060,16 @@ class RoomClient {
                 this.handleRecordingError('Recording save failed: ' + error.message);
             });
             this._recordingSave = session;
-            this.recServerFileName = this.getServerRecFileName();
+            if (this.recording.recSyncServerRecording) {
+                this.recServerFileName = '';
+                this.recUploadToken = '';
+                // Chunks queue behind this, so none is sent before the server issued the file name and token
+                session.uploadQueue = this.requestServerRecUpload().catch((error) => {
+                    session.uploadError = error;
+                    console.error('Recording upload authorization failed:', error);
+                    if (this._recordingSave === session && this.mediaRecorder) this.stopRecording();
+                });
+            }
             this.mediaRecorder.addEventListener('start', this.handleMediaRecorderStart);
             this.mediaRecorder.addEventListener('dataavailable', (evt) => this.handleMediaRecorderData(evt, session));
             this.mediaRecorder.addEventListener('stop', (evt) => this.handleMediaRecorderStop(evt, session));
@@ -11085,19 +11091,18 @@ class RoomClient {
         }
     }
 
-    generateUUIDv4() {
-        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
-        );
-    }
-
-    getServerRecFileName() {
-        const roomName = this.room_id.trim();
-        const dateTime = getDataTimeStringFormat();
-        // Prefer the server-side session ID so recordings correlate with join/exit webhook
-        // events for the same conference instance; fall back to a client UUID if unavailable.
-        const uuid = this.sessionId || this.generateUUIDv4();
-        return `Rec_${roomName}_${dateTime}_${uuid}.webm`;
+    async requestServerRecUpload() {
+        let response;
+        try {
+            response = await this.socket.request('getRecUploadToken', { dateTime: getDataTimeStringFormat() });
+        } catch (error) {
+            throw new Error(error?.message || String(error));
+        }
+        if (!response?.fileName || !response?.token) {
+            throw new Error('Recording upload not authorized');
+        }
+        this.recServerFileName = response.fileName;
+        this.recUploadToken = response.token;
     }
 
     handleMediaRecorderStart(evt) {

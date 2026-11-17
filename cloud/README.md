@@ -24,9 +24,11 @@ RECORDING_ENDPOINT=http://localhost:8080
 
 ## Security
 
-Uploads to `/recSync` are authenticated with a short-lived, room-bound token issued by the
-main MiroTalk SFU server when a user joins a room. The client automatically forwards this
-token, and this server verifies it before accepting any data.
+Uploads to `/recSync` are authenticated with a signed token issued by the main MiroTalk SFU
+server each time a user in a room starts a recording. The token is bound to the single,
+server-generated recording file name, so it can only append to that file and never to another
+participant's recording. The client automatically forwards this token, and this server verifies
+it before accepting any data.
 
 For verification to succeed, this server **must** be configured with the **same JWT secret**
 as the main MiroTalk SFU server:
