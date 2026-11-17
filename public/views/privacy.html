@@ -68,7 +68,7 @@
                             <div class="hero-copy">
                                 <h1 class="hero-title mt-0">Privacy Policy</h1>
                                 <p class="hero-paragraph" id="message"></p>
-                                <p class="hero-paragraph"><em>Last Updated: April 15, 2026</em></p>
+                                <p class="hero-paragraph"><em>Last Updated: November 17, 2026</em></p>
 
                                 <p class="hero-paragraph">
                                     Your privacy matters to us. This page explains in plain language what data
@@ -92,7 +92,8 @@
                                 <p class="hero-paragraph">
                                     <strong>Everything is ephemeral.</strong> Display names, chat messages, and session
                                     data only exist while the room is active — once it ends, they're gone. Nothing is
-                                    stored on our servers afterward.<br /><br />
+                                    stored on our servers afterward, except optional call quality diagnostics (see
+                                    section 5).<br /><br />
                                     <strong>Anonymized stats only:</strong> We pick up anonymized usage statistics (page
                                     views, browser type, OS) through our privacy-friendly analytics. No personally
                                     identifiable information is collected or stored.<br /><br />
@@ -126,15 +127,34 @@
                                     involved.
                                 </p>
 
-                                <h3>5. How Long We Keep Data</h3>
+                                <h3>5. Call Quality Diagnostics (RTCStats)</h3>
+                                <p class="hero-paragraph">
+                                    When <strong>RTCStats</strong> is enabled, the app collects technical WebRTC
+                                    diagnostics during your call to help us troubleshoot problems and improve call
+                                    quality. This includes browser and operating system details, connection type,
+                                    network statistics (bitrate, packet loss, jitter, latency), media settings, and the
+                                    room and display name you joined with.
+                                    <strong>It never includes your audio, video, chat messages, or shared files.</strong
+                                    ><br /><br />
+                                    To protect your privacy, IP addresses are obfuscated and device names (like your
+                                    camera or microphone label) are excluded by default. These diagnostics are only
+                                    accessible to administrators, are used
+                                    <strong>solely for improvement and troubleshooting purposes</strong>, and are
+                                    <strong>never sold</strong> or shared with third parties for advertising or
+                                    marketing. Diagnostic files are automatically deleted after a limited retention
+                                    period (7 days by default).
+                                </p>
+
+                                <h3>6. How Long We Keep Data</h3>
                                 <p class="hero-paragraph">
                                     Server logs are displayed in real-time on the console and are not stored on disk. By
                                     default, only error-level logs are enabled. Chat messages and session data disappear
                                     when the room ends — we don't hold onto them unless the host has explicitly set up
-                                    persistence.
+                                    persistence. Call quality diagnostics, when enabled, are kept only for the retention
+                                    period described above.
                                 </p>
 
-                                <h3>6. How We Protect Your Data</h3>
+                                <h3>7. How We Protect Your Data</h3>
                                 <p class="hero-paragraph">
                                     We take security seriously: SRTP/DTLS encryption for all media, TLS/HTTPS for web
                                     traffic, and hardened server infrastructure. That said, no system is bulletproof —
@@ -142,7 +162,7 @@
                                     <a href="mailto:miroslav.pejic.85@gmail.com">let us know</a> so we can fix it fast.
                                 </p>
 
-                                <h3>7. Third-Party Services</h3>
+                                <h3>8. Third-Party Services</h3>
                                 <p class="hero-paragraph">
                                     MiroTalk may connect to external services like RTMP streaming endpoints, CDNs, or
                                     other APIs. Each of those has its own privacy policy, and we encourage you to check
@@ -150,14 +170,14 @@
                                     end.
                                 </p>
 
-                                <h3>8. Self-Hosted Instances</h3>
+                                <h3>9. Self-Hosted Instances</h3>
                                 <p class="hero-paragraph">
                                     MiroTalk SFU is open-source — anyone can host their own instance. If you're using
                                     someone else's self-hosted version, <strong>they</strong> are responsible for
                                     privacy, not us. This policy only covers instances we operate directly.
                                 </p>
 
-                                <h3>9. Policy Updates</h3>
+                                <h3>10. Policy Updates</h3>
                                 <p class="hero-paragraph">
                                     We may tweak this policy from time to time. When we do, we'll update the "Last
                                     Updated" date at the top. If you keep using the service after a change, that counts
