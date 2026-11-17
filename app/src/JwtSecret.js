@@ -17,6 +17,7 @@ const PURPOSES = {
     rcSetup: 'rc-setup',
     oidcPresenter: 'oidc-presenter',
     whip: 'whip',
+    rtcStats: 'rtcstats',
 };
 
 let cached = null;
@@ -55,6 +56,7 @@ function getJwtKeys(rawSecret = process.env.JWT_SECRET) {
                 rcSetup: deriveKey(secret, PURPOSES.rcSetup),
                 oidcPresenter: deriveKey(secret, PURPOSES.oidcPresenter),
                 whip: deriveKey(secret, PURPOSES.whip),
+                rtcStats: deriveKey(secret, PURPOSES.rtcStats),
             }),
         };
     }

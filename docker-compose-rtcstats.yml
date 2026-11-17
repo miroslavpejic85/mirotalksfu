@@ -1,0 +1,89 @@
+# =============================================================================
+# MiroTalk SFU - Self-hosted rtcstats-server (WebRTC observability collector)
+# =============================================================================
+#
+# Optional EXTERNAL collector for RTCStats dumps (https://github.com/rtcstats/rtcstats).
+# You do NOT need this for the built-in collector: with RTCSTATS_ENABLED=true and
+# RTCSTATS_URL empty, MiroTalk stores the dumps itself (see docs/rtcstats.md).
+#
+# Use this when you want a dedicated, horizontally scalable collector, S3 storage,
+# Postgres metadata or automatic upload to rtcstats.com.
+#
+# -----------------------------------------------------------------------------
+# Quick start
+# -----------------------------------------------------------------------------
+#   RTCSTATS_JWT_SECRET=$(openssl rand -hex 32) docker compose -f docker-compose-rtcstats.yml up -d --build
+#
+# The image is built from the upstream repository (no official image is published).
+#
+# -----------------------------------------------------------------------------
+# Point MiroTalk SFU at this server
+# -----------------------------------------------------------------------------
+# rtcstats-server does NOT terminate TLS: browsers on https pages require wss://,
+# so put it behind your reverse proxy (nginx, caddy, traefik...) and use that URL.
+#
+# In your MiroTalk .env set:
+#
+#   RTCSTATS_ENABLED=true
+#   RTCSTATS_URL=wss://rtcstats.your-domain.com
+#   # SAME value as below, so only participants of your rooms can upload dumps.
+#   RTCSTATS_JWT_SECRET=your-strong-secret
+#
+# -----------------------------------------------------------------------------
+# One dump folder for both collectors
+# -----------------------------------------------------------------------------
+# Finished dumps are written to ./app/rtcstats, the same folder MiroTalk's built-in
+# collector uses (RTCSTATS_DIR). So MiroTalk's viewer (https://<your-host>/rtcstats/viewer)
+# lists, analyzes and deletes them, and RTCSTATS_RETENTION_DAYS applies, whichever
+# collector is used. If MiroTalk runs in Docker, mount the same folder there too:
+#   - ./app/rtcstats:/src/app/rtcstats
+# Use RTCSTATS_DUMPS_DIR to point to another host folder (keep both sides in sync).
+# =============================================================================
+
+services:
+    # Creates the shared dump folder and gives it to the non-root `node` user (uid 1000)
+    # used by both the rtcstats-server image and the MiroTalk image.
+    rtcstats-init:
+        image: busybox:1.37
+        container_name: mirotalkrtcstats-init
+        user: '0:0'
+        command: ['sh', '-c', 'mkdir -p /dumps && chown 1000:1000 /dumps']
+        volumes:
+            - ${RTCSTATS_DUMPS_DIR:-./app/rtcstats}:/dumps
+
+    rtcstats:
+        build:
+            context: https://github.com/rtcstats/rtcstats.git#main
+            dockerfile: Dockerfile
+        image: rtcstats-server:local
+        container_name: mirotalkrtcstats
+        hostname: rtcstats
+        restart: unless-stopped
+        depends_on:
+            rtcstats-init:
+                condition: service_completed_successfully
+        ports:
+            - '${RTCSTATS_PORT:-8080}:8080'
+        environment:
+            NODE_ENV: production
+            # Merged on top of the upstream config/default.yaml.
+            # WARNING: an empty jwtSecret means NO AUTH, anyone who can reach the port can upload dumps.
+            NODE_CONFIG: >-
+                {
+                  "server": {
+                    "workDirectory": "/home/node/work",
+                    "uploadDirectory": "/home/node/upload",
+                    "deleteAtStart": false,
+                    "deleteAfterUpload": false,
+                    "obfuscateIpAddresses": true
+                  },
+                  "authorization": { "jwtSecret": "${RTCSTATS_JWT_SECRET:-}" }
+                }
+        volumes:
+            # In-progress dumps stay private to the container (node user's home, owned by node)
+            - rtcstats_data:/home/node
+            # Finished dumps land in the folder shared with MiroTalk
+            - ${RTCSTATS_DUMPS_DIR:-./app/rtcstats}:/home/node/upload
+
+volumes:
+    rtcstats_data:

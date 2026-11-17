@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.17
+ * @version 2.8.30
  *
  */
 
@@ -96,6 +96,7 @@ const { parseHostUsers, findHostUser } = require('./HostUsers');
 const Room = require('./Room');
 const Peer = require('./Peer');
 const WhipServer = require('./WhipServer');
+const RtcStats = require('./RtcStats');
 const { createScaling } = require('./scaling');
 const scalingAdapter = require('./ScalingAdapter');
 const { assignFallbackPresenter, isConfiguredPresenter, isOidcConfiguredPresenter } = require('./PresenterManager');
@@ -151,6 +152,7 @@ const {
     checkCreateRoomLimit,
     createRoomLimiterMinutes,
     whipLimiter,
+    rtcStatsViewerLimiter,
 } = createRateLimiters({ getRequesterKey });
 
 // Room scheduler configuration
@@ -240,6 +242,14 @@ const jwtCfg = {
 };
 
 const JWT_VERIFY_OPTIONS = { algorithms: ['HS256'] };
+
+// RTCStats WebRTC observability (built-in collector listens on /rtcstats unless an external URL is set)
+const rtcStats = new RtcStats(config?.integrations?.rtcstats, {
+    secret: jwtKeys.rtcStats,
+    baseDir: __dirname,
+    trustProxy,
+});
+rtcStats.attach(server);
 
 // Verify an auth JWT and return its decrypted payload (module scope, also used by getRequesterKey)
 function decodeToken(jwtToken) {
@@ -622,6 +632,7 @@ const views = {
     privacy: path.join(__dirname, '../../', 'public/views/privacy.html'),
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
     rtmpStreamer: path.join(__dirname, '../../', 'public/views/RtmpStreamer.html'),
+    rtcStatsViewer: path.join(__dirname, '../../', 'public/views/RtcStatsViewer.html'),
     whoAreYou: path.join(__dirname, '../../', 'public/views/whoAreYou.html'),
 };
 
@@ -633,6 +644,7 @@ const filesPath = [
     views.whoAreYou,
     views.activeRooms,
     views.customizeRoom,
+    views.rtcStatsViewer,
 ];
 
 const htmlInjector = new HtmlInjector(filesPath, config.ui.brand);
@@ -1446,6 +1458,69 @@ function startServer() {
         const stats = config?.features?.stats || defaultStats;
         // log.debug('Send stats', stats);
         res.send(stats);
+    });
+
+    // RTCStats client settings (needed before the browser wraps RTCPeerConnection)
+    app.get('/rtcstats/config', (req, res) => {
+        res.set('Cache-Control', 'no-store');
+        res.json(rtcStats.getClientConfig());
+    });
+
+    // RTCStats viewer page (holds no data: dumps are listed/downloaded with the API key below)
+    app.get('/rtcstats/viewer', OIDCAuth, (req, res) => {
+        htmlInjector.injectHtml(views.rtcStatsViewer, res);
+    });
+
+    // Dumps contain participants' network/device data: require the REST API key (never the default one)
+    function checkRtcStatsApiKey(req, res, next) {
+        res.set('Cache-Control', 'no-store');
+        const apiKeySecret = config?.api?.keySecret;
+        if (!apiKeySecret || typeof apiKeySecret !== 'string' || apiKeySecret === 'mirotalksfu_default_secret') {
+            return res.status(403).json({ error: 'Set a strong API_KEY_SECRET to use the RTCStats viewer' });
+        }
+        const authorization = req.headers['authorization'];
+        if (typeof authorization !== 'string' || !safeCompareSecret(authorization, apiKeySecret)) {
+            log.debug('RTCStats viewer - Unauthorized', { ip: getIP(req) });
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        next();
+    }
+
+    app.get('/rtcstats/dumps', rtcStatsViewerLimiter, checkRtcStatsApiKey, async (req, res) => {
+        try {
+            res.json({ enabled: rtcStats.enabled, mode: rtcStats.config.mode, dumps: await rtcStats.listDumps() });
+        } catch (err) {
+            log.error('RTCStats list dumps error', err.message);
+            res.status(500).json({ error: 'Unable to list dumps' });
+        }
+    });
+
+    app.get('/rtcstats/dumps/:name', rtcStatsViewerLimiter, checkRtcStatsApiKey, async (req, res) => {
+        const filePath = await rtcStats.resolveDumpPath(req.params.name);
+        if (!filePath) return res.status(404).json({ error: 'Dump not found' });
+        res.type('text/plain');
+        res.download(filePath, RtcStats.dumpDownloadName(path.basename(filePath)), (err) => {
+            if (err && !res.headersSent) res.status(500).json({ error: 'Unable to read dump' });
+        });
+    });
+
+    app.delete('/rtcstats/dumps', rtcStatsViewerLimiter, checkRtcStatsApiKey, async (req, res) => {
+        try {
+            const result = await rtcStats.deleteAllDumps();
+            log.info('RTCStats all dumps deleted', { ...result, ip: getIP(req) });
+            res.json({ success: true, ...result });
+        } catch (err) {
+            log.error('RTCStats delete all dumps error', err.message);
+            res.status(500).json({ error: 'Unable to delete dumps' });
+        }
+    });
+
+    app.delete('/rtcstats/dumps/:name', rtcStatsViewerLimiter, checkRtcStatsApiKey, async (req, res) => {
+        const result = await rtcStats.deleteDump(req.params.name);
+        if (result === 'not_found') return res.status(404).json({ error: 'Dump not found' });
+        if (result === 'active') return res.status(409).json({ error: 'Dump is still being recorded' });
+        log.info('RTCStats dump deleted', { name: req.params.name, ip: getIP(req) });
+        res.json({ success: true });
     });
 
     // handle who are you: Presenter or Guest
@@ -2568,6 +2643,7 @@ function startServer() {
             // Monitoring & Analytics
             monitoring: {
                 sentry: sentryEnabled ? config.integrations?.sentry : false,
+                rtcstats: rtcStats.enabled ? rtcStats.describe() : false,
                 stats: config.features?.stats?.enabled ? config.features.stats : false,
                 system_info: config.system?.info,
             },
@@ -5313,6 +5389,39 @@ function startServer() {
             room.broadCast(socket.id, 'recordingAction', data);
         });
 
+        // Issue a short-lived, single-use token for streaming this participant's RTCStats dump.
+        socket.on('getRtcStatsToken', (dataObject, cb) => {
+            const callback = typeof cb === 'function' ? cb : () => {};
+
+            if (!rtcStats.enabled) return callback({ error: 'RTCStats disabled' });
+            if (!roomExists(socket)) return callback({ error: 'Room not found' });
+
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!peer || isPeerInLobby(peer)) return callback({ error: 'Not allowed' });
+
+            const now = Date.now();
+            if (!rtcStats.canIssueToken(socket.rtcStatsTokenAt, now)) return callback({ error: 'Too many requests' });
+            socket.rtcStatsTokenAt = now;
+
+            const peerName = peer.peer_info?.peer_name;
+            const peerUuid = peer.peer_info?.peer_uuid;
+
+            try {
+                callback(
+                    rtcStats.createToken({
+                        roomId: room.id,
+                        roomSessionId: room.getSessionId(),
+                        peerUuid,
+                        sessionId: socket.id,
+                        presenter: isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid),
+                    })
+                );
+            } catch (err) {
+                log.error('RTCStats token error', err.message);
+                callback({ error: 'RTCStats unavailable' });
+            }
+        });
+
         // Issue the upload capability for one new browser recording synced to the server (/recSync*).
         // The file name is generated here, so a token can only ever write the file it was issued for.
         socket.on('getRecUploadToken', (dataObject, cb) => {
@@ -7282,6 +7391,9 @@ async function gracefulShutdown(signal) {
                 log.error(`Error closing RTMP stream ${key}:`, err.message);
             }
         }
+
+        // 4b. Finalize open RTCStats dumps (before io.close(), which waits for all server connections)
+        await rtcStats.close();
 
         // 5. Close Socket.IO server. Do NOT use socket.disconnect(true): it sends an
         // "io server disconnect" packet, which stops clients from auto-reconnecting.

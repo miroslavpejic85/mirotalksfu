@@ -25,6 +25,8 @@ services:
             # - ./app/rec:/src/app/rec
             # Mandatory volume if `RTMP_FROM_FILE=true` in the .env
             # - ./app/rtmp:/src/app/rtmp
+            # Mandatory volume to keep the dumps if `RTCSTATS_ENABLED=true` with the built-in collector
+            # - ./app/rtcstats:/src/app/rtcstats
             # Optional volumes for real-time updates:
             # - ./app/:/src/app/:ro
             # - ./public/:/src/public/:ro

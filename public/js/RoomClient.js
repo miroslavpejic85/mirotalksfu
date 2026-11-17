@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.17
+ * @version 2.8.30
  *
  */
 
@@ -865,6 +865,8 @@ class RoomClient {
 
         this.loadGifSearchConfig();
         this.loadChatTranslationConfig();
+
+        if (typeof RtcStatsMonitor !== 'undefined') RtcStatsMonitor.connect(this.socket);
 
         await this.loadDeviceAndInitTransports();
 
@@ -5855,6 +5857,7 @@ class RoomClient {
             this.stopNetworkMonitor(true);
             if (this.consumerTransport) this.consumerTransport.close();
             if (this.producerTransport) this.producerTransport.close();
+            if (typeof RtcStatsMonitor !== 'undefined') RtcStatsMonitor.close();
             if (this.socket) {
                 this.socket.off('disconnect');
                 this.socket.off('serverShutdown');

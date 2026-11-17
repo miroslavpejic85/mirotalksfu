@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.8.17 - Configuration File
+ * MiroTalk SFU v2.8.30 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1215,6 +1215,56 @@ module.exports = {
                 : ['error'],
             DSN: process.env.SENTRY_DSN || '',
             tracesSampleRate: Math.min(Math.max(parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE) || 0.5, 0), 1),
+        },
+
+        /**
+         * RTCStats WebRTC Observability Configuration
+         * ==========================================
+         * Records a per-participant dump of every RTCPeerConnection/getUserMedia API call, event and
+         * periodic getStats() (like chrome://webrtc-internals) to troubleshoot call quality afterwards.
+         * View the dumps at /rtcstats/viewer (server dumps require the REST API key: API_KEY_SECRET)
+         * See: https://github.com/rtcstats/rtcstats and docs/rtcstats.md
+         *
+         * Collector modes:
+         * ---------------
+         * - Built-in (default) : Leave `url` empty. MiroTalk receives the dumps on wss://<host>/rtcstats
+         *                        and writes them to `dir` (no extra service needed)
+         * - External           : Set `url` to your rtcstats-server (e.g. wss://rtcstats.example.com)
+         *                        See docker-compose-rtcstats.yml
+         *
+         * Core Settings:
+         * -------------
+         * - enabled              : Enable/disable RTCStats [true/false] (default: false)
+         * - url                  : External rtcstats-server WebSocket URL (empty = built-in collector)
+         * - jwtSecret            : External mode only. Shared with rtcstats-server `authorization.jwtSecret`
+         *                          to sign the per-participant token (empty = no token sent)
+         * - getStatsInterval     : getStats() polling interval in ms (default: 1000)
+         * - excludeDeviceLabels  : Strip camera/microphone labels from dumps for privacy (default: true)
+         * - tags                 : Extra tags added to every dump, e.g. env:prod (max 32 chars [a-zA-Z0-9_.:-])
+         *
+         * Dump Storage Settings (maxDumpSizeMB and obfuscateIpAddresses: built-in collector only):
+         * -------------------------------------------------------------------------------------
+         * - dir                  : Dump directory, relative to app/src (default: ../rtcstats). Also where
+         *                          docker-compose-rtcstats.yml makes the external rtcstats-server write
+         * - maxDumpSizeMB        : Max size of a single dump, the connection is closed when reached (default: 50)
+         * - retentionDays        : Delete dumps older than N days (both collectors), 0 = keep forever (default: 7)
+         * - obfuscateIpAddresses : Mask non-relay IP addresses in candidates/SDP/stats (default: true)
+         */
+        rtcstats: {
+            enabled: process.env.RTCSTATS_ENABLED === 'true',
+            url: process.env.RTCSTATS_URL || '',
+            jwtSecret: process.env.RTCSTATS_JWT_SECRET || '',
+            getStatsInterval: parseInt(process.env.RTCSTATS_GET_STATS_INTERVAL) || 1000,
+            excludeDeviceLabels: process.env.RTCSTATS_EXCLUDE_DEVICE_LABELS !== 'false',
+            tags: process.env.RTCSTATS_TAGS
+                ? process.env.RTCSTATS_TAGS.split(splitChar)
+                      .map((tag) => tag.trim())
+                      .filter(Boolean)
+                : [],
+            dir: process.env.RTCSTATS_DIR || '../rtcstats',
+            maxDumpSizeMB: parseInt(process.env.RTCSTATS_MAX_DUMP_SIZE_MB) || 50,
+            retentionDays: parseInt(process.env.RTCSTATS_RETENTION_DAYS ?? '7', 10),
+            obfuscateIpAddresses: process.env.RTCSTATS_OBFUSCATE_IP_ADDRESSES !== 'false',
         },
 
         /**

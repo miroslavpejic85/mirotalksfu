@@ -23,6 +23,7 @@ docker-push.sh
 data
 rec
 rtmp
+app/rtcstats
 rnnoiseBuild
 
 # virtual background

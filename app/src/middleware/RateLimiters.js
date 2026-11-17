@@ -142,6 +142,13 @@ function createRateLimiters({ getRequesterKey }) {
         text: 'Too many WHIP requests.',
     });
 
+    // RTCStats viewer API (per IP). API-key protected, capped to slow down key guessing.
+    const rtcStatsViewerLimiter = createIpLimiter({
+        windowMs: MINUTE_MS,
+        max: 120,
+        text: 'Too many RTCStats viewer requests.',
+    });
+
     return {
         loginLimiter,
         scheduleMeetingLimiter,
@@ -151,6 +158,7 @@ function createRateLimiters({ getRequesterKey }) {
         checkCreateRoomLimit,
         createRoomLimiterMinutes,
         whipLimiter,
+        rtcStatsViewerLimiter,
     };
 }
 

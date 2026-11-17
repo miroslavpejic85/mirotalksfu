@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title id="title">MiroTalk SFU - RTCStats Viewer</title>
+        <link id="icon" rel="shortcut icon" href="../images/logo.svg" />
+        <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.svg" />
+
+        <meta charset="utf-8" />
+        <meta name="robots" content="noindex, nofollow" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="referrer" content="no-referrer" />
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+        <!-- uPlot (MIT License) https://github.com/leeoniya/uPlot -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.32/dist/uPlot.min.css" />
+        <link rel="stylesheet" type="text/css" href="../css/RtcStatsViewer.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="header-left">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <div>
+                        <h1>RTCStats Viewer</h1>
+                        <div class="subtitle">Understand what happened on a call</div>
+                    </div>
+                </div>
+                <div>
+                    <label class="btn" for="fileInput" title="Open a local RTCStats or webrtc-internals dump">
+                        <i class="fa-solid fa-folder-open"></i> Open file
+                    </label>
+                    <input type="file" id="fileInput" hidden />
+                </div>
+            </div>
+
+            <!-- Library: server dumps + local files -->
+            <div id="libraryView">
+                <section class="card" id="serverSection">
+                    <div class="card-head">
+                        <h2 class="card-title"><i class="fa-solid fa-server"></i> Server dumps</h2>
+                        <div class="card-actions" id="listActions" hidden>
+                            <span class="muted small" id="lastUpdated" aria-live="polite"></span>
+                            <label class="switch" title="Reload the list every 10 seconds">
+                                <input type="checkbox" id="autoRefresh" checked />
+                                <span class="slider"></span>
+                                Auto-refresh
+                            </label>
+                            <button id="refreshBtn" class="btn" title="Reload the dump list">
+                                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                            </button>
+                            <button id="deleteAllBtn" class="btn danger" title="Delete all finished dumps" hidden>
+                                <i class="fa-solid fa-trash-can"></i> Delete all
+                            </button>
+                        </div>
+                    </div>
+                    <form id="authForm" class="auth-form" autocomplete="off">
+                        <input type="password" id="apiKeyInput" placeholder="API key (API_KEY_SECRET)" required />
+                        <button type="submit" class="btn primary"><i class="fa-solid fa-key"></i> Connect</button>
+                    </form>
+                    <div id="dumpsPanel" hidden>
+                        <div class="toolbar">
+                            <input
+                                type="search"
+                                class="grow"
+                                id="dumpSearch"
+                                placeholder="Filter by room, participant, tag, file..."
+                            />
+                            <span class="muted" id="dumpCount"></span>
+                            <button id="logoutBtn" class="btn icon" title="Forget the API key">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="dumps-table">
+                                <thead>
+                                    <tr>
+                                        <th>Started</th>
+                                        <th>Room</th>
+                                        <th>Participant</th>
+                                        <th>Tags</th>
+                                        <th>Duration</th>
+                                        <th>Size</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dumpsBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="serverNotice" class="notice" hidden></div>
+                </section>
+
+                <div id="dropZone" class="drop-zone">
+                    <i class="fa-solid fa-file-arrow-up"></i>
+                    Drop an RTCStats or chrome://webrtc-internals dump here (read locally in your browser)
+                </div>
+            </div>
+
+            <div id="viewerNotice" class="notice error" hidden></div>
+
+            <!-- Analysis of one dump -->
+            <section id="analysisView" hidden>
+                <div class="breadcrumb">
+                    <button id="backBtn" class="btn" title="Back to all dumps">
+                        <i class="fa-solid fa-arrow-left"></i> All dumps
+                    </button>
+                    <span class="crumb-name mono" id="dumpName"></span>
+                    <button id="downloadBtn" class="btn icon" title="Download this dump" hidden>
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                </div>
+                <nav class="tabs" id="tabs" role="tablist"></nav>
+                <div id="tabContent"></div>
+            </section>
+        </div>
+
+        <script defer src="https://cdn.jsdelivr.net/npm/uplot@1.6.32/dist/uPlot.iife.min.js"></script>
+        <script defer src="../sfu/RtcStatsShared.js"></script>
+        <script defer src="../js/RtcStatsAnalyzer.js"></script>
+        <script defer src="../js/RtcStatsViewer.js"></script>
+    </body>
+</html>

@@ -19,3 +19,6 @@ coverage
 
 # personal env
 .env
+
+# rtcstats dumps
+app/rtcstats

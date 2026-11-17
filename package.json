@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.8.17",
+    "version": "2.8.30",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -12,10 +12,13 @@
         "lang:translate": "node scripts/translate-missing-lang.js",
         "lang:auto": "npm run lang && npm run lang:translate",
         "build:mediasoup-client": "npx esbuild node_modules/mediasoup-client/lib/index.js --bundle --minify --format=iife --global-name=mediasoupClient --outfile=public/sfu/MediasoupClient.js --platform=browser",
-        "postinstall": "npm run build:mediasoup-client",
+        "build:rtcstats": "npx esbuild node_modules/@rtcstats/rtcstats-js/rtcstats.js --bundle --minify --format=iife --global-name=rtcstats --outfile=public/sfu/RtcStats.js --platform=browser --banner:js=\"/*! rtcstats-js (https://github.com/rtcstats/rtcstats) | MIT License | Copyright (c) 2016 TokBox, Inc., (c) 2025 rtcstats.com | See RtcStats.LICENSE.md */\" && npx esbuild node_modules/@rtcstats/rtcstats-shared/index.js --bundle --minify --format=iife --global-name=rtcstatsShared --outfile=public/sfu/RtcStatsShared.js --platform=browser --banner:js=\"/*! rtcstats-shared (https://github.com/rtcstats/rtcstats) | MIT License | Copyright (c) 2025 rtcstats.com | See RtcStats.LICENSE.md */\" && node -e \"require('fs').copyFileSync('node_modules/@rtcstats/rtcstats-js/LICENSE.md','public/sfu/RtcStats.LICENSE.md')\"",
+        "postinstall": "npm run build:mediasoup-client && npm run build:rtcstats",
         "lint": "npx prettier --write .",
         "mailpit:up": "docker-compose -f docker-compose-mailpit.yml up -d",
         "mailpit:down": "docker-compose -f docker-compose-mailpit.yml down",
+        "rtcstats:up": "docker compose -f docker-compose-rtcstats.yml up -d --build",
+        "rtcstats:down": "docker compose -f docker-compose-rtcstats.yml down",
         "docker:build": "docker build --tag mirotalk/sfu:latest .",
         "docker:rmi": "docker image prune -f",
         "docker:push": "docker push mirotalk/sfu:latest",
@@ -67,6 +70,8 @@
         "@aws-sdk/lib-storage": "^3.1170.0",
         "@mattermost/client": "11.9.0",
         "@ngrok/ngrok": "1.8.0",
+        "@rtcstats/rtcstats-js": "^2.6.0",
+        "@rtcstats/rtcstats-shared": "^2.6.5",
         "@sentry/node": "^11.13.0",
         "async-mutex": "^0.5.0",
         "axios": "^1.21.1",
@@ -96,10 +101,12 @@
         "openai": "^7.57.0",
         "qs": "6.17.1",
         "sanitize-filename": "^1.6.5",
+        "sdp": "^3.2.3",
         "sdp-transform": "^3.0.0",
         "socket.io": "4.8.4",
         "swagger-ui-express": "5.0.1",
-        "uuid": "14.0.3"
+        "uuid": "14.0.3",
+        "ws": "^8.23.0"
     },
     "devDependencies": {
         "esbuild": "^0.28.2",

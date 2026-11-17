@@ -89,6 +89,7 @@ href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/">Documentation</a> ·
 - 🤖 ChatGPT (OpenAI) & DeepSeek integration · VideoAI avatars · Speech recognition
 - 🔒 OIDC auth · [Host protection](https://docs.mirotalk.com/mirotalk-sfu/host-protection/) · JWT credentials · Room passwords · Lobby & spam mitigation
 - 🔌 REST API · Slack, Discord & Mattermost · Embeddable [iframe](https://docs.mirotalk.com/mirotalk-sfu/integration/#iframe) & [widget](https://docs.mirotalk.com/mirotalk-sfu/integration/#widgets-integration) · 133 languages
+- 📊 Optional [RTCStats](docs/rtcstats.md) WebRTC call-quality dumps with built-in viewer (built-in collector or self-hosted rtcstats-server)
 
 **[See all features →](https://docs.mirotalk.com/mirotalk-sfu/)**
 
@@ -241,6 +242,7 @@ To set up your own instance of `MiroTalk SFU` on a dedicated cloud server, pleas
 - [Davide Pacilio](https://cruip.com/demos/solid/) (html template)
 - [Dirk Vanbeveren](https://github.com/Dirvann) (sfu logic)
 - [Mediasoup](https://mediasoup.org) (sfu server)
+- [rtcstats](https://github.com/rtcstats/rtcstats) (WebRTC observability) · [uPlot](https://github.com/leeoniya/uPlot) (RTCStats viewer charts)
 - [MediaPipe](https://ai.google.dev/edge/mediapipe) (face tracking, segmentation) · [Three.js](https://threejs.org) (3D accessories)
 - [DiceBear](https://www.dicebear.com/) (random avatars)
 - [Image by ddraw on Freepik](https://www.freepik.com/free-vector/collection-female-male-avatars_1105371.htm) (avatar illustrations)
