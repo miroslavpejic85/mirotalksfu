@@ -462,6 +462,184 @@ describe('RoomClient RNNoise lifecycle', () => {
         assert.equal(processor.setNoiseSuppression.callCount, 2);
     });
 
+    it('requests browser noise suppression only when RNNoise is not selected', () => {
+        const { client, context } = createRoomEnvironment();
+        context.localStorageSettings.mic_noise_suppression = true;
+        assert.equal(client.getAudioConstraints().audio.noiseSuppression, false);
+        context.localStorageSettings.mic_noise_suppression = false;
+        assert.equal(client.getAudioConstraints().audio.noiseSuppression, true);
+        context.localStorageSettings.mic_noise_suppression = true;
+        client.isRNNoiseSupported = false;
+        assert.equal(client.getAudioConstraints().audio.noiseSuppression, true);
+        client.isRNNoiseSupported = true;
+        context.BUTTONS.settings.customNoiseSuppression = false;
+        assert.equal(client.getAudioConstraints().audio.noiseSuppression, true);
+    });
+
+    function makeConstrainableStream(makeStream, noiseSuppression) {
+        const raw = makeStream();
+        const track = raw.getAudioTracks()[0];
+        track.constraints = { echoCancellation: true, autoGainControl: true, noiseSuppression };
+        track.getConstraints = () => ({ ...track.constraints });
+        track.getSettings = () => ({ noiseSuppression: track.constraints.noiseSuppression });
+        track.applyConstraints = sinon.spy(async (constraints) => {
+            track.constraints = constraints;
+        });
+        return { raw, track };
+    }
+
+    it('switches browser noise suppression on the raw mic track when RNNoise is toggled', async () => {
+        const { client, makeStream, processor } = createRoomEnvironment();
+        const { raw, track } = makeConstrainableStream(makeStream, false);
+        processor.mediaStream = raw;
+        processor.isProcessing = true;
+        processor.noiseSuppressionEnabled = true;
+        client.RNNoiseProcessor = processor;
+
+        await client.setNoiseSuppression(false);
+        assert.equal(processor.noiseSuppressionEnabled, false);
+        assert.equal(track.constraints.noiseSuppression, true);
+        assert.equal(track.constraints.echoCancellation, true);
+        assert.equal(track.constraints.autoGainControl, true);
+
+        await client.setNoiseSuppression(true);
+        assert.equal(track.constraints.noiseSuppression, false);
+        assert.equal(track.applyConstraints.callCount, 2);
+    });
+
+    it('settles on the latest state after rapid RNNoise toggles', async () => {
+        const { client, makeStream, processor } = createRoomEnvironment();
+        const { raw, track } = makeConstrainableStream(makeStream, false);
+        processor.mediaStream = raw;
+        processor.isProcessing = true;
+        client.RNNoiseProcessor = processor;
+        client.setNoiseSuppression(false);
+        client.setNoiseSuppression(true);
+        await client.setNoiseSuppression(false);
+        assert.equal(track.constraints.noiseSuppression, true);
+    });
+
+    it('does not change browser noise suppression when the device cannot', async () => {
+        const { client, makeStream, processor } = createRoomEnvironment();
+        const { raw, track } = makeConstrainableStream(makeStream, false);
+        track.getCapabilities = () => ({ noiseSuppression: [false] });
+        processor.mediaStream = raw;
+        processor.isProcessing = true;
+        client.RNNoiseProcessor = processor;
+        await client.setNoiseSuppression(false);
+        assert.equal(track.applyConstraints.called, false);
+    });
+
+    it('re-captures the mic when the browser ignores live noise suppression changes', async () => {
+        const { client, makeStream, processor, context } = createRoomEnvironment();
+        const { raw, track } = makeConstrainableStream(makeStream, false);
+        track.getSettings = () => ({ deviceId: 'mic-1', noiseSuppression: false });
+        track.applyConstraints = sinon.spy(async () => {});
+        const { raw: recaptured } = makeConstrainableStream(makeStream, true);
+        let oldTrackStateOnCapture;
+        context.navigator = {
+            mediaDevices: {
+                getUserMedia: sinon.spy(async () => {
+                    oldTrackStateOnCapture = track.readyState;
+                    return recaptured;
+                }),
+            },
+        };
+        context.BUTTONS.settings.customNoiseSuppression = true;
+        processor.mediaStream = raw;
+        processor.isProcessing = true;
+        processor.audioContext = { createMediaStreamSource: () => ({ connect: sinon.spy(), disconnect() {} }) };
+        processor.workletNode = { port: { postMessage() {} } };
+        processor.sourceNode = { disconnect: sinon.spy() };
+        client.RNNoiseProcessor = processor;
+
+        await client.setNoiseSuppression(false);
+        const { audio } = context.navigator.mediaDevices.getUserMedia.firstCall.args[0];
+        assert.equal(audio.noiseSuppression, true);
+        assert.equal(audio.echoCancellation, true);
+        assert.equal(audio.deviceId.exact, 'mic-1');
+        assert.equal(oldTrackStateOnCapture, 'ended');
+        assert.equal(processor.mediaStream, recaptured);
+        assert.equal(track.readyState, 'ended');
+        assert.equal(recaptured.getAudioTracks()[0].readyState, 'live');
+    });
+
+    it('retries the re-capture without the device id when the device cannot be reopened', async () => {
+        const { client, makeStream, processor, context } = createRoomEnvironment();
+        const { raw, track } = makeConstrainableStream(makeStream, false);
+        track.getSettings = () => ({ deviceId: 'mic-1', noiseSuppression: false });
+        track.applyConstraints = async () => {};
+        const { raw: recaptured } = makeConstrainableStream(makeStream, true);
+        const getUserMedia = sinon.stub();
+        getUserMedia.onFirstCall().rejects(new Error('NotReadableError'));
+        getUserMedia.onSecondCall().resolves(recaptured);
+        context.navigator = { mediaDevices: { getUserMedia } };
+        processor.mediaStream = raw;
+        processor.isProcessing = true;
+        processor.audioContext = { createMediaStreamSource: () => ({ connect() {}, disconnect() {} }) };
+        processor.workletNode = { port: { postMessage() {} } };
+        client.RNNoiseProcessor = processor;
+
+        await client.setNoiseSuppression(false);
+        assert.equal(getUserMedia.callCount, 2);
+        assert.equal(getUserMedia.secondCall.args[0].audio.deviceId, undefined);
+        assert.equal(getUserMedia.secondCall.args[0].audio.noiseSuppression, true);
+        assert.equal(processor.mediaStream, recaptured);
+    });
+
+    it('drops a re-captured mic when RNNoise stopped meanwhile', async () => {
+        const { client, makeStream, processor, context } = createRoomEnvironment();
+        const { raw, track } = makeConstrainableStream(makeStream, false);
+        track.applyConstraints = async () => {};
+        const recapture = deferred();
+        const { raw: recaptured } = makeConstrainableStream(makeStream, true);
+        context.navigator = { mediaDevices: { getUserMedia: () => recapture.promise } };
+        processor.mediaStream = raw;
+        processor.isProcessing = true;
+        client.RNNoiseProcessor = processor;
+
+        const syncing = client.setNoiseSuppression(false);
+        await flushStartup();
+        client.disableRNNoiseSuppression();
+        recapture.resolve(recaptured);
+        await syncing;
+        assert.equal(recaptured.getAudioTracks()[0].readyState, 'ended');
+        assert.equal(track.readyState, 'ended');
+    });
+
+    it('enables browser noise suppression when the mic starts with RNNoise switched off', async () => {
+        const { client, makeStream, processor, context } = createRoomEnvironment();
+        context.localStorageSettings.mic_noise_suppression = false;
+        const { raw, track } = makeConstrainableStream(makeStream, false);
+        processor.startProcessing = async (stream) => {
+            processor.mediaStream = stream;
+            processor.isProcessing = true;
+            return makeStream();
+        };
+        client.RNNoiseProcessor = processor;
+        assert.ok(await client.getRNNoiseSuppressionStream(raw));
+        await client.nativeNoiseSuppressionSync;
+        assert.equal(track.constraints.noiseSuppression, true);
+        assert.equal(context.switchNoiseSuppression.checked, false);
+        client.disableRNNoiseSuppression();
+    });
+
+    it('exposes the raw microphone track behind RNNoise for other consumers', () => {
+        const { client, makeStream, processor, context } = createRoomEnvironment();
+        assert.equal(client.getMicrophoneInputTrack(), null);
+        const raw = makeStream();
+        const processed = makeStream();
+        client.producerLabel.set(context.audioType, 'producer');
+        client.localAudioStream = processed;
+        assert.equal(client.getMicrophoneInputTrack(), processed.getAudioTracks()[0]);
+        processor.mediaStream = raw;
+        processor.isProcessing = true;
+        client.RNNoiseProcessor = processor;
+        assert.equal(client.getMicrophoneInputTrack(), raw.getAudioTracks()[0]);
+        raw.getAudioTracks()[0].stop();
+        assert.equal(client.getMicrophoneInputTrack(), null);
+    });
+
     it('ignores presenter noise suppression actions when RNNoise is unavailable', async () => {
         const { client, context } = createRoomEnvironment();
         client.userLog = sinon.spy();

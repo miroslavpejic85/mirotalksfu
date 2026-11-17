@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.14
+ * @version 2.8.15
  *
  */
 
@@ -3720,9 +3720,11 @@ class RoomClient {
 
             processor.setNoiseSuppression(localStorageSettings.mic_noise_suppression);
             switchNoiseSuppression.checked = processor.noiseSuppressionEnabled;
+            this.syncNativeNoiseSuppression(processor);
             processor.onError = (error) => {
                 console.warn('RNNoise processing failed:', error);
-                this.fallbackRNNoiseSuppression(stream, processor, request).catch((err) => {
+                // The raw mic may have been re-captured to switch browser noise suppression
+                this.fallbackRNNoiseSuppression(processor.mediaStream || stream, processor, request).catch((err) => {
                     console.warn('RNNoise fallback failed:', err);
                 });
             };
@@ -3781,6 +3783,91 @@ class RoomClient {
         return stream;
     }
 
+    isRNNoiseSuppressionSelected() {
+        return !!(
+            BUTTONS.settings.customNoiseSuppression &&
+            this.isRNNoiseSupported &&
+            localStorageSettings.mic_noise_suppression
+        );
+    }
+
+    setNoiseSuppression(enabled) {
+        const processor = this.RNNoiseProcessor;
+        if (!processor) return;
+        processor.setNoiseSuppression(enabled);
+        return this.syncNativeNoiseSuppression(processor);
+    }
+
+    // RNNoise and browser noise suppression are mutually exclusive on the raw capture track:
+    // native suppression is turned off while RNNoise suppresses, and back on when RNNoise is switched off.
+    // Updates are chained so rapid toggles always settle on the latest RNNoise state.
+    syncNativeNoiseSuppression(processor = this.RNNoiseProcessor) {
+        const isCurrent = () => !!processor && processor === this.RNNoiseProcessor && processor.isProcessing !== false;
+        const run = async () => {
+            if (!isCurrent()) return;
+            const track = processor.mediaStream?.getAudioTracks?.()[0];
+            if (!track || track.readyState === 'ended' || typeof track.applyConstraints !== 'function') return;
+            const wanted = !processor.noiseSuppressionEnabled;
+            if (track.getSettings?.().noiseSuppression === wanted) return;
+            const supported = track.getCapabilities?.().noiseSuppression;
+            if (Array.isArray(supported) && !supported.includes(wanted)) {
+                console.warn('Browser noise suppression cannot be changed on this device', { wanted, supported });
+                return;
+            }
+            try {
+                await track.applyConstraints({ ...track.getConstraints?.(), noiseSuppression: wanted });
+            } catch (err) {
+                console.warn('Browser noise suppression could not be updated live:', err);
+            }
+            if (!isCurrent()) return;
+            const applied = track.getSettings?.().noiseSuppression;
+            if (applied === undefined || applied === wanted) return;
+            // Chromium ignores audio processing changes via applyConstraints (crbug.com/390804131): re-capture the mic
+            await this.recaptureNoiseSuppressionInput(processor, track, wanted, isCurrent);
+        };
+        const sync = async () => {
+            await run();
+            if (!isCurrent()) return;
+            console.log('Noise suppression state', {
+                rnnoise: processor.noiseSuppressionEnabled,
+                native:
+                    processor.mediaStream?.getAudioTracks?.()[0]?.getSettings?.().noiseSuppression ?? 'not reported',
+            });
+        };
+        this.nativeNoiseSuppressionSync = (this.nativeNoiseSuppressionSync || Promise.resolve()).then(sync, sync);
+        return this.nativeNoiseSuppressionSync;
+    }
+
+    async recaptureNoiseSuppressionInput(processor, track, wanted, isCurrent) {
+        const deviceId = track.getSettings?.().deviceId;
+        const getMic = (id) => {
+            const { audio } = this.getAudioConstraints(id);
+            return navigator.mediaDevices.getUserMedia({ audio: { ...audio, noiseSuppression: wanted } });
+        };
+        // Chromium hands back the already open source (and its processing) while the old track is live: release it first
+        track.stop();
+        let stream;
+        try {
+            stream = await getMic(deviceId);
+        } catch (err) {
+            console.warn('Microphone re-capture failed, retrying without device id:', err);
+            try {
+                stream = await getMic();
+            } catch (retryErr) {
+                console.warn('Browser noise suppression could not be updated:', retryErr);
+                return;
+            }
+        }
+        if (!isCurrent() || processor.mediaStream?.getAudioTracks?.()[0] !== track || !processor.replaceInput(stream)) {
+            stream.getTracks().forEach((t) => t.stop());
+            return;
+        }
+        const applied = stream.getAudioTracks()[0]?.getSettings?.().noiseSuppression;
+        if (applied !== undefined && applied !== wanted) {
+            console.warn('Browser noise suppression did not change', { wanted, applied });
+        }
+    }
+
     disableRNNoiseSuppression(stopInput = true) {
         this.noiseSuppressionRequest++;
         const processor = this.RNNoiseProcessor;
@@ -3800,8 +3887,8 @@ class RoomClient {
     // ####################################################
 
     getAudioConstraints(deviceId) {
-        // If custom RNNoise is enabled but not supported, fall back to built-in WebRTC noise suppression
-        const useBuiltInNoiseSuppression = !BUTTONS.settings.customNoiseSuppression || !this.isRNNoiseSupported;
+        // Use built-in WebRTC noise suppression unless RNNoise is available and selected by the user
+        const useBuiltInNoiseSuppression = !this.isRNNoiseSuppressionSelected();
 
         const audioConstraints = {
             echoCancellation: true,
@@ -4190,6 +4277,15 @@ class RoomClient {
 
     producerExist(type) {
         return this.producerLabel.has(type);
+    }
+
+    // Raw microphone track (before RNNoise), so other consumers never need to open the device a second time
+    getMicrophoneInputTrack() {
+        if (!this.producerLabel.has(mediaType.audio)) return null;
+        const processor = this.RNNoiseProcessor;
+        const stream = processor?.isProcessing ? processor.mediaStream : this.localAudioStream;
+        const track = stream?.getAudioTracks?.()[0];
+        return track?.readyState === 'live' ? track : null;
     }
 
     closeThenProduce(type, deviceId = null, swapCamera = false) {
@@ -14467,7 +14563,7 @@ class RoomClient {
         if (!BUTTONS.settings.customNoiseSuppression || !this.isRNNoiseSupported) return;
         localStorageSettings.mic_noise_suppression = enabled;
         if (switchNoiseSuppression) switchNoiseSuppression.checked = enabled;
-        this.RNNoiseProcessor?.setNoiseSuppression(enabled);
+        this.setNoiseSuppression(enabled);
         this.userLog(enabled ? 'success' : 'warning', message, 'top-end', 6000);
     }
 

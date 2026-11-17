@@ -328,4 +328,23 @@ class RNNoiseProcessor {
     toggleNoiseSuppression() {
         this.setNoiseSuppression(!this.noiseSuppressionEnabled);
     }
+
+    // Swap the microphone feeding the worklet while keeping the processed output track (and the producer) untouched
+    replaceInput(mediaStream) {
+        if (!this.isProcessing || !this.audioContext || !this.workletNode) return false;
+        if (!mediaStream?.getAudioTracks?.().length) return false;
+        const previousStream = this.mediaStream;
+        const previousSource = this.sourceNode;
+        mediaStream.getAudioTracks().forEach((track) => {
+            track.enabled = true;
+        });
+        this.sourceNode = this.audioContext.createMediaStreamSource(mediaStream);
+        this.sourceNode.connect(this.workletNode);
+        this.mediaStream = mediaStream;
+        try {
+            previousSource?.disconnect();
+        } catch (e) {}
+        if (previousStream !== mediaStream) previousStream?.getTracks?.().forEach((track) => track.stop());
+        return true;
+    }
 }
