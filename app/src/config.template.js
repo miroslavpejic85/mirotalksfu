@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.8.30 - Configuration File
+ * MiroTalk SFU v2.8.31 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1241,6 +1241,9 @@ module.exports = {
          * - getStatsInterval     : getStats() polling interval in ms (default: 1000)
          * - excludeDeviceLabels  : Strip camera/microphone labels from dumps for privacy (default: true)
          * - tags                 : Extra tags added to every dump, e.g. env:prod (max 32 chars [a-zA-Z0-9_.:-])
+         * - analyzeUrl           : Viewer "Analyze on ..." link for an in-depth analysis of a dump (default:
+         *                          rtcstats.com, by the rtcstats authors). Set RTCSTATS_ANALYZE_URL= (empty) to
+         *                          hide it, e.g. for white-label or air-gapped deployments
          *
          * Dump Storage Settings (maxDumpSizeMB and obfuscateIpAddresses: built-in collector only):
          * -------------------------------------------------------------------------------------
@@ -1265,6 +1268,8 @@ module.exports = {
             maxDumpSizeMB: parseInt(process.env.RTCSTATS_MAX_DUMP_SIZE_MB) || 50,
             retentionDays: parseInt(process.env.RTCSTATS_RETENTION_DAYS ?? '7', 10),
             obfuscateIpAddresses: process.env.RTCSTATS_OBFUSCATE_IP_ADDRESSES !== 'false',
+            // undefined = default (rtcstats.com), empty = hidden
+            analyzeUrl: process.env.RTCSTATS_ANALYZE_URL,
         },
 
         /**

@@ -435,7 +435,18 @@ async function deleteAllServerDumps() {
 }
 
 // Accessible confirmation modal. With requireText the user must type it to enable the action.
-function confirmDialog({ title, message, details = [], confirmText = 'Confirm', requireText = null }) {
+// variant 'danger' (default, destructive) or 'info' (neutral, e.g. leaving to an external site).
+function confirmDialog({
+    title,
+    message,
+    details = [],
+    steps = [],
+    note = null,
+    confirmText = 'Confirm',
+    requireText = null,
+    variant = 'danger',
+}) {
+    const info = variant === 'info';
     return new Promise((resolve) => {
         const previousFocus = document.activeElement;
         const input = requireText
@@ -450,21 +461,25 @@ function confirmDialog({ title, message, details = [], confirmText = 'Confirm', 
             : null;
         const confirmBtn = el(
             'button',
-            { className: 'btn danger-solid', disabled: Boolean(requireText) },
-            icon('fa-trash-can'),
+            { className: info ? 'btn primary' : 'btn danger-solid', disabled: Boolean(requireText) },
+            icon(info ? 'fa-arrow-up-right-from-square' : 'fa-trash-can'),
             ` ${confirmText}`
         );
         const cancelBtn = el('button', { className: 'btn' }, 'Cancel');
         const dialog = el(
             'div',
             {
-                className: 'modal',
-                role: 'alertdialog',
+                className: `modal${info ? ' info' : ''}`,
+                role: info ? 'dialog' : 'alertdialog',
                 'aria-modal': 'true',
                 'aria-labelledby': 'modalTitle',
                 'aria-describedby': 'modalMessage',
             },
-            el('div', { className: 'modal-icon' }, icon('fa-triangle-exclamation')),
+            el(
+                'div',
+                { className: 'modal-icon' },
+                icon(info ? 'fa-magnifying-glass-chart' : 'fa-triangle-exclamation')
+            ),
             el('h3', { id: 'modalTitle', text: title }),
             el('p', { id: 'modalMessage', className: 'modal-message', text: message }),
             details.filter(Boolean).length
@@ -473,6 +488,16 @@ function confirmDialog({ title, message, details = [], confirmText = 'Confirm', 
                       { className: 'modal-details' },
                       details.filter(Boolean).map((line) => el('div', { text: line }))
                   )
+                : null,
+            steps.length
+                ? el(
+                      'ol',
+                      { className: 'modal-steps' },
+                      steps.map((step) => el('li', { text: step }))
+                  )
+                : null,
+            note
+                ? el('p', { className: 'modal-note' }, icon('fa-circle-info'), el('span', { text: ` ${note}` }))
                 : null,
             input
                 ? el('label', { className: 'modal-label' }, 'Type ', el('strong', { text: requireText }), ' to confirm')
@@ -511,7 +536,7 @@ function confirmDialog({ title, message, details = [], confirmText = 'Confirm', 
         backdrop.addEventListener('mousedown', (e) => e.target === backdrop && close(false));
         document.addEventListener('keydown', onKey, true);
         document.body.append(backdrop);
-        (input || cancelBtn).focus();
+        (input || (info ? confirmBtn : cancelBtn)).focus();
     });
 }
 
@@ -535,10 +560,85 @@ async function openDump(blob, name, serverDump = null) {
     }
     state.analysis = RtcStatsAnalyzer.analyzeDump(data);
     state.selectedDump = serverDump;
+    // Kept for "Analyze on ...": saved without a new request, so the popup is not blocked
+    state.dumpBlob = blob;
+    state.dumpName = name || 'dump';
+    state.dumpIsLocal = !serverDump;
     $('dumpName').textContent = name || 'Dump';
     $('downloadBtn').hidden = !serverDump;
+    updateAnalyzeButton();
     showAnalysis(true);
     renderTabs('overview');
+}
+
+// "Analyze on ..." link from RTCSTATS_ANALYZE_URL (default rtcstats.com, empty = hidden)
+async function loadViewerConfig() {
+    try {
+        const response = await fetch('/rtcstats/config', { cache: 'no-store' });
+        const { analyzeUrl } = response.ok ? await response.json() : {};
+        state.analyzeUrl = typeof analyzeUrl === 'string' && /^https?:\/\//i.test(analyzeUrl) ? analyzeUrl : '';
+    } catch (err) {
+        state.analyzeUrl = '';
+    }
+    updateAnalyzeButton();
+}
+
+function analyzeHost() {
+    try {
+        return new URL(state.analyzeUrl).hostname.replace(/^www\./, '');
+    } catch (err) {
+        return '';
+    }
+}
+
+function updateAnalyzeButton() {
+    const host = analyzeHost();
+    $('analyzeBtn').hidden = !host;
+    $('analyzeLabel').textContent = host ? `Analyze on ${host}` : '';
+    $('analyzeBtn').title =
+        host === 'rtcstats.com'
+            ? 'This viewer is a quick built-in check. Download this dump and open rtcstats.com (by the authors of rtcstats) for an experience score, detailed observations and an AI summary.'
+            : `Download this dump and open ${host} for an in-depth analysis.`;
+}
+
+// Third-party in-depth analysis (rtcstats.com by default: experience score, observations, AI summary).
+// Nothing is sent automatically: the dump is downloaded and the user uploads it there.
+async function openExternalAnalysis() {
+    const host = analyzeHost();
+    if (!state.dumpBlob || !host) return;
+    const isRtcstatsCom = host === 'rtcstats.com';
+    const fileName =
+        state.dumpName.endsWith('.rtcstats.txt') || state.dumpIsLocal
+            ? state.dumpName
+            : `${state.dumpName}.rtcstats.txt`;
+    const confirmed = await confirmDialog({
+        variant: 'info',
+        title: `Analyze on ${host}`,
+        message: isRtcstatsCom
+            ? 'This viewer is a quick built-in check. rtcstats.com, by the authors of rtcstats, gives an experience score, detailed observations and an AI summary of the call.'
+            : `Get an in-depth analysis of this call on ${host}.`,
+        steps: [
+            state.dumpIsLocal
+                ? 'You already have this dump on your computer.'
+                : 'This dump is downloaded to your computer.',
+            `${host} opens in a new tab.`,
+            isRtcstatsCom ? 'Sign in or create a free account.' : null,
+            `Upload this file there.`,
+        ].filter(Boolean),
+        details: [fileName],
+        note: `Nothing is sent automatically. The file is only shared if you upload it to ${host}, a third-party service.`,
+        confirmText: 'Continue',
+    });
+    if (!confirmed) return;
+    window.open(state.analyzeUrl, '_blank', 'noopener');
+    if (!state.dumpIsLocal) {
+        const url = URL.createObjectURL(state.dumpBlob);
+        const link = el('a', { href: url, download: fileName });
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
 }
 
 async function openLocalFile(file) {
@@ -556,6 +656,8 @@ function showAnalysis(visible) {
     if (!visible) {
         destroyCharts();
         state.analysis = null;
+        state.dumpBlob = null;
+        showNotice('viewerNotice', '');
         if (state.dumps.length) renderDumps();
     }
     window.scrollTo({ top: 0 });
@@ -1920,6 +2022,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (getApiKey()) loadDumps({ silent: true });
     });
     $('downloadBtn').addEventListener('click', () => state.selectedDump && downloadServerDump(state.selectedDump));
+    $('analyzeBtn').addEventListener('click', openExternalAnalysis);
+    loadViewerConfig();
     initDropZone();
     initAutoRefresh();
 

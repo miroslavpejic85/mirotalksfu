@@ -1130,3 +1130,56 @@ details.prop-group[open] > summary.prop-group-title {
     color: var(--text);
     flex-shrink: 0;
 }
+
+@media (max-width: 640px) {
+    .breadcrumb {
+        flex-wrap: wrap;
+    }
+}
+
+#viewerNotice {
+    margin: 0 0 14px;
+}
+
+/* Info variant of the confirmation modal (e.g. external analysis) */
+.modal.info .modal-icon {
+    background: var(--accent-glow);
+    color: var(--accent);
+}
+
+.modal-steps {
+    margin: 0 0 14px;
+    padding: 12px 14px 12px 34px;
+    border-radius: 8px;
+    background: var(--primary-bg);
+    text-align: left;
+    font-size: 0.88em;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.modal-steps li::marker {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.modal-note {
+    margin: 0 0 16px;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    text-align: left;
+}
+
+.modal-note i {
+    color: var(--accent);
+}
+
+.modal.info {
+    width: min(500px, 100%);
+}
+
+.modal.info .modal-details {
+    font-family: var(--mono);
+    font-size: 0.78em;
+    color: var(--text-muted);
+}

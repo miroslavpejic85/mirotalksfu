@@ -58,6 +58,21 @@ function toPositiveInt(value, fallback) {
     return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
+// Viewer "Analyze on ..." link for an in-depth analysis of a dump (empty string hides it)
+const DEFAULT_ANALYZE_URL = 'https://rtcstats.com/dashboard?utm_source=mirotalk&utm_medium=viewer';
+
+// undefined/null -> default, '' -> disabled, anything but an http(s) URL -> disabled
+function resolveAnalyzeUrl(value) {
+    if (value === undefined || value === null) return DEFAULT_ANALYZE_URL;
+    if (typeof value !== 'string' || !value.trim()) return '';
+    try {
+        const url = new URL(value.trim());
+        return ['https:', 'http:'].includes(url.protocol) ? url.toString() : '';
+    } catch (err) {
+        return '';
+    }
+}
+
 function resolveConfig(cfg = {}) {
     const url = typeof cfg.url === 'string' ? cfg.url.trim() : '';
     const retentionDays = parseInt(cfg.retentionDays, 10);
@@ -73,6 +88,7 @@ function resolveConfig(cfg = {}) {
         maxDumpBytes: toPositiveInt(cfg.maxDumpSizeMB, 50) * 1024 * 1024,
         retentionDays: Number.isFinite(retentionDays) && retentionDays >= 0 ? retentionDays : 7,
         obfuscateIpAddresses: cfg.obfuscateIpAddresses !== false,
+        analyzeUrl: resolveAnalyzeUrl(cfg.analyzeUrl),
     };
 }
 
@@ -116,6 +132,7 @@ class RtcStats {
             enabled: this.config.enabled,
             getStatsInterval: this.config.getStatsInterval,
             excludeDeviceLabels: this.config.excludeDeviceLabels,
+            analyzeUrl: this.config.analyzeUrl,
         };
     }
 
@@ -579,6 +596,7 @@ class RtcStats {
 
 module.exports = RtcStats;
 module.exports.resolveConfig = resolveConfig;
+module.exports.DEFAULT_ANALYZE_URL = DEFAULT_ANALYZE_URL;
 module.exports.normalizeTags = normalizeTags;
 module.exports.BUILTIN_PATH = BUILTIN_PATH;
 module.exports.DUMP_EXTENSION = DUMP_EXTENSION;

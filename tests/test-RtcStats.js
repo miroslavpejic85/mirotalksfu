@@ -87,8 +87,24 @@ describe('RtcStats', () => {
                 enabled: true,
                 getStatsInterval: 1000,
                 excludeDeviceLabels: true,
+                analyzeUrl: RtcStats.DEFAULT_ANALYZE_URL,
             });
             JSON.stringify(rtcStats.describe()).should.not.containEql('top-secret');
+        });
+
+        it('resolves the viewer "Analyze on ..." link (default, hidden, custom, unsafe)', () => {
+            const analyzeUrl = (value) => resolveConfig({ analyzeUrl: value }).analyzeUrl;
+            RtcStats.DEFAULT_ANALYZE_URL.should.startWith('https://rtcstats.com/');
+            analyzeUrl(undefined).should.equal(RtcStats.DEFAULT_ANALYZE_URL);
+            analyzeUrl(null).should.equal(RtcStats.DEFAULT_ANALYZE_URL);
+            analyzeUrl('').should.equal('');
+            analyzeUrl('   ').should.equal('');
+            analyzeUrl(' https://analysis.example.com/upload?src=sfu ').should.equal(
+                'https://analysis.example.com/upload?src=sfu'
+            );
+            for (const unsafe of ['javascript:alert(1)', 'data:text/html,x', 'ftp://x.com', 'not a url', 42]) {
+                analyzeUrl(unsafe).should.equal('', String(unsafe));
+            }
         });
     });
 
