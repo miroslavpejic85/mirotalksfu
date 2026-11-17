@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.15
+ * @version 2.8.16
  *
  */
 
@@ -7011,6 +7011,27 @@ function setupQuickDeviceSwitchDropdowns() {
         bootstrap.Dropdown.getInstance(toggleEl)?.hide();
     }
 
+    // Quick "for all" moderation shortcut, same action and permission as the participants list
+    function appendMenuModerationAction(menuEl, toggleEl, action, iconClass, label) {
+        if (isRulesActive && !isPresenter) return;
+
+        appendMenuDivider(menuEl);
+        appendMenuHeader(menuEl, 'fas fa-user-shield', 'Moderation');
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'device-menu-action-btn';
+        const icon = document.createElement('i');
+        icon.className = iconClass;
+        btn.appendChild(icon);
+        btn.appendChild(document.createTextNode(` ${label}`));
+        btn.addEventListener('click', () => {
+            hideDeviceMenu(toggleEl);
+            rc.peerAction('me', socket.id, action, true, true);
+        });
+        menuEl.appendChild(btn);
+    }
+
     function appendSelectOptions(menuEl, selectEl, emptyLabel, rebuildFn, meterCollector) {
         if (!selectEl) return;
 
@@ -7355,6 +7376,8 @@ function setupQuickDeviceSwitchDropdowns() {
             });
             videoMenu.appendChild(videoAIBtn);
         }
+
+        appendMenuModerationAction(videoMenu, videoToggle, 'hide', 'fas fa-video-slash', 'Hide all participants');
     }
 
     function buildAudioMenu() {
@@ -7472,6 +7495,8 @@ function setupQuickDeviceSwitchDropdowns() {
             }, 100);
         });
         audioMenu.appendChild(settingsBtn);
+
+        appendMenuModerationAction(audioMenu, audioToggle, 'mute', 'fas fa-microphone-slash', 'Mute all participants');
     }
 
     function rebuildVideoMenu() {
@@ -11483,7 +11508,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.15',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.16',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
