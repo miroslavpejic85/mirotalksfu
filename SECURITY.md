@@ -21,24 +21,26 @@ Thanks in advance for your support to make our products safer!
 
 We would like to extend our gratitude to the following individuals for their responsible disclosure of security vulnerabilities:
 
-| Name                                                 | Contact                                                                                             |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `Hendrik Siewert`                                    | [Email](mailto:hendrik.siewert@upb.de)                                                              |
-| `Caio Fook`                                          | [GitHub](https://github.com/caiofook)                                                               |
-| `Nishant Jain`                                       | [X](https://twitter.com/realArcherL)                                                                |
-| `Florian LELEU`                                      | [Website](https://hosting.cognix-systems.com)                                                       |
-| `Nozomu Sasaki (Paul)`                               | [GitHub](https://github.com/morimori-dev) \| [LinkedIn](https://www.linkedin.com/in/nozomu-sasaki/) |
-| `Vishal Shukla (@shukla304) and sechub.dev AI Agent` | [GitHub](https://github.com/shukla304)                                                              |
-| `Tyler Boykin`                                       | [GitHub](https://github.com/CaptBoykin)                                                             |
-| `tonghuaroot`                                        | [GitHub](https://github.com/tonghuaroot)                                                            |
-| `Kevin Sanchez`                                      | [GitHub](https://github.com/kevinsocute)                                                            |
-| `28Hus`                                              | [GitHub](https://github.com/28Hus)                                                                  |
-| `Hama1cco`                                           | [GitHub](https://github.com/Hama1cco) \| [Email](mailto:limiecco@gmail.com)                         |
-| `Azzzzzqz`                                           | [GitHub](https://github.com/Azzzzzqz)                                                               |
-| `kats1123`                                           | [GitHub](https://github.com/kats1123)                                                               |
-| `oe2735`                                             | [GitHub](https://github.com/oe2735)                                                                 |
-| `Liam-G`                                             | [GitHub](https://github.com/Liam-G)                                                                 |
-| `Xiangpu Song`                                       | [GitHub](https://github.com/songxpu)                                                                |
-| `Marc Schneider`                                     | [GitHub](https://github.com/snrmwg)                                                                 |
+| Name                                                 | Contact                                                                                                  |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `Hendrik Siewert`                                    | [Email](mailto:hendrik.siewert@upb.de)                                                                   |
+| `Caio Fook`                                          | [GitHub](https://github.com/caiofook)                                                                    |
+| `Nishant Jain`                                       | [X](https://twitter.com/realArcherL)                                                                     |
+| `Florian LELEU`                                      | [Website](https://hosting.cognix-systems.com)                                                            |
+| `Nozomu Sasaki (Paul)`                               | [GitHub](https://github.com/morimori-dev) \| [LinkedIn](https://www.linkedin.com/in/nozomu-sasaki/)      |
+| `Vishal Shukla (@shukla304) and sechub.dev AI Agent` | [GitHub](https://github.com/shukla304)                                                                   |
+| `Tyler Boykin`                                       | [GitHub](https://github.com/CaptBoykin)                                                                  |
+| `tonghuaroot`                                        | [GitHub](https://github.com/tonghuaroot)                                                                 |
+| `Kevin Sanchez`                                      | [GitHub](https://github.com/kevinsocute)                                                                 |
+| `28Hus`                                              | [GitHub](https://github.com/28Hus)                                                                       |
+| `Hama1cco`                                           | [GitHub](https://github.com/Hama1cco) \| [Email](mailto:limiecco@gmail.com)                              |
+| `Azzzzzqz`                                           | [GitHub](https://github.com/Azzzzzqz)                                                                    |
+| `kats1123`                                           | [GitHub](https://github.com/kats1123)                                                                    |
+| `oe2735`                                             | [GitHub](https://github.com/oe2735)                                                                      |
+| `Liam-G`                                             | [GitHub](https://github.com/Liam-G)                                                                      |
+| `Xiangpu Song`                                       | [GitHub](https://github.com/songxpu)                                                                     |
+| `Marc Schneider`                                     | [GitHub](https://github.com/snrmwg)                                                                      |
+| `Muhammad Saad`                                      | [Github](https://github.com/msaadraj) \ [LinkedIn](https://www.linkedin.com/in/muhammad-saad-9818502b3/) |
+|                                                      |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
