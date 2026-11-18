@@ -298,6 +298,7 @@ function handleRules(isPresenter, roomSetup = true) {
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     updateJoinLockButtons();
     BUTTONS.settings.sendEmailInvitation ? show(sendEmailInvitation) : hide(sendEmailInvitation);
+    BUTTONS.settings.sendEmailInvitation ? show(participantsEmailInviteBtn) : hide(participantsEmailInviteBtn);
     BUTTONS.settings.micOptionsButton ? show(micOptionsButton) : hide(micOptionsButton);
     BUTTONS.settings.tabNotificationsBtn ? show(tabNotificationsBtn) : hide(tabNotificationsBtn);
     BUTTONS.settings.tabModerator ? show(tabModeratorBtn) : hide(tabModeratorBtn);

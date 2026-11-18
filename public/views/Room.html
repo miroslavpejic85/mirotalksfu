@@ -170,6 +170,7 @@
         <script defer src="../js/WakeLock.js"></script>
         <script defer src="../js/RoomBackground.js"></script>
         <script defer src="../js/RoomTemplate.js"></script>
+        <script defer src="../js/CalendarInvite.js"></script>
         <script defer src="../js/NetworkStats.js"></script>
         <script defer src="../js/GifSearch.js"></script>
         <script defer src="../js/RoomClient.js"></script>
@@ -451,6 +452,9 @@
                         </button>
                         <button id="participantsCopyInviteLinkBtn" type="button">
                             <i class="fas fa-link"></i> Copy invite link
+                        </button>
+                        <button id="participantsEmailInviteBtn" class="hidden" type="button">
+                            <i class="fas fa-envelope"></i> Send email invitation
                         </button>
                     </div>
                 </div>
@@ -4802,6 +4806,50 @@ Note</textarea>
                         aria-label="Meeting date and time"
                     />
                 </div>
+            </div>
+            <div class="email-invitation-date-field">
+                <span id="meetingDurationLabel" class="email-invitation-field-title">Duration</span>
+                <div class="email-invitation-duration-presets" role="radiogroup" aria-labelledby="meetingDurationLabel">
+                    <label class="email-invitation-duration-chip">
+                        <input type="radio" name="meetingDuration" value="15" />
+                        <span>15 min</span>
+                    </label>
+                    <label class="email-invitation-duration-chip">
+                        <input type="radio" name="meetingDuration" value="30" />
+                        <span>30 min</span>
+                    </label>
+                    <label class="email-invitation-duration-chip">
+                        <input type="radio" name="meetingDuration" value="45" />
+                        <span>45 min</span>
+                    </label>
+                    <label class="email-invitation-duration-chip">
+                        <input type="radio" name="meetingDuration" value="60" checked />
+                        <span>1 h</span>
+                    </label>
+                    <label class="email-invitation-duration-chip">
+                        <input type="radio" name="meetingDuration" value="90" />
+                        <span>1 h 30 min</span>
+                    </label>
+                    <label class="email-invitation-duration-chip">
+                        <input type="radio" name="meetingDuration" value="120" />
+                        <span>2 h</span>
+                    </label>
+                    <label class="email-invitation-duration-chip">
+                        <input type="radio" name="meetingDuration" value="custom" />
+                        <span>Custom</span>
+                    </label>
+                </div>
+                <div id="meetingDurationCustom" class="email-invitation-duration-custom" hidden>
+                    <label class="email-invitation-duration-select">
+                        <select id="meetingDurationHours" aria-label="hours"></select>
+                        <span>hours</span>
+                    </label>
+                    <label class="email-invitation-duration-select">
+                        <select id="meetingDurationMinutes" aria-label="minutes"></select>
+                        <span>minutes</span>
+                    </label>
+                </div>
+                <input type="hidden" id="meetingDurationInput" value="60" />
             </div>
         </template>
 

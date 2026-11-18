@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.32
+ * @version 2.8.33
  *
  */
 
@@ -252,6 +252,7 @@ const copyRoomUrlBtn = getId('copyRoomUrlBtn');
 const participantsSplit = getId('participantsSplit');
 const participantsInviteBtn = getId('participantsInviteBtn');
 const participantsCopyInviteLinkBtn = getId('participantsCopyInviteLinkBtn');
+const participantsEmailInviteBtn = getId('participantsEmailInviteBtn');
 const tabSipPhoneBtn = getId('tabSipPhoneBtn');
 const sipWsServer = getId('sipWsServer');
 const sipDomain = getId('sipDomain');
@@ -2683,6 +2684,81 @@ async function copyToClipboard(txt, showTxt = true) {
         : userLog('info', `Copied to clipboard`, 'top-end');
 }
 
+function getEmailInvitationDetails() {
+    const popup = Swal.getPopup();
+    const dateTime = popup?.querySelector('#datetimePicker')?.value?.trim() || '';
+    const start = CalendarInvite.parseLocalDateTime(dateTime);
+    if (!start) {
+        Swal.showValidationMessage('Choose a meeting date and time');
+        return null;
+    }
+    const duration = CalendarInvite.parseDuration(popup?.querySelector('#meetingDurationInput')?.value);
+    if (!duration) {
+        Swal.showValidationMessage('Choose a duration between 1 and 1440 minutes');
+        return null;
+    }
+    const roomPassword = isRoomLocked ? room_password || rc?.RoomPassword || '' : '';
+    Swal.resetValidationMessage();
+    return { start, duration, roomPassword };
+}
+
+function downloadMeetingIcs({ start, duration, roomPassword }) {
+    const description = [`Click to join: ${RoomURL}`];
+    if (roomPassword) description.push(`Password: ${roomPassword}`);
+    const ics = CalendarInvite.buildIcs({
+        title: `${BRAND.app.name} meeting: ${room_id}`,
+        description: description.join('\n'),
+        url: RoomURL,
+        start,
+        durationMinutes: duration,
+        uid: `${crypto.randomUUID?.() || Date.now().toString(36)}@${location.hostname || 'mirotalk'}`,
+        productName: BRAND.app.name,
+    });
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    saveDataToFile(URL.createObjectURL(blob), CalendarInvite.toFileName(room_id));
+    userLog('info', 'Calendar event downloaded', 'top-end');
+}
+
+function setupMeetingDurationPicker(popup) {
+    const output = popup?.querySelector('#meetingDurationInput');
+    const custom = popup?.querySelector('#meetingDurationCustom');
+    const hours = popup?.querySelector('#meetingDurationHours');
+    const minutes = popup?.querySelector('#meetingDurationMinutes');
+    if (!output || !custom || !hours || !minutes) return;
+
+    for (let h = 0; h <= 24; h++) hours.add(new Option(String(h), String(h)));
+    for (let m = 0; m < 60; m += 5) minutes.add(new Option(String(m).padStart(2, '0'), String(m)));
+
+    // Disable combinations outside 5 min – 24 h so the custom value is always valid.
+    const syncCustom = () => {
+        const isMax = hours.value === '24';
+        if (isMax) minutes.value = '0';
+        if (hours.value === '0' && minutes.value === '0') minutes.value = '5';
+        [...minutes.options].forEach((option) => {
+            option.disabled = (isMax && option.value !== '0') || (hours.value === '0' && option.value === '0');
+        });
+        output.value = String(Number(hours.value) * 60 + Number(minutes.value));
+    };
+
+    popup.querySelectorAll('input[name="meetingDuration"]').forEach((radio) => {
+        radio.addEventListener('change', () => {
+            if (!radio.checked) return;
+            const isCustom = radio.value === 'custom';
+            custom.hidden = !isCustom;
+            if (!isCustom) {
+                output.value = radio.value;
+                return;
+            }
+            const current = Number(output.value) || 60;
+            hours.value = String(Math.floor(current / 60));
+            minutes.value = String(Math.floor((current % 60) / 5) * 5);
+            syncCustom();
+        });
+    });
+    hours.addEventListener('change', syncCustom);
+    minutes.addEventListener('change', syncCustom);
+}
+
 function shareRoomByEmail() {
     Swal.fire({
         allowOutsideClick: false,
@@ -2692,8 +2768,10 @@ function shareRoomByEmail() {
         position: 'center',
         title: 'Schedule email invitation',
         html: renderRoomTemplate('popupDateTimePickerTemplate'),
+        showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: 'Open email',
+        denyButtonText: 'Download .ics',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         didOpen: () => {
@@ -2702,22 +2780,34 @@ function shareRoomByEmail() {
                 dateFormat: 'Y-m-d H:i',
                 time_24hr: true,
             });
+            setupMeetingDurationPicker(Swal.getPopup());
+        },
+        preDeny: () => {
+            const details = getEmailInvitationDetails();
+            if (details) downloadMeetingIcs(details);
+            // Keep the popup open so the invitation email can still be sent.
+            return false;
         },
         preConfirm: () => {
-            const selectedDateTime = Swal.getPopup()?.querySelector('#datetimePicker')?.value?.trim() || '';
+            const details = getEmailInvitationDetails();
+            if (!details) return false;
 
-            if (!selectedDateTime) {
-                Swal.showValidationMessage('Choose a meeting date and time');
-                return false;
-            }
-
-            const newLine = '\r\n\r\n';
-            const roomPassword =
-                isRoomLocked && (room_password || rc.RoomPassword)
-                    ? 'Password: ' + (room_password || rc.RoomPassword) + newLine
-                    : '';
+            const when = CalendarInvite.formatMeetingTime({
+                start: details.start,
+                durationMinutes: details.duration,
+                hour12: new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions().hour12,
+            });
+            const lines = [
+                `You're invited to a ${BRAND.app.name} meeting.`,
+                '',
+                `Date: ${when.date}`,
+                `Time: ${when.time} (${when.timeZone})`,
+                `Duration: ${when.duration}`,
+            ];
+            if (details.roomPassword) lines.push(`Password: ${details.roomPassword}`);
+            lines.push('', 'Join the meeting:', RoomURL, '');
             const emailSubject = `Please join our ${BRAND.app.name} Video Chat Meeting`;
-            const emailBody = `The meeting is scheduled at:${newLine}DateTime: ${selectedDateTime}${newLine}${roomPassword}Click to join: ${RoomURL}${newLine}`;
+            const emailBody = lines.join('\r\n');
             const mailtoUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
             bypassBeforeUnloadOnce = true;
@@ -2901,6 +2991,7 @@ function roomIsReady() {
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     updateJoinLockButtons();
     BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
+    BUTTONS.settings.sendEmailInvitation && show(participantsEmailInviteBtn);
     !BUTTONS.settings.customNoiseSuppression && hide(noiseSuppressionButton);
     !BUTTONS.settings.customNoiseSuppression && hide(everyoneNoiseSuppressionBtn);
     BUTTONS.settings.tabNotificationsBtn && show(tabNotificationsBtn);
@@ -3642,6 +3733,9 @@ function handleButtons() {
     };
     participantsCopyInviteLinkBtn.onclick = () => {
         copyRoomURL();
+    };
+    participantsEmailInviteBtn.onclick = () => {
+        shareRoomByEmail();
     };
     // Voice Commands
     speechRecButton.onclick = () => {
@@ -11511,7 +11605,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.32',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.33',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
