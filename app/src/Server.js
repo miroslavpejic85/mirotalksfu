@@ -3272,6 +3272,7 @@ function startServer() {
                 room.broadCast(socket.id, 'roomLobby', {
                     peer_id: peer_id,
                     peer_name: peer_name,
+                    peer_avatar: peer.peer_avatar || false,
                     lobby_status: 'waiting',
                 });
                 return cb('isLobby');
@@ -4128,6 +4129,9 @@ function startServer() {
                 peer.peer_info?.peer_uuid
             );
             if (!isPresenter) return;
+
+            // Clients render lobby avatars: never relay a client supplied one (stored peers are sanitized)
+            delete data.peer_avatar;
 
             data.room = room.toJson();
 

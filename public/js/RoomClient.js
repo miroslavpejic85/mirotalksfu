@@ -12843,6 +12843,7 @@ class RoomClient {
     lobbyRefreshUi() {
         let lobbyTr = this.getId('lobbyTbTemplate').innerHTML;
         const lobbyTb = this.getId('lobbyTb');
+        const lobbyAvatars = [];
 
         for (const peer_id of Object.keys(this.lobbyPears)) {
             const { peer_name, peer_avatar } = this.lobbyPears[peer_id];
@@ -12856,6 +12857,7 @@ class RoomClient {
                     : this.isValidEmail(peer_name)
                       ? this.genGravatar(peer_name, 32)
                       : this.genAvatarSvg(peer_name, 32);
+            lobbyAvatars.push(avatarImg);
 
             const lobbyAcceptId = `${displayName}___${safePeerId}___lobbyAccept`;
             const lobbyRejectId = `${displayName}___${safePeerId}___lobbyReject`;
@@ -12863,7 +12865,7 @@ class RoomClient {
             lobbyTr += `
             <tr id='${safePeerId}' class='lobby-row'>
                 <td class='lobby-cell lobby-cell--avatar'>
-                    <img class='lobby-avatar-img' src="${avatarImg}" alt="${displayName}" />
+                    <img class='lobby-avatar-img' alt="${displayName}" />
                 </td>
                 <td class='lobby-cell lobby-cell--user'>
                     <div class='lobby-user-meta'>
@@ -12898,6 +12900,8 @@ class RoomClient {
             }
         }
         lobbyTb.innerHTML = lobbyTr;
+        // Avatars may be peer supplied: set them as DOM attributes, never inside the HTML string
+        lobbyTb.querySelectorAll('img.lobby-avatar-img').forEach((img, i) => img.setAttribute('src', lobbyAvatars[i]));
         lobbyHeaderTitle.innerText = 'Lobby users (' + this.lobbyParticipantsCount() + ')';
         this.lobbyToggle();
     }

@@ -105,5 +105,19 @@ describe('test-LobbyAuthorization', () => {
             handler({ peer_id: 'alice', lobby_status: 'reject' });
             assert.equal(room.removePeer.called, false);
         });
+
+        it('never relays a presenter supplied avatar (lobby list XSS)', () => {
+            const { handler, room } = setup({ bob: { peer_lobby: true } });
+            handler({
+                peer_id: 'bob',
+                peer_name: 'Guest',
+                peer_avatar: 'https://invalid.invalid/" onerror="alert(document.domain)',
+                lobby_status: 'waiting',
+            });
+            assert.equal(room.sendTo.called, true);
+            for (const call of room.sendTo.getCalls()) {
+                assert.equal('peer_avatar' in call.args[2], false);
+            }
+        });
     });
 });

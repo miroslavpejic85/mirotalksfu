@@ -198,6 +198,20 @@ describe('Socket.IO join authorization', () => {
         assert.equal(JSON.stringify([...state.room.getPeers()]).includes('onanimationstart'), false);
     });
 
+    it('announces a lobby guest with the sanitized stored avatar', async () => {
+        const state = setup({}, 'room-a');
+        state.room.isLobbyEnabled = () => true;
+        state.context.Peer = require('../app/src/Peer');
+        state.data.peer_info.peer_avatar = 'https://example.com/a.png?x=" onerror="alert(1)';
+        assert.equal(await joinExistingRoom(state), 'isLobby');
+        const [, event, data] = state.room.broadCast.lastCall.args;
+        assert.equal(event, 'roomLobby');
+        assert.equal(data.lobby_status, 'waiting');
+        assert.equal(data.peer_id, state.socket.id);
+        assert.match(data.peer_avatar, /^https:\/\/example\.com\/a\.png\?x=/);
+        assert.doesNotMatch(data.peer_avatar, /["<>]/);
+    });
+
     it('waits for the asynchronous authorization verdict before admission', async () => {
         const state = setup();
         let resolveAuthorization;
