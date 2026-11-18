@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.34
+ * @version 2.8.35
  *
  */
 
@@ -9507,6 +9507,8 @@ function getParticipantsList(peers) {
     // PEERS IN THE CURRENT ROOM
     for (const peer of Array.from(peers.keys())) {
         const peer_info = peers.get(peer).peer_info;
+        // peer_id is concatenated into ids and inline handlers below: only accept server-style ids
+        if (!/^[\w-]+$/.test(peer_info?.peer_id || '')) continue;
         console.log('PEER-INFO------->', peer_info);
         const peer_name = peer_info.peer_name;
         const peer_avatar = peer_info.peer_avatar;
@@ -11605,7 +11607,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.34',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.35',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

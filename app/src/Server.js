@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.34
+ * @version 2.8.35
  *
  */
 
@@ -3040,6 +3040,9 @@ function startServer() {
             // peer_whip is server-owned (set only by WhipServer); socket peers can never claim it
             if (data.peer_info) delete data.peer_info.peer_whip;
 
+            // peer_id is server-owned: clients render it into the participants list, so never trust the client value
+            if (data.peer_info) data.peer_info.peer_id = socket.id;
+
             log.debug('User joined', data);
 
             if (!Validator.isValidRoomName(socket.room_id)) {
@@ -5530,6 +5533,10 @@ function startServer() {
                 });
                 return;
             }
+
+            // Bind the sender to the sending connection: never trust client supplied identity
+            data.peer_id = socket.id;
+            data.peer_avatar = peer?.peer_avatar || false;
 
             log.debug('message', data);
 

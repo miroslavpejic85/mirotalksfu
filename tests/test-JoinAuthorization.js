@@ -188,6 +188,16 @@ describe('Socket.IO join authorization', () => {
         assert.equal('peer_token' in state.context.handleJoinWebHook.firstCall.args[2], false);
     });
 
+    it('replaces a client supplied peer_id with the socket id (participants list XSS)', async () => {
+        const state = setup({}, 'room-a');
+        state.data.peer_info.peer_id = 'x" onanimationstart="alert(document.domain)" b="';
+        const result = await joinExistingRoom(state);
+        assert.equal(result.id, 'room-a');
+        const storedPeer = state.room.addPeer.firstCall.args[0];
+        assert.equal(storedPeer.peer_info.peer_id, state.socket.id);
+        assert.equal(JSON.stringify([...state.room.getPeers()]).includes('onanimationstart'), false);
+    });
+
     it('waits for the asynchronous authorization verdict before admission', async () => {
         const state = setup();
         let resolveAuthorization;

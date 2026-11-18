@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.34
+ * @version 2.8.35
  *
  */
 
@@ -15014,7 +15014,7 @@ class RoomClient {
                       : `${status}`;
             return `
                 <a data-toggle="modal" data-target="#view_info">
-                    <img src="${imgSrc}" alt="avatar" />
+                    <img alt="avatar" />
                 </a>
                 <div class="chat-about">
                     ${categoryHTML}
@@ -15024,6 +15024,12 @@ class RoomClient {
                     </span>
                 </div>
             `;
+        };
+
+        // The avatar may be peer supplied: set it as a DOM attribute, never inside the HTML string
+        const setChatAbout = (imgSrc, ...args) => {
+            chatAbout.innerHTML = generateChatAboutHTML(imgSrc, ...args);
+            chatAbout.querySelector('img')?.setAttribute('src', imgSrc);
         };
 
         // CURRENT SELECTED PEER
@@ -15056,7 +15062,7 @@ class RoomClient {
                     return userLog('warning', 'The moderator does not allow you to chat with ChatGPT', 'top-end', 6000);
                 }
                 isChatGPTOn = true;
-                chatAbout.innerHTML = generateChatAboutHTML(image.chatgpt, 'ChatGPT', 'online', '', 'AI ASSISTANT');
+                setChatAbout(image.chatgpt, 'ChatGPT', 'online', '', 'AI ASSISTANT');
                 this.getId('chatGPTMessages').style.display = 'block';
                 break;
             case 'DeepSeek':
@@ -15069,21 +15075,21 @@ class RoomClient {
                     );
                 }
                 isDeepSeekOn = true;
-                chatAbout.innerHTML = generateChatAboutHTML(image.deepSeek, 'DeepSeek', 'online', '', 'AI ASSISTANT');
+                setChatAbout(image.deepSeek, 'DeepSeek', 'online', '', 'AI ASSISTANT');
                 this.getId('deepSeekMessages').style.display = 'block';
                 break;
             case 'all':
                 if (this._moderator.chat_cant_publicly) {
                     return userLog('warning', 'The moderator does not allow you to chat publicly', 'top-end', 6000);
                 }
-                chatAbout.innerHTML = generateChatAboutHTML(image.all, 'Public chat', 'online', participantsCount);
+                setChatAbout(image.all, 'Public chat', 'online', participantsCount);
                 this.getId('chatPublicMessages').style.display = 'block';
                 break;
             default:
                 if (this._moderator.chat_cant_privately) {
                     return userLog('warning', 'The moderator does not allow you to chat privately', 'top-end', 6000);
                 }
-                chatAbout.innerHTML = generateChatAboutHTML(avatarImg, peer_name);
+                setChatAbout(avatarImg, peer_name);
                 chatPrivateMessages.style.display = 'block';
                 for (let i = 0; i < messagePrivateListItems.length; i++) {
                     const li = messagePrivateListItems[i];
