@@ -107,10 +107,12 @@ class VirtualBackgroundWorkerEngine {
         }
         if (message.type === 'pipeline-ended' || message.type === 'pipeline-error') {
             const session = this.sessions.get(message.session);
+            // Stopping a session closes its pipeline: only a running session has anything to report
+            if (!session || session.stopped) return;
             if (message.type === 'pipeline-error') {
                 console.error('❌ Virtual background worker pipeline error:', message.message);
             }
-            session?.onEnded?.();
+            session.onEnded?.();
             return;
         }
         const request = this.pending.get(message.id);
