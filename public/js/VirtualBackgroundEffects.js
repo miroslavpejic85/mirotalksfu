@@ -41,6 +41,77 @@
         );
     }
 
+    // Defaults for createMaskStabilizer, in person-confidence units [0, 1]
+    const MASK_STABILIZER_DEFAULTS = Object.freeze({
+        // Change below tLo counts as model jitter, above tHi as real motion
+        tLo: 0.03,
+        tHi: 0.15,
+        // Minimum weight of the new mask, bounds the lag of static regions
+        leak: 0.3,
+        // Decay of the per-pixel motion envelope: keeps following a moving edge for a few masks
+        release: 0.8,
+        // Smoothstep remap that narrows the soft band MediaPipe leaves around the person. Off for the
+        // WebGL compositor, whose bilateral filter needs the soft band and applies its own coverage.
+        edgeCurve: true,
+        edgeLow: 0.15,
+        edgeHigh: 0.85,
+    });
+
+    // Temporal stabilizer for segmentation masks (after Longpipe's flow-gated stabilizer, MIT, with the
+    // per-pixel mask change as the motion signal since there is no optical flow here):
+    //   env = max(|mask - prev|, release * envPrev)
+    //   g   = max(clamp((env - tLo) / (tHi - tLo), 0, 1), leak)
+    //   out = prev + g * (mask - prev)
+    // Static edges are averaged over a few masks (no flicker), moving edges follow the new mask at once.
+    // With edgeCurve, the result is then remapped with smoothstep(edgeLow, edgeHigh) for a tighter edge.
+    function createMaskStabilizer(options = {}) {
+        const { tLo, tHi, leak, release, edgeCurve, edgeLow, edgeHigh } = {
+            ...MASK_STABILIZER_DEFAULTS,
+            ...options,
+        };
+        const gateRange = Math.max(tHi - tLo, 1e-3);
+        const edgeRange = Math.max(edgeHigh - edgeLow, 1e-3);
+        let state = null;
+        let envelope = null;
+        let output = null;
+
+        const stabilize = (confidence) => {
+            const length = confidence.length;
+            if (!state || state.length !== length) {
+                state = Float32Array.from(confidence);
+                envelope = new Float32Array(length);
+                output = new Float32Array(length);
+            } else {
+                for (let i = 0; i < length; i++) {
+                    const previous = state[i];
+                    const delta = confidence[i] - previous;
+                    const env = Math.max(Math.abs(delta), release * envelope[i]);
+                    envelope[i] = env;
+                    const gate = Math.max(Math.min(Math.max((env - tLo) / gateRange, 0), 1), leak);
+                    state[i] = previous + gate * delta;
+                }
+            }
+            if (!edgeCurve) return state;
+            for (let i = 0; i < length; i++) {
+                const t = Math.min(Math.max((state[i] - edgeLow) / edgeRange, 0), 1);
+                output[i] = t * t * (3 - 2 * t);
+            }
+            return output;
+        };
+        stabilize.reset = () => {
+            state = null;
+            envelope = null;
+            output = null;
+        };
+        return stabilize;
+    }
+
+    // Upscale the low-resolution mask with the best filter available (cubic in Chromium)
+    function smoothMaskScaling(ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+    }
+
     // Slightly blurred copy of the mask for softer edges, drawn into one reused canvas
     function createSoftMask(newCanvas = createCanvas) {
         let maskCanvas;
@@ -54,6 +125,7 @@
                 maskCanvas.height = height;
             }
             maskCtx.clearRect(0, 0, width, height);
+            smoothMaskScaling(maskCtx);
             maskCtx.filter = 'blur(5px)'; // Adjust to control softness
             maskCtx.drawImage(mask, 0, 0, width, height);
             return maskCanvas;
@@ -125,6 +197,7 @@
         return (ctx, canvas, mask, frame) => {
             // Keep only the person using the segmentation mask
             ctx.save();
+            smoothMaskScaling(ctx);
             ctx.globalCompositeOperation = 'destination-in';
             ctx.drawImage(mask, 0, 0, canvas.width, canvas.height);
             ctx.restore();
@@ -167,6 +240,7 @@
         return (ctx, canvas, mask) => {
             // Apply the softened mask
             const edges = softMask ? softMask(mask, canvas.width, canvas.height) : mask;
+            smoothMaskScaling(ctx);
             ctx.globalCompositeOperation = 'destination-in';
             ctx.drawImage(edges, 0, 0, canvas.width, canvas.height);
 
@@ -189,6 +263,7 @@
 
             // Apply the mask to keep only the person
             const edges = softMask ? softMask(mask, canvas.width, canvas.height) : mask;
+            smoothMaskScaling(ctx);
             ctx.globalCompositeOperation = 'destination-in';
             ctx.drawImage(edges, 0, 0, canvas.width, canvas.height);
 
@@ -200,6 +275,8 @@
     root.VirtualBackgroundEffects = {
         createCanvas,
         drawCover,
+        MASK_STABILIZER_DEFAULTS,
+        createMaskStabilizer,
         createSoftMask,
         boxBlurPixels,
         createBlurMaskHandler,

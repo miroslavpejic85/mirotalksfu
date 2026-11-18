@@ -10,6 +10,9 @@ const VB_TASKS_VISION = Object.freeze({
     wasmBaseUrl: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VB_TASKS_VISION_VERSION}/wasm`,
     modelUrl:
         'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite',
+    // Person = not background, with a hair class: cleaner edges, used by the worker on the GPU delegate
+    multiclassModelUrl:
+        'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite',
 });
 
 // The worker and the shared effects are resolved from this script location
@@ -88,7 +91,11 @@ class VirtualBackgroundWorkerEngine {
                 config: {
                     ...VB_TASKS_VISION,
                     effectsUrl: new URL('VirtualBackgroundEffects.js', this.baseUrl).href,
-                    // CPU (XNNPACK, WASM SIMD) is reliable everywhere and keeps the GPU for encoding
+                    glUrl: new URL('VirtualBackgroundGL.js', this.baseUrl).href,
+                    // The same script, started again by the worker to segment in parallel
+                    segmenterUrl: new URL('VirtualBackgroundWorker.js', this.baseUrl).href,
+                    // The selfie model: CPU (XNNPACK, WASM SIMD) is reliable everywhere and keeps the GPU
+                    // for encoding. The multiclass model is only used on the GPU, where it is fast enough.
                     delegate: 'CPU',
                 },
             });
@@ -279,7 +286,8 @@ class VirtualBackgroundWorkerEngine {
             session.pump = pump();
             await session.pump;
             if (session.stopped) throw new Error('Background processing stopped');
-            const stream = canvas.captureStream(fps);
+            // No frame rate: a frame per drawn bitmap, as paced above. Firefox caps captureStream(30) near 18 fps
+            const stream = canvas.captureStream();
             return Object.assign(session, { outputTrack: stream.getVideoTracks()[0], stream });
         } catch (error) {
             await this.stopSession(session);
