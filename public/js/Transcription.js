@@ -199,15 +199,18 @@ class Transcription {
     handleTranscript(transcriptionData) {
         console.log('TRANSCRIPTION TEXT', transcriptionData.text_data);
 
+        // Raw values for the panel, which renders them as text (textContent), never as HTML
+        const raw_name = String(transcriptionData.peer_name ?? '');
+        const raw_text = String(transcriptionData.text_data ?? '');
+
         transcriptionData.text_data = filterXSS(transcriptionData.text_data);
         transcriptionData.peer_name = filterXSS(transcriptionData.peer_name);
-        transcriptionData.peer_avatar = filterXSS(transcriptionData.peer_avatar);
 
         const { peer_name, peer_avatar, text_data } = transcriptionData;
         const time_stamp = rc.getTimeNow();
 
         const avatar_image =
-            peer_avatar && rc.isImageURL(peer_avatar)
+            peer_avatar && rc.isValidAvatarURL(peer_avatar)
                 ? peer_avatar
                 : rc.isValidEmail(peer_name)
                   ? rc.genGravatar(peer_name)
@@ -221,18 +224,26 @@ class Transcription {
             }
         }
 
-        const msgHTML = `
-        <div class="msg-transcription left-msg-transcription">
-            <img class="msg-transcription-img" src="${avatar_image}" />
-            <div class="msg-transcription-bubble">
-                <div class="msg-transcription-info">
-                    <div class="msg-transcription-info-name">${peer_name} : ${time_stamp}</div>
-                </div>
-                <div class="msg-transcription-text">${text_data}</div>
-            </div>
-        </div>
-        `;
-        transcriptionChat.insertAdjacentHTML('beforeend', msgHTML);
+        // Build with DOM APIs: peer-supplied values must never be parsed as HTML (attribute breakout XSS)
+        const msg = document.createElement('div');
+        msg.className = 'msg-transcription left-msg-transcription';
+        const img = document.createElement('img');
+        img.className = 'msg-transcription-img';
+        img.src = avatar_image;
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-transcription-bubble';
+        const info = document.createElement('div');
+        info.className = 'msg-transcription-info';
+        const infoName = document.createElement('div');
+        infoName.className = 'msg-transcription-info-name';
+        infoName.textContent = `${raw_name} : ${time_stamp}`;
+        const text = document.createElement('div');
+        text.className = 'msg-transcription-text';
+        text.textContent = raw_text;
+        info.appendChild(infoName);
+        bubble.append(info, text);
+        msg.append(img, bubble);
+        transcriptionChat.appendChild(msg);
         transcriptionChat.scrollTop += 500;
 
         this.transcripts.push({

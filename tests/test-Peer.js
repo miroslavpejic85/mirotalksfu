@@ -35,6 +35,44 @@ describe('test-Peer', () => {
         peer.peer_name.should.equal('Host');
     });
 
+    it('neutralizes attribute-breakout avatars at join, so they are not relayed (transcript XSS)', () => {
+        const payload = 'https://127.0.0.1:9/a.png?x=" onerror="alert(document.domain)" data-x="';
+        const peer = new Peer('peer-id', {
+            peer_info: { peer_uuid: 'peer-uuid', peer_name: 'Attacker', peer_avatar: payload },
+        });
+
+        peer.peer_avatar.should.not.containEql('"');
+        peer.peer_avatar.should.startWith('https://127.0.0.1:9/a.png?x=');
+        peer.peer_info.peer_avatar.should.equal(peer.peer_avatar);
+    });
+
+    it('drops non-http(s) avatars and keeps valid ones', () => {
+        const avatarOf = (peer_avatar) =>
+            new Peer('peer-id', { peer_info: { peer_uuid: 'u', peer_name: 'P', peer_avatar } }).peer_avatar;
+
+        avatarOf('javascript:alert(1)').should.equal(false);
+        avatarOf('data:image/svg+xml,<svg onload=alert(1)>').should.equal(false);
+        avatarOf('not a url').should.equal(false);
+        avatarOf(undefined).should.equal(false);
+        avatarOf({ src: 'https://x' }).should.equal(false);
+        avatarOf('https://example.com/avatar.jpg').should.equal('https://example.com/avatar.jpg');
+    });
+
+    it('sanitizes avatar updates in place, so the rebroadcast value is safe too', () => {
+        const peer = createPeer();
+        const data = { type: 'avatar', status: 'https://x.test/a.png?"><img src=x onerror=alert(1)>' };
+
+        peer.updatePeerInfo(data);
+
+        data.status.should.not.match(/["<>]/);
+        peer.peer_avatar.should.equal(data.status);
+        peer.peer_info.peer_avatar.should.equal(data.status);
+
+        const reset = { type: 'avatar', status: false };
+        peer.updatePeerInfo(reset);
+        peer.peer_avatar.should.equal(false);
+    });
+
     it('creates a simulcast producer whose encodings have no scalabilityMode', async () => {
         const peer = createPeer();
         const handlers = {};

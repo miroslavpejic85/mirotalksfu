@@ -4,6 +4,18 @@ const { parseScalabilityMode } = require('mediasoup');
 const Logger = require('./Logger');
 const log = new Logger('Peer');
 
+// Avatar URLs are rendered by every room member: keep only normalized http(s) URLs. The WHATWG
+// serializer percent-encodes quotes and angle brackets, so the value can't break out of an attribute.
+function sanitizeAvatarURL(url) {
+    if (!url || typeof url !== 'string') return false;
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : false;
+    } catch {
+        return false;
+    }
+}
+
 module.exports = class Peer {
     constructor(socket_id, data) {
         const { peer_info } = data;
@@ -24,12 +36,13 @@ module.exports = class Peer {
 
         // Security: never keep the auth token on the peer, peer_info is shared with other room members
         delete peer_info.peer_token;
+        peer_info.peer_avatar = sanitizeAvatarURL(peer_avatar);
 
         this.id = socket_id;
         this.peer_info = peer_info;
         this.peer_uuid = peer_uuid;
         this.peer_name = peer_name;
-        this.peer_avatar = peer_avatar;
+        this.peer_avatar = peer_info.peer_avatar;
         this.peer_presenter = peer_presenter;
         this.peer_audio = peer_audio;
         this.peer_video = peer_video;
@@ -103,6 +116,8 @@ module.exports = class Peer {
                 this.peer_lobby = data.status;
                 break;
             case 'avatar':
+                // Normalize in place so the value relayed to other peers is the sanitized one too
+                data.status = sanitizeAvatarURL(data.status);
                 this.peer_info.peer_avatar = data.status;
                 this.peer_avatar = data.status;
                 break;
