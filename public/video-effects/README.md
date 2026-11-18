@@ -331,14 +331,15 @@ Modern Chrome, Edge, Firefox and Safari. Graceful degradation:
 
 Loaded from jsDelivr / Google storage at runtime, nothing added to `package.json`:
 
-| Dependency                                  | Use                 | License    |
-| ------------------------------------------- | ------------------- | ---------- |
-| `@mediapipe/tasks-vision@1.2.0` (JS + WASM) | Face Landmarker     | Apache-2.0 |
-| `face_landmarker.task` (float16/1)          | Face landmark model | Apache-2.0 |
-| `three@0.181.0` + `GLTFLoader` (lazy)       | 3D accessories      | MIT        |
-| `three` meshopt decoder, `RoomEnvironment`  | 3D avatars          | MIT        |
-| `three` Draco + KTX2 loaders (lazy)         | Custom avatars      | MIT        |
-| `@mediapipe/selfie_segmentation` (existing) | Backgrounds         | Apache-2.0 |
+| Dependency                                                 | Use                                   | License    |
+| ---------------------------------------------------------- | ------------------------------------- | ---------- |
+| `@mediapipe/tasks-vision@1.2.0` (JS + WASM)                | Face Landmarker, background segmenter | Apache-2.0 |
+| `face_landmarker.task` (float16/1)                         | Face landmark model                   | Apache-2.0 |
+| `selfie_segmenter.tflite` (float16/1)                      | Backgrounds (worker engine)           | Apache-2.0 |
+| `three@0.181.0` + `GLTFLoader` (lazy)                      | 3D accessories                        | MIT        |
+| `three` meshopt decoder, `RoomEnvironment`                 | 3D avatars                            | MIT        |
+| `three` Draco + KTX2 loaders (lazy)                        | Custom avatars                        | MIT        |
+| `@mediapipe/selfie_segmentation@0.1.1675465747` (existing) | Backgrounds (main-thread fallback)    | Apache-2.0 |
 
 All artwork in `assets/` (SVG and the generated glasses GLB) was created for MiroTalk and is covered by the
 project license, except `assets/avatars-3d/` (Microsoft Rocketbox MIT and MediaPipe Apache-2.0 models, see its

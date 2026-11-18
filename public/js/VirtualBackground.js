@@ -1,7 +1,329 @@
 'use strict';
 
-// Keep in sync with the selfie_segmentation script tag in Room.html
+// Keep in sync with the selfie_segmentation script tag in Room.html (main-thread fallback engine)
 const SELFIE_SEGMENTATION_VERSION = '0.1.1675465747';
+
+// Keep in sync with video-effects/face-tracker.js: both share the cached tasks-vision WASM
+const VB_TASKS_VISION_VERSION = '1.2.0';
+const VB_TASKS_VISION = Object.freeze({
+    visionBundleUrl: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VB_TASKS_VISION_VERSION}/vision_bundle.mjs`,
+    wasmBaseUrl: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VB_TASKS_VISION_VERSION}/wasm`,
+    modelUrl:
+        'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite',
+});
+
+// The worker and the shared effects are resolved from this script location
+const VB_BASE_URL =
+    typeof document !== 'undefined' && document.currentScript?.src
+        ? new URL('.', document.currentScript.src).href
+        : null;
+
+/**
+ * Runs segmentation + compositing in a module worker (VirtualBackgroundWorker.js) and moves the
+ * camera frames there with the best transport of the browser: transferred track processor streams
+ * (Chromium), ImageBitmap round trips (Firefox, Safari, others) or, opt-in, track transfer (Safari 18+).
+ */
+class VirtualBackgroundWorkerEngine {
+    static isSupported(baseUrl = VB_BASE_URL) {
+        return Boolean(
+            baseUrl &&
+            typeof Worker !== 'undefined' &&
+            typeof OffscreenCanvas !== 'undefined' &&
+            typeof createImageBitmap === 'function'
+        );
+    }
+
+    // trackTransfer: Safari 18+ worker-side track processing. Off by default: in WebKit testing
+    // (Playwright WebKit 27.2) VideoTrackGenerator output froze on screen even for untouched frames,
+    // while the ImageBitmap transport stayed live. Enable once verified on a real Safari camera.
+    constructor({
+        baseUrl = VB_BASE_URL,
+        initTimeoutMs = 30000,
+        requestTimeoutMs = 10000,
+        trackTransfer = false,
+    } = {}) {
+        this.baseUrl = baseUrl;
+        this.trackTransfer = trackTransfer;
+        this.initTimeoutMs = initTimeoutMs;
+        this.requestTimeoutMs = requestTimeoutMs;
+        this.worker = null;
+        this.capabilities = {};
+        this.pending = new Map();
+        this.sequence = 0;
+        this.sessions = new Map();
+        this.failed = false;
+    }
+
+    init() {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                this.terminate(new Error('Virtual background worker init timed out'));
+                reject(new Error('Virtual background worker init timed out'));
+            }, this.initTimeoutMs);
+            const done = (error, info) => {
+                clearTimeout(timer);
+                this.initHandlers = null;
+                if (error) {
+                    this.terminate(error);
+                    reject(error);
+                } else {
+                    this.capabilities = info;
+                    resolve(this);
+                }
+            };
+            this.initHandlers = done;
+            try {
+                this.worker = new Worker(new URL('VirtualBackgroundWorker.js', this.baseUrl), { type: 'module' });
+            } catch (error) {
+                done(error);
+                return;
+            }
+            this.worker.onmessage = (event) => this.onMessage(event.data || {});
+            this.worker.onerror = (event) => {
+                event.preventDefault?.();
+                this.terminate(new Error(event.message || 'Virtual background worker failed'));
+            };
+            this.worker.postMessage({
+                type: 'init',
+                config: {
+                    ...VB_TASKS_VISION,
+                    effectsUrl: new URL('VirtualBackgroundEffects.js', this.baseUrl).href,
+                    // CPU (XNNPACK, WASM SIMD) is reliable everywhere and keeps the GPU for encoding
+                    delegate: 'CPU',
+                },
+            });
+        });
+    }
+
+    onMessage(message) {
+        if (message.type === 'ready') {
+            const { type, ...info } = message;
+            this.initHandlers?.(null, info);
+            return;
+        }
+        if (message.type === 'error' && message.stage === 'init') {
+            this.initHandlers?.(new Error(message.message));
+            return;
+        }
+        if (message.type === 'pipeline-ended' || message.type === 'pipeline-error') {
+            const session = this.sessions.get(message.session);
+            if (message.type === 'pipeline-error') {
+                console.error('❌ Virtual background worker pipeline error:', message.message);
+            }
+            session?.onEnded?.();
+            return;
+        }
+        const request = this.pending.get(message.id);
+        if (!request) {
+            message.bitmap?.close?.();
+            return;
+        }
+        this.pending.delete(message.id);
+        clearTimeout(request.timer);
+        if (message.type === 'error') request.reject(new Error(message.message));
+        else request.resolve(message);
+    }
+
+    request(message, transfer = [], timeoutMs = this.requestTimeoutMs) {
+        if (!this.worker) return Promise.reject(new Error('Virtual background worker is not running'));
+        const id = ++this.sequence;
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                this.pending.delete(id);
+                reject(new Error(`Virtual background worker ${message.type} timed out`));
+            }, timeoutMs);
+            this.pending.set(id, { resolve, reject, timer });
+            try {
+                this.worker.postMessage({ ...message, id }, transfer);
+            } catch (error) {
+                clearTimeout(timer);
+                this.pending.delete(id);
+                reject(error);
+            }
+        });
+    }
+
+    setBackground(background) {
+        const transfer = background.bitmap ? [background.bitmap] : [];
+        return this.request({ type: 'background', background }, transfer);
+    }
+
+    sendGifFrame(bitmap) {
+        if (!this.worker) {
+            bitmap.close();
+            return;
+        }
+        this.worker.postMessage({ type: 'gif-frame', bitmap }, [bitmap]);
+    }
+
+    canTransferStreams() {
+        try {
+            const stream = new ReadableStream();
+            const channel = new MessageChannel();
+            channel.port1.postMessage(stream, [stream]);
+            channel.port1.close();
+            channel.port2.close();
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // Resolves { id, mode, outputTrack, stream }; onEnded fires when the pipeline ends on its own
+    async start(videoTrack, { onEnded, createGenerator, supportsTrackPipeline }) {
+        const session = { id: ++this.sequence, onEnded: () => onEnded?.(session), stopped: false };
+        this.sessions.set(session.id, session);
+        try {
+            if (this.trackTransfer && this.capabilities.trackProcessor) {
+                try {
+                    return await this.startTrack(session, videoTrack);
+                } catch (error) {
+                    if (!this.worker) throw error;
+                    console.warn('⚠️ Camera track transfer unavailable, trying another transport', error);
+                }
+            }
+            if (supportsTrackPipeline && this.canTransferStreams()) {
+                return await this.startStreams(session, videoTrack, createGenerator);
+            }
+            return await this.startFrames(session, videoTrack);
+        } catch (error) {
+            this.sessions.delete(session.id);
+            throw error;
+        }
+    }
+
+    async startTrack(session, videoTrack) {
+        // Transfer a clone: the page keeps the original camera track to release it later
+        const clone = videoTrack.clone();
+        let reply;
+        try {
+            reply = await this.request({ type: 'start', session: session.id, mode: 'track', track: clone }, [clone]);
+        } catch (error) {
+            clone.stop();
+            throw error;
+        }
+        return Object.assign(session, {
+            mode: 'track',
+            outputTrack: reply.track,
+            stream: new MediaStream([reply.track]),
+        });
+    }
+
+    async startStreams(session, videoTrack, createGenerator) {
+        const processor = new MediaStreamTrackProcessor({ track: videoTrack });
+        const { generator, track } = createGenerator();
+        await this.request(
+            {
+                type: 'start',
+                session: session.id,
+                mode: 'streams',
+                readable: processor.readable,
+                writable: generator.writable,
+            },
+            [processor.readable, generator.writable]
+        );
+        return Object.assign(session, { mode: 'streams', outputTrack: track, stream: new MediaStream([track]) });
+    }
+
+    async startFrames(session, videoTrack) {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.setAttribute('aria-hidden', 'true');
+        video.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none';
+        video.srcObject = new MediaStream([videoTrack]);
+        document.body.appendChild(video);
+        const canvas = document.createElement('canvas');
+        const onCameraEnded = () => session.onEnded();
+        Object.assign(session, { mode: 'frames', video, canvas, cameraTrack: videoTrack, onCameraEnded, timer: null });
+        videoTrack.addEventListener('ended', onCameraEnded, { once: true });
+        try {
+            await video.play();
+            await this.request({ type: 'start', session: session.id, mode: 'frames' });
+            const renderer = canvas.getContext('bitmaprenderer');
+            if (!renderer) throw new Error('bitmaprenderer canvas context is not supported');
+            const fps = Math.min(30, videoTrack.getSettings?.().frameRate || 30);
+            const pump = async () => {
+                const started = performance.now();
+                if (session.stopped) return;
+                if (video.videoWidth) {
+                    const bitmap = await createImageBitmap(video);
+                    if (session.stopped) return bitmap.close();
+                    const reply = await this.request(
+                        { type: 'frame', session: session.id, bitmap, timestamp: started },
+                        [bitmap]
+                    );
+                    if (!reply.bitmap) return;
+                    if (session.stopped) return reply.bitmap.close();
+                    if (canvas.width !== reply.bitmap.width || canvas.height !== reply.bitmap.height) {
+                        canvas.width = reply.bitmap.width;
+                        canvas.height = reply.bitmap.height;
+                    }
+                    renderer.transferFromImageBitmap(reply.bitmap);
+                }
+                if (session.stopped) return;
+                session.timer = setTimeout(
+                    () => {
+                        session.pump = pump().catch((error) => {
+                            if (session.stopped) return;
+                            console.error('❌ Virtual background frame failed:', error);
+                            session.onEnded();
+                        });
+                    },
+                    Math.max(0, 1000 / fps - (performance.now() - started))
+                );
+            };
+            // Like the main-thread canvas fallback, return once the first frame is drawn
+            session.pump = pump();
+            await session.pump;
+            if (session.stopped) throw new Error('Background processing stopped');
+            const stream = canvas.captureStream(fps);
+            return Object.assign(session, { outputTrack: stream.getVideoTracks()[0], stream });
+        } catch (error) {
+            await this.stopSession(session);
+            throw error;
+        }
+    }
+
+    async stopSession(session) {
+        if (!session || session.stopped) return;
+        session.stopped = true;
+        this.sessions.delete(session.id);
+        // Stop the output first: if the worker ended it (generator closed) it would fire 'ended', which
+        // the room treats as a lost camera ('trackended' closes the producer)
+        session.outputTrack?.stop();
+        clearTimeout(session.timer);
+        try {
+            await session.pump;
+        } catch (error) {
+            // reported by the pump
+        }
+        try {
+            await this.request({ type: 'stop', session: session.id }, [], 3000);
+        } catch (error) {
+            console.warn('⚠️ Virtual background worker stop failed', error);
+        }
+        if (session.mode === 'frames') {
+            session.cameraTrack.removeEventListener('ended', session.onCameraEnded);
+            session.video.pause();
+            session.video.srcObject = null;
+            session.video.remove();
+        }
+    }
+
+    terminate(error = new Error('Virtual background worker stopped')) {
+        this.failed = true;
+        const worker = this.worker;
+        this.worker = null;
+        this.pending.forEach((request) => {
+            clearTimeout(request.timer);
+            request.reject(error);
+        });
+        this.pending.clear();
+        this.sessions.forEach((session) => session.onEnded());
+        worker?.terminate();
+    }
+}
 
 class VirtualBackground {
     static instance = null;
@@ -15,6 +337,11 @@ class VirtualBackground {
 
         // Check for API support
         this.isSupported = this.checkSupport();
+
+        // Segmentation runs in a worker when possible; the main-thread MediaPipe engine is the fallback
+        this.useWorker = VirtualBackgroundWorkerEngine.isSupported();
+        this.workerEnginePromise = null;
+        this.workerEngine = null;
 
         this.resetState();
     }
@@ -81,6 +408,8 @@ class VirtualBackground {
         this.activeSourceTrack = null;
         this.activeStream = null;
         this.activeMaskHandler = null;
+        this.activeWorkerSession = null;
+        this.gifPump = null;
         this.backgroundRequest = 0;
         this.frameCanvas = null;
         this.frameContext = null;
@@ -438,7 +767,7 @@ class VirtualBackground {
     }
 
     async stopCurrentProcessor() {
-        if (!this.activeProcessor && !this.activeCanvas) {
+        if (!this.activeProcessor && !this.activeCanvas && !this.activeWorkerSession) {
             console.warn('⚠️ No active processing to stop');
             return;
         }
@@ -452,6 +781,10 @@ class VirtualBackground {
                 clearTimeout(timer);
                 cameraTrack.removeEventListener('ended', onEnded);
                 video.pause();
+            }
+            if (this.activeWorkerSession) {
+                this.stopGifPump();
+                await this.workerEngine?.stopSession(this.activeWorkerSession);
             }
             this.activeOutputTrack?.stop();
             await this.activePipelinePromise;
@@ -475,9 +808,130 @@ class VirtualBackground {
             this.activeSourceTrack = null;
             this.activeStream = null;
             this.activeMaskHandler = null;
+            this.activeWorkerSession = null;
             this.frameCounter = 0;
             this.lastSegmentationMask = null;
         }
+    }
+
+    // ####################################################
+    // WORKER ENGINE
+    // ####################################################
+
+    getWorkerEngine() {
+        // The worker crashed earlier: stay on the main thread
+        if (this.workerEngine?.failed) this.disableWorkerEngine();
+        if (!this.useWorker) return Promise.resolve(null);
+        if (!this.workerEnginePromise) {
+            const engine = new VirtualBackgroundWorkerEngine();
+            this.workerEnginePromise = engine.init().then(
+                () => {
+                    this.workerEngine = engine;
+                    console.log('✅ Virtual background worker ready', engine.capabilities);
+                    return engine;
+                },
+                (error) => {
+                    console.warn('⚠️ Virtual background worker unavailable, using the main thread', error);
+                    this.disableWorkerEngine();
+                    return null;
+                }
+            );
+        }
+        return this.workerEnginePromise;
+    }
+
+    disableWorkerEngine() {
+        this.useWorker = false;
+        this.workerEnginePromise = null;
+        const engine = this.workerEngine;
+        this.workerEngine = null;
+        if (engine && !engine.failed) engine.terminate();
+    }
+
+    // The worker receives a serializable background: images and GIF frames as ImageBitmaps
+    async createWorkerBackground({ blurLevel, imageUrl, transparent } = {}) {
+        if (blurLevel) {
+            this.stopGifAnimation();
+            return { kind: 'blur', blurLevel };
+        }
+        if (transparent) {
+            this.stopGifAnimation();
+            return { kind: 'transparent' };
+        }
+        if (imageUrl) {
+            if (this.isGifUrl(imageUrl)) {
+                const gifCanvas = await this.loadGifImage(imageUrl);
+                return { kind: 'gif', bitmap: await createImageBitmap(gifCanvas) };
+            }
+            const image = await this.loadImage(imageUrl);
+            this.stopGifAnimation();
+            return { kind: 'image', bitmap: await this.imageToBitmap(image) };
+        }
+        throw new Error('No virtual background selected');
+    }
+
+    // Rasterize through a canvas: works for SVG too, and caps huge pictures
+    async imageToBitmap(image, maxSize = 1920) {
+        const width = image.naturalWidth || image.width || maxSize;
+        const height = image.naturalHeight || image.height || maxSize;
+        const scale = Math.min(1, maxSize / Math.max(width, height));
+        const canvas = this.createCanvas(
+            Math.max(1, Math.round(width * scale)),
+            Math.max(1, Math.round(height * scale))
+        );
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        return createImageBitmap(canvas);
+    }
+
+    // gifler animates the GIF on the page: forward its frames to the worker
+    startGifPump(background) {
+        this.stopGifPump();
+        if (background.kind !== 'gif' || !this.gifCanvas) return;
+        let busy = false;
+        this.gifPump = setInterval(async () => {
+            if (busy || !this.gifCanvas.width || !this.workerEngine) return;
+            busy = true;
+            try {
+                this.workerEngine.sendGifFrame(await createImageBitmap(this.gifCanvas));
+            } catch (error) {
+                console.warn('⚠️ GIF background frame failed', error);
+            } finally {
+                busy = false;
+            }
+        }, 1000 / 15);
+    }
+
+    stopGifPump() {
+        clearInterval(this.gifPump);
+        this.gifPump = null;
+    }
+
+    closeWorkerBackground(background) {
+        try {
+            background?.bitmap?.close();
+        } catch (error) {
+            // already transferred or closed
+        }
+    }
+
+    async processStreamWithWorker(engine, videoTrack, background) {
+        await this.stopCurrentProcessor();
+        await engine.setBackground(background);
+        const session = await engine.start(videoTrack, {
+            onEnded: (ended) => {
+                if (this.activeWorkerSession === ended) void this.stopCurrentProcessor();
+            },
+            createGenerator: () => this.createVideoTrackGenerator(),
+            supportsTrackPipeline: this.supportsTrackPipeline(),
+        });
+        this.activeWorkerSession = session;
+        this.activeSourceTrack = videoTrack;
+        this.activeOutputTrack = session.outputTrack;
+        this.activeStream = session.stream;
+        this.isProcessing = true;
+        this.startGifPump(background);
+        console.log(`✅ Virtual background running in a worker (${session.mode})`);
+        return session.stream;
     }
 
     canSwapBackground(videoTrack) {
@@ -496,12 +950,31 @@ class VirtualBackground {
     async setBackground(videoTrack, options = {}) {
         if (!this.canSwapBackground(videoTrack)) return false;
         const request = ++this.backgroundRequest;
+        if (this.activeWorkerSession) return this.setWorkerBackground(videoTrack, options, request);
         const maskHandler = await this.createMaskHandler(options);
         // A newer selection was made while this one was loading: it wins
         if (request !== this.backgroundRequest) return true;
         if (!this.canSwapBackground(videoTrack)) return false;
         this.activeMaskHandler = maskHandler;
         console.log('✅ Virtual background swapped on the running pipeline');
+        return true;
+    }
+
+    async setWorkerBackground(videoTrack, options, request) {
+        const session = this.activeWorkerSession;
+        const background = await this.createWorkerBackground(options);
+        if (request !== this.backgroundRequest) {
+            this.closeWorkerBackground(background);
+            return true;
+        }
+        if (!this.canSwapBackground(videoTrack) || this.activeWorkerSession !== session) {
+            this.closeWorkerBackground(background);
+            return false;
+        }
+        this.stopGifPump();
+        await this.workerEngine.setBackground(background);
+        if (this.activeWorkerSession === session) this.startGifPump(background);
+        console.log('✅ Virtual background swapped on the running worker pipeline');
         return true;
     }
 
@@ -514,6 +987,19 @@ class VirtualBackground {
         }
         if (await this.setBackground(videoTrack, options)) return this.activeStream;
         ++this.backgroundRequest;
+        const engine = await this.getWorkerEngine();
+        if (engine) {
+            // A background that cannot be loaded is not a worker problem: let it throw
+            const background = await this.createWorkerBackground(options);
+            try {
+                return await this.processStreamWithWorker(engine, videoTrack, background);
+            } catch (error) {
+                console.warn('⚠️ Virtual background worker failed, using the main thread', error);
+                this.closeWorkerBackground(background);
+                await this.stopCurrentProcessor();
+                this.disableWorkerEngine();
+            }
+        }
         return this.processStreamWithSegmentation(videoTrack, await this.createMaskHandler(options));
     }
 
@@ -541,175 +1027,27 @@ class VirtualBackground {
 
     createBlurMaskHandler(blurLevel) {
         this.stopGifAnimation();
-
-        let blurCanvas;
-        let blurContext;
-        const maskHandler = (ctx, canvas, mask, imageBitmap) => {
-            // Keep only the person using the segmentation mask
-            ctx.save();
-            ctx.globalCompositeOperation = 'destination-in';
-            ctx.drawImage(mask, 0, 0, canvas.width, canvas.height);
-            ctx.restore();
-
-            // Apply blur to background and draw image behind the person
-            ctx.save();
-            ctx.globalCompositeOperation = 'destination-over';
-            if ('filter' in ctx) {
-                ctx.filter = `blur(${blurLevel}px)`;
-                ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
-            } else {
-                if (!blurCanvas) {
-                    blurCanvas = this.createCanvas(1, 1);
-                    blurContext = blurCanvas.getContext('2d', { willReadFrequently: true });
-                    if (!blurContext) throw new Error('Unable to create a canvas context for background blur.');
-                }
-
-                const scale = 8;
-                const width = Math.max(1, Math.round(canvas.width / scale));
-                const height = Math.max(1, Math.round(canvas.height / scale));
-                if (blurCanvas.width !== width || blurCanvas.height !== height) {
-                    blurCanvas.width = width;
-                    blurCanvas.height = height;
-                }
-                blurContext.clearRect(0, 0, width, height);
-                blurContext.imageSmoothingEnabled = true;
-                blurContext.drawImage(imageBitmap, 0, 0, width, height);
-                const imageData = blurContext.getImageData(0, 0, width, height);
-                let pixels = imageData.data;
-                const radius = Math.max(1, Math.round(blurLevel / scale));
-                const boxBlur = (source, horizontal) => {
-                    const blurred = new Uint8ClampedArray(source.length);
-                    const outerLength = horizontal ? height : width;
-                    const innerLength = horizontal ? width : height;
-                    const divisor = radius * 2 + 1;
-
-                    for (let outer = 0; outer < outerLength; outer++) {
-                        let red = 0;
-                        let green = 0;
-                        let blue = 0;
-                        for (let offset = -radius; offset <= radius; offset++) {
-                            const inner = Math.min(innerLength - 1, Math.max(0, offset));
-                            const index = (horizontal ? outer * width + inner : inner * width + outer) * 4;
-                            red += source[index];
-                            green += source[index + 1];
-                            blue += source[index + 2];
-                        }
-
-                        for (let inner = 0; inner < innerLength; inner++) {
-                            const index = (horizontal ? outer * width + inner : inner * width + outer) * 4;
-                            blurred[index] = Math.round(red / divisor);
-                            blurred[index + 1] = Math.round(green / divisor);
-                            blurred[index + 2] = Math.round(blue / divisor);
-                            blurred[index + 3] = source[index + 3];
-
-                            const remove = Math.max(0, inner - radius);
-                            const add = Math.min(innerLength - 1, inner + radius + 1);
-                            const removeIndex = (horizontal ? outer * width + remove : remove * width + outer) * 4;
-                            const addIndex = (horizontal ? outer * width + add : add * width + outer) * 4;
-                            red += source[addIndex] - source[removeIndex];
-                            green += source[addIndex + 1] - source[removeIndex + 1];
-                            blue += source[addIndex + 2] - source[removeIndex + 2];
-                        }
-                    }
-
-                    return blurred;
-                };
-                // Three box passes approximate a Gaussian blur without CanvasRenderingContext2D.filter.
-                for (let pass = 0; pass < 3; pass++) {
-                    pixels = boxBlur(boxBlur(pixels, true), false);
-                }
-                imageData.data.set(pixels);
-                blurContext.putImageData(imageData, 0, 0);
-                ctx.imageSmoothingEnabled = true;
-                ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
-            }
-            ctx.restore();
-        };
-
-        return maskHandler;
+        return VirtualBackgroundEffects.createBlurMaskHandler(blurLevel, this.createCanvas.bind(this));
     }
 
     async createImageMaskHandler(imageUrl) {
-        // Determine if the background is a GIF
-        const isGif = imageUrl.endsWith('.gif') || imageUrl.startsWith('data:image/gif');
+        const isGif = this.isGifUrl(imageUrl);
         const background = isGif ? await this.loadGifImage(imageUrl) : await this.loadImage(imageUrl);
         if (!isGif) this.stopGifAnimation();
-        const softMask = this.createSoftMask();
-
-        // Handler for applying virtual background
-        return (ctx, canvas, mask) => {
-            // Apply the softened mask
-            ctx.globalCompositeOperation = 'destination-in';
-            ctx.drawImage(softMask(mask, canvas.width, canvas.height), 0, 0, canvas.width, canvas.height);
-
-            // Draw background behind the person
-            ctx.globalCompositeOperation = 'destination-over';
-            this.drawCover(ctx, background, canvas.width, canvas.height);
-        };
+        return VirtualBackgroundEffects.createImageMaskHandler(background, this.createCanvas.bind(this));
     }
 
     createTransparentMaskHandler() {
         this.stopGifAnimation();
-        const softMask = this.createSoftMask();
-
-        // Handler for applying transparency by using only the mask
-        return (ctx, canvas, mask, imageBitmap) => {
-            // Clear the canvas (ensures transparency)
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw the original frame (so we start with the full image)
-            ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
-
-            // Apply the mask to keep only the person
-            ctx.globalCompositeOperation = 'destination-in';
-            ctx.drawImage(softMask(mask, canvas.width, canvas.height), 0, 0, canvas.width, canvas.height);
-
-            // Reset blending mode to normal
-            ctx.globalCompositeOperation = 'source-over';
-        };
+        return VirtualBackgroundEffects.createTransparentMaskHandler(this.createCanvas.bind(this));
     }
 
-    // Slightly blurred copy of the mask for softer edges, drawn into one reused canvas
-    createSoftMask() {
-        let maskCanvas;
-        let maskCtx;
-        return (mask, width, height) => {
-            if (!maskCanvas) {
-                maskCanvas = this.createCanvas(width, height);
-                maskCtx = maskCanvas.getContext('2d');
-            } else if (maskCanvas.width !== width || maskCanvas.height !== height) {
-                maskCanvas.width = width;
-                maskCanvas.height = height;
-            }
-            maskCtx.clearRect(0, 0, width, height);
-            maskCtx.filter = 'blur(5px)'; // Adjust to control softness
-            maskCtx.drawImage(mask, 0, 0, width, height);
-            return maskCanvas;
-        };
-    }
-
-    // Scale and center-crop the source to fill the frame without distorting it (CSS object-fit: cover)
     drawCover(ctx, source, width, height) {
-        const sourceWidth = source.naturalWidth || source.videoWidth || source.width;
-        const sourceHeight = source.naturalHeight || source.videoHeight || source.height;
-        if (!sourceWidth || !sourceHeight) {
-            ctx.drawImage(source, 0, 0, width, height);
-            return;
-        }
-        const scale = Math.max(width / sourceWidth, height / sourceHeight);
-        const cropWidth = width / scale;
-        const cropHeight = height / scale;
-        ctx.drawImage(
-            source,
-            (sourceWidth - cropWidth) / 2,
-            (sourceHeight - cropHeight) / 2,
-            cropWidth,
-            cropHeight,
-            0,
-            0,
-            width,
-            height
-        );
+        VirtualBackgroundEffects.drawCover(ctx, source, width, height);
+    }
+
+    isGifUrl(imageUrl) {
+        return imageUrl.endsWith('.gif') || imageUrl.startsWith('data:image/gif');
     }
 
     stopGifAnimation() {

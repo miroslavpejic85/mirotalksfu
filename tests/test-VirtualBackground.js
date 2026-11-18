@@ -130,6 +130,7 @@ function createEnvironment(overrides = {}) {
         },
         ...overrides,
     });
+    vm.runInContext(fs.readFileSync(path.join(__dirname, '../public/js/VirtualBackgroundEffects.js'), 'utf8'), context);
     vm.runInContext(fs.readFileSync(path.join(__dirname, '../public/js/VirtualBackground.js'), 'utf8'), context);
     const background = vm.runInContext('new VirtualBackground()', context);
     background.initialized = true;
