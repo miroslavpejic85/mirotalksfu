@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.35
+ * @version 2.8.36
  *
  */
 
@@ -11155,8 +11155,9 @@ function openVideoEffectsSettings(tab = null) {
 
 // Lobby preview: the camera (or its virtual background) goes through the effects engine when needed
 function setPreviewStream(videoElement, stream) {
-    if (videoElement === initVideo) return setInitVideoStream(stream);
-    videoElement.srcObject = stream;
+    // A background swap keeps the same processed stream: re-assigning it would reload the element
+    if (videoElement === initVideo) return stream === initVideoBaseStream ? undefined : setInitVideoStream(stream);
+    if (videoElement.srcObject !== stream) videoElement.srcObject = stream;
 }
 
 function setInitVideoStream(stream) {
@@ -11607,7 +11608,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.35',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.36',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

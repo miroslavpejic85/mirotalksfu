@@ -408,3 +408,236 @@ describe('Virtual background pipeline cleanup', () => {
         assert.equal(background.lastSegmentationMask, null);
     });
 });
+
+describe('Virtual background swapping', () => {
+    function createFrameEnvironment() {
+        const canvases = [];
+        class OffscreenCanvas {
+            constructor(width, height) {
+                this.width = width;
+                this.height = height;
+                this.context = {
+                    save: sinon.spy(),
+                    restore: sinon.spy(),
+                    clearRect: sinon.spy(),
+                    drawImage: sinon.spy(),
+                };
+                canvases.push(this);
+            }
+            getContext() {
+                return this.context;
+            }
+        }
+        class VideoFrame {
+            constructor(source, init) {
+                this.source = source;
+                this.timestamp = init.timestamp;
+            }
+            close() {
+                this.closed = true;
+            }
+        }
+        const environment = createEnvironment({
+            OffscreenCanvas,
+            VideoFrame,
+            createImageBitmap: async () => ({ close: sinon.spy() }),
+        });
+        environment.background.segmentation.send = sinon.stub().callsFake(async () => {
+            environment.background.handleSegmentationResults({ segmentationMask: { mask: true } });
+        });
+        return { ...environment, canvases };
+    }
+
+    function createFrame(timestamp) {
+        return { displayWidth: 640, displayHeight: 360, timestamp, close: sinon.spy() };
+    }
+
+    const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+    it('swaps the effect on the running pipeline without restarting it', async () => {
+        const { background, processors, generators } = createEnvironment();
+        const camera = { readyState: 'live', stop: sinon.spy() };
+        const first = sinon.spy();
+        const second = sinon.spy();
+        const stream = await background.processStreamWithSegmentation(camera, first);
+        background.lastSegmentationMask = { mask: true };
+        background.createMaskHandler = sinon.stub().resolves(second);
+
+        assert.equal(await background.setBackground(camera, { blurLevel: 20 }), true);
+        assert.equal(background.createMaskHandler.calledOnceWith({ blurLevel: 20 }), true);
+        assert.equal(background.activeMaskHandler, second);
+        assert.equal(await background.applyBlurToWebRTCStream(camera, 10), stream);
+        assert.equal(processors.length, 1);
+        assert.equal(generators[0].stop.called, false);
+        assert.equal(processors[0].cancel.called, false);
+        assert.deepEqual(background.lastSegmentationMask, { mask: true });
+        assert.equal(camera.stop.called, false);
+        await background.stopCurrentProcessor();
+    });
+
+    it('refuses to swap without a running pipeline for the same live camera', async () => {
+        const { background } = createEnvironment();
+        const camera = { readyState: 'live' };
+        background.createMaskHandler = sinon.stub().resolves(() => {});
+
+        assert.equal(await background.setBackground(camera, { blurLevel: 10 }), false);
+        await background.processStreamWithSegmentation(camera, () => {});
+        assert.equal(await background.setBackground({ readyState: 'live' }, { blurLevel: 10 }), false);
+        camera.readyState = 'ended';
+        assert.equal(await background.setBackground(camera, { blurLevel: 10 }), false);
+        camera.readyState = 'live';
+        await background.stopCurrentProcessor();
+        assert.equal(await background.setBackground(camera, { blurLevel: 10 }), false);
+        assert.equal(background.createMaskHandler.called, false);
+    });
+
+    it('keeps the newest selection when an older background finishes loading later', async () => {
+        const { background } = createEnvironment();
+        const camera = { readyState: 'live' };
+        await background.processStreamWithSegmentation(camera, () => {});
+        const slow = () => {};
+        const fast = () => {};
+        let finishSlow;
+        background.createMaskHandler = sinon.stub();
+        background.createMaskHandler.onFirstCall().returns(new Promise((resolve) => (finishSlow = resolve)));
+        background.createMaskHandler.onSecondCall().resolves(fast);
+
+        const older = background.setBackground(camera, { imageUrl: 'big.jpg' });
+        assert.equal(await background.setBackground(camera, { blurLevel: 10 }), true);
+        finishSlow(slow);
+        assert.equal(await older, true);
+        assert.equal(background.activeMaskHandler, fast);
+        await background.stopCurrentProcessor();
+    });
+
+    it('renders every frame with the current effect on one reused canvas', async () => {
+        const { background, processors, canvases } = createFrameEnvironment();
+        const first = sinon.spy((ctx) => (ctx.globalCompositeOperation = 'destination-over'));
+        const second = sinon.spy();
+        await background.processStreamWithSegmentation({ readyState: 'live' }, first);
+
+        processors[0].controller.enqueue(createFrame(1));
+        await flush();
+        background.activeMaskHandler = second;
+        processors[0].controller.enqueue(createFrame(2));
+        await flush();
+
+        assert.equal(background.segmentation.send.calledOnce, true);
+        assert.equal(first.calledOnce, true);
+        assert.equal(second.calledOnceWith(canvases[0].context, canvases[0]), true);
+        assert.deepEqual(second.firstCall.args[2], { mask: true });
+        assert.equal(canvases.length, 1);
+        assert.equal(canvases[0].context.save.calledTwice, true);
+        assert.equal(canvases[0].context.restore.calledTwice, true);
+        assert.equal(canvases[0].context.clearRect.calledTwice, true);
+        await background.stopCurrentProcessor();
+    });
+
+    it('swaps the effect of the canvas fallback without restarting the camera video', async () => {
+        const { background, camera, videos, setTimeout } = createCanvasEnvironment();
+        const first = sinon.spy();
+        const second = sinon.spy();
+        const stream = await background.processStreamWithSegmentation(camera, first);
+        background.createMaskHandler = sinon.stub().resolves(second);
+
+        assert.equal(await background.applyVirtualBackgroundToWebRTCStream(camera, 'beach.jpg'), stream);
+        await setTimeout.firstCall.args[0]();
+
+        assert.equal(videos.length, 1);
+        assert.equal(first.calledOnce, true);
+        assert.equal(second.calledOnce, true);
+        assert.equal(stream.getVideoTracks()[0].stop.called, false);
+        await background.stopCurrentProcessor();
+    });
+
+    it('fills the frame with the background without stretching it', () => {
+        const { background } = createEnvironment();
+        const ctx = { drawImage: sinon.spy() };
+        const square = { naturalWidth: 1000, naturalHeight: 1000 };
+
+        background.drawCover(ctx, square, 1280, 720);
+        assert.deepEqual(ctx.drawImage.firstCall.args, [square, 0, 218.75, 1000, 562.5, 0, 0, 1280, 720]);
+
+        const portraitGif = { width: 200, height: 400 };
+        background.drawCover(ctx, portraitGif, 400, 400);
+        assert.deepEqual(ctx.drawImage.secondCall.args, [portraitGif, 0, 100, 200, 200, 0, 0, 400, 400]);
+
+        const unknown = {};
+        background.drawCover(ctx, unknown, 640, 360);
+        assert.deepEqual(ctx.drawImage.thirdCall.args, [unknown, 0, 0, 640, 360]);
+    });
+
+    it('stops a running GIF background when another background is chosen', async () => {
+        const { background } = createEnvironment();
+        const animation = { stop: sinon.spy() };
+        background.gifAnimation = animation;
+        background.createBlurMaskHandler(10);
+        assert.equal(animation.stop.calledOnce, true);
+        assert.equal(background.gifAnimation, null);
+    });
+});
+
+describe('Room client virtual background switching', () => {
+    function createClient({ sourceTrack = { readyState: 'live' }, swapped = true } = {}) {
+        const context = vm.createContext({
+            console: { log() {}, warn() {}, error() {} },
+            virtualBackgroundBlurLevel: 10,
+            virtualBackgroundSelectedImage: null,
+            virtualBackgroundTransparent: null,
+            virtualBackground: {
+                setBackground: sinon.stub().resolves(swapped),
+                stopCurrentProcessor: sinon.stub().resolves(),
+            },
+            videoSelect: { onchange: sinon.spy() },
+            saveVirtualBackgroundSettings: sinon.spy(),
+        });
+        const source = fs.readFileSync(path.join(__dirname, '../public/js/RoomClient.js'), 'utf8');
+        const methods = source.slice(
+            source.indexOf('    async applyVirtualBackground('),
+            source.indexOf('    // Stop the virtual background pipeline and the camera that fed it')
+        );
+        const client = vm.runInContext(`new (class { syncVideoBackgroundSelection() {} ${methods} })()`, context);
+        client.videoBackgroundSourceTrack = sourceTrack;
+        return { client, context };
+    }
+
+    it('swaps between backgrounds without re-producing the camera', async () => {
+        const { client, context } = createClient();
+        await client.applyVirtualBackground(null, 'beach.jpg', null);
+
+        assert.equal(
+            context.virtualBackground.setBackground.calledOnceWith(client.videoBackgroundSourceTrack, {
+                blurLevel: null,
+                imageUrl: 'beach.jpg',
+                transparent: null,
+            }),
+            true
+        );
+        assert.equal(context.videoSelect.onchange.called, false);
+        assert.equal(context.virtualBackgroundSelectedImage, 'beach.jpg');
+        assert.equal(context.virtualBackgroundBlurLevel, null);
+        assert.equal(context.saveVirtualBackgroundSettings.calledOnceWith(null, 'beach.jpg', null), true);
+    });
+
+    it('restarts the camera when no pipeline can be swapped, the swap fails or the background is removed', async () => {
+        let { client, context } = createClient({ sourceTrack: null });
+        await client.applyVirtualBackground(20, null, null);
+        assert.equal(context.virtualBackground.setBackground.called, false);
+        assert.equal(context.videoSelect.onchange.calledOnce, true);
+
+        ({ client, context } = createClient({ swapped: false }));
+        await client.applyVirtualBackground(null, null, true);
+        assert.equal(context.videoSelect.onchange.calledOnce, true);
+
+        ({ client, context } = createClient());
+        context.virtualBackground.setBackground = sinon.stub().rejects(new Error('Image failed'));
+        await client.applyVirtualBackground(null, 'broken.jpg', null);
+        assert.equal(context.videoSelect.onchange.calledOnce, true);
+
+        ({ client, context } = createClient());
+        await client.applyVirtualBackground(null, null, null);
+        assert.equal(context.virtualBackground.setBackground.called, false);
+        assert.equal(context.virtualBackground.stopCurrentProcessor.calledOnce, true);
+        assert.equal(context.videoSelect.onchange.calledOnce, true);
+    });
+});

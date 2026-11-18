@@ -1,5 +1,8 @@
 'use strict';
 
+// Keep in sync with the selfie_segmentation script tag in Room.html
+const SELFIE_SEGMENTATION_VERSION = '0.1.1675465747';
+
 class VirtualBackground {
     static instance = null;
 
@@ -75,6 +78,12 @@ class VirtualBackground {
         this.activeAbortController = null;
         this.activePipelinePromise = null;
         this.activeCanvas = null;
+        this.activeSourceTrack = null;
+        this.activeStream = null;
+        this.activeMaskHandler = null;
+        this.backgroundRequest = 0;
+        this.frameCanvas = null;
+        this.frameContext = null;
         this.isProcessing = false;
         this.gifAnimation = null;
         this.gifCanvas = null;
@@ -92,11 +101,12 @@ class VirtualBackground {
 
         try {
             this.segmentation = new SelfieSegmentation({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
+                locateFile: (file) =>
+                    `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@${SELFIE_SEGMENTATION_VERSION}/${file}`,
             });
 
             this.segmentation.setOptions({
-                modelSelection: 1, // Higher accuracy
+                modelSelection: 0, // General (256x256) model: more accurate edges than landscape (1)
                 runningMode: 'video', // Smoother segmentation for streaming
                 smoothSegmentation: true, // Enables smoother edges
             });
@@ -116,13 +126,13 @@ class VirtualBackground {
         if (!results?.segmentationMask) return;
 
         if (this.activeCanvas) {
-            const { canvas, context, video, maskHandler, signal } = this.activeCanvas;
-            if (signal.aborted) return;
+            const { canvas, context, video, signal } = this.activeCanvas;
+            if (signal.aborted || !this.activeMaskHandler) return;
             context.save();
             try {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(results.image || video, 0, 0, canvas.width, canvas.height);
-                maskHandler(context, canvas, results.segmentationMask, results.image || video);
+                this.activeMaskHandler(context, canvas, results.segmentationMask, results.image || video);
             } finally {
                 context.restore();
             }
@@ -144,27 +154,46 @@ class VirtualBackground {
             pendingFrame.videoFrame,
             pendingFrame.controller,
             pendingFrame.imageBitmap,
-            pendingFrame.maskHandler,
+            this.activeMaskHandler,
             this.lastSegmentationMask
         );
     }
 
+    getFrameContext(width, height) {
+        // Reuse one canvas for every frame: VideoFrame(canvas) snapshots its pixels
+        if (!this.frameCanvas) {
+            this.frameCanvas = new OffscreenCanvas(width, height);
+            this.frameContext = this.frameCanvas.getContext('2d');
+        } else if (this.frameCanvas.width !== width || this.frameCanvas.height !== height) {
+            this.frameCanvas.width = width;
+            this.frameCanvas.height = height;
+        }
+        return this.frameContext;
+    }
+
     processFrame(videoFrame, controller, imageBitmap, maskHandler, segmentationMask) {
-        if (!controller) {
-            console.warn('Controller invalid, closing frames');
+        if (!controller || !maskHandler) {
+            console.warn('Controller or mask handler invalid, closing frames');
             this.closeFrames(videoFrame, imageBitmap);
             return;
         }
 
         try {
-            const canvas = new OffscreenCanvas(videoFrame.displayWidth, videoFrame.displayHeight);
-            const ctx = canvas.getContext('2d');
+            const ctx = this.getFrameContext(videoFrame.displayWidth, videoFrame.displayHeight);
+            const canvas = this.frameCanvas;
 
-            // Apply original frame
-            ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+            ctx.save();
+            try {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Apply mask processing
-            maskHandler(ctx, canvas, segmentationMask, imageBitmap);
+                // Apply original frame
+                ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+
+                // Apply mask processing
+                maskHandler(ctx, canvas, segmentationMask, imageBitmap);
+            } finally {
+                ctx.restore();
+            }
 
             // Create new video frame with the processed content
             const processedFrame = new VideoFrame(canvas, {
@@ -213,8 +242,11 @@ class VirtualBackground {
         // Initialize segmentation if not already done
         await this.initializeSegmentation();
 
+        this.activeMaskHandler = maskHandler;
+        this.activeSourceTrack = videoTrack;
+
         if (!this.supportsTrackPipeline()) {
-            return this.processCanvasStream(videoTrack, maskHandler);
+            return this.processCanvasStream(videoTrack);
         }
 
         // Create new processor and generator for stream transformation
@@ -254,7 +286,6 @@ class VirtualBackground {
                             videoFrame,
                             controller,
                             imageBitmap,
-                            maskHandler,
                             signal,
                         });
 
@@ -262,7 +293,13 @@ class VirtualBackground {
                         await this.segmentation.send({ image: imageBitmap });
                     } else if (this.lastSegmentationMask) {
                         // Use last segmentation mask for skipped frames
-                        this.processFrame(videoFrame, controller, imageBitmap, maskHandler, this.lastSegmentationMask);
+                        this.processFrame(
+                            videoFrame,
+                            controller,
+                            imageBitmap,
+                            this.activeMaskHandler,
+                            this.lastSegmentationMask
+                        );
                     } else {
                         // If no previous mask, just enqueue the original frame
                         controller.enqueue(videoFrame);
@@ -308,7 +345,8 @@ class VirtualBackground {
                 }
             });
 
-            return new MediaStream([outputTrack]);
+            this.activeStream = new MediaStream([outputTrack]);
+            return this.activeStream;
         } catch (error) {
             console.error('Error setting up processing pipeline', error);
             await this.stopCurrentProcessor();
@@ -316,7 +354,7 @@ class VirtualBackground {
         }
     }
 
-    async processCanvasStream(videoTrack, maskHandler) {
+    async processCanvasStream(videoTrack) {
         const video = document.createElement('video');
         video.muted = true;
         video.playsInline = true;
@@ -330,7 +368,6 @@ class VirtualBackground {
             video,
             canvas,
             context: canvas.getContext('2d'),
-            maskHandler,
             signal: abortController.signal,
             timer: null,
             cameraTrack: videoTrack,
@@ -382,6 +419,7 @@ class VirtualBackground {
             if (state.signal.aborted) throw new Error('Background processing stopped');
             const stream = canvas.captureStream(fps);
             this.activeOutputTrack = stream.getVideoTracks()[0];
+            this.activeStream = stream;
             return stream;
         } catch (error) {
             await this.stopCurrentProcessor();
@@ -434,18 +472,75 @@ class VirtualBackground {
             this.activeOutputTrack = null;
             this.activeAbortController = null;
             this.activePipelinePromise = null;
+            this.activeSourceTrack = null;
+            this.activeStream = null;
+            this.activeMaskHandler = null;
             this.frameCounter = 0;
             this.lastSegmentationMask = null;
         }
     }
 
-    async applyBlurToWebRTCStream(videoTrack, blurLevel = 10) {
+    canSwapBackground(videoTrack) {
+        return Boolean(
+            videoTrack &&
+            this.isProcessing &&
+            this.activeStream &&
+            this.activeSourceTrack === videoTrack &&
+            videoTrack.readyState !== 'ended' &&
+            this.activeOutputTrack?.readyState !== 'ended'
+        );
+    }
+
+    // Swap the effect on the running pipeline: same output track, so no camera or producer restart.
+    // Resolves false when no pipeline is running for videoTrack (the caller must start one).
+    async setBackground(videoTrack, options = {}) {
+        if (!this.canSwapBackground(videoTrack)) return false;
+        const request = ++this.backgroundRequest;
+        const maskHandler = await this.createMaskHandler(options);
+        // A newer selection was made while this one was loading: it wins
+        if (request !== this.backgroundRequest) return true;
+        if (!this.canSwapBackground(videoTrack)) return false;
+        this.activeMaskHandler = maskHandler;
+        console.log('✅ Virtual background swapped on the running pipeline');
+        return true;
+    }
+
+    async applyBackground(videoTrack, options) {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
                 'Neither track processing nor canvas virtual backgrounds are supported in this environment.'
             );
         }
+        if (await this.setBackground(videoTrack, options)) return this.activeStream;
+        ++this.backgroundRequest;
+        return this.processStreamWithSegmentation(videoTrack, await this.createMaskHandler(options));
+    }
+
+    async createMaskHandler({ blurLevel, imageUrl, transparent } = {}) {
+        if (blurLevel) return this.createBlurMaskHandler(blurLevel);
+        if (imageUrl) return this.createImageMaskHandler(imageUrl);
+        if (transparent) return this.createTransparentMaskHandler();
+        throw new Error('No virtual background selected');
+    }
+
+    async applyBlurToWebRTCStream(videoTrack, blurLevel = 10) {
+        console.log('✅ Apply Blur.');
+        return this.applyBackground(videoTrack, { blurLevel });
+    }
+
+    async applyVirtualBackgroundToWebRTCStream(videoTrack, imageUrl) {
+        console.log('✅ Apply Virtual Background.');
+        return this.applyBackground(videoTrack, { imageUrl });
+    }
+
+    async applyTransparentVirtualBackgroundToWebRTCStream(videoTrack) {
+        console.log('✅ Apply Transparent Background');
+        return this.applyBackground(videoTrack, { transparent: true });
+    }
+
+    createBlurMaskHandler(blurLevel) {
+        this.stopGifAnimation();
 
         let blurCanvas;
         let blurContext;
@@ -531,79 +626,96 @@ class VirtualBackground {
             ctx.restore();
         };
 
-        console.log('✅ Apply Blur.');
-        return this.processStreamWithSegmentation(videoTrack, maskHandler);
+        return maskHandler;
     }
 
-    async applyVirtualBackgroundToWebRTCStream(videoTrack, imageUrl) {
-        // Check if the required APIs are supported
-        if (!this.isSupported) {
-            throw new Error(
-                'Neither track processing nor canvas virtual backgrounds are supported in this environment.'
-            );
-        }
-
+    async createImageMaskHandler(imageUrl) {
         // Determine if the background is a GIF
         const isGif = imageUrl.endsWith('.gif') || imageUrl.startsWith('data:image/gif');
         const background = isGif ? await this.loadGifImage(imageUrl) : await this.loadImage(imageUrl);
+        if (!isGif) this.stopGifAnimation();
+        const softMask = this.createSoftMask();
 
         // Handler for applying virtual background
-        const maskHandler = (ctx, canvas, mask, imageBitmap) => {
-            // Create an offscreen canvas for a softer mask
-            const maskCanvas = this.createCanvas(canvas.width, canvas.height);
-            const maskCtx = maskCanvas.getContext('2d');
-
-            // Apply slight blur to mask to smooth edges
-            maskCtx.filter = 'blur(5px)'; // Adjust to control softness
-            maskCtx.drawImage(mask, 0, 0, canvas.width, canvas.height);
-
+        return (ctx, canvas, mask) => {
             // Apply the softened mask
             ctx.globalCompositeOperation = 'destination-in';
-            ctx.drawImage(maskCanvas, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(softMask(mask, canvas.width, canvas.height), 0, 0, canvas.width, canvas.height);
 
             // Draw background behind the person
             ctx.globalCompositeOperation = 'destination-over';
-            ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+            this.drawCover(ctx, background, canvas.width, canvas.height);
         };
-
-        console.log('✅ Apply Virtual Background.');
-        return this.processStreamWithSegmentation(videoTrack, maskHandler);
     }
 
-    async applyTransparentVirtualBackgroundToWebRTCStream(videoTrack) {
-        // Check if the required APIs are supported
-        if (!this.isSupported) {
-            throw new Error(
-                'Neither track processing nor canvas virtual backgrounds are supported in this environment.'
-            );
-        }
+    createTransparentMaskHandler() {
+        this.stopGifAnimation();
+        const softMask = this.createSoftMask();
 
         // Handler for applying transparency by using only the mask
-        const maskHandler = (ctx, canvas, mask, imageBitmap) => {
+        return (ctx, canvas, mask, imageBitmap) => {
             // Clear the canvas (ensures transparency)
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Draw the original frame (so we start with the full image)
             ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
 
-            // Create an offscreen canvas for smooth masking
-            const maskCanvas = this.createCanvas(canvas.width, canvas.height);
-            const maskCtx = maskCanvas.getContext('2d');
-
-            // Blur the mask slightly for softer edges
-            maskCtx.filter = 'blur(5px)';
-            maskCtx.drawImage(mask, 0, 0, canvas.width, canvas.height);
-
             // Apply the mask to keep only the person
             ctx.globalCompositeOperation = 'destination-in';
-            ctx.drawImage(maskCanvas, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(softMask(mask, canvas.width, canvas.height), 0, 0, canvas.width, canvas.height);
 
             // Reset blending mode to normal
             ctx.globalCompositeOperation = 'source-over';
         };
+    }
 
-        console.log('✅ Apply Transparent Background');
-        return this.processStreamWithSegmentation(videoTrack, maskHandler);
+    // Slightly blurred copy of the mask for softer edges, drawn into one reused canvas
+    createSoftMask() {
+        let maskCanvas;
+        let maskCtx;
+        return (mask, width, height) => {
+            if (!maskCanvas) {
+                maskCanvas = this.createCanvas(width, height);
+                maskCtx = maskCanvas.getContext('2d');
+            } else if (maskCanvas.width !== width || maskCanvas.height !== height) {
+                maskCanvas.width = width;
+                maskCanvas.height = height;
+            }
+            maskCtx.clearRect(0, 0, width, height);
+            maskCtx.filter = 'blur(5px)'; // Adjust to control softness
+            maskCtx.drawImage(mask, 0, 0, width, height);
+            return maskCanvas;
+        };
+    }
+
+    // Scale and center-crop the source to fill the frame without distorting it (CSS object-fit: cover)
+    drawCover(ctx, source, width, height) {
+        const sourceWidth = source.naturalWidth || source.videoWidth || source.width;
+        const sourceHeight = source.naturalHeight || source.videoHeight || source.height;
+        if (!sourceWidth || !sourceHeight) {
+            ctx.drawImage(source, 0, 0, width, height);
+            return;
+        }
+        const scale = Math.max(width / sourceWidth, height / sourceHeight);
+        const cropWidth = width / scale;
+        const cropHeight = height / scale;
+        ctx.drawImage(
+            source,
+            (sourceWidth - cropWidth) / 2,
+            (sourceHeight - cropHeight) / 2,
+            cropWidth,
+            cropHeight,
+            0,
+            0,
+            width,
+            height
+        );
+    }
+
+    stopGifAnimation() {
+        if (!this.gifAnimation) return;
+        this.gifAnimation.stop();
+        this.gifAnimation = null;
     }
 
     async loadImage(src) {
@@ -621,10 +733,7 @@ class VirtualBackground {
         // Load and animate a GIF using gifler
         return new Promise((resolve, reject) => {
             try {
-                if (this.gifAnimation) {
-                    this.gifAnimation.stop(); // Stop previous animation
-                    this.gifAnimation = null;
-                }
+                this.stopGifAnimation(); // Stop previous animation
 
                 if (!this.gifCanvas) {
                     this.gifCanvas = document.createElement('canvas');
