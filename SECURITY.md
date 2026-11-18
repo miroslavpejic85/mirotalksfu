@@ -40,7 +40,7 @@ We would like to extend our gratitude to the following individuals for their res
 | `Liam-G`                                             | [GitHub](https://github.com/Liam-G)                                                                      |
 | `Xiangpu Song`                                       | [GitHub](https://github.com/songxpu)                                                                     |
 | `Marc Schneider`                                     | [GitHub](https://github.com/snrmwg)                                                                      |
-| `Muhammad Saad`                                      | [Github](https://github.com/msaadraj) \ [LinkedIn](https://www.linkedin.com/in/muhammad-saad-9818502b3/) |
+| `Muhammad Saad`                                      | [GitHub](https://github.com/msaadraj) \ [LinkedIn](https://www.linkedin.com/in/muhammad-saad-9818502b3/) |
 |                                                      |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
