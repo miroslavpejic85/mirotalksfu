@@ -4916,10 +4916,9 @@ img.vb-video-thumb {
 /* Live camera preview (full-screen settings only) */
 .settings-video-preview {
     position: relative;
-    width: 100%;
+    width: min(100%, 420px, calc(32vh * 16 / 9));
     aspect-ratio: 16 / 9;
-    max-height: 40vh;
-    margin: 10px 0 6px;
+    margin: 10px auto 6px;
     border: 1px solid var(--room-border);
     border-radius: 12px;
     overflow: hidden;

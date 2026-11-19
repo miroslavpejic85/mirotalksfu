@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.46
+ * @version 2.8.47
  *
  */
 
@@ -6731,13 +6731,12 @@ class RoomClient {
         }
     }
 
-    // Mirror my camera (with effects/background) above the video source select when settings covers the screen
+    // Mirror my camera (with effects/background) above the video source select while settings is open
     syncSettingsVideoPreview() {
         const preview = this.getId('settingsVideoPreview');
         const previewVideo = this.getId('settingsVideoPreviewVideo');
         if (!preview || !previewVideo) return;
-        const fullScreen = this.isMobileDevice || window.matchMedia('(max-width: 768px)').matches;
-        const show = this.isMySettingsOpen && fullScreen && this.isVideoAllowed;
+        const show = this.isMySettingsOpen && this.isVideoAllowed;
         const source = this.localVideoElement;
         const stream = show && source?.isConnected ? source.srcObject : null;
         const videoTrack = stream?.getVideoTracks?.()[0];
@@ -6761,6 +6760,22 @@ class RoomClient {
         });
     }
 
+    // One shared preview: Video tab (camera card) or the fallback Background tab (Visual effects has its own)
+    moveSettingsVideoPreview(tabName) {
+        const preview = this.getId('settingsVideoPreview');
+        const target =
+            tabName === 'tabVideoDevices'
+                ? this.getId('cameraSettingsDiv')?.querySelector('.settings-card-title')
+                : tabName === 'tabVirtualBackground'
+                  ? this.getId('tabVirtualBackground')?.querySelector('.settings-section-intro')
+                  : null;
+        if (!preview || !target || target.nextElementSibling === preview) return;
+        target.after(preview);
+        // Detaching a media element pauses it
+        const previewVideo = this.getId('settingsVideoPreviewVideo');
+        if (previewVideo?.srcObject) previewVideo.play().catch(() => {});
+    }
+
     openTab(evt, tabName) {
         let i, tabcontent, tablinks;
         tabcontent = this.getEcN('tabcontent');
@@ -6778,6 +6793,7 @@ class RoomClient {
         evt.currentTarget.setAttribute('aria-selected', 'true');
         evt.currentTarget.tabIndex = 0;
         this.closeMobileSettingsNav();
+        this.moveSettingsVideoPreview(tabName);
 
         if (tabName === 'tabNetwork') {
             this.startNetworkMonitor();
