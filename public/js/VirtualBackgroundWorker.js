@@ -43,6 +43,7 @@ let fileset = null;
 let workerConfig = null;
 let model = null;
 let downgrading = false;
+let downgradeFailed = false;
 let segmentCount = 0;
 let stabilizeMask = null;
 let maskSource = null;
@@ -145,7 +146,9 @@ async function downgradeModel() {
         useSegmenter(await createSegmenter(candidate.url, candidate.delegate), candidate);
         console.warn('Virtual background: multiclass segmentation too slow, using the selfie model');
     } catch (error) {
-        console.warn('Virtual background: selfie model fallback failed', error);
+        // Tried once: keep the multiclass model instead of retrying on every mask
+        downgradeFailed = true;
+        console.warn('Virtual background: selfie model fallback failed, keeping the multiclass model', error);
     } finally {
         downgrading = false;
     }
@@ -175,6 +178,7 @@ function recordSegmentMs(elapsed) {
     if (
         model?.name === 'multiclass' &&
         !downgrading &&
+        !downgradeFailed &&
         segmentCount > MODEL_WARMUP_SEGMENTS &&
         compositor.segmentMs > MAX_MULTICLASS_SEGMENT_MS
     ) {
@@ -182,8 +186,21 @@ function recordSegmentMs(elapsed) {
     }
 }
 
+// In module workers MediaPipe loads its WASM loader with import(), which runs the loader (and so sets
+// self.ModuleFactory) only once per worker, while each new segmenter clears self.ModuleFactory: every model
+// after the first one (fallback candidates, the selfie downgrade) failed with "ModuleFactory not set".
+// MediaPipe uses self.import when defined: restore the factory from the loader's default export.
+function installWasmLoaderImport() {
+    self.import = async (url) => {
+        const loader = await import(url);
+        if (typeof loader?.default === 'function') self.ModuleFactory = loader.default;
+        return loader;
+    };
+}
+
 async function loadSegmenter(config) {
     vision = await import(config.visionBundleUrl);
+    installWasmLoaderImport();
     // true: load the ES module build of the WASM loader, module workers have no importScripts()
     fileset = await vision.FilesetResolver.forVisionTasks(config.wasmBaseUrl, true);
     await loadModel(config);
