@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.43
+ * @version 2.8.44
  *
  */
 
@@ -223,6 +223,8 @@ const io = socketIo(server, {
     maxHttpBufferSize: 1e7,
     transports: ['websocket'],
     cors: corsOptions,
+    // Enforce the IP allow-list on every Engine.IO handshake (all namespaces)
+    allowRequest: restrictAccessByIP.allowSocketRequest,
 });
 
 const host = config?.server?.hostUrl || `http://localhost:${config?.server?.listen?.port || 3010}`;
@@ -788,6 +790,8 @@ function OIDCAuth(req, res, next) {
 function startServer() {
     // Start the app
     app.set('trust proxy', trustProxy); // Enables trust for proxy headers (e.g., X-Forwarded-For) based on the trustProxy setting
+    // IP Whitelist check: must be the first middleware so it also covers static files (incl. /views/*.html)
+    app.use(restrictAccessByIP);
     app.use(helmet.noSniff()); // Enable content type sniffing prevention
     app.use(applyEmbedHeaders); // Apply iframe embedding restrictions (CSP frame-ancestors / X-Frame-Options)
     // Compress all HTTP responses (including static files) using GZip; must be registered before express.static
@@ -822,9 +826,6 @@ function startServer() {
     app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Handles URL-encoded payloads
     app.use(express.raw({ type: 'video/webm', limit: '50mb' })); // Handles raw binary data
     app.use(restApi.basePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
-
-    // IP Whitelist check ...
-    app.use(restrictAccessByIP);
 
     // Logs requests
     /*
