@@ -12,8 +12,10 @@ describe('Virtual background settings selection', () => {
     let context;
     let document;
     let client;
+    let storedBackgrounds;
 
     beforeEach(() => {
+        storedBackgrounds = ['data:image/png;base64,custom'];
         document = new JSDOM(`
             <div id="videoVirtualBackground"></div>
             <div id="imageGrid"></div>
@@ -26,6 +28,8 @@ describe('Virtual background settings selection', () => {
             virtualBackgroundSelectedImage: 'background.jpg',
             virtualBackgroundTransparent: null,
             virtualBackgrounds: ['background.jpg', 'other.jpg'],
+            virtualBackgroundVideos: [],
+            getVirtualBackgroundPresets: () => [...context.virtualBackgrounds, ...context.virtualBackgroundVideos],
             image: {},
             elemDisplay() {},
             show() {},
@@ -33,7 +37,16 @@ describe('Virtual background settings selection', () => {
             setTippy() {},
             saveImageUrlBtn: document.createElement('button'),
             cancelImageUrlBtn: document.createElement('button'),
-            indexedDBHelper: { getAllImages: async () => ['data:image/png;base64,custom'] },
+            indexedDBHelper: { getAllImages: async () => storedBackgrounds },
+            // Videos show a poster: the background URL is kept in data-background
+            VirtualBackground: {
+                isVideoUrl: (url) => /^blob:|\.mp4$/.test(String(url)),
+                setThumbnail(img, url) {
+                    img.dataset.background = url;
+                    if (String(url).startsWith('blob:')) img.src = 'poster.jpg';
+                    else img.src = String(url).endsWith('.mp4') ? url.replace(/\.mp4$/, '.jpg') : url;
+                },
+            },
         });
         const source = fs.readFileSync(path.join(__dirname, '../public/js/RoomClient.js'), 'utf8');
         const methods = source.slice(
@@ -68,6 +81,32 @@ describe('Virtual background settings selection', () => {
         assert.equal(document.querySelectorAll('.image-wrapper:has(> img.vb-selected)').length, 1);
     });
 
+    it('shows an uploaded video as its poster and highlights it by its background URL', async () => {
+        storedBackgrounds = ['data:image/png;base64,custom', 'blob:https://localhost/video'];
+        context.virtualBackgroundSelectedImage = 'blob:https://localhost/video';
+        client.showVideoImageSelector();
+        await Promise.resolve();
+        const [selected, ...others] = selectedImages();
+        assert.equal(others.length, 0);
+        assert.equal(selected.getAttribute('src'), 'poster.jpg');
+        assert.equal(selected.dataset.background, 'blob:https://localhost/video');
+        assert.deepEqual([...client.virtualBackgroundCustomImages], storedBackgrounds);
+    });
+
+    it('lists the preset videos after the images, shown with their poster', () => {
+        context.virtualBackgroundVideos = ['videos/fireplace.mp4'];
+        context.virtualBackgroundSelectedImage = 'videos/fireplace.mp4';
+        client.showVideoImageSelector();
+        const presets = [...document.querySelectorAll('#imageGridVideo img[id^="virtualBg"]')];
+        assert.deepEqual(
+            presets.map((img) => img.dataset.background),
+            ['background.jpg', 'other.jpg', 'videos/fireplace.mp4']
+        );
+        const [selected, ...others] = selectedImages();
+        assert.equal(others.length, 0);
+        assert.equal(selected.getAttribute('src'), 'videos/fireplace.jpg');
+    });
+
     it('refreshes an existing grid for blur, transparency and no background', () => {
         client.showVideoImageSelector();
         context.virtualBackgroundSelectedImage = null;
@@ -85,6 +124,61 @@ describe('Virtual background settings selection', () => {
                 [expected]
             );
             assert.equal(document.querySelectorAll('.image-wrapper:has(> img.vb-selected)').length, 1);
+        }
+    });
+});
+
+describe('Virtual background preset videos manifest', () => {
+    function load(manifestVideos) {
+        const source = fs.readFileSync(path.join(__dirname, '../public/js/Room.js'), 'utf8');
+        const patterns = source.match(
+            /const defaultVirtualBackgroundVideoPathPattern =[\s\S]*?;\nconst defaultVirtualBackgroundPosterPathPattern =[\s\S]*?;\n/
+        );
+        const loader = source.match(/function loadVirtualBackgroundVideos\(manifestVideos\) \{[\s\S]*?\n\}\n/);
+        assert.ok(patterns && loader);
+        const posters = {};
+        const context = vm.createContext({
+            VirtualBackground: { registerVideoPoster: (src, poster) => (posters[src] = poster) },
+        });
+        vm.runInContext(
+            `var virtualBackgroundVideos = [];\n${patterns[0]}${loader[0]}
+            loadVirtualBackgroundVideos(${JSON.stringify(manifestVideos)});
+            globalThis.videos = [...virtualBackgroundVideos];`,
+            context
+        );
+        return { videos: context.videos, posters };
+    }
+
+    it('keeps only local preset videos and registers their posters', () => {
+        const fireplace = '../images/virtual-background/videos/cozy-fireplace.mp4';
+        const { videos, posters } = load([
+            { src: fireplace, poster: '../images/virtual-background/videos/cozy-fireplace.jpg' },
+            { src: fireplace, poster: '../images/virtual-background/videos/cozy-fireplace.jpg' },
+            { src: '../images/virtual-background/videos/aquarium.webm' },
+            { src: 'https://example.com/remote.mp4' },
+            { src: '../images/virtual-background/videos/../../../secret.mp4' },
+            { src: '../images/virtual-background/videos/beach.mp4', poster: 'javascript:alert(1)' },
+            { src: '../images/virtual-background/default/background-1.jpg' },
+            'not-an-object',
+        ]);
+        assert.deepEqual([...videos], [fireplace, '../images/virtual-background/videos/aquarium.webm']);
+        assert.deepEqual(JSON.parse(JSON.stringify(posters)), {
+            [fireplace]: '../images/virtual-background/videos/cozy-fireplace.jpg',
+        });
+    });
+
+    it('ships every manifest video with its poster', () => {
+        const manifest = JSON.parse(
+            fs.readFileSync(path.join(__dirname, '../public/images/virtual-background/default/manifest.json'), 'utf8')
+        );
+        assert.ok(manifest.videos.length >= 15);
+        const { videos } = load(manifest.videos);
+        assert.equal(videos.length, manifest.videos.length, 'every manifest video passes validation');
+        for (const { src, poster } of manifest.videos) {
+            for (const file of [src, poster]) {
+                const local = path.join(__dirname, '../public', file.replace(/^\.\.\//, ''));
+                assert.ok(fs.existsSync(local), `${file} exists`);
+            }
         }
     });
 });

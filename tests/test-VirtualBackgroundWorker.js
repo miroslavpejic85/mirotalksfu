@@ -201,6 +201,23 @@ describe('Virtual background worker script', () => {
         assert.equal(compositor().gifBitmap, null);
     });
 
+    it('treats video backgrounds like GIFs: the page keeps sending their current frame', async () => {
+        createWorker();
+        await startFrames({ kind: 'blur', blurLevel: 10 });
+        const first = bitmap(1280, 720);
+        await send({ type: 'background', id: 3, background: { kind: 'video', bitmap: first } });
+        assert.equal(compositor().gifBitmap, first);
+
+        const next = bitmap(1280, 720);
+        await send({ type: 'gif-frame', bitmap: next });
+        assert.equal(first.close.calledOnce, true);
+        assert.equal(compositor().gifBitmap, next);
+
+        await send({ type: 'background', id: 4, background: { kind: 'transparent' } });
+        assert.equal(next.close.calledOnce, true);
+        assert.equal(compositor().gifBitmap, null);
+    });
+
     it('picks the person mask of multiclass models by label', async () => {
         createWorker({
             labels: ['background', 'person'],
@@ -924,6 +941,182 @@ describe('Virtual background engine selection', () => {
         await wait(150);
         assert.equal(engine.sendGifFrame.callCount, sent);
         await background.stopCurrentProcessor();
+    });
+
+    it('forwards each new video frame to the worker and pauses the video when processing stops', async () => {
+        const { background, engine } = createBackground();
+        const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        const video = {
+            readyState: 4,
+            currentTime: 0,
+            paused: true,
+            play: sinon.spy(async () => (video.paused = false)),
+            pause: sinon.spy(() => (video.paused = true)),
+        };
+        background.backgroundVideo = video;
+        background.createWorkerBackground = async () => ({ kind: 'video', bitmap: bitmap() });
+        await background.applyVirtualBackgroundToWebRTCStream(camera(), 'blob:https://localhost/video');
+        assert.equal(video.play.calledOnce, true);
+        await wait(150);
+        // The same frame is not sent twice
+        assert.equal(engine.sendGifFrame.callCount, 1);
+        video.currentTime = 0.5;
+        await wait(80);
+        assert.equal(engine.sendGifFrame.callCount, 2);
+
+        await background.stopCurrentProcessor();
+        assert.equal(background.gifPump, null);
+        assert.equal(video.pause.calledOnce, true);
+    });
+});
+
+describe('Virtual background videos', () => {
+    // A <video> double: enough of HTMLMediaElement for the background video loader
+    class FakeVideo {
+        constructor() {
+            this.listeners = {};
+            this.attributes = {};
+            this.style = {};
+            this.paused = true;
+            this.readyState = 0;
+            this.currentTime = 0;
+            this.videoWidth = 1920;
+            this.videoHeight = 1080;
+            this.play = sinon.spy(async () => {
+                this.paused = false;
+            });
+            this.pause = sinon.spy(() => {
+                this.paused = true;
+            });
+            this.load = sinon.spy();
+            this.remove = sinon.spy();
+        }
+        set src(value) {
+            this.attributes.src = value;
+        }
+        get src() {
+            return this.attributes.src;
+        }
+        setAttribute(name, value) {
+            this.attributes[name] = value;
+        }
+        removeAttribute(name) {
+            delete this.attributes[name];
+        }
+        addEventListener(type, listener) {
+            (this.listeners[type] ||= []).push(listener);
+        }
+        removeEventListener(type, listener) {
+            this.listeners[type] = (this.listeners[type] || []).filter((item) => item !== listener);
+        }
+        emit(type) {
+            [...(this.listeners[type] || [])].forEach((listener) => listener());
+        }
+    }
+
+    function createVideoPage() {
+        const videos = [];
+        const context = createPageContext({
+            document: {
+                createElement: (tag) => {
+                    assert.equal(tag, 'video');
+                    const video = new FakeVideo();
+                    videos.push(video);
+                    return video;
+                },
+                body: { appendChild() {} },
+            },
+            createImageBitmap: sinon.spy(async (source, options) => ({ source, options, close: sinon.spy() })),
+        });
+        return { context, videos, VirtualBackground: vm.runInContext('VirtualBackground', context) };
+    }
+
+    it('recognizes video backgrounds and their uploaded object URLs', () => {
+        const { VirtualBackground } = createVideoPage();
+        assert.equal(VirtualBackground.isVideoUrl('https://example.com/beach.mp4'), true);
+        assert.equal(VirtualBackground.isVideoUrl('https://example.com/loop.webm?v=2'), true);
+        assert.equal(VirtualBackground.isVideoUrl('data:video/mp4;base64,AAAA'), true);
+        assert.equal(VirtualBackground.isVideoUrl('../images/virtual-background/background-1.jpg'), false);
+        assert.equal(VirtualBackground.isVideoUrl('data:image/png;base64,AAAA'), false);
+
+        const url = 'blob:https://localhost/1234';
+        assert.equal(VirtualBackground.isVideoUrl(url), false);
+        VirtualBackground.registerVideoUrl(url);
+        assert.equal(VirtualBackground.isVideoUrl(url), true);
+        VirtualBackground.unregisterVideoUrl(url);
+        assert.equal(VirtualBackground.isVideoUrl(url), false);
+
+        assert.equal(VirtualBackground.isVideoFile({ type: 'video/webm' }), true);
+        assert.equal(VirtualBackground.isVideoFile({ type: 'image/png' }), false);
+        assert.equal(VirtualBackground.videoTypeFromUrl('https://example.com/a.MOV?x=1'), 'video/quicktime');
+        assert.equal(VirtualBackground.videoTypeFromUrl('https://example.com/a.jpg'), null);
+    });
+
+    it('plays a looping muted video and sends its first frame downscaled to the worker', async () => {
+        const { context, videos } = createVideoPage();
+        const background = vm.runInContext('new VirtualBackground()', context);
+        const pending = background.createWorkerBackground({ imageUrl: 'https://example.com/beach.mp4' });
+        const [video] = videos;
+        assert.equal(video.muted && video.loop && video.playsInline, true);
+        assert.equal(video.crossOrigin, 'anonymous');
+        video.readyState = 2;
+        video.emit('loadeddata');
+        const result = await pending;
+
+        assert.equal(result.kind, 'video');
+        assert.equal(video.play.calledOnce, true);
+        assert.equal(result.bitmap.source, video);
+        assert.deepEqual(plain(result.bitmap.options), {
+            resizeWidth: 1280,
+            resizeHeight: 720,
+            resizeQuality: 'medium',
+        });
+
+        // Selecting it again reuses the playing video
+        await background.createWorkerBackground({ imageUrl: 'https://example.com/beach.mp4' });
+        assert.equal(videos.length, 1);
+
+        // Another kind of background releases it
+        await background.createWorkerBackground({ blurLevel: 10 });
+        assert.equal(video.pause.called, true);
+        assert.equal(video.src, undefined);
+        assert.equal(video.remove.calledOnce, true);
+        assert.equal(background.backgroundVideo, null);
+    });
+
+    it('rejects a video that is replaced while it is still loading', async () => {
+        const { context, videos } = createVideoPage();
+        const background = vm.runInContext('new VirtualBackground()', context);
+        const first = background.loadVideoBackground('blob:https://localhost/first');
+        const second = background.loadVideoBackground('blob:https://localhost/second');
+        await assert.rejects(first, /replaced/);
+        assert.equal(videos[0].remove.calledOnce, true);
+        assert.equal(videos[0].crossOrigin, undefined);
+        videos[1].emit('loadeddata');
+        assert.equal(await second, videos[1]);
+        assert.equal(background.backgroundVideo, videos[1]);
+    });
+
+    it('shows preset videos with their shipped poster without loading the video', async () => {
+        const { videos, VirtualBackground } = createVideoPage();
+        const url = '../images/virtual-background/videos/cozy-fireplace.mp4';
+        VirtualBackground.registerVideoPoster(url, '../images/virtual-background/videos/cozy-fireplace.jpg');
+        const img = { dataset: {}, classList: { add: sinon.spy() } };
+        VirtualBackground.setThumbnail(img, url);
+        assert.equal(img.src, '../images/virtual-background/videos/cozy-fireplace.jpg');
+        assert.equal(img.dataset.background, url);
+        assert.equal(await VirtualBackground.getVideoPoster(url), img.src);
+        assert.equal(videos.length, 0);
+    });
+
+    it('rejects a video that cannot be decoded', async () => {
+        const { context, videos } = createVideoPage();
+        const background = vm.runInContext('new VirtualBackground()', context);
+        const load = background.loadVideoBackground('blob:https://localhost/broken');
+        videos[0].error = { code: 4, message: 'unsupported' };
+        videos[0].emit('error');
+        await assert.rejects(load, /unsupported/);
+        assert.equal(background.backgroundVideo, null);
     });
 });
 

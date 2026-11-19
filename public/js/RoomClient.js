@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.41
+ * @version 2.8.42
  *
  */
 
@@ -3207,7 +3207,7 @@ class RoomClient {
         document.querySelectorAll('#imageGridVideoControls img, #imageGridVideo img').forEach((img) => {
             const selected = selectedControl
                 ? img.id === selectedControl
-                : img.getAttribute('src') === virtualBackgroundSelectedImage;
+                : (img.dataset.background || img.getAttribute('src')) === virtualBackgroundSelectedImage;
             img.classList.toggle('vb-selected', selected);
         });
     }
@@ -3240,7 +3240,7 @@ class RoomClient {
             imageContainer.className = 'image-wrapper';
             const img = document.createElement('img');
             img.id = id;
-            img.src = src;
+            VirtualBackground.setThumbnail(img, src);
             img.dataset.index = index;
             img.addEventListener('click', clickHandler);
             imageContainer.appendChild(img);
@@ -3330,23 +3330,8 @@ class RoomClient {
         }
 
         async function handleFileUpload(files) {
-            const imageFiles = Array.from(files || []).filter((file) => file?.type?.startsWith('image/'));
-            const uploadedImages = [];
-
-            for (const file of imageFiles) {
-                const reader = new FileReader();
-                await new Promise((resolve) => {
-                    reader.onload = async (e) => {
-                        const imgData = e.target.result;
-                        await indexedDBHelper.saveImage(imgData);
-                        addImageToUI(imgData);
-                        uploadedImages.push(imgData);
-                        resolve();
-                    };
-                    reader.onerror = resolve;
-                    reader.readAsDataURL(file);
-                });
-            }
+            const uploadedImages = await saveVirtualBackgroundFiles(files);
+            uploadedImages.forEach(addImageToUI);
             return uploadedImages;
         }
 
@@ -3358,19 +3343,21 @@ class RoomClient {
         function createUploadImageButton() {
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
-            fileInput.accept = 'image/*';
+            fileInput.accept = 'image/*,video/*';
             fileInput.multiple = true;
             fileInput.style.display = 'none';
             fileInput.addEventListener('change', async (event) => {
                 await handleFileUpload(event.target.files);
             });
 
-            setupFileUploadButton('uploadImg', image.upload, 'Upload your custom image', () => fileInput.click());
+            setupFileUploadButton('uploadImg', image.upload, 'Upload your custom image or video', () =>
+                fileInput.click()
+            );
 
             return fileInput;
         }
 
-        // Function to add an image to UI
+        // Function to add an image (or a video poster) to UI
         function addImageToUI(imgData) {
             rc.virtualBackgroundCustomImages.push(imgData);
 
@@ -3378,7 +3365,7 @@ class RoomClient {
             imageContainer.className = 'image-wrapper';
 
             const customImg = document.createElement('img');
-            customImg.src = imgData;
+            VirtualBackground.setThumbnail(customImg, imgData);
             customImg.addEventListener('click', (e) => {
                 setSelectedVb(e.currentTarget);
                 handleVirtualBackground(null, imgData);
@@ -3400,18 +3387,13 @@ class RoomClient {
             rc.syncVideoBackgroundSelection();
         }
 
-        // Function to fetch and store an image from URL
+        // Function to fetch and store an image or video from URL
         async function fetchAndStoreImage(url) {
             try {
                 const response = await fetch(url);
                 const blob = await response.blob();
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const imgData = e.target.result;
-                    await indexedDBHelper.saveImage(imgData);
-                    addImageToUI(imgData);
-                };
-                reader.readAsDataURL(blob);
+                const [background] = await saveVirtualBackgroundFiles([typeBackgroundBlob(blob, url)]);
+                if (background) addImageToUI(background);
             } catch (error) {
                 console.error('Error fetching image:', error);
                 // Detect CORS issue and provide a clearer error message
@@ -3427,7 +3409,7 @@ class RoomClient {
             navigator.clipboard
                 .readText()
                 .then((clipboardText) => {
-                    if (isValidImageURL(filterXSS(clipboardText))) {
+                    if (isValidBackgroundURL(filterXSS(clipboardText))) {
                         imageUrlInput.value = clipboardText;
                     }
                 })
@@ -3436,7 +3418,7 @@ class RoomClient {
 
         saveImageUrlBtn.addEventListener('click', async () => {
             elemDisplay(imageUrlModal.id, false);
-            if (isValidImageURL(imageUrlInput.value)) {
+            if (isValidBackgroundURL(imageUrlInput.value)) {
                 await fetchAndStoreImage(imageUrlInput.value);
                 imageUrlInput.value = '';
             }
@@ -3451,10 +3433,10 @@ class RoomClient {
         createUploadImageButton();
 
         // Upload from URL button
-        setupFileUploadButton('linkImage', image.link, 'Upload Image from URL', askForImageURL);
+        setupFileUploadButton('linkImage', image.link, 'Upload Image or Video from URL', askForImageURL);
 
         // Load default virtual backgrounds
-        virtualBackgrounds.forEach((imageUrl, index) => {
+        getVirtualBackgroundPresets().forEach((imageUrl, index) => {
             createImage(`virtualBg${index}`, imageUrl, null, index + 1, (e) => {
                 setSelectedVb(e.currentTarget);
                 handleVirtualBackground(null, imageUrl);

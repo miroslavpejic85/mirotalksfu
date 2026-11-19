@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.41
+ * @version 2.8.42
  *
  */
 
@@ -302,12 +302,35 @@ const exitLeaveAllBtn = getId('exitLeaveAllBtn');
 
 const fallbackVirtualBackgrounds = Object.values(image.virtualBackground);
 let virtualBackgrounds = [...fallbackVirtualBackgrounds];
+// Animated presets: only for the camera background pickers (virtualBackgrounds also feeds the room background)
+let virtualBackgroundVideos = [];
 
 const defaultVirtualBackgroundManifestPath = '../images/virtual-background/default/manifest.json';
 const defaultVirtualBackgroundPathPattern =
     /^\.\.\/images\/virtual-background\/default\/[A-Za-z0-9._-]+\.(?:jpe?g|png|gif|webp)$/i;
+const defaultVirtualBackgroundVideoPathPattern =
+    /^\.\.\/images\/virtual-background\/videos\/[A-Za-z0-9._-]+\.(?:mp4|webm)$/i;
+const defaultVirtualBackgroundPosterPathPattern =
+    /^\.\.\/images\/virtual-background\/videos\/[A-Za-z0-9._-]+\.(?:jpe?g|png|webp)$/i;
 
 loadVirtualBackgroundsFromManifest();
+
+// Camera background presets: images, then videos
+function getVirtualBackgroundPresets() {
+    return [...virtualBackgrounds, ...virtualBackgroundVideos];
+}
+
+function loadVirtualBackgroundVideos(manifestVideos) {
+    const videos = (Array.isArray(manifestVideos) ? manifestVideos : []).filter(
+        (video) =>
+            typeof video?.src === 'string' &&
+            defaultVirtualBackgroundVideoPathPattern.test(video.src) &&
+            (video.poster === undefined ||
+                (typeof video.poster === 'string' && defaultVirtualBackgroundPosterPathPattern.test(video.poster)))
+    );
+    videos.forEach((video) => VirtualBackground.registerVideoPoster(video.src, video.poster));
+    virtualBackgroundVideos = [...new Set(videos.map((video) => video.src))];
+}
 
 async function loadVirtualBackgroundsFromManifest() {
     try {
@@ -317,6 +340,7 @@ async function loadVirtualBackgroundsFromManifest() {
         }
 
         const manifest = await response.json();
+        loadVirtualBackgroundVideos(manifest?.videos);
         const manifestBackgrounds = Array.isArray(manifest?.backgrounds) ? manifest.backgrounds : [];
         const validBackgrounds = [
             ...new Set(
@@ -2087,7 +2111,7 @@ async function whoAreYou() {
         if (!BUTTONS.main.startScreenButton) isScreenAllowed = false;
         getPeerInfo();
         // No lobby preview: restore blur/virtual background before the camera is produced
-        restoreVirtualBackgroundState();
+        await restoreVirtualBackgroundState();
         joinRoom(peer_name, room_id);
         return;
     }
@@ -7219,7 +7243,7 @@ function setupQuickDeviceSwitchDropdowns() {
         // Kept outside the menu so rebuilding the menu while the file picker is open does not drop the selection
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
-        fileInput.accept = 'image/*';
+        fileInput.accept = 'image/*,video/*';
         fileInput.style.display = 'none';
         fileInput.addEventListener('change', async () => {
             const files = Array.from(fileInput.files || []);
@@ -7300,13 +7324,20 @@ function setupQuickDeviceSwitchDropdowns() {
             const card = createCard(imageUrl === virtualBackgroundSelectedImage, () =>
                 setVideoMenuBackground(null, imageUrl)
             );
-            card.setAttribute('aria-label', 'Background image');
+            const isVideo = VirtualBackground.isVideoUrl(imageUrl);
+            card.setAttribute('aria-label', isVideo ? 'Background video' : 'Background image');
             const img = document.createElement('img');
             img.alt = '';
             img.loading = 'lazy';
             img.decoding = 'async';
-            img.src = imageUrl;
+            VirtualBackground.setThumbnail(img, imageUrl);
             card.appendChild(img);
+            if (isVideo) {
+                const play = document.createElement('i');
+                play.className = 'fas fa-play device-menu-bg-play';
+                play.setAttribute('aria-hidden', 'true');
+                card.appendChild(play);
+            }
         };
 
         createIconCard('fas fa-ban', 'None', false, () => setVideoMenuBackground());
@@ -7317,7 +7348,7 @@ function setupQuickDeviceSwitchDropdowns() {
 
         // Same images as Settings > Background: presets, then uploaded images
         const customImages = rc.virtualBackgroundCustomImages || [];
-        const images = [...new Set([...virtualBackgrounds, ...customImages])];
+        const images = [...new Set([...getVirtualBackgroundPresets(), ...customImages])];
         // The active image may be missing from both lists (e.g. restored from a previous session)
         const currentImage = virtualBackgroundSelectedImage;
         if (currentImage && !images.includes(currentImage)) images.unshift(currentImage);
@@ -10577,7 +10608,7 @@ function showImageSelector() {
     function createImage(id, src, tooltip, index, clickHandler, target = imageGrid) {
         const img = document.createElement('img');
         img.id = id;
-        img.src = src;
+        VirtualBackground.setThumbnail(img, src);
         img.dataset.index = index;
         img.addEventListener('click', clickHandler);
         target.appendChild(img);
@@ -10648,45 +10679,34 @@ function showImageSelector() {
     }
 
     async function handleFileUpload(files) {
-        const imageFiles = Array.from(files || []).filter((file) => file?.type?.startsWith('image/'));
-
-        for (const file of imageFiles) {
-            const reader = new FileReader();
-            await new Promise((resolve) => {
-                reader.onload = async (e) => {
-                    const imgData = e.target.result;
-                    await indexedDBHelper.saveImage(imgData);
-                    addImageToUI(imgData);
-                    resolve();
-                };
-                reader.onerror = resolve;
-                reader.readAsDataURL(file);
-            });
-        }
+        const backgrounds = await saveVirtualBackgroundFiles(files);
+        backgrounds.forEach(addImageToUI);
     }
 
     function createUploadImageButton() {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
-        fileInput.accept = 'image/*';
+        fileInput.accept = 'image/*,video/*';
         fileInput.multiple = true;
         fileInput.style.display = 'none';
         fileInput.addEventListener('change', async (event) => {
             await handleFileUpload(event.target.files);
         });
 
-        setupFileUploadButton('initUploadImg', image.upload, 'Upload your custom image', () => fileInput.click());
+        setupFileUploadButton('initUploadImg', image.upload, 'Upload your custom image or video', () =>
+            fileInput.click()
+        );
 
         return fileInput;
     }
 
-    // Function to add an image to UI
+    // Function to add an image (or a video poster) to UI
     function addImageToUI(imgData) {
         const imageContainer = document.createElement('div');
         imageContainer.className = 'image-wrapper';
 
         const customImg = document.createElement('img');
-        customImg.src = imgData;
+        VirtualBackground.setThumbnail(customImg, imgData);
         customImg.addEventListener('click', () => handleVirtualBackground(null, imgData));
 
         const deleteBtn = document.createElement('span');
@@ -10702,18 +10722,13 @@ function showImageSelector() {
         imageGrid.appendChild(imageContainer);
     }
 
-    // Function to fetch and store an image from URL
+    // Function to fetch and store an image or video from URL
     async function fetchAndStoreImage(url) {
         try {
             const response = await fetch(url);
             const blob = await response.blob();
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const imgData = e.target.result;
-                await indexedDBHelper.saveImage(imgData);
-                addImageToUI(imgData);
-            };
-            reader.readAsDataURL(blob);
+            const [background] = await saveVirtualBackgroundFiles([typeBackgroundBlob(blob, url)]);
+            if (background) addImageToUI(background);
         } catch (error) {
             console.error('Error fetching image:', error);
             // Detect CORS issue and provide a clearer error message
@@ -10723,13 +10738,13 @@ function showImageSelector() {
         }
     }
 
-    // Paste image from URL
+    // Paste image or video from URL
     function askForImageURL() {
         elemDisplay(initImageUrlModal.id, true);
         navigator.clipboard
             .readText()
             .then((clipboardText) => {
-                if (isValidImageURL(filterXSS(clipboardText))) {
+                if (isValidBackgroundURL(filterXSS(clipboardText))) {
                     initImageUrlInput.value = clipboardText;
                 }
             })
@@ -10738,7 +10753,7 @@ function showImageSelector() {
 
     initSaveImageUrlBtn.addEventListener('click', async () => {
         elemDisplay(initImageUrlModal.id, false);
-        if (isValidImageURL(initImageUrlInput.value)) {
+        if (isValidBackgroundURL(initImageUrlInput.value)) {
             await fetchAndStoreImage(initImageUrlInput.value);
             initImageUrlInput.value = '';
         }
@@ -10753,10 +10768,10 @@ function showImageSelector() {
     createUploadImageButton();
 
     // Upload from URL button
-    setupFileUploadButton('initLinkImage', image.link, 'Upload Image from URL', askForImageURL);
+    setupFileUploadButton('initLinkImage', image.link, 'Upload Image or Video from URL', askForImageURL);
 
     // Load default virtual backgrounds
-    virtualBackgrounds.forEach((imageUrl, index) => {
+    getVirtualBackgroundPresets().forEach((imageUrl, index) => {
         createImage(`initVirtualBg${index}`, imageUrl, null, index + 1, () => handleVirtualBackground(null, imageUrl));
     });
 
@@ -10830,11 +10845,65 @@ function isValidImageURL(url) {
     );
 }
 
+function isValidVideoURL(url) {
+    return /\.(mp4|webm|ogv|mov|m4v)$/i.test(url);
+}
+
+function isValidBackgroundURL(url) {
+    return isValidImageURL(url) || isValidVideoURL(url);
+}
+
+function isVirtualBackgroundFile(file) {
+    return !!file?.type?.startsWith('image/') || VirtualBackground.isVideoFile(file);
+}
+
+function readFileAsDataURL(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+    });
+}
+
+// Stores an uploaded background and resolves its URL: images as data URLs, videos as Blobs played
+// through object URLs (base64 copies of a video would be huge in memory, the DOM and localStorage)
+async function saveVirtualBackgroundFile(file) {
+    try {
+        if (VirtualBackground.isVideoFile(file)) return await indexedDBHelper.saveVideo(file);
+        if (!file?.type?.startsWith('image/')) return null;
+        const imgData = await readFileAsDataURL(file);
+        if (imgData) await indexedDBHelper.saveImage(imgData);
+        return imgData;
+    } catch (error) {
+        console.error('Unable to save the background', error);
+        return null;
+    }
+}
+
+async function saveVirtualBackgroundFiles(files) {
+    const saved = [];
+    for (const file of Array.from(files || []).filter(isVirtualBackgroundFile)) {
+        const url = await saveVirtualBackgroundFile(file);
+        if (url) saved.push(url);
+    }
+    return saved;
+}
+
+// A background fetched from a link: servers may not label it as an image or video
+function typeBackgroundBlob(blob, url) {
+    if (isVirtualBackgroundFile(blob)) return blob;
+    return new Blob([blob], { type: VirtualBackground.videoTypeFromUrl(url) || 'image/png' });
+}
+
 // ####################################################
 // VIRTUAL BACKGROUND INDEXDB HELPER
 // ####################################################
 
+// Images are stored as { imgData: dataURL }, videos as { video: Blob }; both are listed as URLs
 const indexedDBHelper = {
+    videoUrls: new Map(), // id -> object URL
+    videoIds: new Map(), // object URL -> id
     async openDB() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open('customImageDB', 1);
@@ -10853,13 +10922,46 @@ const indexedDBHelper = {
         const transaction = db.transaction('images', 'readwrite');
         transaction.objectStore('images').add({ imgData });
     },
+    async saveVideo(blob) {
+        const db = await this.openDB();
+        const id = await new Promise((resolve, reject) => {
+            const transaction = db.transaction('images', 'readwrite');
+            const request = transaction.objectStore('images').add({ video: blob });
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+            transaction.onabort = () => reject(transaction.error || request.error);
+        });
+        return this.getVideoUrlFor(id, blob);
+    },
+    getVideoUrlFor(id, blob) {
+        let url = this.videoUrls.get(id);
+        if (!url) {
+            url = URL.createObjectURL(blob);
+            this.videoUrls.set(id, url);
+            this.videoIds.set(url, id);
+            VirtualBackground.registerVideoUrl(url);
+        }
+        return url;
+    },
+    getVideoId(url) {
+        return this.videoIds.get(url) ?? null;
+    },
+    async getVideoUrl(id) {
+        await this.getAllImages();
+        return this.videoUrls.get(id) || null;
+    },
     async getAllImages() {
         const db = await this.openDB();
         return new Promise((resolve, reject) => {
             const transaction = db.transaction('images', 'readonly');
             const store = transaction.objectStore('images');
             const request = store.getAll();
-            request.onsuccess = () => resolve(request.result.map((item) => item.imgData));
+            request.onsuccess = () =>
+                resolve(
+                    request.result
+                        .map((item) => (item.video ? this.getVideoUrlFor(item.id, item.video) : item.imgData))
+                        .filter(Boolean)
+                );
             request.onerror = () => reject(request.error);
         });
     },
@@ -10867,6 +10969,13 @@ const indexedDBHelper = {
         const db = await this.openDB();
         const transaction = db.transaction('images', 'readwrite');
         const store = transaction.objectStore('images');
+
+        const videoId = this.getVideoId(imgData);
+        if (videoId !== null) {
+            // The object URL stays valid: it may still be playing until another background is chosen
+            store.delete(videoId);
+            return;
+        }
 
         const request = store.getAll();
         request.onsuccess = () => {
@@ -10882,12 +10991,31 @@ const indexedDBHelper = {
 
 function saveVirtualBackgroundSettings(blurLevel, imageUrl, transparent) {
     if (imageUrl) virtualBackgroundLastImage = imageUrl;
+    // Uploaded videos are object URLs that do not survive a reload: keep their IndexedDB id
+    const videoId = imageUrl ? indexedDBHelper.getVideoId(imageUrl) : null;
     const settings = {
         blurLevel: blurLevel || null,
-        imageUrl: imageUrl || null,
+        imageUrl: videoId === null ? imageUrl || null : null,
+        videoId,
         transparent: transparent || null,
     };
-    localStorage.setItem('virtualBackgroundSettings', JSON.stringify(settings));
+    try {
+        localStorage.setItem('virtualBackgroundSettings', JSON.stringify(settings));
+    } catch (error) {
+        console.warn('Unable to save the virtual background settings', error);
+    }
+}
+
+// The saved background URL: a stored video is looked up by its IndexedDB id
+async function resolveSavedVirtualBackgroundUrl(saved) {
+    if (!saved || saved.blurLevel) return null;
+    if (saved.videoId === null || saved.videoId === undefined) return saved.imageUrl || null;
+    try {
+        return await indexedDBHelper.getVideoUrl(saved.videoId);
+    } catch (error) {
+        console.warn('Unable to restore the background video', error);
+        return null;
+    }
 }
 
 // Requires browser support, config enabled, and a camera that was actually granted/enumerated
@@ -10934,35 +11062,37 @@ function applyVisualEffectsMerge() {
     updateDevicesNavLabel();
 }
 
-function readImageFiles(files) {
-    const imageFiles = Array.from(files || []).filter((file) => file?.type?.startsWith('image/'));
-    return Promise.all(
-        imageFiles.map(
-            (file) =>
-                new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.onerror = () => resolve(null);
-                    reader.readAsDataURL(file);
-                })
-        )
-    ).then((images) => images.filter(Boolean));
-}
-
 // Background adapter for the effects panel: room (RoomClient) or pre-join lobby
 function createVisualBackgroundAdapter() {
     let lobbyImages = null;
+    const posters = new Map();
     const inRoom = () => !!rc;
     return {
         isAvailable: () => isVirtualBackgroundAvailable(),
         supportsTransparent: () => true,
-        isValidImageUrl: (url) => isValidImageURL(filterXSS(url)),
+        isValidImageUrl: (url) => isValidBackgroundURL(filterXSS(url)),
+        isVideo: (url) => VirtualBackground.isVideoUrl(url),
+        videoTypeFromUrl: (url) => VirtualBackground.videoTypeFromUrl(url),
+        // Video backgrounds show a poster: null until it is ready, then the panel is refreshed
+        getThumbnail(url) {
+            if (!VirtualBackground.isVideoUrl(url)) return url;
+            const preset = VirtualBackground.getPresetVideoPoster(url);
+            if (preset) return preset;
+            if (!posters.has(url)) {
+                posters.set(url, null);
+                VirtualBackground.getVideoPoster(url).then((poster) => {
+                    posters.set(url, poster);
+                    if (poster) refreshVisualEffectsUi();
+                });
+            }
+            return posters.get(url);
+        },
         getSelection: () => ({
             blurLevel: virtualBackgroundBlurLevel || null,
             imageUrl: virtualBackgroundSelectedImage || null,
             transparent: virtualBackgroundTransparent || null,
         }),
-        getPresetImages: () => virtualBackgrounds,
+        getPresetImages: () => getVirtualBackgroundPresets(),
         getCustomImages() {
             if (inRoom()) return rc.virtualBackgroundCustomImages || [];
             if (!lobbyImages) {
@@ -10994,11 +11124,10 @@ function createVisualBackgroundAdapter() {
             if (inRoom() && typeof rc.uploadVirtualBackgroundImages === 'function') {
                 return rc.uploadVirtualBackgroundImages(files);
             }
-            const images = await readImageFiles(files);
-            for (const imageData of images) {
-                await indexedDBHelper.saveImage(imageData);
+            const images = await saveVirtualBackgroundFiles(files);
+            images.forEach((imageData) => {
                 if (lobbyImages && !lobbyImages.includes(imageData)) lobbyImages.push(imageData);
-            }
+            });
             return images;
         },
         async removeCustom(imageData) {
@@ -11009,7 +11138,9 @@ function createVisualBackgroundAdapter() {
                 if (index !== -1) list.splice(index, 1);
                 // Keep the legacy background grid (used by other pickers) in sync
                 document.querySelectorAll('#imageGridVideo .image-wrapper img').forEach((img) => {
-                    if (img.getAttribute('src') === imageData) img.closest('.image-wrapper')?.remove();
+                    if ((img.dataset.background || img.getAttribute('src')) === imageData) {
+                        img.closest('.image-wrapper')?.remove();
+                    }
                 });
             } else if (lobbyImages) {
                 lobbyImages = lobbyImages.filter((image) => image !== imageData);
@@ -11464,14 +11595,15 @@ function initSettingsNav() {
 
 // Sets the blur/virtual background state from the saved settings without processing a stream, so the
 // in-room camera producer applies it. Used on direct rejoin, where loadVirtualBackgroundSettings() runs too late.
-function restoreVirtualBackgroundState() {
+async function restoreVirtualBackgroundState() {
     if (!isVirtualBackgroundAvailable()) return;
     try {
         const saved = JSON.parse(localStorage.getItem('virtualBackgroundSettings') || 'null');
         if (!saved) return;
+        const imageUrl = await resolveSavedVirtualBackgroundUrl(saved);
         virtualBackgroundBlurLevel = saved.blurLevel || null;
-        virtualBackgroundSelectedImage = virtualBackgroundBlurLevel ? null : saved.imageUrl || null;
-        if (saved.imageUrl) virtualBackgroundLastImage = saved.imageUrl;
+        virtualBackgroundSelectedImage = virtualBackgroundBlurLevel ? null : imageUrl || null;
+        if (imageUrl) virtualBackgroundLastImage = imageUrl;
         virtualBackgroundTransparent =
             !virtualBackgroundBlurLevel && !virtualBackgroundSelectedImage && saved.transparent ? true : null;
     } catch (error) {
@@ -11486,7 +11618,9 @@ async function loadVirtualBackgroundSettings() {
 
     if (!savedSettings) return;
 
-    const { blurLevel, imageUrl, transparent } = JSON.parse(savedSettings);
+    const saved = JSON.parse(savedSettings);
+    const { blurLevel, transparent } = saved;
+    const imageUrl = await resolveSavedVirtualBackgroundUrl(saved);
 
     if (blurLevel) {
         await applyVirtualBackground(initVideo, initStream, blurLevel);
@@ -11608,7 +11742,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.41',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.42',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

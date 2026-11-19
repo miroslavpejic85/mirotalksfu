@@ -197,55 +197,74 @@ describe('test-Reconnect', () => {
 
 describe('test-Reconnect virtual background restore', () => {
     const roomSource = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'Room.js'), 'utf8');
-    const match = roomSource.match(/function restoreVirtualBackgroundState\(\) \{[\s\S]*?\n\}\n/);
+    const match = roomSource.match(/async function restoreVirtualBackgroundState\(\) \{[\s\S]*?\n\}\n/);
+    const resolver = roomSource.match(/async function resolveSavedVirtualBackgroundUrl\(saved\) \{[\s\S]*?\n\}\n/);
 
-    function restore(saved, available = true) {
+    async function restore(saved, available = true, storedVideos = {}) {
         const store = saved ? { virtualBackgroundSettings: JSON.stringify(saved) } : {};
         const context = vm.createContext({
             console: { warn() {} },
             localStorage: { getItem: (key) => store[key] ?? null },
             isVirtualBackgroundAvailable: () => available,
+            indexedDBHelper: { getVideoUrl: async (id) => storedVideos[id] || null },
         });
         vm.runInContext(
-            `var virtualBackgroundBlurLevel = null, virtualBackgroundSelectedImage = null, virtualBackgroundTransparent = null;
+            `var virtualBackgroundBlurLevel = null, virtualBackgroundSelectedImage = null, virtualBackgroundTransparent = null, virtualBackgroundLastImage;
+            ${resolver[0]}
             ${match[0]}
-            restoreVirtualBackgroundState();
-            globalThis.state = { blur: virtualBackgroundBlurLevel, image: virtualBackgroundSelectedImage, transparent: virtualBackgroundTransparent };`,
+            globalThis.done = restoreVirtualBackgroundState().then(() => {
+                globalThis.state = { blur: virtualBackgroundBlurLevel, image: virtualBackgroundSelectedImage, transparent: virtualBackgroundTransparent };
+            });`,
             context
         );
+        await context.done;
         return JSON.parse(JSON.stringify(context.state));
     }
 
     it('exists in Room.js', () => {
         (match !== null).should.be.true();
+        (resolver !== null).should.be.true();
     });
 
-    it('restores blur before the rejoin produces the camera', () => {
-        restore({ blurLevel: 20, imageUrl: null, transparent: null }).should.eql({
+    it('restores an uploaded background video from its IndexedDB id', async () => {
+        const saved = { blurLevel: null, imageUrl: null, videoId: 7, transparent: null };
+        (await restore(saved, true, { 7: 'blob:https://localhost/video' })).should.eql({
+            blur: null,
+            image: 'blob:https://localhost/video',
+            transparent: null,
+        });
+        // Deleted since: nothing to restore
+        (await restore(saved)).should.eql({ blur: null, image: null, transparent: null });
+    });
+
+    it('restores blur before the rejoin produces the camera', async () => {
+        (await restore({ blurLevel: 20, imageUrl: null, transparent: null })).should.eql({
             blur: 20,
             image: null,
             transparent: null,
         });
     });
 
-    it('restores a virtual background image', () => {
-        restore({ blurLevel: null, imageUrl: '../images/virtual-background/x.jpg', transparent: null }).should.eql({
+    it('restores a virtual background image', async () => {
+        (
+            await restore({ blurLevel: null, imageUrl: '../images/virtual-background/x.jpg', transparent: null })
+        ).should.eql({
             blur: null,
             image: '../images/virtual-background/x.jpg',
             transparent: null,
         });
     });
 
-    it('restores a transparent background', () => {
-        restore({ blurLevel: null, imageUrl: null, transparent: true }).should.eql({
+    it('restores a transparent background', async () => {
+        (await restore({ blurLevel: null, imageUrl: null, transparent: true })).should.eql({
             blur: null,
             image: null,
             transparent: true,
         });
     });
 
-    it('does nothing when nothing is saved or virtual background is unavailable', () => {
-        restore(null).should.eql({ blur: null, image: null, transparent: null });
-        restore({ blurLevel: 20 }, false).should.eql({ blur: null, image: null, transparent: null });
+    it('does nothing when nothing is saved or virtual background is unavailable', async () => {
+        (await restore(null)).should.eql({ blur: null, image: null, transparent: null });
+        (await restore({ blurLevel: 20 }, false)).should.eql({ blur: null, image: null, transparent: null });
     });
 });

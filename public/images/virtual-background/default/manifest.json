@@ -16,5 +16,75 @@
         "../images/virtual-background/default/background-14.webp",
         "../images/virtual-background/default/background-15.webp",
         "../images/virtual-background/default/background-16.webp"
+    ],
+    "videos": [
+        {
+            "src": "../images/virtual-background/videos/cozy-fireplace.mp4",
+            "poster": "../images/virtual-background/videos/cozy-fireplace.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/christmas-fireplace.mp4",
+            "poster": "../images/virtual-background/videos/christmas-fireplace.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/christmas-tree.mp4",
+            "poster": "../images/virtual-background/videos/christmas-tree.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/modern-living-room.mp4",
+            "poster": "../images/virtual-background/videos/modern-living-room.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/rainy-city-window.mp4",
+            "poster": "../images/virtual-background/videos/rainy-city-window.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/beach-paradise.mp4",
+            "poster": "../images/virtual-background/videos/beach-paradise.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/tropical-island.mp4",
+            "poster": "../images/virtual-background/videos/tropical-island.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/tropical-sunset.mp4",
+            "poster": "../images/virtual-background/videos/tropical-sunset.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/swiss-alps.mp4",
+            "poster": "../images/virtual-background/videos/swiss-alps.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/mountain-clouds.mp4",
+            "poster": "../images/virtual-background/videos/mountain-clouds.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/winter-moon.mp4",
+            "poster": "../images/virtual-background/videos/winter-moon.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/countryside-meadow.mp4",
+            "poster": "../images/virtual-background/videos/countryside-meadow.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/aquarium.mp4",
+            "poster": "../images/virtual-background/videos/aquarium.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/space-stars.mp4",
+            "poster": "../images/virtual-background/videos/space-stars.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/milky-way.mp4",
+            "poster": "../images/virtual-background/videos/milky-way.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/starry-lake.mp4",
+            "poster": "../images/virtual-background/videos/starry-lake.jpg"
+        },
+        {
+            "src": "../images/virtual-background/videos/northern-lights.mp4",
+            "poster": "../images/virtual-background/videos/northern-lights.jpg"
+        }
     ]
 }

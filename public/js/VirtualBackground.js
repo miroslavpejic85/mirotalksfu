@@ -338,6 +338,135 @@ class VirtualBackgroundWorkerEngine {
 class VirtualBackground {
     static instance = null;
 
+    // Object URLs of the uploaded background videos (their URL alone does not tell they are videos)
+    static videoUrls = new Set();
+    static videoPosters = new Map();
+    // Posters shipped with preset videos: no need to load the video to show its thumbnail
+    static presetVideoPosters = new Map();
+
+    static registerVideoUrl(url) {
+        if (url) VirtualBackground.videoUrls.add(url);
+    }
+
+    static unregisterVideoUrl(url) {
+        VirtualBackground.videoUrls.delete(url);
+        VirtualBackground.videoPosters.delete(url);
+    }
+
+    static registerVideoPoster(url, posterUrl) {
+        if (url && posterUrl) VirtualBackground.presetVideoPosters.set(url, posterUrl);
+    }
+
+    static getPresetVideoPoster(url) {
+        return VirtualBackground.presetVideoPosters.get(url) || null;
+    }
+
+    static isVideoUrl(url) {
+        if (typeof url !== 'string' || !url) return false;
+        if (VirtualBackground.videoUrls.has(url) || /^data:video\//i.test(url)) return true;
+        if (/^(data|blob):/i.test(url)) return false;
+        return /\.(mp4|webm|ogv|mov|m4v)(?:[?#]|$)/i.test(url);
+    }
+
+    // Servers may label a video as generic binary data: guess its type from the link extension
+    static videoTypeFromUrl(url) {
+        const path = String(url || '').split(/[?#]/)[0];
+        const extension = (path.match(/\.([a-z0-9]+)$/i)?.[1] || '').toLowerCase();
+        const types = {
+            mp4: 'video/mp4',
+            m4v: 'video/mp4',
+            webm: 'video/webm',
+            ogv: 'video/ogg',
+            mov: 'video/quicktime',
+        };
+        return types[extension] || null;
+    }
+
+    static isVideoFile(file) {
+        return typeof file?.type === 'string' && file.type.startsWith('video/');
+    }
+
+    static createHiddenVideo(src) {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.defaultMuted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.preload = 'auto';
+        video.setAttribute('playsinline', '');
+        video.setAttribute('aria-hidden', 'true');
+        if (!/^(blob|data):/i.test(src)) video.crossOrigin = 'anonymous';
+        video.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none';
+        video.src = src;
+        return video;
+    }
+
+    // Poster (JPEG data URL) for a background video thumbnail; resolves null when it cannot be made
+    static getVideoPoster(url, width = 320) {
+        const preset = VirtualBackground.getPresetVideoPoster(url);
+        if (preset) return Promise.resolve(preset);
+        const cached = VirtualBackground.videoPosters.get(url);
+        if (cached) return cached;
+        const poster = new Promise((resolve) => {
+            const video = VirtualBackground.createHiddenVideo(url);
+            video.loop = false;
+            video.preload = 'metadata';
+            const timer = setTimeout(() => done(null), 10000);
+            const done = (result) => {
+                clearTimeout(timer);
+                video.removeAttribute('src');
+                video.load();
+                resolve(result);
+            };
+            const capture = () => {
+                try {
+                    const scale = width / (video.videoWidth || width);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = Math.max(1, Math.round((video.videoHeight || width * 0.5625) * scale));
+                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                    done(canvas.toDataURL('image/jpeg', 0.75));
+                } catch (error) {
+                    console.warn('⚠️ Background video poster failed', error);
+                    done(null);
+                }
+            };
+            video.addEventListener('error', () => done(null), { once: true });
+            video.addEventListener(
+                'loadeddata',
+                () => {
+                    // The very first frame is often black: show one a bit into the video
+                    const time = Number.isFinite(video.duration) ? Math.min(1, video.duration / 4) : 0;
+                    if (time <= 0) return capture();
+                    video.addEventListener('seeked', capture, { once: true });
+                    video.currentTime = time;
+                },
+                { once: true }
+            );
+        });
+        VirtualBackground.videoPosters.set(url, poster);
+        return poster;
+    }
+
+    // Shows a background in an <img>: the image itself, or the poster of a video (kept in data-background)
+    static setThumbnail(img, url) {
+        img.dataset.background = url;
+        if (!VirtualBackground.isVideoUrl(url)) {
+            img.src = url;
+            return;
+        }
+        img.classList.add('vb-video-thumb');
+        img.alt = img.alt || '';
+        const preset = VirtualBackground.getPresetVideoPoster(url);
+        if (preset) {
+            img.src = preset;
+            return;
+        }
+        VirtualBackground.getVideoPoster(url).then((poster) => {
+            if (poster && img.dataset.background === url) img.src = poster;
+        });
+    }
+
     constructor() {
         // Ensure only one instance of VirtualBackground exists
         if (VirtualBackground.instance) {
@@ -426,6 +555,10 @@ class VirtualBackground {
         this.isProcessing = false;
         this.gifAnimation = null;
         this.gifCanvas = null;
+        this.backgroundVideo = null;
+        this.backgroundVideoUrl = null;
+        this.backgroundVideoLoad = null;
+        this.backgroundVideoCancel = null;
         this.frameCounter = 0;
         this.frameSkipRatio = 3;
         this.lastSegmentationMask = null;
@@ -577,6 +710,7 @@ class VirtualBackground {
 
         // Stop current processing before starting new one
         await this.stopCurrentProcessor();
+        this.resumeVideoBackground();
 
         // Initialize segmentation if not already done
         await this.initializeSegmentation();
@@ -783,6 +917,8 @@ class VirtualBackground {
         }
 
         this.isProcessing = false;
+        // Nothing shows the background video anymore: a new pipeline resumes it
+        this.backgroundVideo?.pause();
 
         try {
             this.activeAbortController?.abort('Processing stopped');
@@ -858,26 +994,43 @@ class VirtualBackground {
         if (engine && !engine.failed) engine.terminate();
     }
 
-    // The worker receives a serializable background: images and GIF frames as ImageBitmaps
+    // The worker receives a serializable background: images, GIF and video frames as ImageBitmaps
     async createWorkerBackground({ blurLevel, imageUrl, transparent } = {}) {
         if (blurLevel) {
-            this.stopGifAnimation();
+            this.stopBackgroundMedia();
             return { kind: 'blur', blurLevel };
         }
         if (transparent) {
-            this.stopGifAnimation();
+            this.stopBackgroundMedia();
             return { kind: 'transparent' };
         }
         if (imageUrl) {
+            if (VirtualBackground.isVideoUrl(imageUrl)) {
+                const video = await this.loadVideoBackground(imageUrl);
+                return { kind: 'video', bitmap: await this.videoFrameToBitmap(video) };
+            }
             if (this.isGifUrl(imageUrl)) {
                 const gifCanvas = await this.loadGifImage(imageUrl);
                 return { kind: 'gif', bitmap: await createImageBitmap(gifCanvas) };
             }
             const image = await this.loadImage(imageUrl);
-            this.stopGifAnimation();
+            this.stopBackgroundMedia();
             return { kind: 'image', bitmap: await this.imageToBitmap(image) };
         }
         throw new Error('No virtual background selected');
+    }
+
+    // Downscaled: the background is drawn behind a camera frame of at most ~720p
+    async videoFrameToBitmap(video, maxSize = 1280) {
+        const width = video.videoWidth || maxSize;
+        const height = video.videoHeight || maxSize;
+        const scale = Math.min(1, maxSize / Math.max(width, height));
+        if (scale >= 1) return createImageBitmap(video);
+        return createImageBitmap(video, {
+            resizeWidth: Math.max(1, Math.round(width * scale)),
+            resizeHeight: Math.max(1, Math.round(height * scale)),
+            resizeQuality: 'medium',
+        }).catch(() => createImageBitmap(video));
     }
 
     // Rasterize through a canvas: works for SVG too, and caps huge pictures
@@ -893,22 +1046,38 @@ class VirtualBackground {
         return createImageBitmap(canvas);
     }
 
-    // gifler animates the GIF on the page: forward its frames to the worker
+    // gifler animates the GIF, a hidden <video> plays the video, on the page: forward their frames to the worker
     startGifPump(background) {
         this.stopGifPump();
-        if (background.kind !== 'gif' || !this.gifCanvas) return;
+        const isVideo = background.kind === 'video';
+        const source = isVideo ? this.backgroundVideo : background.kind === 'gif' ? this.gifCanvas : null;
+        if (!source) return;
+        if (isVideo) this.resumeVideoBackground();
         let busy = false;
-        this.gifPump = setInterval(async () => {
-            if (busy || !this.gifCanvas.width || !this.workerEngine) return;
-            busy = true;
-            try {
-                this.workerEngine.sendGifFrame(await createImageBitmap(this.gifCanvas));
-            } catch (error) {
-                console.warn('⚠️ GIF background frame failed', error);
-            } finally {
-                busy = false;
-            }
-        }, 1000 / 15);
+        let lastVideoTime = -1;
+        this.gifPump = setInterval(
+            async () => {
+                if (busy || !this.workerEngine) return;
+                if (isVideo) {
+                    // HAVE_CURRENT_DATA, and a new frame since the last one sent
+                    if (source.readyState < 2 || source.currentTime === lastVideoTime) return;
+                    lastVideoTime = source.currentTime;
+                } else if (!source.width) {
+                    return;
+                }
+                busy = true;
+                try {
+                    const bitmap = isVideo ? await this.videoFrameToBitmap(source) : await createImageBitmap(source);
+                    if (this.workerEngine) this.workerEngine.sendGifFrame(bitmap);
+                    else bitmap.close();
+                } catch (error) {
+                    console.warn('⚠️ Animated background frame failed', error);
+                } finally {
+                    busy = false;
+                }
+            },
+            1000 / (isVideo ? 30 : 15)
+        );
     }
 
     stopGifPump() {
@@ -972,7 +1141,14 @@ class VirtualBackground {
 
     async setWorkerBackground(videoTrack, options, request) {
         const session = this.activeWorkerSession;
-        const background = await this.createWorkerBackground(options);
+        let background;
+        try {
+            background = await this.createWorkerBackground(options);
+        } catch (error) {
+            // A newer selection stopped the media this one was still loading
+            if (request !== this.backgroundRequest) return true;
+            throw error;
+        }
         if (request !== this.backgroundRequest) {
             this.closeWorkerBackground(background);
             return true;
@@ -1036,19 +1212,23 @@ class VirtualBackground {
     }
 
     createBlurMaskHandler(blurLevel) {
-        this.stopGifAnimation();
+        this.stopBackgroundMedia();
         return VirtualBackgroundEffects.createBlurMaskHandler(blurLevel, this.createCanvas.bind(this));
     }
 
     async createImageMaskHandler(imageUrl) {
+        if (VirtualBackground.isVideoUrl(imageUrl)) {
+            const video = await this.loadVideoBackground(imageUrl);
+            return VirtualBackgroundEffects.createImageMaskHandler(video, this.createCanvas.bind(this));
+        }
         const isGif = this.isGifUrl(imageUrl);
         const background = isGif ? await this.loadGifImage(imageUrl) : await this.loadImage(imageUrl);
-        if (!isGif) this.stopGifAnimation();
+        if (!isGif) this.stopBackgroundMedia();
         return VirtualBackgroundEffects.createImageMaskHandler(background, this.createCanvas.bind(this));
     }
 
     createTransparentMaskHandler() {
-        this.stopGifAnimation();
+        this.stopBackgroundMedia();
         return VirtualBackgroundEffects.createTransparentMaskHandler(this.createCanvas.bind(this));
     }
 
@@ -1064,6 +1244,78 @@ class VirtualBackground {
         if (!this.gifAnimation) return;
         this.gifAnimation.stop();
         this.gifAnimation = null;
+    }
+
+    // Animated sources (GIF, video) stay alive only while they are the selected background
+    stopBackgroundMedia() {
+        this.stopGifAnimation();
+        this.stopVideoBackground();
+    }
+
+    stopVideoBackground() {
+        const video = this.backgroundVideo;
+        const cancel = this.backgroundVideoCancel;
+        this.backgroundVideo = null;
+        this.backgroundVideoUrl = null;
+        this.backgroundVideoLoad = null;
+        this.backgroundVideoCancel = null;
+        cancel?.();
+        if (!video) return;
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+        video.remove();
+    }
+
+    resumeVideoBackground() {
+        const video = this.backgroundVideo;
+        if (!video?.paused) return;
+        video.play().catch((error) => console.warn('⚠️ Background video playback failed', error));
+    }
+
+    // Resolves the playing, looping, muted <video> once its first frame is decoded
+    loadVideoBackground(src) {
+        this.stopGifAnimation();
+        if (this.backgroundVideoLoad && this.backgroundVideoUrl === src) {
+            this.resumeVideoBackground();
+            return this.backgroundVideoLoad;
+        }
+        this.stopVideoBackground();
+        const video = VirtualBackground.createHiddenVideo(src);
+        const load = new Promise((resolve, reject) => {
+            const timer = setTimeout(() => fail(new Error('Background video load timed out')), 20000);
+            const cleanup = () => {
+                clearTimeout(timer);
+                video.removeEventListener('loadeddata', onLoaded);
+                video.removeEventListener('error', onError);
+            };
+            const fail = (error) => {
+                cleanup();
+                reject(error);
+            };
+            const onLoaded = () => {
+                cleanup();
+                resolve(video);
+            };
+            const onError = () =>
+                fail(new Error(`Background video failed to load: ${video.error?.message || video.error?.code}`));
+            this.backgroundVideoCancel = () => fail(new Error('Background video replaced'));
+            video.addEventListener('loadeddata', onLoaded);
+            video.addEventListener('error', onError);
+        }).then(async () => {
+            if (this.backgroundVideo === video) this.backgroundVideoCancel = null;
+            await video.play();
+            console.log('✅ Background video loaded and playing.');
+            return video;
+        });
+        this.backgroundVideo = video;
+        this.backgroundVideoUrl = src;
+        this.backgroundVideoLoad = load;
+        load.catch(() => {
+            if (this.backgroundVideo === video) this.stopVideoBackground();
+        });
+        document.body.appendChild(video);
+        return load;
     }
 
     async loadImage(src) {
@@ -1082,6 +1334,7 @@ class VirtualBackground {
         return new Promise((resolve, reject) => {
             try {
                 this.stopGifAnimation(); // Stop previous animation
+                this.stopVideoBackground();
 
                 if (!this.gifCanvas) {
                     this.gifCanvas = document.createElement('canvas');

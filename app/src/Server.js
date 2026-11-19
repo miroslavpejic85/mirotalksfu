@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.41
+ * @version 2.8.42
  *
  */
 
@@ -576,6 +576,15 @@ const dir = {
     rtmp: path.join(__dirname, config?.media?.rtmp?.dir || 'rtmp'),
 };
 
+// Preset background videos and their posters never change in place (a changed clip gets a new file name):
+// browsers keep them for 30 days without revalidating, so selecting one again costs no request
+const virtualBackgroundVideosDir = path.join(dir.public, 'images', 'virtual-background', 'videos') + path.sep;
+const virtualBackgroundVideoCacheControl = 'public, max-age=2592000, immutable';
+
+function isVirtualBackgroundVideoAsset(filePath) {
+    return filePath.startsWith(virtualBackgroundVideosDir) && /\.(?:mp4|webm|jpe?g|png|webp)$/i.test(filePath);
+}
+
 // Rec directory create and set max file size
 const recMaxFileSize = config?.media?.recording?.maxFileSize || 1 * 1024 * 1024 * 1024; // 1GB default
 const serverRecordingEnabled = config?.media?.recording?.enabled || false;
@@ -800,6 +809,9 @@ function startServer() {
                 if (filePath.endsWith('.js')) {
                     res.setHeader('Content-Type', 'application/javascript');
                 } //...
+                if (isVirtualBackgroundVideoAsset(filePath)) {
+                    res.setHeader('Cache-Control', virtualBackgroundVideoCacheControl);
+                }
             },
         })
     );

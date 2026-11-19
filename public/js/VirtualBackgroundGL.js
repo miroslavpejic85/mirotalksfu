@@ -376,7 +376,7 @@ void main() {
                 mask.image = image;
                 mask.dirty = true;
             },
-            // background: { kind: 'blur', blurLevel } | { kind: 'image' | 'gif', source } | { kind: 'transparent' }
+            // background: { kind: 'blur', blurLevel } | { kind: 'image' | 'gif' | 'video', source } | { kind: 'transparent' }
             render(frame, width, height, view) {
                 if (!mask.image) return false;
                 if (canvas.width !== width || canvas.height !== height) {

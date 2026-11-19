@@ -164,6 +164,15 @@ class VideoEffectsPanel {
         return null;
     }
 
+    isVideoBackground(url) {
+        return !!this.background?.isVideo?.(url);
+    }
+
+    // Video backgrounds show a poster, null while it is being made
+    backgroundThumbnail(url) {
+        return this.background?.getThumbnail ? this.background.getThumbnail(url) : url;
+    }
+
     effectMeta(id) {
         return this.engine.getEffects().find((effect) => effect.id === id) || null;
     }
@@ -186,16 +195,20 @@ class VideoEffectsPanel {
                     'blur-20': t('Strong blur'),
                     transparent: t('Transparent'),
                 };
+                const isVideo = !!selection.imageUrl && this.isVideoBackground(selection.imageUrl);
+                const thumb = selection.imageUrl ? this.backgroundThumbnail(selection.imageUrl) : null;
                 items.push({
                     id: 'background',
                     tab: 'background',
-                    label: labels[key] || t('Background image'),
+                    label: labels[key] || (isVideo ? t('Background video') : t('Background image')),
                     icon: key.startsWith('blur')
                         ? 'fas fa-droplet'
                         : key === 'transparent'
                           ? 'fas fa-border-none'
-                          : null,
-                    thumb: selection.imageUrl || null,
+                          : isVideo
+                            ? 'fas fa-film'
+                            : null,
+                    thumb,
                     remove: () => this.selectBackground(null),
                 });
             }
@@ -641,7 +654,7 @@ class VideoEffectsPanel {
         const value = (url || '').trim();
         this.urlError = '';
         if (!/^https?:\/\//i.test(value) || !this.background?.isValidImageUrl?.(value)) {
-            this.urlError = t('Paste a link to an image (jpg, png, gif, webp...).');
+            this.urlError = t('Paste a link to an image or video (jpg, png, gif, webp, mp4, webm...).');
             this.sync();
             return false;
         }
@@ -649,13 +662,15 @@ class VideoEffectsPanel {
             const response = await fetch(value);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const blob = await response.blob();
-            if (!blob.type.startsWith('image/')) throw new Error('Not an image');
-            const file = new File([blob], 'background', { type: blob.type });
+            const type = blob.type.startsWith('image/') || blob.type.startsWith('video/') ? blob.type : null;
+            const videoType = this.background?.videoTypeFromUrl?.(value) || null;
+            if (!type && !videoType) throw new Error('Not an image or video');
+            const file = new File([blob], 'background', { type: type || videoType });
             await this.uploadBackground([file]);
             return true;
         } catch (error) {
             console.warn('Unable to add the background from URL', error);
-            this.urlError = t('This image can’t be loaded (the website may block it). Download it and use Upload.');
+            this.urlError = t('This file can’t be loaded (the website may block it). Download it and use Upload.');
             this.sync();
             return false;
         }
@@ -786,7 +801,16 @@ class VideoEffectsPanel {
     // UI BUILDING BLOCKS
     // ####################################################
 
-    createCard({ label, image = null, icon = null, badge = null, swatch = null, onClick, toggle = true }) {
+    createCard({
+        label,
+        image = null,
+        icon = null,
+        badge = null,
+        badgeIcon = null,
+        swatch = null,
+        onClick,
+        toggle = true,
+    }) {
         const card = VideoEffectsPanel.element('button', 'vfx-card', { type: 'button' });
         if (toggle) card.setAttribute('aria-pressed', 'false');
         card.setAttribute('aria-label', label);
@@ -802,9 +826,10 @@ class VideoEffectsPanel {
         } else if (icon) {
             thumb.appendChild(VideoEffectsPanel.icon(icon));
         }
-        if (badge) {
+        if (badge || badgeIcon) {
             const badgeEl = VideoEffectsPanel.element('span', 'vfx-badge');
-            badgeEl.textContent = badge;
+            if (badgeIcon) badgeEl.appendChild(VideoEffectsPanel.icon(badgeIcon));
+            else badgeEl.textContent = badge;
             thumb.appendChild(badgeEl);
         }
         const text = VideoEffectsPanel.element('span', 'vfx-label');
@@ -1266,7 +1291,7 @@ class VideoEffectsPanel {
         });
         view.backgroundGrid = grid;
 
-        const fileInput = VideoEffectsPanel.element('input', 'hidden', { type: 'file', accept: 'image/*' });
+        const fileInput = VideoEffectsPanel.element('input', 'hidden', { type: 'file', accept: 'image/*,video/*' });
         fileInput.multiple = true;
         fileInput.addEventListener('change', async () => {
             const files = Array.from(fileInput.files || []);
@@ -1281,8 +1306,8 @@ class VideoEffectsPanel {
             inputmode: 'url',
             autocomplete: 'off',
         });
-        urlInput.placeholder = t('Paste an image link');
-        urlInput.setAttribute('aria-label', t('Paste an image link'));
+        urlInput.placeholder = t('Paste an image or video link');
+        urlInput.setAttribute('aria-label', t('Paste an image or video link'));
         const urlButton = VideoEffectsPanel.element('button', 'vfx-link-btn', { type: 'submit' });
         urlButton.append(VideoEffectsPanel.icon('fas fa-link'), document.createTextNode(` ${t('Add')}`));
         urlRow.append(urlInput, urlButton);
@@ -1299,7 +1324,7 @@ class VideoEffectsPanel {
             fileInput,
             urlRow,
             view.urlError,
-            this.createHint(t('Tip: drop images here to upload them.'))
+            this.createHint(t('Tip: drop images or videos here to upload them.'))
         );
     }
 
@@ -1312,12 +1337,15 @@ class VideoEffectsPanel {
         const selectedImage = this.background.getSelection().imageUrl;
         const images = [...new Set([...presets, ...custom])];
         if (selectedImage && !images.includes(selectedImage)) images.unshift(selectedImage);
-        const signature = `${images.join('|')}#${custom.join('|')}`;
+        const thumbnails = new Map(images.map((url) => [url, this.backgroundThumbnail(url)]));
+        // Includes which video posters are ready, to swap them in once made
+        const posters = images.map((url) => (thumbnails.get(url) ? 1 : 0)).join('');
+        const signature = `${images.join('|')}#${custom.join('|')}#${posters}`;
         if (view.backgroundSignature !== signature) {
             view.backgroundSignature = signature;
             grid.replaceChildren();
             view.backgroundCards = [];
-            const add = (key, options, removable = false) => {
+            const add = (key, options, removable = false, isVideo = false) => {
                 const card = this.createCard(options);
                 card.dataset.key = key;
                 view.backgroundCards.push(card);
@@ -1327,8 +1355,9 @@ class VideoEffectsPanel {
                 }
                 const wrap = VideoEffectsPanel.element('div', 'vfx-card-wrap');
                 const remove = VideoEffectsPanel.element('button', 'vfx-card-remove', { type: 'button' });
-                remove.setAttribute('aria-label', t('Delete image'));
-                remove.title = t('Delete image');
+                const removeLabel = isVideo ? t('Delete video') : t('Delete image');
+                remove.setAttribute('aria-label', removeLabel);
+                remove.title = removeLabel;
                 remove.appendChild(VideoEffectsPanel.icon('fas fa-trash-can'));
                 remove.addEventListener('click', () => this.removeCustomBackground(key.slice('image:'.length)));
                 wrap.append(card, remove);
@@ -1360,10 +1389,18 @@ class VideoEffectsPanel {
                 });
             }
             images.forEach((url) => {
+                const isVideo = this.isVideoBackground(url);
                 add(
                     `image:${url}`,
-                    { label: t('Background image'), image: url, onClick: () => this.selectBackground(`image:${url}`) },
-                    custom.includes(url)
+                    {
+                        label: isVideo ? t('Background video') : t('Background image'),
+                        image: thumbnails.get(url),
+                        icon: isVideo ? 'fas fa-film' : null,
+                        badgeIcon: isVideo ? 'fas fa-play' : null,
+                        onClick: () => this.selectBackground(`image:${url}`),
+                    },
+                    custom.includes(url),
+                    isVideo
                 );
             });
         }

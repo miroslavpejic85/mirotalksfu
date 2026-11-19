@@ -1234,6 +1234,28 @@ body {
     color: white;
 }
 
+/* Background videos: a poster with a play mark */
+img.vb-video-thumb {
+    background: #000;
+    object-fit: cover;
+}
+
+.image-wrapper:has(> img.vb-video-thumb)::before {
+    content: '\f04b';
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    z-index: 1;
+    padding: 3px 5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-family: 'Font Awesome 6 Free';
+    font-size: 0.6rem;
+    font-weight: 900;
+    pointer-events: none;
+}
+
 /*--------------------------------------------------------------
 # Custom modal to paste image URL
 --------------------------------------------------------------*/
@@ -1945,6 +1967,19 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    pointer-events: none;
+}
+
+#bottomButtons #startVideoDeviceMenu .device-menu-bg-card .device-menu-bg-play {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    z-index: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 0.5rem;
     pointer-events: none;
 }
 

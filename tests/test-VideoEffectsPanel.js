@@ -363,6 +363,49 @@ describe('Visual effects panel', () => {
         assert.match($('.vfx-error').textContent, /Upload/);
     });
 
+    it('shows uploaded videos with their poster and adds video links', async () => {
+        const videoUrl = 'blob:https://mirotalk.test/video';
+        const posters = new Map();
+        background.isVideo = (url) => url.startsWith('blob:');
+        background.getThumbnail = (url) => (background.isVideo(url) ? posters.get(url) || null : url);
+        background.videoTypeFromUrl = (url) => (/\.mp4$/i.test(url) ? 'video/mp4' : null);
+        background.isValidImageUrl = (url) => /\.(png|mp4)$/i.test(url);
+        background.custom.push(videoUrl);
+        panel.openTab('background');
+        panel.sync();
+        assert.match(visiblePanel().querySelector('input[type="file"]').accept, /video\/\*/);
+
+        let card = $(`.vfx-card[data-key="image:${videoUrl}"]`);
+        assert.equal(card.getAttribute('aria-label'), 'Background video');
+        assert.equal(card.querySelector('img'), null, 'no poster yet: a film icon');
+        assert.ok(card.querySelector('.fa-film'));
+        assert.ok(card.querySelector('.vfx-badge .fa-play'));
+        assert.equal(card.parentElement.querySelector('.vfx-card-remove').title, 'Delete video');
+
+        posters.set(videoUrl, 'data:image/jpeg;base64,poster');
+        panel.sync();
+        card = $(`.vfx-card[data-key="image:${videoUrl}"]`);
+        assert.equal(card.querySelector('img').getAttribute('src'), 'data:image/jpeg;base64,poster');
+
+        card.click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.deepEqual(background.applied.at(-1), [null, videoUrl, null]);
+        assert.ok(panel.getActiveItems().some((item) => item.label === 'Background video'));
+
+        // Served as binary data: the link extension tells it is a video
+        let uploaded;
+        background.upload = async (files) => {
+            uploaded = files;
+            return [];
+        };
+        window.fetch = async () => ({
+            ok: true,
+            blob: async () => new window.Blob(['x'], { type: 'application/octet-stream' }),
+        });
+        assert.equal(await panel.addBackgroundFromUrl('https://example.com/loop.mp4'), true);
+        assert.equal(uploaded[0].type, 'video/mp4');
+    });
+
     it('explains unavailable face effects, the camera being off, and slow devices', () => {
         engine.state.faceTracking = 'error';
         panel.openTab('face');

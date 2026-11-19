@@ -525,6 +525,7 @@ function glView() {
         case 'image':
             return { kind: 'image', source: background.bitmap };
         case 'gif':
+        case 'video':
             return { kind: 'image', source: compositor.gifBitmap };
         default:
             return { kind: 'transparent' };
@@ -645,11 +646,16 @@ function closeBitmap(bitmap) {
     }
 }
 
+// GIF and video backgrounds: the page keeps sending their current frame ('gif-frame')
+function isAnimated(background) {
+    return background?.kind === 'gif' || background?.kind === 'video';
+}
+
 function setBackground(background) {
     const previous = compositor.background;
     const previousGif = compositor.gifBitmap;
     compositor.background = background;
-    compositor.gifBitmap = background.kind === 'gif' ? background.bitmap : null;
+    compositor.gifBitmap = isAnimated(background) ? background.bitmap : null;
     switch (background.kind) {
         case 'blur':
             compositor.handler = effects.createBlurMaskHandler(background.blurLevel);
@@ -658,6 +664,7 @@ function setBackground(background) {
             compositor.handler = effects.createImageMaskHandler(background.bitmap, undefined, PRE_SOFTENED);
             break;
         case 'gif':
+        case 'video':
             compositor.handler = effects.createImageMaskHandler(() => compositor.gifBitmap, undefined, PRE_SOFTENED);
             break;
         case 'transparent':
@@ -671,7 +678,7 @@ function setBackground(background) {
 }
 
 function setGifFrame(bitmap) {
-    if (compositor.background?.kind !== 'gif') {
+    if (!isAnimated(compositor.background)) {
         closeBitmap(bitmap);
         return;
     }
