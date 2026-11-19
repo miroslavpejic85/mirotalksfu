@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.44
+ * @version 2.8.45
  *
  */
 
@@ -3110,6 +3110,8 @@ class RoomClient {
                     // Processed tracks (effects, background) do not report the camera facing mode
                     camera = detectCameraFacingMode(cameraStream || stream);
                     handleCameraMirror(elem);
+                    this.watchSettingsVideoPreview(elem);
+                    this.syncSettingsVideoPreview();
                     // Effects changed while the transport was being recovered
                     if (recovery) this.updateVideoEffectsTrack();
                 }
@@ -4683,6 +4685,7 @@ class RoomClient {
             case mediaType.video:
                 this.setIsVideo(false);
                 this.event(_EVENTS.stopVideo);
+                this.syncSettingsVideoPreview();
                 break;
             case mediaType.screen:
                 this.setIsScreen(false);
@@ -6713,6 +6716,7 @@ class RoomClient {
         mySettings.classList.toggle('show');
         this.isMySettingsOpen = !this.isMySettingsOpen;
         this.videoMediaContainer.style.opacity = this.isMySettingsOpen ? 0.3 : 1;
+        this.syncSettingsVideoPreview();
 
         if (!this.isMySettingsOpen) {
             this.closeMobileSettingsNav();
@@ -6725,6 +6729,36 @@ class RoomClient {
         if (tabNetwork && tabNetwork.style.display === 'block') {
             this.startNetworkMonitor();
         }
+    }
+
+    // Mirror my camera (with effects/background) above the video source select when settings covers the screen
+    syncSettingsVideoPreview() {
+        const preview = this.getId('settingsVideoPreview');
+        const previewVideo = this.getId('settingsVideoPreviewVideo');
+        if (!preview || !previewVideo) return;
+        const fullScreen = this.isMobileDevice || window.matchMedia('(max-width: 768px)').matches;
+        const show = this.isMySettingsOpen && fullScreen && this.isVideoAllowed;
+        const source = this.localVideoElement;
+        const stream = show && source?.isConnected ? source.srcObject : null;
+        const videoTrack = stream?.getVideoTracks?.()[0];
+        const isLive = !!videoTrack && videoTrack.readyState === 'live';
+        preview.hidden = !show;
+        if (previewVideo.srcObject !== (isLive ? stream : null)) {
+            previewVideo.srcObject = isLive ? stream : null;
+            if (isLive) previewVideo.play().catch(() => {});
+        }
+        if (!show) return;
+        previewVideo.classList.toggle('mirror', !!source?.classList.contains('mirror'));
+        preview.classList.toggle('is-off', !isLive || !videoTrack.enabled);
+    }
+
+    watchSettingsVideoPreview(video) {
+        // Assigning srcObject (effects, background) fires loadstart; mirroring toggles the class
+        video.addEventListener('loadstart', () => this.syncSettingsVideoPreview());
+        new MutationObserver(() => this.syncSettingsVideoPreview()).observe(video, {
+            attributes: true,
+            attributeFilter: ['class'],
+        });
     }
 
     openTab(evt, tabName) {
@@ -6927,8 +6961,9 @@ class RoomClient {
                 [...document.querySelectorAll('video')].forEach((video) => {
                     console.log('DOCUMENT PIP found video id -----> ' + video.id);
 
-                    // No video stream detected or is video share from URL...
-                    if (!video.srcObject || video.id === '__videoShare') return;
+                    // No video stream detected or is video share from URL or the settings preview...
+                    if (!video.srcObject || video.id === '__videoShare' || video.id === 'settingsVideoPreviewVideo')
+                        return;
 
                     const videoElement = rc.getId(video.id);
 

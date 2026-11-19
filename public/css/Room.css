@@ -4904,6 +4904,49 @@ img.vb-video-thumb {
     line-height: 1.45;
 }
 
+/* Live camera preview (full-screen settings only) */
+.settings-video-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 40vh;
+    margin: 10px 0 6px;
+    border: 1px solid var(--room-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+}
+
+.settings-video-preview[hidden] {
+    display: none;
+}
+
+#mySettings .settings-video-preview video {
+    display: block;
+    object-fit: cover;
+    border-radius: 0;
+    cursor: default;
+    transition: none;
+}
+
+#mySettings .settings-video-preview video:hover {
+    filter: none;
+}
+
+#mySettings .settings-video-preview-off {
+    position: absolute;
+    inset: 0;
+    display: none;
+    place-items: center;
+    font-size: 1.6rem;
+    color: color-mix(in srgb, var(--fg-1) 64%, transparent);
+    background: #000;
+}
+
+#mySettings .settings-video-preview.is-off .settings-video-preview-off {
+    display: grid;
+}
+
 /* One card per settings group (camera, screen sharing, microphone, speakers); the fields inside become flat rows */
 .settings-card {
     margin-bottom: 16px;
