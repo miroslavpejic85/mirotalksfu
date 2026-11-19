@@ -1030,17 +1030,26 @@ body {
     background: transparent;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+    scrollbar-color: #4678f9 transparent;
 }
 
-/* Scrollbar Styling */
+/* Scrollbar Styling: same blue as the P2P background picker */
 .image-grid::-webkit-scrollbar {
     width: 5px;
 }
 
+.image-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 .image-grid::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: #4678f9;
     border-radius: 14px;
+    cursor: pointer;
+}
+
+.image-grid::-webkit-scrollbar-thumb:hover {
+    background-color: #376df9;
 }
 
 /* Image Thumbnails */
