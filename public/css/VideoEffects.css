@@ -107,8 +107,56 @@
     text-align: center;
 }
 
-.vfx-preview-off > i {
+.vfx-preview-off.clickable {
+    position: absolute;
+    inset: 0;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.vfx-preview-off.clickable:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Your avatar while the camera is off, like the pre-join (the icon until the picture loads) */
+.vfx-preview-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: clamp(48px, 22%, 88px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 50%;
     font-size: 1.6rem;
+    background: rgba(255, 255, 255, 0.08);
+    transition: transform 0.15s ease;
+}
+
+.vfx-preview-off.clickable:hover .vfx-preview-avatar {
+    transform: scale(1.04);
+}
+
+.vfx-preview-avatar i {
+    color: inherit !important;
+}
+
+.vfx-preview-avatar img {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vfx-preview-avatar.loaded img {
+    display: block;
+}
+
+.vfx-preview-avatar.loaded i,
+#mySettings .vfx-preview-avatar.loaded i {
+    display: none;
 }
 
 /* Chips of what is on, with remove buttons and "Turn off all" */

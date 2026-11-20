@@ -426,6 +426,45 @@ describe('Visual effects panel', () => {
         assert.equal(turnedOn, true);
     });
 
+    it('shows my avatar in the preview while the camera is off, and turns it on with a click', () => {
+        // jsdom has no layout: treat attached elements as visible
+        Object.defineProperty(window.HTMLElement.prototype, 'offsetParent', {
+            configurable: true,
+            get() {
+                return this.parentNode;
+            },
+        });
+        let turnedOn = 0;
+        let avatar = 'https://example.com/me.png';
+        panel.camera = { isOn: () => false, turnOn: () => turnedOn++ };
+        panel.preview = { getStream: () => null, isMirrored: () => false, getAvatar: () => avatar };
+        panel.mount(container, { preview: true });
+        panel.sync();
+
+        const off = $('.vfx-preview-off');
+        const img = $('.vfx-preview-avatar img');
+        assert.ok(!off.classList.contains('hidden'));
+        assert.ok(off.classList.contains('clickable'));
+        assert.equal(img.getAttribute('src'), avatar);
+        assert.ok($('.vfx-preview-avatar i.fa-video-slash'), 'icon until the picture loads');
+
+        img.dispatchEvent(new window.Event('load'));
+        assert.ok($('.vfx-preview-avatar').classList.contains('loaded'));
+        panel.sync();
+        assert.ok($('.vfx-preview-avatar').classList.contains('loaded'), 'same URL does not reload');
+
+        avatar = 'https://example.com/new.png';
+        panel.sync();
+        assert.equal(img.getAttribute('src'), avatar);
+        assert.ok(!$('.vfx-preview-avatar').classList.contains('loaded'));
+
+        off.click();
+        assert.equal(turnedOn, 1);
+        off.querySelector('button').click();
+        assert.equal(turnedOn, 2, 'the button turns it on once');
+        delete window.HTMLElement.prototype.offsetParent;
+    });
+
     it('disables Touch up without WebGL', () => {
         engine.state.capabilities = { filters: true, smoothing: false, webgl: false };
         panel.openTab('filters');

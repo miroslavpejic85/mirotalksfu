@@ -11,7 +11,7 @@
  * Integration points are adapters, so the panel knows nothing about RoomClient:
  * - background: the existing virtual background feature (apply, upload, custom images)
  * - camera: { isOn(), turnOn() } for the camera-off hint
- * - preview: { getStream(), isMirrored() } for the live self-preview
+ * - preview: { getStream(), isMirrored(), getAvatar() } for the live self-preview (avatar URL while the camera is off)
  * - snapshotSource(): a <video> used to build the filter previews from the user's own camera
  */
 class VideoEffectsPanel {
@@ -1002,17 +1002,26 @@ class VideoEffectsPanel {
         video.playsInline = true;
         video.setAttribute('playsinline', '');
         const off = VideoEffectsPanel.element('div', 'vfx-preview-off hidden');
+        // Like the pre-join: your avatar while the camera is off (the icon until it loads, or without one)
+        const avatar = VideoEffectsPanel.element('div', 'vfx-preview-avatar', { 'aria-hidden': 'true' });
+        const avatarImg = VideoEffectsPanel.element('img', null, { alt: '' });
+        avatarImg.addEventListener('load', () => avatar.classList.add('loaded'));
+        avatarImg.addEventListener('error', () => avatar.classList.remove('loaded'));
+        avatar.append(VideoEffectsPanel.icon('fas fa-video-slash'), avatarImg);
         const offText = VideoEffectsPanel.element('span');
         offText.textContent = t('Turn on your camera to preview effects');
-        off.append(VideoEffectsPanel.icon('fas fa-video-slash'), offText);
+        off.append(avatar, offText);
         if (this.camera?.turnOn) {
             const on = VideoEffectsPanel.element('button', 'vfx-link-btn', { type: 'button' });
             on.append(VideoEffectsPanel.icon('fas fa-video'), document.createTextNode(` ${t('Turn on camera')}`));
-            on.addEventListener('click', () => this.camera.turnOn());
             off.appendChild(on);
+            // The whole placeholder turns the camera on; the button click bubbles here (one toggle)
+            off.classList.add('clickable');
+            off.title = t('Turn on camera');
+            off.addEventListener('click', () => this.camera.turnOn());
         }
         box.append(video, off);
-        view.preview = { box, video, off };
+        view.preview = { box, video, off, avatar, avatarImg };
         return box;
     }
 
@@ -1475,6 +1484,7 @@ class VideoEffectsPanel {
         preview.video.classList.toggle('hidden', !live);
         if (!live) {
             if (preview.video.srcObject) preview.video.srcObject = null;
+            if (visible) this.updatePreviewAvatar(preview);
             return;
         }
         if (preview.video.srcObject !== stream) {
@@ -1482,6 +1492,15 @@ class VideoEffectsPanel {
             preview.video.play().catch(() => {});
         }
         preview.video.classList.toggle('mirror', !!this.preview.isMirrored?.());
+    }
+
+    updatePreviewAvatar(preview) {
+        const src = this.preview.getAvatar?.() || '';
+        // Same URL: keep the loaded image (no flicker on every tick)
+        if (preview.avatarSrc === src) return;
+        preview.avatarSrc = src;
+        preview.avatar.classList.remove('loaded');
+        src ? preview.avatarImg.setAttribute('src', src) : preview.avatarImg.removeAttribute('src');
     }
 
     // ####################################################

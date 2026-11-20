@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.48
+ * @version 2.8.49
  *
  */
 
@@ -6736,7 +6736,8 @@ class RoomClient {
         const preview = this.getId('settingsVideoPreview');
         const previewVideo = this.getId('settingsVideoPreviewVideo');
         if (!preview || !previewVideo) return;
-        const show = this.isMySettingsOpen && this.isVideoAllowed;
+        // Also while the camera is off: my avatar, click to turn it on (like the pre-join)
+        const show = this.isMySettingsOpen && !!BUTTONS.main.startVideoButton;
         const source = this.localVideoElement;
         const stream = show && source?.isConnected ? source.srcObject : null;
         const videoTrack = stream?.getVideoTracks?.()[0];
@@ -6748,7 +6749,55 @@ class RoomClient {
         }
         if (!show) return;
         previewVideo.classList.toggle('mirror', !!source?.classList.contains('mirror'));
-        preview.classList.toggle('is-off', !isLive || !videoTrack.enabled);
+        const isOff = !isLive || !videoTrack.enabled;
+        preview.classList.toggle('is-off', isOff);
+        if (isOff) this.updateSettingsVideoPreviewOff();
+    }
+
+    updateSettingsVideoPreviewOff() {
+        const off = this.getId('settingsVideoPreviewOff');
+        const img = this.getId('settingsVideoPreviewAvatar');
+        if (!off || !img) return;
+
+        const src = this.getMyAvatarUrl(176);
+        // Same URL: keep the loaded image (a Gravatar may have been swapped to its initials fallback)
+        if (img.dataset.src !== src) {
+            img.dataset.src = src;
+            img.parentElement.classList.remove('loaded');
+            img.onload = () => img.parentElement.classList.add('loaded');
+            img.onerror = () => img.parentElement.classList.remove('loaded');
+            img.setAttribute('src', src);
+        }
+
+        const canTurnOn = !this.producerLabel.has(mediaType.video) && !this.isVideoLockedByModerator();
+        off.classList.toggle('clickable', canTurnOn);
+        if (canTurnOn) {
+            off.setAttribute('role', 'button');
+            off.setAttribute('tabindex', '0');
+        } else {
+            off.removeAttribute('role');
+            off.removeAttribute('tabindex');
+        }
+        if (off.onclick) return;
+        const turnOn = () => {
+            if (!off.classList.contains('clickable') || startVideoButton.disabled) return;
+            startVideoButton.click();
+        };
+        off.onclick = turnOn;
+        off.onkeydown = (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            turnOn();
+        };
+    }
+
+    // My avatar, same priority as my camera-off tile: custom avatar, Gravatar for emails, initials
+    getMyAvatarUrl(size = 250) {
+        if (this.peer_avatar && this.isValidAvatarURL(this.peer_avatar)) return this.peer_avatar;
+        if (!cfg.useAvatarSvg) return image.avatar;
+        return this.isValidEmail(this.peer_name)
+            ? this.genGravatar(this.peer_name, size)
+            : this.genAvatarSvg(this.peer_name, size);
     }
 
     watchSettingsVideoPreview(video) {
@@ -15540,6 +15589,7 @@ class RoomClient {
                     this.peer_avatar = status;
                     this.peer_info.peer_avatar = status;
                     this.setVideoAvatarImgName(peer_id + '__img', peer_name, status);
+                    this.syncSettingsVideoPreview();
                     break;
                 default:
                     break;

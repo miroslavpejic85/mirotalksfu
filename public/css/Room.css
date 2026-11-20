@@ -4963,14 +4963,89 @@ img.vb-video-thumb {
     position: absolute;
     inset: 0;
     display: none;
-    place-items: center;
-    font-size: 1.6rem;
-    color: color-mix(in srgb, var(--fg-1) 64%, transparent);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    color: var(--fg-1);
+    text-align: center;
     background: #000;
 }
 
 #mySettings .settings-video-preview.is-off .settings-video-preview-off {
-    display: grid;
+    display: flex;
+}
+
+#mySettings .settings-video-preview-off.clickable {
+    cursor: pointer;
+}
+
+#mySettings .settings-video-preview-off.clickable:hover,
+#mySettings .settings-video-preview-off.clickable:focus-visible {
+    background: #0a0a0a;
+    outline: none;
+}
+
+#mySettings .settings-video-preview-off.clickable:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--room-border-strong);
+}
+
+/* My avatar while the camera is off, like the pre-join (the icon until the picture loads) */
+#mySettings .settings-video-preview-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: clamp(48px, 22%, 88px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    color: color-mix(in srgb, var(--fg-1) 64%, transparent);
+    background: rgba(255, 255, 255, 0.08);
+    transition: transform 0.15s ease;
+}
+
+#mySettings .settings-video-preview-off.clickable:hover .settings-video-preview-avatar {
+    transform: scale(1.04);
+}
+
+#mySettings .settings-video-preview-avatar i {
+    margin: 0;
+    padding: 0;
+    color: inherit !important;
+}
+
+#mySettings .settings-video-preview-avatar img {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+#mySettings .settings-video-preview-avatar.loaded img {
+    display: block;
+}
+
+#mySettings .settings-video-preview-avatar.loaded i {
+    display: none;
+}
+
+#mySettings .settings-video-preview-off-text {
+    font-size: var(--font-md);
+    font-weight: var(--fw-semibold);
+}
+
+#mySettings .settings-video-preview-off-hint {
+    display: none;
+    color: var(--fg-2);
+    font-size: var(--font-sm);
+}
+
+#mySettings .settings-video-preview-off.clickable .settings-video-preview-off-hint {
+    display: block;
 }
 
 /* One card per settings group (camera, screen sharing, microphone, speakers); the fields inside become flat rows */
