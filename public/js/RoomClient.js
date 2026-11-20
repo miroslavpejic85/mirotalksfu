@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.47
+ * @version 2.8.48
  *
  */
 
@@ -6843,17 +6843,6 @@ class RoomClient {
     changeBtnsBarPosition(position) {
         const positions = {
             vertical: {
-                // bottomButtons horizontally
-                '--bottom-btns-top': 'auto',
-                '--bottom-btns-left': '50%',
-                '--bottom-btns-bottom': '0',
-                '--bottom-btns-translate-X': '-50%',
-                '--bottom-btns-translate-Y': '0%',
-                '--bottom-btns-margin-bottom': '16px',
-                '--bottom-btns-flex-direction': 'row',
-            },
-            horizontal: {
-                // bottomButtons vertically
                 '--bottom-btns-top': '50%',
                 '--bottom-btns-left': '15px',
                 '--bottom-btns-bottom': 'auto',
@@ -6862,14 +6851,23 @@ class RoomClient {
                 '--bottom-btns-margin-bottom': '0',
                 '--bottom-btns-flex-direction': 'column',
             },
+            horizontal: {
+                '--bottom-btns-top': 'auto',
+                '--bottom-btns-left': '50%',
+                '--bottom-btns-bottom': '0',
+                '--bottom-btns-translate-X': '-50%',
+                '--bottom-btns-translate-Y': '0%',
+                '--bottom-btns-margin-bottom': '16px',
+                '--bottom-btns-flex-direction': 'row',
+            },
         };
         const props = positions[position];
         if (props) {
             const root = document.documentElement.style;
             Object.entries(props).forEach(([key, value]) => root.setProperty(key, value));
             bottomButtons.querySelectorAll('.split-btn .dropdown').forEach((dropdown) => {
-                dropdown.classList.toggle('dropup', position === 'vertical');
-                dropdown.classList.toggle('dropend', position === 'horizontal');
+                dropdown.classList.toggle('dropup', position === 'horizontal');
+                dropdown.classList.toggle('dropend', position === 'vertical');
             });
             bottomButtons.dataset.position = position;
             this.btnsBarPosition = position;
@@ -6880,7 +6878,7 @@ class RoomClient {
 
     // Center the horizontal buttons bar over the video area when a side panel is pinned
     updateButtonsBarPinnedOffset() {
-        if (this.isMobileDevice || this.btnsBarPosition !== 'vertical') return;
+        if (this.isMobileDevice || this.btnsBarPosition !== 'horizontal') return;
         const panelWidth = this.getPinnedSidePanelWidth();
         const left = panelWidth ? `${(100 - panelWidth) / 2}%` : '50%';
         document.documentElement.style.setProperty('--bottom-btns-left', left);

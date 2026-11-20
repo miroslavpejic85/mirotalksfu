@@ -1375,7 +1375,8 @@ img.vb-video-thumb {
     overflow: visible;
     gap: 0;
     border-radius: 12px;
-    background: var(--btns-bg-color);
+    /* Inner buttons paint the (semi-transparent) bg; painting it here too would stack it and look darker. */
+    background: transparent;
 }
 
 #bottomButtons .push-to-talk-status {
@@ -1555,7 +1556,7 @@ img.vb-video-thumb {
 }
 
 /* Popper anchors split menus to the chevron; align them with the main button. */
-#bottomButtons:not([data-position='horizontal']) .split-btn .dropdown-menu {
+#bottomButtons[data-position='horizontal'] .split-btn .dropdown-menu {
     translate: -48px 0;
 }
 
@@ -1627,11 +1628,11 @@ img.vb-video-thumb {
     text-overflow: ellipsis;
 }
 
-#bottomButtons[data-position='horizontal'] .dropdown-menu {
+#bottomButtons[data-position='vertical'] .dropdown-menu {
     max-height: calc(100vh - 24px);
 }
 
-#bottomButtons[data-position='horizontal'] .device-dropdown-toggle i {
+#bottomButtons[data-position='vertical'] .device-dropdown-toggle i {
     transform: rotate(90deg);
 }
 
@@ -2101,7 +2102,7 @@ img.vb-video-thumb {
         border-radius: 14px;
     }
     /* Wrap onto a second row instead of squeezing buttons or pushing Leave off-screen. */
-    #bottomButtons:not([data-position='horizontal']) {
+    #bottomButtons[data-position='horizontal'] {
         flex-wrap: wrap;
         width: max-content;
         row-gap: 6px;
