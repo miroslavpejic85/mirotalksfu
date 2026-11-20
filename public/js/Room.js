@@ -6377,7 +6377,7 @@ function handleButtonsBar() {
 let buttonsBarReserve = 0;
 
 function syncButtonsBarReserve() {
-    const isBottomBar = bottomButtons.dataset.position === 'horizontal';
+    const isBottomBar = bottomButtons.dataset.position !== 'vertical';
     const barHeight = isBottomBar && localStorageSettings.keep_buttons_visible ? bottomButtons.offsetHeight : 0;
     const reserve = barHeight ? Math.ceil(barHeight + parseFloat(getComputedStyle(bottomButtons).marginBottom) + 6) : 0;
     if (reserve === buttonsBarReserve) return;

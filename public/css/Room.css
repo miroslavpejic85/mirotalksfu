@@ -1364,7 +1364,24 @@ img.vb-video-thumb {
     justify-content: center;
     gap: 6px;
     border: none !important;
+    border-radius: 18px;
     background: transparent;
+}
+
+/* Subtle panel behind the buttons. Drawn on a pseudo-element: backdrop-filter on #bottomButtons itself
+   would become the backdrop root of its dropdown menus and break their own blur. */
+#bottomButtons::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: inherit;
+    background: color-mix(in srgb, var(--btns-bg-color) 35%, transparent);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    pointer-events: none;
 }
 
 /* Split button (main action + device arrow) */
@@ -1556,7 +1573,7 @@ img.vb-video-thumb {
 }
 
 /* Popper anchors split menus to the chevron; align them with the main button. */
-#bottomButtons[data-position='horizontal'] .split-btn .dropdown-menu {
+#bottomButtons:not([data-position='vertical']) .split-btn .dropdown-menu {
     translate: -48px 0;
 }
 
@@ -2064,7 +2081,7 @@ img.vb-video-thumb {
     background: var(--color-danger-strong) !important;
 }
 
-#bottomButtons:not([data-position='horizontal']) #exitButton {
+#bottomButtons:not([data-position='vertical']) #exitButton {
     width: 64px;
 }
 
@@ -2102,7 +2119,7 @@ img.vb-video-thumb {
         border-radius: 14px;
     }
     /* Wrap onto a second row instead of squeezing buttons or pushing Leave off-screen. */
-    #bottomButtons[data-position='horizontal'] {
+    #bottomButtons:not([data-position='vertical']) {
         flex-wrap: wrap;
         width: max-content;
         row-gap: 6px;
@@ -2119,7 +2136,7 @@ img.vb-video-thumb {
         font-size: 1rem;
         border-radius: 10px;
     }
-    #bottomButtons:not([data-position='horizontal']) #exitButton {
+    #bottomButtons:not([data-position='vertical']) #exitButton {
         width: 52px;
     }
     #bottomButtons .split-btn > button:not(.device-dropdown-toggle) {
