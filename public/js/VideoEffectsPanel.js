@@ -1178,10 +1178,11 @@ class VideoEffectsPanel {
         });
         size.row.classList.add('hidden');
 
+        // Moves the picture accessory that is on, so it is shown only then (like the size slider)
         let placementButtons = null;
         let placementRow = null;
         if (category === 'face') {
-            placementRow = VideoEffectsPanel.element('div', 'vfx-placement', { role: 'group' });
+            placementRow = VideoEffectsPanel.element('div', 'vfx-placement hidden', { role: 'group' });
             placementRow.setAttribute('aria-label', t('Place it on'));
             const labels = { head: t('Head'), eyes: t('Eyes'), nose: t('Nose'), mouth: t('Mouth') };
             placementButtons = new Map();
@@ -1194,7 +1195,13 @@ class VideoEffectsPanel {
             });
         }
 
-        view.customAvatarControls.set(category, { form: { input, add, upload }, error, size, placementButtons });
+        view.customAvatarControls.set(category, {
+            form: { input, add, upload },
+            error,
+            size,
+            placementRow,
+            placementButtons,
+        });
         const hint = {
             face: t(
                 'Tip: add your own picture (PNG with a transparent background works best), then choose where it goes.'
@@ -1204,7 +1211,7 @@ class VideoEffectsPanel {
             ),
             avatar3d: t('Tip: add your own 3D avatar (.glb), for example one from Ready Player Me.'),
         }[category];
-        panel.append(...[placementRow, row, fileInput, error, size.row, this.createHint(hint)].filter(Boolean));
+        panel.append(...[row, fileInput, error, placementRow, size.row, this.createHint(hint)].filter(Boolean));
     }
 
     buildFiltersTab(view, panel) {
@@ -1428,11 +1435,13 @@ class VideoEffectsPanel {
     }
 
     renderCustomAvatarControls(view, state) {
-        view.customAvatarControls.forEach(({ form, error, size, placementButtons }, category) => {
+        view.customAvatarControls.forEach(({ form, error, size, placementRow, placementButtons }, category) => {
             const { input, add, upload } = form;
             if (placementButtons) {
                 const accessory = this.customAvatars.get(state.effect);
-                const current = accessory?.category === category ? accessory.placement : this.placement;
+                const isOn = accessory?.category === category;
+                placementRow.classList.toggle('hidden', !isOn);
+                const current = isOn ? accessory.placement : this.placement;
                 placementButtons.forEach((button, key) => {
                     button.classList.toggle('active', key === current);
                     button.setAttribute('aria-pressed', String(key === current));

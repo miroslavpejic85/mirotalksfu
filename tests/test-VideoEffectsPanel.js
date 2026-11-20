@@ -729,6 +729,10 @@ describe('Visual effects panel', () => {
             assert.ok(effectsTab().querySelector('.vfx-url-row'), 'the Effects tab has the link field');
             assert.equal(effectCards().length, 2);
             assert.equal(effectsTab().querySelectorAll('.vfx-placement button').length, 4);
+            assert.ok(
+                effectsTab().querySelector('.vfx-placement').classList.contains('hidden'),
+                'placement is hidden until a picture accessory is on'
+            );
 
             await panel.setPlacement('nose');
             assert.equal(await panel.addCustomAvatarFromUrl('face', PICTURE), true);
@@ -742,6 +746,7 @@ describe('Visual effects panel', () => {
             assert.equal(engine.state.effect, id);
             assert.equal(effectCards().length, 3);
             assert.ok(effectsTab().querySelector('.vfx-card-remove'));
+            assert.ok(!effectsTab().querySelector('.vfx-placement').classList.contains('hidden'));
             assert.equal(effectsTab().querySelector('.vfx-placement .active').textContent, 'Nose');
 
             await panel.setPlacement('head');
