@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.63
+ * @version 2.8.64
  *
  */
 
@@ -12474,7 +12474,7 @@ class RoomClient {
 
     getVideoType(url) {
         if (url.endsWith('.mp4')) return 'video/mp4';
-        if (url.endsWith('.mp3')) return 'video/mp3';
+        if (url.endsWith('.mp3')) return 'audio/mpeg';
         if (url.endsWith('.webm')) return 'video/webm';
         if (url.endsWith('.ogg')) return 'video/ogg';
         return 'na';
@@ -12518,9 +12518,15 @@ class RoomClient {
     openVideo(data) {
         let d, vb, e, video, pn, fsBtn;
         let peer_name = data.peer_name;
-        let video_url = data.video_url + (this.isMobileSafari ? '&enablejsapi=1&mute=1' : ''); // Safari need user interaction
         let is_youtube = data.is_youtube;
+        // Safari mobile requires YouTube player API + muted autoplay, but this must not be
+        // appended to direct media files (.mp4/.mp3/.webm/.ogg) or they can fail to load.
+        let video_url =
+            this.isMobileSafari && is_youtube
+                ? data.video_url + (data.video_url.includes('?') ? '&' : '?') + 'enablejsapi=1&mute=1'
+                : data.video_url;
         let video_type = this.getVideoType(video_url);
+        const is_audio_share = video_type === 'audio/mpeg';
         this.closeVideo();
         show(videoCloseBtn);
         d = document.createElement('div');
@@ -12568,24 +12574,66 @@ class RoomClient {
                 });
             }
         } else {
-            video = document.createElement('video');
-            video.type = video_type;
-            video.autoplay = true;
-            video.controls = true;
-            if (video_type == 'video/mp3') {
-                video.poster = image.audio;
+            if (is_audio_share) {
+                const audioPoster = document.createElement('img');
+                audioPoster.setAttribute('src', image.audio);
+                audioPoster.setAttribute('alt', 'Shared audio');
+                audioPoster.setAttribute('width', '100%');
+                audioPoster.setAttribute('height', '100%');
+                d.appendChild(audioPoster);
+
+                video = document.createElement('audio');
+                video.type = video_type;
+                video.controls = true;
+                video.autoplay = true;
+                video.preload = 'metadata';
+            } else {
+                video = document.createElement('video');
+                video.type = video_type;
+                video.autoplay = true;
+                video.controls = true;
+                video.playsInline = true;
+                video.setAttribute('playsinline', 'true');
+                video.setAttribute('webkit-playsinline', 'true');
             }
         }
         video.setAttribute('id', '__videoShare');
         video.setAttribute('src', video_url);
-        video.setAttribute('width', '100%');
-        video.setAttribute('height', '100%');
+        if (!is_audio_share) {
+            video.setAttribute('width', '100%');
+            video.setAttribute('height', '100%');
+        }
         vb.appendChild(e);
-        BUTTONS.videoShare.fullScreenButton && vb.appendChild(fsBtn);
+        BUTTONS.videoShare.fullScreenButton && !is_audio_share && vb.appendChild(fsBtn);
         if (BUTTONS.videoShare.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
         d.appendChild(video);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
+
+        if (!is_youtube) {
+            const tryPlay = video.play?.();
+            if (tryPlay && typeof tryPlay.catch === 'function') {
+                tryPlay.catch((err) => {
+                    console.warn('[openVideo] Media autoplay blocked, waiting for user interaction', err);
+                    Swal.fire({
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        background: swalBackground,
+                        position: 'center',
+                        imageUrl: image.videoShare,
+                        title: 'Play shared media',
+                        text: 'Autoplay is blocked on this device/browser. Tap Play to start the shared audio/video.',
+                        confirmButtonText: 'Play',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            video.play().catch((playErr) => {
+                                console.warn('[openVideo] User-triggered media play failed', playErr);
+                            });
+                        }
+                    });
+                });
+            }
+        }
 
         fsBtn.addEventListener('click', () => {
             // Try to use the Fullscreen API
@@ -12607,7 +12655,6 @@ class RoomClient {
                 video.style.height = '100vh';
                 video.style.zIndex = 9999;
 
-                // Add a close/maximize button for fallback
                 let isMaximized = true;
                 const closeBtn = document.createElement('button');
                 closeBtn.innerText = isMaximized ? 'Minimize' : 'Maximize';
