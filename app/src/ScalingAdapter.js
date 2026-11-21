@@ -41,10 +41,14 @@ function getPlacementRoomId(roomId) {
 
 // Room info published in the node snapshot (cluster-wide /activeRooms, /stats)
 function describeRoom(room) {
-    return {
+    const info = {
         peers: room?.getPeersCount?.() ?? 0,
         broadcasting: Boolean(room?.isBroadcasting?.()),
     };
+    // Breakout room display name given by the presenter
+    const name = room?.getDisplayName?.();
+    if (name) info.name = name;
+    return info;
 }
 
 // Host protection: a host login (authorized IP) on any node unlocks the rooms on every node

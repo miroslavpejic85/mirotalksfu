@@ -43,6 +43,7 @@ describe('Room creation authorization (Socket.IO createRoom)', () => {
             scaling: createScaling(),
             config: { mediasoup: { router: { mediaCodecs: [] } } },
             io: {},
+            applyBreakoutRoomName() {},
             Room: class {
                 constructor(id) {
                     this.id = id;

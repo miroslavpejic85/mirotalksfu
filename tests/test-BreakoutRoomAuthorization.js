@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const sinon = require('sinon');
+const Room = require('../app/src/Room');
 
 const serverSource = fs.readFileSync(path.join(__dirname, '..', 'app', 'src', 'Server.js'), 'utf8');
 const handlersSource = serverSource.slice(
@@ -21,14 +22,18 @@ const presenterSource = serverSource.slice(
 describe('Socket.IO breakout room authorization', () => {
     function makeRoom(id, peerList = []) {
         const peers = new Map(peerList.map((p) => [p.id, p]));
-        return {
+        const room = Object.create(Room.prototype);
+        Object.assign(room, {
             id,
+            _displayName: null,
+            _breakoutRoomNames: new Map(),
             getPeers: () => peers,
             getPeersCount: () => peers.size,
             getPeer: (peerId) => peers.get(peerId),
             sendToAll: sinon.spy(),
             sendTo: sinon.spy(),
-        };
+        });
+        return room;
     }
 
     function setup(socketRoomId, socketId = 'attacker-socket') {
@@ -64,7 +69,7 @@ describe('Socket.IO breakout room authorization', () => {
             getPeer: (s) => roomList.get(s.room_id)?.getPeer(s.id) || null,
         });
         vm.runInContext(`${presenterSource}\n${handlersSource}`, context);
-        return { handlers, rooms };
+        return { handlers, rooms, roomList, context };
     }
 
     const attacker = { peer_name: 'Attacker', peer_uuid: 'attacker-uuid' };
@@ -160,5 +165,58 @@ describe('Socket.IO breakout room authorization', () => {
         assert.equal(room.sendTo.callCount, 1);
         assert.equal(room.sendTo.firstCall.args[0], 'p2');
         assert.equal(room.sendTo.firstCall.args[2].mainRoom, 'attackerOwnRoom');
+    });
+
+    const victimHost = { peer_name: 'VictimHost', peer_uuid: 'victim-uuid' };
+
+    it('keeps the custom breakout room name given at launch', async () => {
+        const { handlers, rooms } = setup('victimSecret', 'victim-presenter');
+        await handlers.breakoutRoom({
+            ...victimHost,
+            assignments: [
+                { peerId: 'victim-participant', breakoutRoom: 'victimSecret_breakout_1', roomName: 'Living Room' },
+                { peerId: 'p2', breakoutRoom: 'victimSecret_breakout_2', roomName: 'Kitchen' },
+            ],
+        });
+        assert.equal(rooms.victimSecret.getBreakoutRoomName('victimSecret_breakout_2'), 'Kitchen');
+        assert.equal(rooms.victimSecret_breakout_1.getDisplayName(), 'Living Room');
+
+        const result = await new Promise((resolve) => handlers.getBreakoutRoomsInfo({}, resolve));
+        assert.equal(result[0].name, 'Living Room');
+    });
+
+    it('applies the stored name when the breakout room is created later', async () => {
+        const { handlers, roomList, context } = setup('victimSecret', 'victim-presenter');
+        await handlers.breakoutRoom({
+            ...victimHost,
+            assignments: [{ peerId: 'p2', breakoutRoom: 'victimSecret_breakout_2', roomName: 'Kitchen' }],
+        });
+        const created = makeRoom('victimSecret_breakout_2');
+        roomList.set(created.id, created);
+        context.applyBreakoutRoomName(created);
+        assert.equal(created.getDisplayName(), 'Kitchen');
+    });
+
+    it('lets only the presenter rename its own breakout rooms', async () => {
+        const { handlers, rooms } = setup('victimSecret', 'victim-presenter');
+        await handlers.breakoutRoomName({ ...victimHost, breakoutRoom: 'victimSecret_breakout_1', roomName: 'Lab' });
+        assert.equal(rooms.victimSecret_breakout_1.getDisplayName(), 'Lab');
+
+        const participant = setup('victimSecret', 'victim-participant');
+        await participant.handlers.breakoutRoomName({
+            peer_name: 'VictimUser',
+            breakoutRoom: 'victimSecret_breakout_1',
+            roomName: 'Hijacked',
+        });
+        assert.equal(participant.rooms.victimSecret_breakout_1.getDisplayName(), null);
+
+        const attackerSetup = setup('attackerOwnRoom');
+        await attackerSetup.handlers.breakoutRoomName({
+            ...attacker,
+            breakoutRoom: 'victimSecret_breakout_1',
+            roomName: 'Hijacked',
+        });
+        assert.equal(attackerSetup.rooms.victimSecret_breakout_1.getDisplayName(), null);
+        assert.equal(attackerSetup.rooms.victimSecret.getBreakoutRoomName('victimSecret_breakout_1'), null);
     });
 });

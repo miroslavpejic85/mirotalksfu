@@ -34,6 +34,47 @@ describe('test-Room', () => {
         });
     });
 
+    describe('breakout room display names', () => {
+        const makeRoom = () => {
+            const room = Object.create(Room.prototype);
+            room._displayName = null;
+            room._breakoutRoomNames = new Map();
+            return room;
+        };
+
+        it('normalizes names: trims, strips control characters and caps the length', () => {
+            Room.normalizeDisplayName('  Living Room  ').should.equal('Living Room');
+            Room.normalizeDisplayName('Living\nRoom\u0000').should.equal('Living Room');
+            Room.normalizeDisplayName('x'.repeat(50)).should.equal('x'.repeat(30));
+            (Room.normalizeDisplayName('   ') === null).should.be.true();
+            (Room.normalizeDisplayName(42) === null).should.be.true();
+        });
+
+        it('stores, renames and clears breakout room names on the main room', () => {
+            const room = makeRoom();
+            room.setBreakoutRoomName('main_breakout_1', 'Living Room').should.equal('Living Room');
+            room.getBreakoutRoomName('main_breakout_1').should.equal('Living Room');
+            room.setBreakoutRoomName('main_breakout_1', 'Kitchen');
+            room.getBreakoutRoomName('main_breakout_1').should.equal('Kitchen');
+            room.setBreakoutRoomName('main_breakout_1', '');
+            (room.getBreakoutRoomName('main_breakout_1') === null).should.be.true();
+        });
+
+        it('caps the number of stored breakout room names', () => {
+            const room = makeRoom();
+            for (let i = 0; i < 150; i++) room.setBreakoutRoomName(`main_breakout_${i}`, `Room ${i}`);
+            room._breakoutRoomNames.size.should.equal(100);
+            room.setBreakoutRoomName('main_breakout_0', 'Renamed').should.equal('Renamed');
+        });
+
+        it('keeps its own display name', () => {
+            const room = makeRoom();
+            (room.getDisplayName() === null).should.be.true();
+            room.setDisplayName(' Living Room ');
+            room.getDisplayName().should.equal('Living Room');
+        });
+    });
+
     describe('room time limit', () => {
         const makeRoom = () => {
             const room = Object.create(Room.prototype);

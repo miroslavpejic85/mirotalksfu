@@ -12,6 +12,10 @@ const { audioLevelObserverEnabled, activeSpeakerObserverEnabled } = config.media
 // Time given to clients to show the "time limit reached" notice and leave before being disconnected
 const TIME_LIMIT_GRACE_MS = 15000;
 
+// Breakout room display names (client input is capped at 30 characters)
+const BREAKOUT_ROOM_NAME_MAX_LENGTH = 30;
+const BREAKOUT_ROOM_NAMES_MAX = 100;
+
 module.exports = class Room {
     constructor(room_id, worker, io, options = {}) {
         this.id = room_id;
@@ -124,6 +128,51 @@ module.exports = class Room {
 
         // Room-wide time limit (duration=HH:MM:SS), shared by all peers
         this._timeLimit = null;
+
+        // Breakout room display name given by the presenter (null = show the room id)
+        this._displayName = null;
+        // Main room only: breakout room id -> display name (kept even before the breakout room exists)
+        this._breakoutRoomNames = new Map();
+    }
+
+    // ####################################################
+    // DISPLAY NAME (BREAKOUT ROOMS)
+    // ####################################################
+
+    static normalizeDisplayName(name) {
+        if (typeof name !== 'string') return null;
+        const normalized = name
+            .replace(/[\u0000-\u001F\u007F]+/g, ' ')
+            .trim()
+            .slice(0, BREAKOUT_ROOM_NAME_MAX_LENGTH)
+            .trim();
+        return normalized || null;
+    }
+
+    setDisplayName(name) {
+        this._displayName = Room.normalizeDisplayName(name);
+    }
+
+    getDisplayName() {
+        return this._displayName;
+    }
+
+    setBreakoutRoomName(roomId, name) {
+        if (typeof roomId !== 'string' || !roomId) return null;
+        const normalized = Room.normalizeDisplayName(name);
+        if (!normalized) {
+            this._breakoutRoomNames.delete(roomId);
+            return null;
+        }
+        if (!this._breakoutRoomNames.has(roomId) && this._breakoutRoomNames.size >= BREAKOUT_ROOM_NAMES_MAX) {
+            return null;
+        }
+        this._breakoutRoomNames.set(roomId, normalized);
+        return normalized;
+    }
+
+    getBreakoutRoomName(roomId) {
+        return this._breakoutRoomNames.get(roomId) || null;
     }
 
     // ####################################################

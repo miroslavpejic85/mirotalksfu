@@ -97,6 +97,25 @@ describe('test-ServerAPI', () => {
         });
     });
 
+    describe('getActiveRooms', () => {
+        it('returns the breakout room display name when one is set', () => {
+            const roomList = new Map([
+                ['main', { peers: new Map([['p1', {}]]), getDisplayName: () => null }],
+                ['main_breakout_1', { peers: new Map([['p2', {}]]), getDisplayName: () => 'Living Room' }],
+            ]);
+
+            serverApi.getActiveRooms(roomList).should.deepEqual([
+                { id: 'main', peers: 1, join: `https://${host}/main` },
+                {
+                    id: 'main_breakout_1',
+                    name: 'Living Room',
+                    peers: 1,
+                    join: `https://${host}/main_breakout_1`,
+                },
+            ]);
+        });
+    });
+
     describe('getMeetings', () => {
         it('should return formatted meetings with peer information', () => {
             const roomList = new Map([

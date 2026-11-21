@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.56
+ * @version 2.8.57
  *
  */
 
@@ -11759,7 +11759,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.56',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.57',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
@@ -11984,7 +11984,7 @@ async function refreshBreakoutPanel() {
             breakoutRooms.push({
                 id: info.room,
                 duration: 'unlimited',
-                name: info.room.split('_breakout_').pop() || 'Room',
+                name: info.name || info.room.split('_breakout_').pop() || 'Room',
             });
         }
     }
@@ -12324,6 +12324,14 @@ function renameBreakoutRoom(index) {
     function saveName() {
         const newName = input.value.trim() || `Room ${index + 1}`;
         room.name = newName;
+        if (newName !== currentName) {
+            rc.socket.emit('breakoutRoomName', {
+                peer_name: peer_name,
+                peer_uuid: peer_uuid,
+                breakoutRoom: room.id,
+                roomName: newName,
+            });
+        }
         refreshBreakoutPanel();
     }
 

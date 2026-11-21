@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.56
+ * @version 2.8.57
  *
  */
 
@@ -2543,6 +2543,7 @@ function startServer() {
         for (const remoteRoom of await scaling.getRemoteRooms()) {
             activeRooms.push({
                 id: remoteRoom.id,
+                ...(remoteRoom.name ? { name: remoteRoom.name } : {}),
                 peers: remoteRoom.peers,
                 join: 'https://' + host + '/' + remoteRoom.id,
             });
@@ -2991,6 +2992,7 @@ function startServer() {
                     return callback({ error: 'already exists' });
                 }
                 roomList.set(socket.room_id, room);
+                applyBreakoutRoomName(room);
                 log.debug('Created room', { room_id: socket.room_id });
                 callback({ room_id: socket.room_id });
             } catch (error) {
@@ -4239,11 +4241,27 @@ function startServer() {
             return presenters[socket.room_id]?.[socket.id]?.is_presenter === true;
         }
 
+        // Display name of a breakout room: kept by its main room (it may not exist yet) and
+        // copied onto the breakout room itself, so it survives the main room being emptied.
+        function setBreakoutRoomName(mainRoom, breakoutRoomId, name) {
+            const normalized = mainRoom.setBreakoutRoomName(breakoutRoomId, name);
+            const breakoutRoom = roomList.get(breakoutRoomId);
+            if (breakoutRoom) breakoutRoom.setDisplayName(normalized);
+        }
+
+        function applyBreakoutRoomName(room) {
+            const idx = room.id.indexOf('_breakout_');
+            if (idx <= 0) return;
+            const name = roomList.get(room.id.slice(0, idx))?.getBreakoutRoomName(room.id);
+            if (name) room.setDisplayName(name);
+        }
+
         socket.on('getBreakoutRoomsInfo', async (_data, callback) => {
             if (typeof callback !== 'function') return;
             if (!roomExists(socket) || !isMainRoomSocket(socket) || !isSocketPresenter(socket)) return callback([]);
 
             const mainRoom = socket.room_id;
+            const mainRoomObj = getRoom(socket);
             const breakoutRooms = [];
             for (const [roomId, room] of getOwnBreakoutRooms(mainRoom)) {
                 const peerNames = [];
@@ -4252,11 +4270,27 @@ function startServer() {
                 });
                 breakoutRooms.push({
                     room: roomId,
+                    name: mainRoomObj?.getBreakoutRoomName(roomId) || room.getDisplayName() || null,
                     peers: room.getPeersCount(),
                     peerNames: peerNames,
                 });
             }
             callback(breakoutRooms);
+        });
+
+        socket.on('breakoutRoomName', async (dataObject) => {
+            if (!roomExists(socket) || !isMainRoomSocket(socket)) return;
+
+            const data = checkXSS(dataObject);
+            if (!data || typeof data !== 'object') return;
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+            if (!isPresenter) return;
+
+            const room = getRoom(socket);
+            if (!room || !isOwnBreakoutRoom(socket.room_id, data.breakoutRoom)) return;
+
+            setBreakoutRoomName(room, data.breakoutRoom, data.roomName);
         });
 
         socket.on('breakoutRoomBroadcast', async (dataObject) => {
@@ -4383,6 +4417,7 @@ function startServer() {
                     if (!assignment || typeof assignment !== 'object') continue;
                     const { peerId, breakoutRoom, duration, roomName } = assignment;
                     if (!isOwnBreakoutRoom(mainRoom, breakoutRoom)) continue;
+                    if (roomName) setBreakoutRoomName(room, breakoutRoom, roomName);
                     room.sendTo(peerId, 'breakoutRoom', {
                         action: 'assign',
                         breakoutRoom: breakoutRoom,

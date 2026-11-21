@@ -41,11 +41,15 @@ module.exports = class ServerApi {
     }
 
     getActiveRooms(roomList) {
-        return Array.from(roomList.entries()).map(([roomId, room]) => ({
-            id: roomId,
-            peers: room.peers.size,
-            join: 'https://' + this._host + '/' + roomId,
-        }));
+        return Array.from(roomList.entries()).map(([roomId, room]) => {
+            const name = room.getDisplayName?.();
+            return {
+                id: roomId,
+                ...(name ? { name } : {}),
+                peers: room.peers.size,
+                join: 'https://' + this._host + '/' + roomId,
+            };
+        });
     }
 
     getMeetings(roomList) {

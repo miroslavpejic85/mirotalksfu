@@ -102,6 +102,11 @@ describe('test-Scaling', function () {
                 peers: 4,
                 broadcasting: true,
             });
+            describeRoom({
+                getPeersCount: () => 1,
+                isBroadcasting: () => false,
+                getDisplayName: () => 'Living Room',
+            }).should.deepEqual({ peers: 1, broadcasting: false, name: 'Living Room' });
         });
     });
 
