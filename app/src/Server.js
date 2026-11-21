@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.55
+ * @version 2.8.56
  *
  */
 
@@ -6454,7 +6454,13 @@ function startServer() {
          * @returns {object} { key, ownerKey, name }
          */
         function getQuizViewer(peer_id, peer) {
-            return { key: 'n:' + String(peer?.peer_name), ownerKey: 's:' + peer_id, name: peer?.peer_name };
+            return {
+                key: 'n:' + String(peer?.peer_name),
+                ownerKey: 's:' + peer_id,
+                name: peer?.peer_name,
+                // Sanitized by Peer (http(s) only), already shared with the room
+                avatar: peer?.peer_info?.peer_avatar || '',
+            };
         }
 
         /**

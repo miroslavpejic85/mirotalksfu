@@ -38,6 +38,7 @@ const LIMITS = Object.freeze({
 });
 
 const MODES = Object.freeze(['step', 'all']);
+const MAX_AVATAR_URL_LENGTH = 2048;
 const MAX_NAME_LENGTH = 60;
 
 // Control characters plus zero-width / bidi override characters that could spoof the rendered text
@@ -73,6 +74,21 @@ const roomIds = new Map();
 
 function getStore(roomId) {
     return roomId !== null && typeof roomId === 'object' ? roomObjects : roomIds;
+}
+
+/**
+ * Participant avatar URL, shared with the names (only http(s), like the peer avatar of the room)
+ * @param {*} value
+ * @returns {string} normalized URL, '' when none or unsafe
+ */
+function cleanAvatar(value) {
+    if (typeof value !== 'string' || !value || value.length > MAX_AVATAR_URL_LENGTH) return '';
+    try {
+        const url = new URL(value);
+        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+    } catch {
+        return '';
+    }
 }
 
 function getRoom(roomId, create = false) {
@@ -177,7 +193,7 @@ function create(roomId, data, creator) {
         creatorName: cleanName(creator.name),
         createdAt: Date.now(),
         questions,
-        participants: new Map(), // voterKey -> name (everyone who answered at least once)
+        participants: new Map(), // voterKey -> { name, avatar } (everyone who answered at least once)
     };
     room.set(quiz.id, quiz);
     return { quiz };
@@ -271,8 +287,9 @@ function answer(roomId, quizId, voter, questionIndex, option) {
         question.answers.delete(voter.key);
     } else {
         const name = cleanName(voter.name);
-        question.answers.set(voter.key, { option, name });
-        quiz.participants.set(voter.key, name);
+        const avatar = cleanAvatar(voter.avatar);
+        question.answers.set(voter.key, { option, name, avatar });
+        quiz.participants.set(voter.key, { name, avatar });
     }
     return { quiz };
 }
@@ -302,13 +319,14 @@ function isCreator(quiz, key) {
 /**
  * Scores on the revealed questions
  * @param {object} quiz internal quiz
- * @returns {object[]} [{ key, name, score }] best first, then by name
+ * @returns {object[]} [{ key, name, avatar, score }] best first, then by name
  */
 function getScores(quiz) {
     const revealed = quiz.questions.filter((question) => question.state === 'revealed');
-    const scores = [...quiz.participants].map(([key, name]) => ({
+    const scores = [...quiz.participants].map(([key, { name, avatar }]) => ({
         key,
         name,
+        avatar,
         score: revealed.filter((question) => question.answers.get(key)?.option === question.correct).length,
     }));
     return scores.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
@@ -329,15 +347,17 @@ function summarize(quiz) {
         averageScore: scores.length > 0 ? Math.round((total / scores.length) * 10) / 10 : 0,
         askedCount: quiz.questions.filter((question) => question.state !== 'pending').length,
         revealedCount: quiz.questions.filter((question) => question.state === 'revealed').length,
-        // Per question: votes and voter names by option
+        // Per question: votes, voter names and their avatars by option
         tallies: quiz.questions.map((question) => {
             const votes = question.options.map(() => 0);
             const voters = question.options.map(() => []);
-            for (const { option, name } of question.answers.values()) {
+            const avatars = question.options.map(() => []);
+            for (const { option, name, avatar } of question.answers.values()) {
                 votes[option]++;
                 voters[option].push(name);
+                avatars[option].push(avatar || '');
             }
-            return { votes, voters };
+            return { votes, voters, avatars };
         }),
     };
 }
@@ -360,7 +380,11 @@ function questionToPublic(question, index, tally, viewerKey, manager, seesNames,
     const options = question.options.map((text, option) => {
         const view = { text };
         if (showResults) view.votes = tally.votes[option];
-        if (showNames) view.voters = [...tally.voters[option]];
+        if (showNames) {
+            view.voters = [...tally.voters[option]];
+            // Same order as voters ('' when the participant has no avatar)
+            view.voter_avatars = [...tally.avatars[option]];
+        }
         return view;
     });
     const myAnswer = viewerKey ? question.answers.get(viewerKey) : undefined;
@@ -424,13 +448,14 @@ function toPublic(quiz, viewer, isPresenter = false, summary = summarize(quiz)) 
     // Live ranking for the managers allowed to see the names, final ranking for everyone unless anonymous
     if (manager && seesNames) {
         // Per participant answers (option index or -1, by question index) for the results export
-        view.leaderboard = summary.scores.map(({ key, name, score }) => ({
+        view.leaderboard = summary.scores.map(({ key, name, avatar, score }) => ({
             name,
+            avatar,
             score,
             answers: quiz.questions.map((question) => question.answers.get(key)?.option ?? -1),
         }));
     } else if (finished && !quiz.anonymous) {
-        view.leaderboard = summary.scores.map(({ name, score }) => ({ name, score }));
+        view.leaderboard = summary.scores.map(({ name, avatar, score }) => ({ name, avatar, score }));
     }
     return view;
 }
