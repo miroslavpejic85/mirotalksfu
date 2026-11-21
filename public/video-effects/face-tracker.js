@@ -8,6 +8,11 @@
  * rendered frame interpolates towards the latest landmarks, after One Euro filtering removes
  * jitter. When the face is briefly lost the last pose is kept for a grace period, then faded out.
  *
+ * Faces far from the camera: the landmarker's own detector only sees faces close to it. When it finds
+ * nothing, the full-range Face Detector looks for a face (a few times per second), and the landmarker then
+ * runs on a square crop around it, where the face is big enough; the crop follows the face until it is
+ * close enough for the whole frame again. The landmarks are mapped back to the whole frame.
+ *
  * Coordinates are camera pixels: x right, y down, z away from the camera (MediaPipe convention,
  * z uses the same scale as x).
  */
@@ -21,7 +26,54 @@
         wasmBaseUrl: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`,
         modelUrl:
             'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+        // BlazeFace full range (~1 MB, loaded on first use): finds faces several meters from the camera
+        faceDetectorModelUrl:
+            'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/1/blaze_face_full_range.tflite',
     });
+
+    // Square crop around a far face: its side in face sizes (the face fills about 40% of it)
+    const FACE_ROI_SCALE = 2.6;
+    // The crop moves only when the face leaves this share of it or changes size outside this range
+    const FACE_ROI_MAX_OFFSET = 0.15;
+    const FACE_ROI_SIZE_RANGE = [0.25, 0.5];
+    // Longest side of the crop sent to the landmarker, in pixels
+    const FACE_ROI_MAX_SIZE = 512;
+
+    // Square region ({ x, y, width, height } normalized to the frame) of `side` pixels centered on (cx, cy)
+    function squareRegion(cx, cy, side, width, height) {
+        const size = Math.min(side, width, height);
+        const x = clamp(cx - size / 2, 0, width - size);
+        const y = clamp(cy - size / 2, 0, height - size);
+        return { x: x / width, y: y / height, width: size / width, height: size / height };
+    }
+
+    // Landmarks normalized to a crop -> normalized to the whole frame (z is in units of the frame width)
+    function mapFromRegion(landmarks, region) {
+        for (let i = 0; i < landmarks.length; i += 3) {
+            landmarks[i] = region.x + landmarks[i] * region.width;
+            landmarks[i + 1] = region.y + landmarks[i + 1] * region.height;
+            landmarks[i + 2] *= region.width;
+        }
+        return landmarks;
+    }
+
+    // Center and size, in frame pixels, of a face from normalized landmarks: forehead-chin in 3D (unchanged by
+    // head turns) or twice the eye distance when larger, centered between forehead and chin
+    function landmarkBounds(landmarks, width, height) {
+        const at = (index) => [
+            landmarks[index * 3] * width,
+            landmarks[index * 3 + 1] * height,
+            landmarks[index * 3 + 2] * width,
+        ];
+        const forehead = at(LANDMARKS.forehead);
+        const chin = at(LANDMARKS.chin);
+        const eyes = vec3.length(vec3.sub(at(LANDMARKS.leftEyeOuter), at(LANDMARKS.rightEyeOuter)));
+        return {
+            cx: (forehead[0] + chin[0]) / 2,
+            cy: (forehead[1] + chin[1]) / 2,
+            size: Math.max(vec3.length(vec3.sub(chin, forehead)), eyes * 2),
+        };
+    }
 
     // MediaPipe face mesh indices ("right"/"left" are the subject's sides)
     const LANDMARKS = Object.freeze({
@@ -286,6 +338,40 @@
         return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
     }
 
+    // A crop of the frame (region normalized to it), at most FACE_ROI_MAX_SIZE pixels wide
+    function captureRegion(video, region) {
+        const sx = region.x * video.videoWidth;
+        const sy = region.y * video.videoHeight;
+        const sw = region.width * video.videoWidth;
+        const sh = region.height * video.videoHeight;
+        const scale = Math.min(1, FACE_ROI_MAX_SIZE / Math.max(sw, sh));
+        if (scale >= 1) return createImageBitmap(video, sx, sy, sw, sh);
+        const options = { resizeWidth: Math.round(sw * scale), resizeHeight: Math.round(sh * scale) };
+        return createImageBitmap(video, sx, sy, sw, sh, { ...options, resizeQuality: 'medium' }).catch(() =>
+            // Resize options unsupported: the landmarks are normalized to the crop, its full size works too
+            createImageBitmap(video, sx, sy, sw, sh)
+        );
+    }
+
+    // Normalized box of the most confident face in a Face Detector result, or null
+    function bestFaceBox(result, width, height) {
+        let best = null;
+        for (const detection of result?.detections || []) {
+            const box = detection.boundingBox;
+            const score = detection.categories?.[0]?.score ?? 0;
+            if (!box || !(box.width > 0) || !(box.height > 0) || (best && best.score >= score)) continue;
+            best = { score, box };
+        }
+        if (!best) return null;
+        const { box } = best;
+        return {
+            x: box.originX / width,
+            y: box.originY / height,
+            width: box.width / width,
+            height: box.height / height,
+        };
+    }
+
     async function captureBitmap(video, maxWidth) {
         const width = video.videoWidth;
         const height = video.videoHeight;
@@ -365,7 +451,9 @@
             if (!request) return;
             this.pending.delete(message.id);
             clearTimeout(request.timer);
-            if (message.type === 'result') {
+            if (message.type === 'face-box') {
+                request.resolve(message.box || null);
+            } else if (message.type === 'result') {
                 request.resolve(
                     message.landmarks
                         ? { landmarks: message.landmarks, blendshapes: message.blendshapes || null }
@@ -386,30 +474,48 @@
             this.pending.clear();
         }
 
-        async detect(video, timestamp, maxWidth) {
+        // Landmarks of the whole frame, or of `region` (normalized crop) when given
+        async detect(video, timestamp, maxWidth, region = null) {
+            if (this.closed) return null;
+            const bitmap = region ? await captureRegion(video, region) : await captureBitmap(video, maxWidth);
+            if (this.closed) {
+                bitmap.close();
+                return null;
+            }
+            // The first inference compiles the GPU shaders and can take several seconds
+            const timeoutMs = this.warmedUp ? this.detectTimeoutMs : this.initTimeoutMs;
+            return this.send('detect', { bitmap, timestamp }, timeoutMs, () => (this.warmedUp = true));
+        }
+
+        // Box of a face anywhere in the frame (full-range detector), normalized, or null
+        async findFace(video, maxWidth) {
             if (this.closed) return null;
             const bitmap = await captureBitmap(video, maxWidth);
             if (this.closed) {
                 bitmap.close();
                 return null;
             }
+            // The first request downloads the detector model
+            const timeoutMs = this.faceDetectorReady ? this.detectTimeoutMs : this.initTimeoutMs;
+            return this.send('find-face', { bitmap }, timeoutMs, () => (this.faceDetectorReady = true));
+        }
+
+        send(type, payload, timeoutMs, onSuccess) {
             const id = ++this.sequence;
-            // The first inference compiles the GPU shaders and can take several seconds
-            const timeoutMs = this.warmedUp ? this.detectTimeoutMs : this.initTimeoutMs;
             return new Promise((resolve, reject) => {
                 const timer = setTimeout(() => {
                     this.pending.delete(id);
                     reject(new VFX.VideoEffectsError('DETECT_TIMEOUT', 'Face detection timed out'));
                 }, timeoutMs);
                 this.pending.set(id, {
-                    resolve: (landmarks) => {
-                        this.warmedUp = true;
-                        resolve(landmarks);
+                    resolve: (value) => {
+                        onSuccess();
+                        resolve(value);
                     },
                     reject,
                     timer,
                 });
-                this.worker.postMessage({ type: 'detect', id, bitmap, timestamp }, [bitmap]);
+                this.worker.postMessage({ type, id, ...payload }, [payload.bitmap]);
             });
         }
 
@@ -439,12 +545,18 @@
             this.lastTimestamp = -1;
             this.closed = false;
             this.delegate = null;
+            this.vision = null;
+            this.fileset = null;
+            this.faceDetector = null;
+            this.faceDetectorPromise = null;
         }
 
         async init() {
             const load = async () => {
                 const vision = await import(this.config.visionBundleUrl);
                 const fileset = await vision.FilesetResolver.forVisionTasks(this.config.wasmBaseUrl);
+                this.vision = vision;
+                this.fileset = fileset;
                 const create = (delegate) =>
                     vision.FaceLandmarker.createFromOptions(fileset, {
                         baseOptions: { modelAssetPath: this.config.modelUrl, delegate },
@@ -482,11 +594,21 @@
             if (this.closed) this.close();
         }
 
-        async detect(video, timestamp) {
+        async detect(video, timestamp, maxWidth, region = null) {
             if (this.closed || !this.landmarker) return null;
+            const input = region ? await captureRegion(video, region) : video;
+            if (this.closed || !this.landmarker) {
+                if (region) input.close();
+                return null;
+            }
             const ts = Math.max(Math.round(timestamp), this.lastTimestamp + 1);
             this.lastTimestamp = ts;
-            const result = this.landmarker.detectForVideo(video, ts);
+            let result;
+            try {
+                result = this.landmarker.detectForVideo(input, ts);
+            } finally {
+                if (region) input.close();
+            }
             const face = result?.faceLandmarks?.[0];
             if (!face || !face.length) return null;
             const blendshapes = {};
@@ -496,14 +618,40 @@
             return { landmarks: packLandmarks(face), blendshapes };
         }
 
+        async findFace(video) {
+            if (this.closed || !this.landmarker) return null;
+            if (!this.faceDetectorPromise) {
+                this.faceDetectorPromise = this.vision.FaceDetector.createFromOptions(this.fileset, {
+                    baseOptions: { modelAssetPath: this.config.faceDetectorModelUrl, delegate: 'CPU' },
+                    runningMode: 'IMAGE',
+                    minDetectionConfidence: 0.5,
+                }).then(
+                    (detector) => (this.faceDetector = detector),
+                    (error) => {
+                        this.faceDetectorPromise = null;
+                        throw error;
+                    }
+                );
+            }
+            await this.faceDetectorPromise;
+            if (this.closed) {
+                this.faceDetector?.close();
+                this.faceDetector = null;
+                return null;
+            }
+            return bestFaceBox(this.faceDetector.detect(video), video.videoWidth, video.videoHeight);
+        }
+
         close() {
             this.closed = true;
             try {
                 this.landmarker?.close();
+                this.faceDetector?.close();
             } catch (error) {
                 // ignore
             }
             this.landmarker = null;
+            this.faceDetector = null;
         }
     }
 
@@ -523,6 +671,8 @@
                 minPresenceConfidence: 0.5,
                 minTrackingConfidence: 0.5,
                 lossGraceMs: 600,
+                // Without a face, look for a far one (full-range detector) at most this often
+                farFaceSearchMs: 500,
                 // Extrapolate the landmarks by their velocity to hide the detection latency
                 maxPredictionMs: 120,
                 fadeMs: 250,
@@ -544,6 +694,10 @@
             this.busy = false;
             this.lastDetectAt = -Infinity;
             this.consecutiveErrors = 0;
+            // Far face: the crop the landmarker runs on (normalized), null for the whole frame
+            this.region = null;
+            this.lastFarSearch = -Infinity;
+            this.farSearchUnavailable = false;
             this.resetFace();
         }
 
@@ -643,8 +797,7 @@
             this.busy = true;
             this.lastDetectAt = now;
             const generation = this.generation;
-            this.backend
-                .detect(video, now, this.options.detectionWidth)
+            this.detectFace(video, now, generation)
                 .then((result) => {
                     if (generation !== this.generation) return;
                     this.consecutiveErrors = 0;
@@ -656,6 +809,82 @@
                 .finally(() => {
                     if (generation === this.generation) this.busy = false;
                 });
+        }
+
+        /**
+         * Landmarks normalized to the whole frame, or null. Looks in the crop around a far face while there is
+         * one, otherwise in the whole frame and, when that finds nothing, for a far face to crop around.
+         */
+        async detectFace(video, now, generation) {
+            const width = this.options.detectionWidth;
+            if (this.region) {
+                const region = this.region;
+                const result = await this.backend.detect(video, now, width, region);
+                if (this.generation !== generation) return null;
+                if (!result?.landmarks) {
+                    // Lost in the crop: the whole frame again next time
+                    this.region = null;
+                    return null;
+                }
+                mapFromRegion(result.landmarks, region);
+                this.followRegion(result.landmarks, video);
+                return result;
+            }
+            const result = await this.backend.detect(video, now, width);
+            if (result?.landmarks || this.generation !== generation) return result;
+            const box = await this.findFarFace(video, now);
+            if (!box || this.generation !== generation) return null;
+            const { videoWidth, videoHeight } = video;
+            const size = Math.max(box.width * videoWidth, box.height * videoHeight);
+            const cx = (box.x + box.width / 2) * videoWidth;
+            const cy = (box.y + box.height / 2) * videoHeight;
+            const region = squareRegion(cx, cy, size * FACE_ROI_SCALE, videoWidth, videoHeight);
+            const found = await this.backend.detect(video, now, width, region);
+            if (!found?.landmarks || this.generation !== generation) return null;
+            this.region = region;
+            mapFromRegion(found.landmarks, region);
+            this.followRegion(found.landmarks, video);
+            return found;
+        }
+
+        // Full-range face box, rate limited (only runs while no face is found); null when none or unavailable
+        async findFarFace(video, now) {
+            if (this.farSearchUnavailable || typeof this.backend?.findFace !== 'function') return null;
+            if (now - this.lastFarSearch < this.options.farFaceSearchMs) return null;
+            this.lastFarSearch = now;
+            try {
+                return await this.backend.findFace(video, this.options.detectionWidth);
+            } catch (error) {
+                // Faces close to the camera are still tracked: only far faces are missed
+                this.farSearchUnavailable = true;
+                console.warn('[VideoEffects] Far face detection unavailable', error);
+                return null;
+            }
+        }
+
+        // Keep the crop on the far face: moved or resized only when needed, dropped once the face is big enough
+        followRegion(landmarks, video) {
+            if (!this.region) return;
+            const { videoWidth, videoHeight } = video;
+            const face = landmarkBounds(landmarks, videoWidth, videoHeight);
+            const side = face.size * FACE_ROI_SCALE;
+            if (side >= Math.min(videoWidth, videoHeight) * 0.9) {
+                this.region = null;
+                return;
+            }
+            const region = this.region;
+            const current = region.width * videoWidth;
+            const ratio = face.size / current;
+            const offsetX = Math.abs(face.cx - (region.x + region.width / 2) * videoWidth) / current;
+            const offsetY = Math.abs(face.cy - (region.y + region.height / 2) * videoHeight) / current;
+            if (
+                ratio < FACE_ROI_SIZE_RANGE[0] ||
+                ratio > FACE_ROI_SIZE_RANGE[1] ||
+                offsetX > FACE_ROI_MAX_OFFSET ||
+                offsetY > FACE_ROI_MAX_OFFSET
+            ) {
+                this.region = squareRegion(face.cx, face.cy, side, videoWidth, videoHeight);
+            }
         }
 
         // `now` is the capture time of the analysed frame (smoothing and prediction use it)
@@ -758,6 +987,8 @@
             this.generation++;
             this.busy = false;
             this.lastDetectAt = -Infinity;
+            this.region = null;
+            this.lastFarSearch = -Infinity;
             this.resetFace();
         }
 
@@ -780,4 +1011,6 @@
     VFX.smoothstep = smoothstep;
     VFX.averagePoint = averagePoint;
     VFX.FaceTracker = FaceTracker;
+    VFX.squareRegion = squareRegion;
+    VFX.mapFromRegion = mapFromRegion;
 })(typeof globalThis !== 'undefined' ? globalThis : self);

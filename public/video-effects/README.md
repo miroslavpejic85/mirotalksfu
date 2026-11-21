@@ -21,19 +21,19 @@ camera track ─► (optional) VirtualBackground ─► hidden <video>
                                     processed MediaStreamTrack ─► producer.replaceTrack()
 ```
 
-| File                              | Role                                                                               |
-| --------------------------------- | ---------------------------------------------------------------------------------- |
-| `index.js`                        | `MiroTalkVideoEffects` public API, render loop, lifecycle                          |
-| `camera.js`                       | `VideoSource` (track → hidden video) and `FrameScheduler` (rVFC / worker timer)    |
-| `face-tracker.js`                 | MediaPipe backends (worker, main thread), smoothing, pose, face-loss handling      |
-| `auto-framer.js`                  | Auto framing: crop/zoom that keeps the person centered, face mapping into the crop |
-| `workers/face-tracking-worker.js` | Module worker running Face Landmarker                                              |
-| `renderer.js`                     | WebGL2/WebGL1 renderer (filters, skin smoothing, accessories), Canvas 2D fallback  |
-| `effects-manager.js`              | Effect/filter registries, asset loading and validation, accessory placement        |
-| `model-renderer.js`               | Lazy Three.js renderer for GLB/GLTF accessories and realistic 3D avatars           |
-| `stream-manager.js`               | `canvas.captureStream()` output track                                              |
-| `effects/*.js`                    | Effect descriptors and filter presets                                              |
-| `assets/`                         | Original SVG artwork, 3D glasses (`glasses-3d.glb`) and 3D avatars (`avatars-3d`)  |
+| File                              | Role                                                                                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------- |
+| `index.js`                        | `MiroTalkVideoEffects` public API, render loop, lifecycle                                |
+| `camera.js`                       | `VideoSource` (track → hidden video) and `FrameScheduler` (rVFC / worker timer)          |
+| `face-tracker.js`                 | MediaPipe backends (worker, main thread), smoothing, pose, face-loss handling, far faces |
+| `auto-framer.js`                  | Auto framing: crop/zoom that keeps the person centered, face mapping into the crop       |
+| `workers/face-tracking-worker.js` | Module worker running Face Landmarker                                                    |
+| `renderer.js`                     | WebGL2/WebGL1 renderer (filters, skin smoothing, accessories), Canvas 2D fallback        |
+| `effects-manager.js`              | Effect/filter registries, asset loading and validation, accessory placement              |
+| `model-renderer.js`               | Lazy Three.js renderer for GLB/GLTF accessories and realistic 3D avatars                 |
+| `stream-manager.js`               | `canvas.captureStream()` output track                                                    |
+| `effects/*.js`                    | Effect descriptors and filter presets                                                    |
+| `assets/`                         | Original SVG artwork, 3D glasses (`glasses-3d.glb`) and 3D avatars (`avatars-3d`)        |
 
 ## Visual effects panel (UI)
 
@@ -94,6 +94,11 @@ like the auto framing of other meeting apps. It uses the same face tracking as t
   not change): head and shoulders (forehead-chin at ~30% of the short side), the face slightly above the middle,
   zoom limited to 2x (1.6x on phones) to keep enough resolution, always inside the frame.
 - The face size is the forehead-chin distance in 3D, so turning the head does not zoom in and out.
+- **Far from the camera**: the landmarker's own detector only sees faces close to it. When it finds nothing,
+  the full-range MediaPipe Face Detector (BlazeFace full range, ~1 MB, loaded on first use) looks for a face
+  at most twice per second, then the landmarker runs on a square crop around it, taken from the full camera
+  resolution. The crop follows the face (moved only when needed) until it is close enough for the whole frame;
+  the landmarks are mapped back, so face effects and avatars work on far faces too.
 - A **dead zone** keeps the frame perfectly still for small moves; bigger moves are eased with a critically damped
   spring (no jumps, no overshoot, frame-rate independent).
 - When nobody is in view the frame is held for 1.5 s, then slowly zooms back out to the whole camera.

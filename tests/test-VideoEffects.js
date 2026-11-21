@@ -684,6 +684,130 @@ describe('Video effects engine', () => {
             assert.equal(tracker.getFace(1100), null);
         });
 
+        describe('far faces', () => {
+            const W = 1280;
+            const H = 720;
+            const video = { videoWidth: W, videoHeight: H };
+            const settle = async () => {
+                for (let i = 0; i < 5; i++) await new Promise((resolve) => setImmediate(resolve));
+            };
+
+            // A small face (25 px eye distance) far from the camera, at the right of the frame
+            function farBackend({ face = { cx: 1180, cy: 430, eyeDistance: 25 }, findFace } = {}) {
+                const backend = {
+                    calls: [],
+                    face,
+                    // The landmarker only finds the face in a crop around it, normalized to the crop
+                    async detect(source, timestamp, width, region) {
+                        backend.calls.push(region ? { ...region } : null);
+                        if (!region || !backend.face) return null;
+                        const points = syntheticFace(backend.face);
+                        const left = region.x * W;
+                        const top = region.y * H;
+                        const side = region.width * W;
+                        const inside = backend.face.cx > left && backend.face.cx < left + side;
+                        if (!inside) return null;
+                        const landmarks = new Float32Array(points.length);
+                        for (let i = 0; i < points.length; i += 3) {
+                            landmarks[i] = (points[i] - left) / side;
+                            landmarks[i + 1] = (points[i + 1] - top) / (region.height * H);
+                            landmarks[i + 2] = points[i + 2] / side;
+                        }
+                        return { landmarks, blendshapes: null };
+                    },
+                    findFace: sinon.spy(
+                        findFace ||
+                            (async () => {
+                                if (!backend.face) return null;
+                                const { cx, cy } = backend.face;
+                                return { x: (cx - 40) / W, y: (cy - 40) / H, width: 80 / W, height: 80 / H };
+                            })
+                    ),
+                    close() {},
+                };
+                return backend;
+            }
+
+            function trackerWith(backend) {
+                const tracker = readyTracker({ detectionFps: 30, farFaceSearchMs: 500 });
+                tracker.state = 'ready';
+                tracker.backend = backend;
+                return tracker;
+            }
+
+            it('finds a far face with the full-range detector and tracks it in a crop around it', async () => {
+                const backend = farBackend();
+                const tracker = trackerWith(backend);
+                for (let t = 0; t <= 1000; t += 40) {
+                    tracker.update(video, t);
+                    await settle();
+                }
+                const face = tracker.getFace(1000);
+                assert.ok(face, 'the far face is tracked');
+                close(face.pose.center[0], 1180, 1, 'mapped back to the whole frame');
+                close(face.pose.center[1], 430, 1);
+                close(face.pose.scale, 25, 0.5);
+                assert.equal(backend.findFace.callCount, 1, 'the crop keeps the face: no new search');
+                const region = tracker.region;
+                close(region.width * W, region.height * H, 1e-6, 'a square crop');
+                assert.ok(region.x + region.width <= 1 + 1e-9, 'inside the frame');
+                assert.ok(backend.calls.slice(-5).every(Boolean), 'the landmarker runs on the crop');
+            });
+
+            it('searches again at most twice per second while nobody is found, and drops a crop that lost the face', async () => {
+                const backend = farBackend({ findFace: async () => null });
+                const tracker = trackerWith(backend);
+                for (let t = 0; t <= 1000; t += 40) {
+                    tracker.update(video, t);
+                    await settle();
+                }
+                assert.equal(backend.findFace.callCount, 2, 'at 0 and 520 ms (the next one is due at 1040 ms)');
+
+                const found = farBackend();
+                const following = trackerWith(found);
+                for (let t = 0; t <= 200; t += 40) {
+                    following.update(video, t);
+                    await settle();
+                }
+                assert.ok(following.region);
+                found.face = null;
+                following.update(video, 240);
+                await settle();
+                assert.equal(following.region, null, 'back to the whole frame');
+            });
+
+            it('goes back to the whole frame once the face is close enough', async () => {
+                const backend = farBackend();
+                const tracker = trackerWith(backend);
+                for (let t = 0; t <= 200; t += 40) {
+                    tracker.update(video, t);
+                    await settle();
+                }
+                assert.ok(tracker.region);
+                backend.face = { cx: 900, cy: 400, eyeDistance: 120 };
+                tracker.update(video, 240);
+                await settle();
+                assert.equal(tracker.region, null);
+            });
+
+            it('keeps tracking close faces when the far face detector cannot load', async () => {
+                const backend = farBackend({ findFace: async () => Promise.reject(new Error('offline')) });
+                const tracker = trackerWith(backend);
+                const warn = sinon.stub(console, 'warn');
+                try {
+                    for (let t = 0; t <= 1200; t += 40) {
+                        tracker.update(video, t);
+                        await settle();
+                    }
+                } finally {
+                    warn.restore();
+                }
+                assert.equal(backend.findFace.callCount, 1, 'not retried');
+                assert.equal(tracker.farSearchUnavailable, true);
+                assert.notEqual(tracker.state, 'error', 'face tracking itself keeps working');
+            });
+        });
+
         it('stops after repeated detection errors and reports it', () => {
             const tracker = readyTracker({ maxConsecutiveErrors: 2 });
             const backend = { close: sinon.spy() };

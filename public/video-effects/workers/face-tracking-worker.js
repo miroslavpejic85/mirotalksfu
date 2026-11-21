@@ -3,7 +3,9 @@
  *
  * Runs MediaPipe Face Landmarker (Apache-2.0) off the main thread. The page sends downscaled
  * ImageBitmaps; the worker answers with the 478 normalized landmarks of the first face and the
- * blendshape scores (blinks, smile, brows...) used to animate avatars.
+ * blendshape scores (blinks, smile, brows...) used to animate avatars. When the landmarker finds no face, the
+ * page can ask for a face box from the full-range Face Detector ('find-face'), which also sees faces far from
+ * the camera; the page then sends a crop around it, where the landmarker finds the face again.
  */
 
 // Blendshapes forwarded to the page (MediaPipe returns 52, avatars only need these)
@@ -30,6 +32,11 @@ function pickBlendshapes(result) {
 
 let landmarker = null;
 let lastTimestamp = -1;
+let vision = null;
+let fileset = null;
+let workerConfig = null;
+let faceDetector = null;
+let faceDetectorPromise = null;
 
 async function createLandmarker(vision, fileset, config, delegate) {
     return vision.FaceLandmarker.createFromOptions(fileset, {
@@ -44,10 +51,23 @@ async function createLandmarker(vision, fileset, config, delegate) {
     });
 }
 
+// In module workers MediaPipe imports its WASM loader once, but each new task clears self.ModuleFactory: the
+// face detector created after the landmarker failed with "ModuleFactory not set". MediaPipe uses self.import
+// when defined: restore the factory from the loader's default export (as in VirtualBackgroundWorker.js).
+function installWasmLoaderImport() {
+    self.import = async (url) => {
+        const loader = await import(url);
+        if (typeof loader?.default === 'function') self.ModuleFactory = loader.default;
+        return loader;
+    };
+}
+
 async function init(config) {
-    const vision = await import(config.visionBundleUrl);
+    workerConfig = config;
+    vision = await import(config.visionBundleUrl);
+    installWasmLoaderImport();
     // true: load the ES module build of the WASM loader, module workers have no importScripts()
-    const fileset = await vision.FilesetResolver.forVisionTasks(config.wasmBaseUrl, true);
+    fileset = await vision.FilesetResolver.forVisionTasks(config.wasmBaseUrl, true);
     let delegate = config.delegate;
     try {
         landmarker = await createLandmarker(vision, fileset, config, delegate);
@@ -58,6 +78,56 @@ async function init(config) {
         landmarker = await createLandmarker(vision, fileset, config, delegate);
     }
     return delegate;
+}
+
+// Loaded on the first request: only needed when someone sits far from the camera
+function loadFaceDetector() {
+    if (!faceDetectorPromise) {
+        faceDetectorPromise = (async () => {
+            if (!workerConfig?.faceDetectorModelUrl) throw new Error('No face detector model');
+            faceDetector = await vision.FaceDetector.createFromOptions(fileset, {
+                baseOptions: { modelAssetPath: workerConfig.faceDetectorModelUrl, delegate: 'CPU' },
+                runningMode: 'IMAGE',
+                minDetectionConfidence: 0.5,
+            });
+        })().catch((error) => {
+            faceDetectorPromise = null;
+            throw error;
+        });
+    }
+    return faceDetectorPromise;
+}
+
+// The most confident face box, normalized to the image ({ x, y, width, height }), or null
+function bestFaceBox(result, width, height) {
+    let best = null;
+    for (const detection of result?.detections || []) {
+        const box = detection.boundingBox;
+        const score = detection.categories?.[0]?.score ?? 0;
+        if (!box || !(box.width > 0) || !(box.height > 0) || (best && best.score >= score)) continue;
+        best = {
+            score,
+            x: box.originX / width,
+            y: box.originY / height,
+            width: box.width / width,
+            height: box.height / height,
+        };
+    }
+    if (!best) return null;
+    const { score, ...face } = best;
+    return face;
+}
+
+async function findFace({ id, bitmap }) {
+    try {
+        await loadFaceDetector();
+        const box = bestFaceBox(faceDetector.detect(bitmap), bitmap.width, bitmap.height);
+        self.postMessage({ type: 'face-box', id, box });
+    } catch (error) {
+        self.postMessage({ type: 'error', stage: 'find-face', id, message: String(error?.message || error) });
+    } finally {
+        bitmap.close();
+    }
 }
 
 function detect({ id, bitmap, timestamp }) {
@@ -116,13 +186,23 @@ self.onmessage = async (event) => {
                 });
             }
             break;
+        case 'find-face':
+            if (!landmarker) {
+                message.bitmap?.close();
+                self.postMessage({ type: 'face-box', id: message.id, box: null });
+                break;
+            }
+            await findFace(message);
+            break;
         case 'close':
             try {
                 landmarker?.close();
+                faceDetector?.close();
             } catch (error) {
                 // ignore, the worker is going away
             }
             landmarker = null;
+            faceDetector = null;
             self.close();
             break;
         default:
