@@ -11,7 +11,7 @@ camera track ─► (optional) VirtualBackground ─► hidden <video>
                      ┌──────────────────────────────┤
                      ▼                              ▼
          FaceTracker (module worker)        WebGLRenderer / Canvas2DRenderer
-         MediaPipe Face Landmarker          filters shader + accessory quads
+         MediaPipe Face Landmarker          auto framing crop, filters shader + accessory quads
          8-15 Hz, One Euro smoothing,       (+ Three.js overlay for GLB models)
          interpolation + prediction                 │
                      └──────── face pose ───────────┤
@@ -21,18 +21,19 @@ camera track ─► (optional) VirtualBackground ─► hidden <video>
                                     processed MediaStreamTrack ─► producer.replaceTrack()
 ```
 
-| File                              | Role                                                                              |
-| --------------------------------- | --------------------------------------------------------------------------------- |
-| `index.js`                        | `MiroTalkVideoEffects` public API, render loop, lifecycle                         |
-| `camera.js`                       | `VideoSource` (track → hidden video) and `FrameScheduler` (rVFC / worker timer)   |
-| `face-tracker.js`                 | MediaPipe backends (worker, main thread), smoothing, pose, face-loss handling     |
-| `workers/face-tracking-worker.js` | Module worker running Face Landmarker                                             |
-| `renderer.js`                     | WebGL2/WebGL1 renderer (filters, skin smoothing, accessories), Canvas 2D fallback |
-| `effects-manager.js`              | Effect/filter registries, asset loading and validation, accessory placement       |
-| `model-renderer.js`               | Lazy Three.js renderer for GLB/GLTF accessories and realistic 3D avatars          |
-| `stream-manager.js`               | `canvas.captureStream()` output track                                             |
-| `effects/*.js`                    | Effect descriptors and filter presets                                             |
-| `assets/`                         | Original SVG artwork, 3D glasses (`glasses-3d.glb`) and 3D avatars (`avatars-3d`) |
+| File                              | Role                                                                               |
+| --------------------------------- | ---------------------------------------------------------------------------------- |
+| `index.js`                        | `MiroTalkVideoEffects` public API, render loop, lifecycle                          |
+| `camera.js`                       | `VideoSource` (track → hidden video) and `FrameScheduler` (rVFC / worker timer)    |
+| `face-tracker.js`                 | MediaPipe backends (worker, main thread), smoothing, pose, face-loss handling      |
+| `auto-framer.js`                  | Auto framing: crop/zoom that keeps the person centered, face mapping into the crop |
+| `workers/face-tracking-worker.js` | Module worker running Face Landmarker                                              |
+| `renderer.js`                     | WebGL2/WebGL1 renderer (filters, skin smoothing, accessories), Canvas 2D fallback  |
+| `effects-manager.js`              | Effect/filter registries, asset loading and validation, accessory placement        |
+| `model-renderer.js`               | Lazy Three.js renderer for GLB/GLTF accessories and realistic 3D avatars           |
+| `stream-manager.js`               | `canvas.captureStream()` output track                                              |
+| `effects/*.js`                    | Effect descriptors and filter presets                                              |
+| `assets/`                         | Original SVG artwork, 3D glasses (`glasses-3d.glb`) and 3D avatars (`avatars-3d`)  |
 
 ## Visual effects panel (UI)
 
@@ -74,7 +75,8 @@ const processed = await effects.setSourceTrack(cameraTrack);
 | `setEffect(id \| null)`                                        | Select an effect (`null`/`'none'` removes it). Rejects and keeps the previous effect if an asset is invalid                                                                                                                                                                                      |
 | `setFilters({...})` / `setFilterPreset(id)` / `resetFilters()` | `brightness`, `contrast`, `saturation` (CSS filter semantics), `grayscale`, `sepia`, `temperature` (-1..1), `smoothing` (0..1, WebGL only). Manual values make the preset `null` ("Custom")                                                                                                      |
 | `setAdjustments({ touchUp, lowLight })`                        | Friendly adjustments (0..1) applied on top of the preset/custom filters: skin smoothing and brightening for dark cameras                                                                                                                                                                         |
-| `clearAll()`                                                   | Back to the plain camera: no effect, filters or adjustments                                                                                                                                                                                                                                      |
+| `setAutoFraming(enabled)`                                      | Keep the person centered: crops and zooms the camera around the tracked face (see _Auto framing_)                                                                                                                                                                                                |
+| `clearAll()`                                                   | Back to the plain camera: no effect, filters, adjustments or auto framing                                                                                                                                                                                                                        |
 | `isActive()`                                                   | `true` when the output differs from the camera                                                                                                                                                                                                                                                   |
 | `getEffects()`, `getFilterPresets()`, `getState()`             | For UIs. `getState().slow` is `true` after 4 s under `slowFps` (option, default 12)                                                                                                                                                                                                              |
 | `on(event, fn)`                                                | `state`, `error` (`{ stage, error }`), `sourceended`, `destroyed`                                                                                                                                                                                                                                |
@@ -82,6 +84,23 @@ const processed = await effects.setSourceTrack(cameraTrack);
 | `destroy()`                                                    | Releases workers, MediaPipe, WebGL contexts, streams, listeners, loops and object URLs                                                                                                                                                                                                           |
 
 `MiroTalkVideoEffects.isSupported()` is `false` when `canvas.captureStream()` is missing.
+
+## Auto framing
+
+**Auto framing** (switch above the tabs of the panel, and in the camera menu) keeps you centered as you move,
+like the auto framing of other meeting apps. It uses the same face tracking as the accessories and runs locally.
+
+- `auto-framer.js` (`AutoFramer`) picks a crop of the camera with the **same aspect ratio** (the output size does
+  not change): head and shoulders (forehead-chin at ~30% of the short side), the face slightly above the middle,
+  zoom limited to 2x (1.6x on phones) to keep enough resolution, always inside the frame.
+- The face size is the forehead-chin distance in 3D, so turning the head does not zoom in and out.
+- A **dead zone** keeps the frame perfectly still for small moves; bigger moves are eased with a critically damped
+  spring (no jumps, no overshoot, frame-rate independent).
+- When nobody is in view the frame is held for 1.5 s, then slowly zooms back out to the whole camera.
+- The renderer only changes texture coordinates (WebGL) or the source rectangle (Canvas 2D); the face is mapped
+  into the crop (`cropFace()`), so accessories and avatars stay on it. Backgrounds are applied before, so they
+  are cropped along with the camera.
+- It counts as "something on" (`isActive()`, the chips, **Turn off all**) and is remembered with the other effects.
 
 ## WebRTC integration (RoomClient)
 

@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.57
+ * @version 2.8.60
  *
  */
 
@@ -7462,6 +7462,20 @@ function setupQuickDeviceSwitchDropdowns() {
         }
 
         if (isVideoEffectsAvailable() && !rc.getModerator().video_cant_unhide) {
+            // Quick switch, also in Settings > Visual effects
+            appendMenuToggle(
+                videoMenu,
+                'deviceMenuAutoFraming',
+                'Auto framing',
+                !!videoEffects.autoFraming,
+                async (enabled) => {
+                    await getVideoEffectsPanel()?.setAutoFraming(enabled);
+                    const menuSwitch = getId('deviceMenuAutoFraming');
+                    if (menuSwitch) menuSwitch.checked = !!videoEffects.autoFraming;
+                },
+                'fas fa-expand'
+            );
+
             const effectsBtn = document.createElement('button');
             effectsBtn.type = 'button';
             effectsBtn.className = 'device-menu-action-btn';
@@ -11188,6 +11202,11 @@ function getVideoEffectsPanel() {
     });
     // Camera unplugged or permission revoked while the effects were processing it
     videoEffects.on('sourceended', () => rc?.handleVideoEffectsSourceEnded());
+    // Keep the camera menu switch in sync when auto framing changes elsewhere (panel, chips, turn off all)
+    videoEffects.on('state', ({ autoFraming }) => {
+        const menuSwitch = getId('deviceMenuAutoFraming');
+        if (menuSwitch && menuSwitch.checked !== autoFraming) menuSwitch.checked = autoFraming;
+    });
     return videoEffectsPanel;
 }
 
@@ -11759,7 +11778,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.57',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.60',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

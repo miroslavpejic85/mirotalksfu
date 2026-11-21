@@ -252,6 +252,15 @@ class VideoEffectsPanel {
                 remove: () => this.setAdjustment('lowLight', 0),
             });
         }
+        if (state.autoFraming) {
+            items.push({
+                id: 'autoFraming',
+                tab: null,
+                label: t('Auto framing'),
+                icon: 'fas fa-expand',
+                remove: () => this.setAutoFraming(false),
+            });
+        }
         return items;
     }
 
@@ -284,6 +293,7 @@ class VideoEffectsPanel {
                 this.engine.setFilters(saved.filters);
             }
             if (saved.adjustments) this.engine.setAdjustments(saved.adjustments);
+            if (saved.autoFraming === true) await this.engine.setAutoFraming(true);
             if (saved.effect && this.engine.getEffects().some((effect) => effect.id === saved.effect)) {
                 await this.engine.setEffect(saved.effect);
             }
@@ -301,6 +311,7 @@ class VideoEffectsPanel {
                 filterPreset: state.filterPreset,
                 filters: state.filters,
                 adjustments: state.adjustments,
+                autoFraming: state.autoFraming,
             };
             try {
                 localStorage.setItem(VideoEffectsPanel.STORAGE_KEY, JSON.stringify(settings));
@@ -615,6 +626,18 @@ class VideoEffectsPanel {
 
     async resetFilters() {
         this.engine.resetFilters();
+        await this.commit();
+    }
+
+    async setAutoFraming(enabled) {
+        try {
+            await this.engine.setAutoFraming(enabled);
+        } catch (error) {
+            console.warn('Auto framing is not available', error);
+            if (typeof userLog === 'function') {
+                userLog('warning', 'Auto framing is not available on this device.', 'top-end', 6000);
+            }
+        }
         await this.commit();
     }
 
@@ -979,6 +1002,8 @@ class VideoEffectsPanel {
         view.status = VideoEffectsPanel.element('div', 'vfx-status hidden', { role: 'status', 'aria-live': 'polite' });
         root.appendChild(view.status);
 
+        root.appendChild(this.buildAutoFraming(view));
+
         root.appendChild(this.buildTabs(view));
         this.availableTabs().forEach((tab) => root.appendChild(this.buildTabPanel(view, tab)));
 
@@ -1023,6 +1048,26 @@ class VideoEffectsPanel {
         box.append(video, off);
         view.preview = { box, video, off, avatar, avatarImg };
         return box;
+    }
+
+    // Camera-wide switch, shown above the tabs: keeps the person centered in the frame
+    buildAutoFraming(view) {
+        const t = VideoEffectsPanel.t;
+        const id = `vfx-auto-framing-${Math.random().toString(36).slice(2, 8)}`;
+        const row = VideoEffectsPanel.element('div', 'vfx-toggle');
+        const text = VideoEffectsPanel.element('label', 'vfx-toggle-text', { for: id });
+        const name = VideoEffectsPanel.element('span', 'vfx-toggle-name');
+        name.append(VideoEffectsPanel.icon('fas fa-expand'), document.createTextNode(` ${t('Auto framing')}`));
+        const hint = VideoEffectsPanel.element('span', 'vfx-toggle-hint');
+        hint.textContent = t('Keeps you centered in the frame as you move.');
+        text.append(name, hint);
+        const switchBox = VideoEffectsPanel.element('div', 'form-check form-switch form-switch-md');
+        const input = VideoEffectsPanel.element('input', 'form-check-input', { type: 'checkbox', role: 'switch', id });
+        input.addEventListener('change', () => this.setAutoFraming(input.checked));
+        switchBox.appendChild(input);
+        row.append(text, switchBox);
+        view.autoFraming = { row, input };
+        return row;
     }
 
     buildTabs(view) {
@@ -1518,7 +1563,8 @@ class VideoEffectsPanel {
 
     statusMessage(state, view) {
         const t = VideoEffectsPanel.t;
-        const faceSelected = !!state.effect;
+        // Face tracking is needed by face effects and by auto framing
+        const faceSelected = !!state.effect || !!state.autoFraming;
         if (this.camera && !this.camera.isOn() && !view.preview) {
             return {
                 level: 'info',
@@ -1649,6 +1695,14 @@ class VideoEffectsPanel {
             });
             if (view.touchUpNote) {
                 view.touchUpNote.classList.toggle('hidden', !(state.renderer && !state.capabilities.smoothing));
+            }
+
+            if (view.autoFraming) {
+                const { row, input } = view.autoFraming;
+                input.checked = !!state.autoFraming;
+                // Without face tracking it cannot work: only turning it off stays possible
+                input.disabled = !!faceUnavailable && !state.autoFraming;
+                row.classList.toggle('disabled', input.disabled);
             }
 
             this.renderBackgroundGrid(view);

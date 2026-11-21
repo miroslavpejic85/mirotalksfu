@@ -13,7 +13,8 @@
  *   const processedTrack = await effects.setSourceTrack(cameraTrack);
  *
  * Pipeline: camera track -> hidden <video> -> face tracking (worker) -> WebGL/2D renderer
- * (filters + accessories) -> canvas.captureStream() -> processed track. Everything runs locally.
+ * (auto framing crop, filters + accessories) -> canvas.captureStream() -> processed track.
+ * Everything runs locally.
  * The engine knows nothing about signaling or peer connections.
  */
 (function (root) {
@@ -49,6 +50,10 @@
             // Friendly adjustments layered on top of the preset or custom filters (0..1)
             this.adjustments = { touchUp: 0, lowLight: 0 };
             this.effectiveFilters = { ...VFX.DEFAULT_FILTERS };
+            // Keep the person centered: crop and zoom the camera following the face
+            this.autoFraming = false;
+            this.framer = new VFX.AutoFramer(this.options.autoFraming || {});
+            this.croppedPoints = null;
             this.slowWindows = 0;
             this.slow = false;
             this.initialized = false;
@@ -117,6 +122,7 @@
         async setSourceTrack(track) {
             await this.initialize();
             this.tracker.reset();
+            this.framer.reset();
             try {
                 await this.source.attachTrack(track);
                 await this.source.waitUntilReady();
@@ -247,18 +253,40 @@
             this.emitState();
         }
 
-        // Back to the plain camera: no effect, filters or adjustments
+        /**
+         * Auto framing: keeps the person centered (and zoomed to head and shoulders) by cropping
+         * the camera around the tracked face. Loads face tracking when turned on.
+         */
+        async setAutoFraming(enabled) {
+            const next = !!enabled;
+            if (next === this.autoFraming) return;
+            this.autoFraming = next;
+            this.framer.reset();
+            this.emitState();
+            if (!next) return;
+            try {
+                await this.initialize();
+            } catch (error) {
+                this.autoFraming = false;
+                this.emitState();
+                throw error;
+            }
+            this.tracker.load().catch(() => {});
+        }
+
+        // Back to the plain camera: no effect, filters, adjustments or auto framing
         async clearAll() {
             this.filters = { ...VFX.DEFAULT_FILTERS };
             this.filterPresetId = 'none';
             this.adjustments = { touchUp: 0, lowLight: 0 };
             this.updateEffectiveFilters();
+            if (this.autoFraming) await this.setAutoFraming(false);
             if (this.effectId) await this.setEffect(null);
         }
 
-        // True when the output differs from the camera (effect, filters or adjustments)
+        // True when the output differs from the camera (effect, filters, adjustments or auto framing)
         isActive() {
-            return !!this.effectId || !VFX.isDefaultFilters(this.effectiveFilters);
+            return !!this.effectId || this.autoFraming || !VFX.isDefaultFilters(this.effectiveFilters);
         }
 
         setDetectionFps(fps) {
@@ -283,13 +311,23 @@
             this.renderer.resize(width, height);
 
             let face = null;
-            if (this.manager.active) {
-                this.tracker.update(video, now);
+            let crop = null;
+            if (this.manager.active || this.autoFraming) this.tracker.update(video, now);
+            if (this.autoFraming) {
+                // The crop follows the face in camera pixels, the accessories are then mapped into it
+                const tracked = this.tracker.getFace(now, 1);
+                crop = this.framer.update(tracked, video.videoWidth, video.videoHeight, now);
+                if (tracked && this.manager.active) {
+                    face = VFX.cropFace(tracked, crop, video.videoWidth, video.videoHeight, width, this.croppedPoints);
+                    if (face) this.croppedPoints = face.points;
+                }
+                if (VFX.isFullFrame(crop)) crop = null;
+            } else if (this.manager.active) {
                 face = this.tracker.getFace(now, scale);
             }
 
             try {
-                if (!this.renderer.drawVideo(this.source.frameSource, this.effectiveFilters)) return;
+                if (!this.renderer.drawVideo(this.source.frameSource, this.effectiveFilters, crop)) return;
                 if (face) {
                     const layers = this.manager.computeLayers(face);
                     for (let i = 0; i < layers.length; i++) {
@@ -350,6 +388,7 @@
                 filterPreset: this.filterPresetId,
                 filters: { ...this.filters },
                 adjustments: { ...this.adjustments },
+                autoFraming: this.autoFraming,
                 effectiveFilters: { ...this.effectiveFilters },
                 active: this.isActive(),
                 slow: this.slow,
@@ -378,6 +417,7 @@
             this.streamManager.stop();
             this.source.detach();
             this.tracker.reset();
+            this.framer.reset();
             this.running = false;
             this.fps = 0;
             this.slowWindows = 0;

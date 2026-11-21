@@ -19,9 +19,11 @@
 
     const VIDEO_VERTEX_SHADER = `
         attribute vec2 a_position;
+        // Visible part of the frame (auto framing): origin.xy, size.zw in texture coordinates
+        uniform vec4 u_crop;
         varying vec2 v_uv;
         void main() {
-            v_uv = vec2(a_position.x * 0.5 + 0.5, 0.5 - a_position.y * 0.5);
+            v_uv = u_crop.xy + vec2(a_position.x * 0.5 + 0.5, 0.5 - a_position.y * 0.5) * u_crop.zw;
             gl_Position = vec4(a_position, 0.0, 1.0);
         }
     `;
@@ -119,6 +121,8 @@
         smoothing: 0,
     });
 
+    const FULL_FRAME = Object.freeze({ x: 0, y: 0, width: 1, height: 1 });
+
     function cssFilter(filters) {
         const f = { ...DEFAULT_FILTERS, ...filters };
         return [
@@ -190,6 +194,7 @@
                 'u_temperature',
                 'u_smoothing',
                 'u_offsets',
+                'u_crop',
             ]);
             this.quadUniforms = this.getUniforms(this.quadProgram, ['u_texture', 'u_opacity', 'u_resolution']);
             this.videoPositionLocation = gl.getAttribLocation(this.videoProgram, 'a_position');
@@ -283,11 +288,25 @@
             this.smoothingOffsets = offsets;
         }
 
-        drawVideo(source, filters = DEFAULT_FILTERS) {
+        // Smoothing taps are in output pixels: shrink them in texture space when the frame is cropped
+        smoothingOffsetsFor(crop) {
+            if (!crop || (crop.width === 1 && crop.height === 1)) return this.smoothingOffsets;
+            const base = this.smoothingOffsets;
+            if (!this.croppedOffsets) this.croppedOffsets = new Float32Array(base.length);
+            for (let i = 0; i < base.length; i += 2) {
+                this.croppedOffsets[i] = base[i] * crop.width;
+                this.croppedOffsets[i + 1] = base[i + 1] * crop.height;
+            }
+            return this.croppedOffsets;
+        }
+
+        // crop: { x, y, width, height } of the frame to show, normalized (0..1); null for the whole frame
+        drawVideo(source, filters = DEFAULT_FILTERS, crop = null) {
             if (this.lost) return false;
             const gl = this.gl;
             const { width, height } = this.canvas;
             const f = { ...DEFAULT_FILTERS, ...filters };
+            const c = crop || FULL_FRAME;
 
             gl.viewport(0, 0, width, height);
             gl.disable(gl.BLEND);
@@ -308,9 +327,10 @@
             gl.uniform1f(u.u_sepia, f.sepia);
             gl.uniform1f(u.u_temperature, f.temperature);
             gl.uniform1f(u.u_smoothing, f.smoothing);
+            gl.uniform4f(u.u_crop, c.x, c.y, c.width, c.height);
             if (f.smoothing > 0) {
                 this.updateSmoothingOffsets(width, height);
-                gl.uniform2fv(u.u_offsets, this.smoothingOffsets);
+                gl.uniform2fv(u.u_offsets, this.smoothingOffsetsFor(crop));
             }
 
             gl.bindBuffer(gl.ARRAY_BUFFER, this.fullscreenBuffer);
@@ -444,7 +464,7 @@
             }
         }
 
-        drawVideo(source, filters = DEFAULT_FILTERS) {
+        drawVideo(source, filters = DEFAULT_FILTERS, crop = null) {
             const ctx = this.ctx;
             const { width, height } = this.canvas;
             const f = { ...DEFAULT_FILTERS, ...filters };
@@ -453,7 +473,23 @@
             ctx.globalCompositeOperation = 'source-over';
             ctx.clearRect(0, 0, width, height);
             if (this.supportsFilter) ctx.filter = cssFilter(f);
-            ctx.drawImage(source, 0, 0, width, height);
+            const sourceWidth = source.videoWidth || source.displayWidth || source.width;
+            const sourceHeight = source.videoHeight || source.displayHeight || source.height;
+            if (crop && !(crop.width === 1 && crop.height === 1) && sourceWidth && sourceHeight) {
+                ctx.drawImage(
+                    source,
+                    crop.x * sourceWidth,
+                    crop.y * sourceHeight,
+                    crop.width * sourceWidth,
+                    crop.height * sourceHeight,
+                    0,
+                    0,
+                    width,
+                    height
+                );
+            } else {
+                ctx.drawImage(source, 0, 0, width, height);
+            }
             if (this.supportsFilter) ctx.filter = 'none';
             if (this.supportsFilter && f.temperature) {
                 // Approximation of the shader temperature shift

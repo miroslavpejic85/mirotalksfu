@@ -12,6 +12,7 @@ const ENGINE_FILES = [
     'stream-manager',
     'renderer',
     'face-tracker',
+    'auto-framer',
     'effects-manager',
     'model-renderer',
     'effects/sunglasses',
@@ -701,6 +702,137 @@ describe('Video effects engine', () => {
             assert.equal(tracker.error.code, 'FACE_TRACKING_FAILED');
             assert.ok(backend.close.calledOnce);
             assert.deepEqual(states, ['error']);
+        });
+    });
+
+    describe('auto framing', () => {
+        const W = 1280;
+        const H = 720;
+        // syntheticFace: forehead-chin is 2.3 eye distances
+        const faceAt = (cx, cy, eyeDistance = 50) => ({ points: syntheticFace({ cx, cy, eyeDistance }) });
+        const sameCrop = (actual, expected, message) => {
+            for (const key of ['x', 'y', 'width', 'height']) close(actual[key], expected[key], 1e-3, message);
+        };
+        const run = (framer, face, from, to, step = 33) => {
+            let crop = null;
+            for (let t = from; t <= to; t += step) crop = framer.update(face, W, H, t);
+            return crop;
+        };
+
+        it('measures the face from the forehead-chin distance, relative to the short side', () => {
+            const measure = VFX.AutoFramer.measure(faceAt(640, 360, 100), W, H);
+            close(measure.size, 230 / 720, 1e-4);
+            close(measure.x, 0.5, 1e-4);
+            close(measure.y, (360 + 25) / 720, 1e-4);
+            assert.equal(VFX.AutoFramer.measure(null, W, H), null);
+            assert.equal(VFX.AutoFramer.measure({ points: new Float32Array(478 * 3) }, W, H), null);
+        });
+
+        it('starts from the whole frame, then centers and zooms on a person off to the side', () => {
+            const framer = new VFX.AutoFramer({ maxZoom: 2 });
+            const face = faceAt(400, 300);
+            assert.deepEqual({ ...framer.update(face, W, H, 0) }, { x: 0, y: 0, width: 1, height: 1 });
+            const crop = run(framer, face, 33, 4000);
+            assert.ok(crop.width < 0.7, `zoomed in (crop ${crop.width})`);
+            assert.ok(crop.width >= 0.5 - 1e-6, 'never beyond the maximum zoom');
+            close(crop.width, crop.height, 1e-9, 'keeps the camera aspect ratio');
+            close(crop.x + crop.width / 2, 400 / W, 0.01, 'face centered horizontally');
+            const faceY = (300 + 0.25 * 50 - crop.y * H) / (crop.height * H);
+            close(faceY, 0.42, 0.02, 'face slightly above the middle (headroom)');
+        });
+
+        it('keeps the crop inside the frame and limits the zoom', () => {
+            const framer = new VFX.AutoFramer({ maxZoom: 2 });
+            const crop = run(framer, faceAt(30, 20, 10), 0, 4000);
+            close(crop.width, 0.5, 1e-3, 'a tiny face is zoomed only up to maxZoom');
+            assert.ok(crop.x >= 0 && crop.y >= 0);
+            assert.ok(crop.x + crop.width <= 1 + 1e-9 && crop.y + crop.height <= 1 + 1e-9);
+        });
+
+        it('stays still for small moves (dead zone) and follows bigger ones smoothly', () => {
+            const framer = new VFX.AutoFramer({ maxZoom: 2 });
+            const settled = run(framer, faceAt(640, 360), 0, 4000);
+            const nudged = run(framer, faceAt(655, 365), 4033, 6000);
+            sameCrop(nudged, settled, 'a small move does not re-frame');
+
+            const first = framer.update(faceAt(900, 360), W, H, 6033);
+            assert.ok(first.x - settled.x < 0.02, 'no jump on the first frame');
+            const moved = run(framer, faceAt(900, 360), 6066, 9000);
+            close(moved.x + moved.width / 2, 900 / W, 0.01, 'then re-centers on the person');
+        });
+
+        it('holds the frame when the face is briefly lost, then zooms back out', () => {
+            const framer = new VFX.AutoFramer({ maxZoom: 2, holdMs: 1500 });
+            const framed = run(framer, faceAt(640, 360), 0, 4000);
+            const held = run(framer, null, 4033, 5000);
+            close(held.width, framed.width, 1e-3, 'kept during the hold time');
+            const reset = run(framer, null, 5033, 12000);
+            assert.deepEqual({ ...reset }, { x: 0, y: 0, width: 1, height: 1 });
+        });
+
+        it('does not zoom when the head turns', () => {
+            const framer = new VFX.AutoFramer({ maxZoom: 2 });
+            const front = run(framer, faceAt(640, 360), 0, 4000);
+            // Head turned: the eyes get closer on screen, forehead and chin move in depth only
+            const turned = faceAt(640, 360);
+            for (const index of [33, 133, 263, 362, 468, 473])
+                turned.points[index * 3] = 640 + (turned.points[index * 3] - 640) * 0.5;
+            sameCrop(run(framer, turned, 4033, 6000), front);
+        });
+
+        it('maps the tracked face into the cropped output', () => {
+            const face = { points: syntheticFace({ cx: 640, cy: 360, eyeDistance: 100 }), opacity: 1, expressions: {} };
+            const crop = { x: 0.25, y: 0.25, width: 0.5, height: 0.5 };
+            const mapped = VFX.cropFace(face, crop, W, H, W);
+            close(mapped.pose.center[0], 640, 1e-3, 'centered face stays centered');
+            close(mapped.pose.center[1], 360, 1e-3);
+            close(mapped.pose.scale, 200, 1e-3, 'twice as big at 2x zoom');
+            assert.equal(mapped.expressions, face.expressions);
+            assert.equal(face.points[33 * 3], 590, 'the tracked face is not modified');
+        });
+
+        it('crops the frame on the Canvas 2D renderer', () => {
+            const calls = [];
+            const ctx = {
+                filter: 'none',
+                setTransform() {},
+                clearRect() {},
+                drawImage: (...args) => calls.push(args.slice(1)),
+            };
+            const renderer = new VFX.Canvas2DRenderer({ width: 1280, height: 720, getContext: () => ctx });
+            const video = { videoWidth: 1920, videoHeight: 1080 };
+            renderer.drawVideo(video, {}, { x: 0.25, y: 0.1, width: 0.5, height: 0.5 });
+            assert.deepEqual(calls[0], [480, 108, 960, 540, 0, 0, 1280, 720]);
+            renderer.drawVideo(video, {}, null);
+            assert.deepEqual(calls[1], [0, 0, 1280, 720]);
+        });
+
+        it('makes the engine active, loads face tracking, and is cleared by Turn off all', async () => {
+            const effects = new context.MiroTalkVideoEffects();
+            const load = sinon.stub().resolves();
+            effects.initialize = sinon.stub().resolves();
+            effects.tracker = { load };
+            const states = [];
+            effects.on('state', (state) => states.push(state.autoFraming));
+
+            await effects.setAutoFraming(true);
+            assert.equal(effects.isActive(), true);
+            assert.equal(effects.getState().autoFraming, true);
+            assert.ok(load.calledOnce);
+
+            await effects.clearAll();
+            assert.equal(effects.getState().autoFraming, false);
+            assert.equal(effects.isActive(), false);
+            assert.equal(states[0], true);
+            assert.equal(states.at(-1), false);
+        });
+
+        it('turns itself off when the engine cannot start', async () => {
+            const effects = new context.MiroTalkVideoEffects();
+            effects.initialize = sinon.stub().rejects(new Error('unsupported'));
+            await assert.rejects(effects.setAutoFraming(true), /unsupported/);
+            assert.equal(effects.autoFraming, false);
+            assert.equal(effects.isActive(), false);
         });
     });
 

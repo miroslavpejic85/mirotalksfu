@@ -25,6 +25,7 @@ function createEngine() {
         filterPreset: 'none',
         filters: {},
         adjustments: { touchUp: 0, lowLight: 0 },
+        autoFraming: false,
         running: true,
         renderer: 'webgl2',
         capabilities: { filters: true, smoothing: true, webgl: true },
@@ -64,10 +65,15 @@ function createEngine() {
         setAdjustments(adjustments) {
             Object.assign(state.adjustments, adjustments);
         },
+        async setAutoFraming(enabled) {
+            engine.calls.push(['setAutoFraming', enabled]);
+            state.autoFraming = !!enabled;
+        },
         async clearAll() {
             engine.calls.push(['clearAll']);
             engine.resetFilters();
             state.adjustments = { touchUp: 0, lowLight: 0 };
+            state.autoFraming = false;
             state.effect = null;
         },
     };
@@ -499,6 +505,53 @@ describe('Visual effects panel', () => {
         assert.equal(restored.state.adjustments.touchUp, 0.3);
         other.destroy();
     });
+
+    it('turns auto framing on from its switch, lists it as a chip, and remembers it', async () => {
+        const toggle = $('.vfx-toggle input[type="checkbox"]');
+        assert.ok(toggle, 'switch shown above the tabs');
+        assert.equal(toggle.checked, false);
+        assert.match($('.vfx-toggle').textContent, /Auto framing/);
+
+        toggle.checked = true;
+        toggle.dispatchEvent(new window.Event('change'));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.equal(engine.state.autoFraming, true);
+        assert.deepEqual(chipLabels(), ['Auto framing']);
+        assert.equal(indicator, true);
+        assert.ok(changes >= 1, 'the camera output is refreshed');
+
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        assert.equal(JSON.parse(window.localStorage.getItem('videoEffectsSettings')).autoFraming, true);
+        const restored = createEngine();
+        restored.window = window;
+        const other = new window.VideoEffectsPanel(restored, { background });
+        await other.restoreSettings();
+        assert.equal(restored.state.autoFraming, true);
+        other.destroy();
+
+        $('.vfx-active .vfx-chip-remove').click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.equal(engine.state.autoFraming, false);
+        assert.equal(toggle.checked, false);
+        assert.equal(indicator, false);
+    });
+
+    it('disables auto framing without face tracking, but still lets it be turned off', () => {
+        engine.state.faceTracking = 'error';
+        panel.sync();
+        assert.equal($('.vfx-toggle input').disabled, true);
+        engine.state.autoFraming = true;
+        panel.sync();
+        assert.equal($('.vfx-toggle input').disabled, false);
+    });
+
+    it('explains while auto framing looks for a face', () => {
+        engine.state.autoFraming = true;
+        engine.state.faceDetected = false;
+        panel.sync();
+        assert.match($('.vfx-status').textContent, /Looking for your face/);
+    });
+
     describe('custom 3D avatars', () => {
         const GLB = 'https://models.example.com/my-avatar.glb';
         const avatarTab = () => $$('.vfx-tabpanel')[3];
