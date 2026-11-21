@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.51
+ * @version 2.8.55
  *
  */
 
@@ -448,6 +448,9 @@ class RoomClient {
         this.isPollOpen = false;
         this.isPollPinned = false;
         this.isPollMaximized = false;
+        // Room quizzes (Quiz tab of the polls panel, state kept by the server)
+        this.roomQuizzes = null;
+        this.pollActiveTab = 'polls'; // 'polls' | 'quiz'
         this.isEditorOpen = false;
         this.isEditorLocked = false;
         this.isEditorPinned = false;
@@ -1083,6 +1086,8 @@ class RoomClient {
             if (room.thereIsPolls) {
                 this.socket.emit('updatePoll');
             }
+            // Room quizzes snapshot, serialized for me by the server
+            this.socket.emit('quiz', { action: 'list' });
             // Host protected enabled in the server side
             if (room.hostProtected) {
                 RoomURL = window.location.origin + getJoinRoomPath(room_id);
@@ -1837,6 +1842,7 @@ class RoomClient {
         this.socket.on('endRTMPfromURL', this.handleEndRTMPfromURL);
         this.socket.on('errorRTMPfromURL', this.handleErrorRTMPfromURL);
         this.socket.on('updatePolls', this.handleUpdatePolls);
+        this.socket.on('quiz', this.handleQuiz);
         this.socket.on('editorChange', this.handleEditorChange);
         this.socket.on('editorActions', this.handleEditorActions);
         this.socket.on('editorUpdate', this.handleEditorUpdate);
@@ -2174,6 +2180,12 @@ class RoomClient {
 
     handleUpdatePolls = (data) => {
         this.pollsUpdate(data);
+    };
+
+    handleQuiz = (data) => {
+        // The snapshot can arrive before the buttons are wired
+        this.initQuizzes();
+        this.roomQuizzes?.handle(data);
     };
 
     handleEditorChange = (data) => {
@@ -10193,7 +10205,10 @@ class RoomClient {
     }
 
     pollsUpdate(polls) {
-        if (!this.isPollOpen) this.togglePoll();
+        if (!this.isPollOpen) {
+            this.togglePoll();
+            this.setPollTab('polls');
+        }
 
         pollsContainer.innerHTML = '';
         polls.forEach((poll, index) => {
@@ -10353,6 +10368,145 @@ class RoomClient {
                 setTippy(deletePollButton.id, 'Delete poll', 'top');
                 setTippy(editPollButton.id, 'Edit poll', 'top');
             }
+        });
+    }
+
+    // ####################################################
+    // ROOM QUIZZES (Quiz tab of the polls panel)
+    // ####################################################
+
+    /**
+     * The server keeps the questions, the correct answers and the scores, and only sends to the
+     * participants what was revealed: this client sends intents and renders the state it gets.
+     */
+    initQuizzes() {
+        if (this.roomQuizzes || typeof RoomQuizzes === 'undefined') return;
+        const el = (id) => document.getElementById(id);
+        this.roomQuizzes = new RoomQuizzes({
+            elements: {
+                list: el('quizList'),
+                empty: el('quizEmpty'),
+                form: el('quizForm'),
+                title: el('quizTitle'),
+                modeStep: el('quizModeStep'),
+                modeAll: el('quizModeAll'),
+                anonymous: el('quizAnonymous'),
+                questions: el('quizQuestions'),
+                addQuestionBtn: el('quizAddQuestionBtn'),
+                cancelBtn: el('quizCancelBtn'),
+                count: el('quizCount'),
+                loadBtn: el('quizLoadBtn'),
+                saveBtn: el('quizSaveBtn'),
+                fileInput: el('quizFileInput'),
+            },
+            send: (action, data) => this.socket.emit('quiz', { action, ...data }),
+            getMyPeerId: () => this.peer_id,
+            onQuizEvent: (quiz, event, isMine) => this.handleQuizEvent(quiz, event, isMine),
+            onError: (message) => this.userLog('warning', message, 'top-end'),
+            onLoaded: () => this.userLog('success', 'Quiz loaded: review it, then create it', 'top-end', 4000),
+            confirmDelete: () => this.confirmDeleteQuiz(),
+            download: (blob, fileName) => this.saveBlobToFile(blob, fileName),
+        });
+    }
+
+    newQuiz() {
+        if (this._moderator.polls_cant_create && !isPresenter) {
+            return this.userLog(
+                'warning',
+                'The moderator does not allow non-presenters to create quizzes',
+                'top-end',
+                6000
+            );
+        }
+        this.roomQuizzes?.showForm();
+    }
+
+    /**
+     * Switch the polls panel between the polls and the quizzes
+     * @param {string} tab 'polls' | 'quiz'
+     */
+    setPollTab(tab) {
+        this.pollActiveTab = tab === 'quiz' ? 'quiz' : 'polls';
+        const isQuiz = this.pollActiveTab === 'quiz';
+        const pollTabPolls = document.getElementById('pollTabPolls');
+        const pollTabQuiz = document.getElementById('pollTabQuiz');
+        const pollPanePolls = document.getElementById('pollPanePolls');
+        const pollPaneQuiz = document.getElementById('pollPaneQuiz');
+        if (!pollTabPolls || !pollTabQuiz || !pollPanePolls || !pollPaneQuiz) return;
+        pollTabPolls.classList.toggle('active', !isQuiz);
+        pollTabQuiz.classList.toggle('active', isQuiz);
+        pollTabPolls.setAttribute('aria-selected', String(!isQuiz));
+        pollTabQuiz.setAttribute('aria-selected', String(isQuiz));
+        pollTabPolls.tabIndex = isQuiz ? -1 : 0;
+        pollTabQuiz.tabIndex = isQuiz ? 0 : -1;
+        pollPanePolls.classList.toggle('hidden', isQuiz);
+        pollPaneQuiz.classList.toggle('hidden', !isQuiz);
+        // Saves the poll results: the quizzes have their own download on each card
+        pollSaveButton.classList.toggle('hidden', isQuiz || !BUTTONS.poll.pollSaveButton);
+    }
+
+    /**
+     * Open the polls panel on a tab
+     * @param {string} tab 'polls' | 'quiz'
+     */
+    showPollPanel(tab) {
+        // togglePoll plays the open sound
+        this.isPollOpen ? this.sound('message') : this.togglePoll();
+        this.setPollTab(tab);
+    }
+
+    /**
+     * A quiz moved on: bring it to the participants' attention
+     * @param {object} quiz public quiz
+     * @param {string} event 'created' | 'start' | 'reveal' | 'next' | 'finish'
+     * @param {boolean} isMine action performed by me
+     */
+    handleQuizEvent(quiz, event, isMine) {
+        if (isMine) return;
+        switch (event) {
+            case 'start':
+                this.showPollPanel('quiz');
+                this.userLog(
+                    'info',
+                    (window.i18n?.t('{name} started a quiz', 'toasts') || '{name} started a quiz').replace(
+                        '{name}',
+                        quiz.creator_name
+                    ),
+                    'top-end',
+                    4000
+                );
+                break;
+            case 'next':
+            case 'finish':
+                this.showPollPanel('quiz');
+                break;
+            case 'reveal':
+                this.sound('message');
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Confirm the deletion of a quiz for everyone
+     * @returns {Promise<boolean>} confirmed
+     */
+    confirmDeleteQuiz() {
+        return Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            title: 'Delete quiz',
+            text: 'Are you sure you want to delete this quiz for everyone?',
+            imageUrl: image.delete,
+            ...swalDestructiveOptions(),
+            confirmButtonText: 'Delete quiz',
+            cancelButtonText: 'Cancel',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) this.sound('delete');
+            return result.isConfirmed;
         });
     }
 

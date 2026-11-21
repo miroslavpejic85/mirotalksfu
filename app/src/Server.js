@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.51
+ * @version 2.8.55
  *
  */
 
@@ -106,9 +106,24 @@ const { getJwtKeys } = require('./JwtSecret');
 const Logger = require('./Logger');
 const Validator = require('./Validator');
 const RoomPassword = require('./RoomPassword');
+const RoomQuizzes = require('./RoomQuizzes');
 const HtmlInjector = require('./HtmlInjector');
 const { buildRobotsTxt, buildSitemapXml } = require('./Seo');
 const log = new Logger('Server');
+
+// Pending batched quiz answer broadcasts: quiz id -> timeout
+const quizBroadcastTimers = new Map();
+const QUIZ_ANSWER_BATCH_MS = 150;
+
+/**
+ * @param {string} quizId
+ */
+function cancelQuizBroadcast(quizId) {
+    const timer = quizBroadcastTimers.get(quizId);
+    if (!timer) return;
+    clearTimeout(timer);
+    quizBroadcastTimers.delete(quizId);
+}
 const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yaml.load(fs.readFileSync(path.join(__dirname, '/../api/swagger.yaml'), 'utf8'));
@@ -6425,6 +6440,177 @@ function startServer() {
                 log.debug('[Poll] deletePoll', roomPolls);
             }
         });
+
+        // ####################################################
+        // ROOM QUIZZES (server-authoritative state)
+        // ####################################################
+
+        /**
+         * Quiz identity of a peer, built from server-side state only (never from the client payload):
+         * the answers follow the peer name (unique in the room, kept across a page reload), the
+         * creator rights the connection (peer_uuid is shared with the room, so it is not a secret).
+         * @param {string} peer_id socket id
+         * @param {object} peer
+         * @returns {object} { key, ownerKey, name }
+         */
+        function getQuizViewer(peer_id, peer) {
+            return { key: 'n:' + String(peer?.peer_name), ownerKey: 's:' + peer_id, name: peer?.peer_name };
+        }
+
+        /**
+         * @param {string} room_id
+         * @param {string} peer_id socket id
+         * @param {object} peer
+         * @returns {boolean} presenter of the room, checked with the server-stored peer identity
+         */
+        function isQuizPresenter(room_id, peer_id, peer) {
+            return isPeerPresenter(room_id, peer_id, peer?.peer_info?.peer_name, peer?.peer_info?.peer_uuid);
+        }
+
+        /**
+         * Handle room quizzes. Lobby peers never get here (socket middleware).
+         * @param {Object} data
+         * @param {string} data.action - 'list' | 'create' | 'start' | 'answer' | 'reveal' | 'next' | 'finish' | 'delete'.
+         * @param {string} [data.quiz_id] - Target quiz (every action but list and create).
+         * @param {string} [data.title] - Quiz title (create).
+         * @param {string} [data.mode] - 'step' (one question at a time) | 'all' (create).
+         * @param {boolean} [data.anonymous] - Only the presenters see the names (create).
+         * @param {Object[]} [data.questions] - [{ question, options, correct }] (create).
+         * @param {number} [data.question] - Question index (answer).
+         * @param {number} [data.option] - Option index, -1 to retract the answer (answer).
+         */
+        socket.on('quiz', async (data) => {
+            // Quiz texts are plain text (rendered with textContent), normalized by RoomQuizzes instead of checkXSS
+            if (!roomExists(socket)) return;
+            if (!Validator.isValidData(data) || Array.isArray(data)) return;
+
+            const room_id = socket.room_id;
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!room || !peer || isPeerInLobby(peer) || peer.isWhip) return;
+
+            const { action, quiz_id } = data;
+
+            // Throttle: every accepted action is broadcast to the whole room
+            const now = Date.now();
+            if (now - (socket.lastQuizActionAt || 0) < 100) return;
+            socket.lastQuizActionAt = now;
+
+            const viewer = getQuizViewer(socket.id, peer);
+            const isPresenter = isQuizPresenter(room_id, socket.id, peer);
+            const replyError = (message) => socket.emit('quiz', { action: 'error', message });
+            const canManage = (quiz) => RoomQuizzes.isCreator(quiz, viewer.ownerKey) || isPresenter;
+
+            try {
+                switch (action) {
+                    case 'list': {
+                        socket.emit('quiz', {
+                            action: 'list',
+                            quizzes: RoomQuizzes.list(room).map((quiz) =>
+                                RoomQuizzes.toPublic(quiz, viewer, isPresenter)
+                            ),
+                        });
+                        break;
+                    }
+                    case 'create': {
+                        // Same moderator rule as the polls: "only presenters can create polls"
+                        if (room._moderator?.polls_cant_create && !isPresenter) {
+                            return replyError('The moderator does not allow non-presenters to create quizzes');
+                        }
+                        const { quiz, error } = RoomQuizzes.create(room, data, viewer);
+                        if (error) return replyError(error);
+                        log.debug('[Quiz] created', { room_id, quiz_id: quiz.id });
+                        broadcastQuiz(room, room_id, quiz, { created_by: socket.id });
+                        break;
+                    }
+                    case 'answer': {
+                        // Managers see the correct options live: only the participants answer
+                        if (isPresenter) return replyError('Invalid request');
+                        const { quiz, error } = RoomQuizzes.answer(room, quiz_id, viewer, data.question, data.option);
+                        if (error) return replyError(error);
+                        scheduleQuizBroadcast(room, room_id, quiz);
+                        break;
+                    }
+                    case 'start':
+                    case 'reveal':
+                    case 'next':
+                    case 'finish': {
+                        const quiz = RoomQuizzes.get(room, quiz_id);
+                        if (!quiz) return replyError('Quiz not found');
+                        if (!canManage(quiz)) return;
+                        const { error } = RoomQuizzes[action](quiz);
+                        if (error) return replyError(error);
+                        log.debug('[Quiz] ' + action, { room_id, quiz_id });
+                        broadcastQuiz(room, room_id, quiz, { event: action, by: socket.id });
+                        break;
+                    }
+                    case 'delete': {
+                        const quiz = RoomQuizzes.get(room, quiz_id);
+                        if (!quiz) return replyError('Quiz not found');
+                        if (!canManage(quiz)) return;
+                        RoomQuizzes.remove(room, quiz_id);
+                        cancelQuizBroadcast(quiz_id);
+                        room.sendToAll('quiz', { action: 'delete', quiz_id, deleted_by: socket.id });
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (err) {
+                log.error('Quiz', err.message);
+            }
+        });
+
+        /**
+         * Send a quiz update to every admitted peer of the room, serialized per recipient:
+         * the managers (creator or presenter) get the answers, the others only what was revealed.
+         * @param {object} room
+         * @param {string} room_id
+         * @param {object} quiz internal quiz
+         * @param {object} [extra] extra fields
+         */
+        function broadcastQuiz(room, room_id, quiz, extra = {}) {
+            // This update carries the latest state: a pending batched one is no longer needed
+            cancelQuizBroadcast(quiz.id);
+            // Results computed once for the whole room, then serialized per recipient
+            const summary = RoomQuizzes.summarize(quiz);
+            for (const peer_id of room.getAdmittedPeerIds()) {
+                const peer = room.getPeer(peer_id);
+                if (!peer || peer.isWhip) continue;
+                room.send(peer_id, 'quiz', {
+                    action: 'update',
+                    quiz: RoomQuizzes.toPublic(
+                        quiz,
+                        getQuizViewer(peer_id, peer),
+                        isQuizPresenter(room_id, peer_id, peer),
+                        summary
+                    ),
+                    ...extra,
+                });
+            }
+        }
+
+        /**
+         * Answers are sent to the whole room: a burst of answers (everyone answering at once) is
+         * batched into one update per quiz instead of one room broadcast per answer.
+         * @param {object} room
+         * @param {string} room_id
+         * @param {object} quiz internal quiz
+         */
+        function scheduleQuizBroadcast(room, room_id, quiz) {
+            if (quizBroadcastTimers.has(quiz.id)) return;
+            const timer = setTimeout(() => {
+                quizBroadcastTimers.delete(quiz.id);
+                // Deleted or room closed meanwhile
+                if (RoomQuizzes.get(room, quiz.id) !== quiz || roomList.get(room_id) !== room) return;
+                try {
+                    broadcastQuiz(room, room_id, quiz);
+                } catch (err) {
+                    log.error('Quiz broadcast', err.message);
+                }
+            }, QUIZ_ANSWER_BATCH_MS);
+            timer.unref?.();
+            quizBroadcastTimers.set(quiz.id, timer);
+        }
 
         // Room collaborative editor
 

@@ -37,6 +37,7 @@
         <link rel="stylesheet" href="../css/VideoGrid.css" />
         <link rel="stylesheet" href="../css/GroupChat.css" />
         <link rel="stylesheet" href="../css/Polls.css" />
+        <link rel="stylesheet" href="../css/Quiz.css" />
         <link rel="stylesheet" href="../css/Editor.css" />
         <link rel="stylesheet" href="../css/Translate.css" />
         <link rel="stylesheet" href="../css/Swal.css" />
@@ -177,6 +178,7 @@
         <script defer src="../js/CalendarInvite.js"></script>
         <script defer src="../js/NetworkStats.js"></script>
         <script defer src="../js/GifSearch.js"></script>
+        <script defer src="../js/Quiz.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/SipPhone.js"></script>
         <script defer src="../js/WhipClient.js"></script>
@@ -4102,44 +4104,137 @@
                     </button>
                 </div>
             </div>
-            <div id="pollForm" class="poll-creation">
-                <form id="pollCreateForm" class="form">
-                    <div class="form-group">
-                        <label for="question">Question</label>
-                        <input
-                            type="text"
-                            id="question"
-                            name="question"
-                            placeholder="What would you like to ask?"
-                            required
-                        />
-                    </div>
-                    <div class="form-group">
-                        <div class="poll-options-heading">
-                            <span class="poll-field-label">Options</span>
-                            <div class="poll-option-actions" aria-label="Manage poll options">
-                                <button type="button" id="pollAddOptionBtn" aria-label="Add option">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <button type="button" id="pollDelOptionBtn" aria-label="Remove last option">
-                                    <i class="fas fa-minus"></i>
+            <div class="poll-tabs" role="tablist" aria-label="Polls and quizzes">
+                <button
+                    id="pollTabPolls"
+                    type="button"
+                    class="poll-tab active"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="pollPanePolls"
+                >
+                    <i class="fas fa-square-poll-horizontal"></i> Polls
+                </button>
+                <button
+                    id="pollTabQuiz"
+                    type="button"
+                    class="poll-tab"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="pollPaneQuiz"
+                    tabindex="-1"
+                >
+                    <i class="fas fa-graduation-cap"></i> Quiz
+                    <span id="quizCount" class="poll-count hidden" aria-label="Quizzes in progress"></span>
+                </button>
+            </div>
+            <div id="pollPanePolls" class="poll-pane" role="tabpanel" aria-labelledby="pollTabPolls">
+                <div id="pollForm" class="poll-creation">
+                    <form id="pollCreateForm" class="form">
+                        <div class="form-group">
+                            <label for="question">Question</label>
+                            <input
+                                type="text"
+                                id="question"
+                                name="question"
+                                placeholder="What would you like to ask?"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <div class="poll-options-heading">
+                                <span class="poll-field-label">Options</span>
+                                <div class="poll-option-actions" aria-label="Manage poll options">
+                                    <button type="button" id="pollAddOptionBtn" aria-label="Add option">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button type="button" id="pollDelOptionBtn" aria-label="Remove last option">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="optionsContainer">
+                                <input type="text" name="option" class="option-input" placeholder="Option 1" required />
+                                <input type="text" name="option" class="option-input" placeholder="Option 2" required />
+                            </div>
+                            <div class="poll-btns">
+                                <button type="submit" id="addPollButton" class="poll-primary-btn">
+                                    <i class="fas fa-square-poll-horizontal"></i> Create Poll
                                 </button>
                             </div>
                         </div>
-                        <div id="optionsContainer">
-                            <input type="text" name="option" class="option-input" placeholder="Option 1" required />
-                            <input type="text" name="option" class="option-input" placeholder="Option 2" required />
+                    </form>
+                </div>
+                <div class="polls">
+                    <div id="pollsContainer" class="polls-container"></div>
+                </div>
+            </div>
+            <div id="pollPaneQuiz" class="poll-pane quiz-pane hidden" role="tabpanel" aria-labelledby="pollTabQuiz">
+                <div class="quiz-pane-toolbar">
+                    <button id="quizNewBtn" type="button" class="poll-btn poll-btn-primary poll-btn-small">
+                        <i class="fas fa-plus"></i> New quiz
+                    </button>
+                </div>
+                <div class="quiz-pane-body">
+                    <form id="quizForm" class="poll-form quiz-form hidden" autocomplete="off">
+                        <div class="quiz-form-file">
+                            <button id="quizLoadBtn" type="button" class="poll-link-btn">
+                                <i class="fas fa-file-import"></i> Load from file
+                            </button>
+                            <button id="quizSaveBtn" type="button" class="poll-link-btn">
+                                <i class="fas fa-floppy-disk"></i> Save to file
+                            </button>
+                            <input
+                                id="quizFileInput"
+                                type="file"
+                                accept=".json,application/json"
+                                class="hidden"
+                                aria-label="Quiz file"
+                            />
                         </div>
-                        <div class="poll-btns">
-                            <button type="submit" id="addPollButton" class="poll-primary-btn">
-                                <i class="fas fa-square-poll-horizontal"></i> Create Poll
+                        <label for="quizTitle" class="poll-form-label">Quiz title</label>
+                        <input id="quizTitle" type="text" maxlength="120" placeholder="Give your quiz a name" />
+                        <span class="poll-form-label">Mode</span>
+                        <div class="quiz-modes" role="radiogroup" aria-label="Quiz mode">
+                            <label class="quiz-mode">
+                                <input id="quizModeStep" type="radio" name="quizMode" value="step" checked />
+                                <span class="quiz-mode-text">
+                                    <strong>One at a time</strong>
+                                    <small>You open the questions one by one</small>
+                                </span>
+                            </label>
+                            <label class="quiz-mode">
+                                <input id="quizModeAll" type="radio" name="quizMode" value="all" />
+                                <span class="quiz-mode-text">
+                                    <strong>All at once</strong>
+                                    <small>Everyone answers at their own pace</small>
+                                </span>
+                            </label>
+                        </div>
+                        <label class="poll-form-check">
+                            <input id="quizAnonymous" type="checkbox" checked />
+                            <span>Anonymous results (only presenters see the names)</span>
+                        </label>
+                        <div id="quizQuestions" class="quiz-form-questions"></div>
+                        <button id="quizAddQuestionBtn" type="button" class="poll-link-btn">
+                            <i class="fas fa-plus"></i> Add question
+                        </button>
+                        <div class="poll-form-actions">
+                            <button id="quizCancelBtn" type="button" class="poll-btn">Cancel</button>
+                            <button id="quizCreateBtn" type="submit" class="poll-btn poll-btn-primary">
+                                Create quiz
                             </button>
                         </div>
+                    </form>
+                    <div id="quizEmpty" class="poll-empty">
+                        <i class="fas fa-graduation-cap"></i>
+                        <p>No quizzes yet</p>
+                        <button id="quizEmptyNewBtn" type="button" class="poll-btn poll-btn-primary">
+                            Create a quiz
+                        </button>
                     </div>
-                </form>
-            </div>
-            <div class="polls">
-                <div id="pollsContainer" class="polls-container"></div>
+                    <div id="quizList" class="poll-list"></div>
+                </div>
             </div>
         </section>
 

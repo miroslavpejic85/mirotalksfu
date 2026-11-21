@@ -1,0 +1,800 @@
+/*--------------------------------------------------------------
+# Room quizzes (Quiz tab of the polls panel)
+# Shared poll UI classes are scoped to .quiz-pane so they never touch the polls tab.
+--------------------------------------------------------------*/
+
+.pls-container {
+    --quiz-correct: #3ecf8e;
+    --quiz-wrong: #ff6b6b;
+}
+
+/* Tabs (polls / quizzes) */
+
+.poll-tabs {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 4px;
+    margin-bottom: 10px;
+    padding: 4px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: var(--poll-toolbar-surface);
+}
+
+.poll-tab {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.65);
+    background: transparent;
+    border: none !important;
+    border-radius: 6px;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
+}
+
+.poll-tab:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.poll-tab.active {
+    color: #fff;
+    background: color-mix(in srgb, var(--poll-accent) 24%, transparent);
+}
+
+.pls-container .poll-tab:focus-visible {
+    outline: 2px solid var(--poll-accent);
+    outline-offset: 2px;
+}
+
+.pls-container .poll-pane {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0;
+    min-height: 0;
+}
+
+.poll-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    box-sizing: border-box;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 9px;
+    color: #fff;
+    background: color-mix(in srgb, var(--poll-accent) 30%, transparent);
+    border: 1px solid color-mix(in srgb, var(--poll-accent) 60%, transparent);
+}
+
+.quiz-pane {
+    --poll-surface: var(--poll-toolbar-surface, rgba(18, 18, 21, 0.88));
+    color: #fff;
+}
+
+.quiz-pane-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+}
+
+.quiz-pane-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    padding: 0 2px 10px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.pls-container.is-maximized .quiz-pane-body {
+    width: min(100%, 900px);
+    margin: 0 auto;
+}
+
+.quiz-pane button:focus-visible,
+.quiz-pane input:focus-visible {
+    outline: 2px solid var(--poll-accent);
+    outline-offset: 2px;
+}
+
+/* Buttons */
+
+.quiz-pane .poll-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.quiz-pane .poll-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+/* Tinted accent: readable whether the theme accent is light or dark */
+.quiz-pane .poll-btn-primary {
+    background: color-mix(in srgb, var(--poll-accent) 24%, transparent);
+    border-color: color-mix(in srgb, var(--poll-accent) 55%, transparent) !important;
+}
+
+.quiz-pane .poll-btn-primary:hover {
+    background: color-mix(in srgb, var(--poll-accent) 36%, transparent);
+}
+
+.quiz-pane .poll-btn-small {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+}
+
+.quiz-pane .poll-btn-danger:hover {
+    color: #ff8a8a;
+    background: rgba(255, 92, 92, 0.18);
+    border-color: rgba(255, 92, 92, 0.4) !important;
+}
+
+.quiz-pane .poll-link-btn {
+    align-self: flex-start;
+    padding: 4px 0;
+    font-size: 0.8rem;
+    color: var(--poll-accent);
+    background: transparent;
+    border: none !important;
+    cursor: pointer;
+}
+
+.quiz-pane .poll-link-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Create form */
+
+.quiz-pane .poll-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: var(--poll-surface);
+}
+
+.quiz-pane .poll-form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.quiz-pane .poll-form input[type='text'] {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    font-size: 0.85rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+}
+
+.quiz-pane .poll-form input[type='text']::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.quiz-pane .poll-form-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.quiz-pane .poll-form-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.quiz-pane .poll-form-option-remove {
+    flex: 0 0 auto;
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    min-height: 30px;
+    padding: 0;
+    box-sizing: border-box;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+    border: none !important;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.quiz-pane .poll-form-option-remove:hover:not(:disabled) {
+    color: #ff8a8a;
+    background: rgba(255, 92, 92, 0.18);
+}
+
+.quiz-pane .poll-form-option-remove:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.quiz-pane .poll-form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.quiz-pane .poll-form-check input {
+    accent-color: var(--poll-accent);
+}
+
+.quiz-pane .poll-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Empty state */
+
+.quiz-pane .poll-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex: 1;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+}
+
+.quiz-pane .poll-empty > i {
+    font-size: 2.2rem;
+    color: var(--poll-accent);
+    opacity: 0.6;
+}
+
+.quiz-pane .poll-empty p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+/* Poll cards */
+
+.quiz-pane .poll-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quiz-pane .poll-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: var(--poll-surface);
+}
+
+.quiz-pane .poll-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.quiz-pane .poll-question {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.quiz-pane .poll-badge {
+    flex: 0 0 auto;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.quiz-pane .poll-badge-closed {
+    color: #ff8a8a;
+    background: rgba(255, 92, 92, 0.16);
+}
+
+.quiz-pane .poll-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.quiz-pane .poll-creator {
+    overflow-wrap: anywhere;
+}
+
+.quiz-pane .poll-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.quiz-pane .poll-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 10px;
+    overflow: hidden;
+    font-size: 0.85rem;
+    color: #fff;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.18s ease;
+}
+
+.quiz-pane .poll-option:hover:not(:disabled) {
+    border-color: var(--poll-accent) !important;
+}
+
+.quiz-pane .poll-option:disabled {
+    cursor: default;
+}
+
+.quiz-pane .poll-option.is-selected {
+    border-color: var(--poll-accent) !important;
+}
+
+.quiz-pane .poll-option-bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: color-mix(in srgb, var(--poll-accent) 22%, transparent);
+    transition: width 0.35s ease;
+    pointer-events: none;
+}
+
+.quiz-pane .poll-option.is-selected .poll-option-bar {
+    background: color-mix(in srgb, var(--poll-accent) 38%, transparent);
+}
+
+.quiz-pane .poll-option-check,
+.quiz-pane .poll-option-text,
+.quiz-pane .poll-option-result {
+    position: relative;
+}
+
+.quiz-pane .poll-option-check {
+    flex: 0 0 auto;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.quiz-pane .poll-option.is-selected .poll-option-check {
+    color: var(--poll-accent);
+}
+
+.quiz-pane .poll-option-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.quiz-pane .poll-option-result {
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.quiz-pane .poll-voters {
+    padding: 3px 10px 0;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+    overflow-wrap: anywhere;
+}
+
+.quiz-pane .poll-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.quiz-pane .poll-card.is-closed .poll-option:not(.is-selected) .poll-option-check {
+    visibility: hidden;
+}
+
+/* Polls.css defines these for the poll cards: reset them for the quiz cards */
+.quiz-pane .poll-card-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    width: auto;
+    margin-left: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.quiz-pane .poll-question {
+    font-size: 0.95rem;
+}
+
+/* Builder */
+
+.quiz-pane .quiz-form-file {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.quiz-pane .quiz-form-file .poll-link-btn {
+    align-self: auto;
+}
+
+.quiz-pane .quiz-modes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 6px;
+}
+
+.quiz-pane .quiz-mode {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: border-color 0.18s ease;
+}
+
+.quiz-pane .quiz-mode:has(input:checked) {
+    border-color: var(--poll-accent);
+    background: color-mix(in srgb, var(--poll-accent) 12%, transparent);
+}
+
+.quiz-pane .quiz-mode input,
+.quiz-pane .quiz-form-correct {
+    flex: 0 0 auto;
+    accent-color: var(--quiz-correct);
+}
+
+.quiz-pane .quiz-mode input {
+    margin-top: 3px;
+    accent-color: var(--poll-accent);
+}
+
+.quiz-pane .quiz-mode-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.8rem;
+}
+
+.quiz-pane .quiz-mode-text small {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.quiz-pane .quiz-form-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quiz-pane .quiz-form-question {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.quiz-pane .quiz-form-question-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.quiz-pane .quiz-form-hint {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.quiz-pane .quiz-form-correct {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.quiz-pane .quiz-form-option:has(.quiz-form-correct:checked) .quiz-form-option-text {
+    border-color: color-mix(in srgb, var(--quiz-correct) 70%, transparent);
+}
+
+/* Cards */
+
+.quiz-pane .quiz-badge-ready {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.quiz-pane .quiz-badge-live {
+    color: var(--quiz-correct);
+    background: color-mix(in srgb, var(--quiz-correct) 16%, transparent);
+}
+
+.quiz-pane .quiz-note {
+    margin: 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.quiz-pane .quiz-progress {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--poll-accent);
+}
+
+.quiz-pane .quiz-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quiz-pane .quiz-question {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.quiz-pane .quiz-questions .quiz-question + .quiz-question {
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.quiz-pane .quiz-question-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.quiz-pane .quiz-question-number {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.quiz-pane .quiz-question-state {
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.quiz-pane .quiz-question[data-state='open'] .quiz-question-state {
+    color: var(--quiz-correct);
+}
+
+.quiz-pane .quiz-question-text {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.quiz-pane .quiz-option-mark {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.quiz-pane .poll-option.quiz-option.is-correct {
+    border-color: color-mix(in srgb, var(--quiz-correct) 70%, transparent) !important;
+}
+
+.quiz-pane .poll-option.quiz-option.is-correct .poll-option-bar {
+    background: color-mix(in srgb, var(--quiz-correct) 26%, transparent);
+}
+
+.quiz-pane .poll-option.quiz-option.is-correct .quiz-option-mark {
+    color: var(--quiz-correct);
+}
+
+.quiz-pane .poll-option.quiz-option.is-wrong {
+    border-color: color-mix(in srgb, var(--quiz-wrong) 70%, transparent) !important;
+}
+
+.quiz-pane .poll-option.quiz-option.is-wrong .poll-option-bar {
+    background: color-mix(in srgb, var(--quiz-wrong) 22%, transparent);
+}
+
+.quiz-pane .poll-option.quiz-option.is-wrong .quiz-option-mark,
+.quiz-pane .poll-option.quiz-option.is-wrong .poll-option-check {
+    color: var(--quiz-wrong);
+}
+
+/* Who answered what: green = correct, red = wrong */
+.quiz-pane .quiz-voters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 10px 0;
+}
+
+.quiz-pane .quiz-voter {
+    padding: 1px 8px;
+    font-size: 0.7rem;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid transparent;
+    overflow-wrap: anywhere;
+}
+
+.quiz-pane .quiz-voter.is-correct {
+    color: var(--quiz-correct);
+    background: color-mix(in srgb, var(--quiz-correct) 14%, transparent);
+    border-color: color-mix(in srgb, var(--quiz-correct) 40%, transparent);
+}
+
+.quiz-pane .quiz-voter.is-wrong {
+    color: var(--quiz-wrong);
+    background: color-mix(in srgb, var(--quiz-wrong) 12%, transparent);
+    border-color: color-mix(in srgb, var(--quiz-wrong) 35%, transparent);
+}
+
+/* Scores */
+
+.quiz-pane .quiz-score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--poll-accent) 14%, transparent);
+}
+
+.quiz-pane .quiz-score i {
+    color: #ffc845;
+}
+
+.quiz-pane .quiz-score.is-perfect {
+    background: color-mix(in srgb, var(--quiz-correct) 16%, transparent);
+}
+
+.quiz-pane .quiz-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.quiz-pane .quiz-leaderboard-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.quiz-pane .quiz-leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.quiz-pane .quiz-leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.quiz-pane .quiz-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.quiz-pane .quiz-leaderboard-item[data-rank='1'] .quiz-rank {
+    color: #1b1b1b;
+    background: #ffc845;
+}
+
+.quiz-pane .quiz-leaderboard-item[data-rank='2'] .quiz-rank {
+    color: #1b1b1b;
+    background: #c9d1d9;
+}
+
+.quiz-pane .quiz-leaderboard-item[data-rank='3'] .quiz-rank {
+    color: #1b1b1b;
+    background: #d9955b;
+}
+
+.quiz-pane .quiz-leaderboard-name {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.quiz-pane .quiz-leaderboard-score {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.quiz-pane .quiz-review-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.quiz-pane .quiz-card .poll-card-actions {
+    flex-wrap: wrap;
+}
