@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.62
+ * @version 2.8.63
  *
  */
 
@@ -2891,6 +2891,33 @@ function startServer() {
     const PEER_NAME_CHECK_WINDOW_MS = 60 * 1000;
 
     io.on('connection', (socket) => {
+        // Security: a malformed packet (missing payload/ack, wrong types) must never take the process down.
+        // Socket.IO does not catch listener exceptions, so every listener is wrapped and failures are contained.
+        const registerListener = socket.on.bind(socket);
+        socket.on = (event, listener) => {
+            if (typeof listener !== 'function') return registerListener(event, listener);
+            return registerListener(event, function (...args) {
+                const onError = (err) => {
+                    log.warn('Socket event handler error', { event, peer_id: socket.id, error: err?.message });
+                    const ack = args[args.length - 1];
+                    if (typeof ack === 'function') {
+                        try {
+                            ack({ error: 'Invalid request' });
+                        } catch (ackError) {
+                            log.debug('Socket event ack error', { event, error: ackError?.message });
+                        }
+                    }
+                };
+                try {
+                    const result = listener.apply(this, args);
+                    if (result && typeof result.catch === 'function') result.catch(onError);
+                    return result;
+                } catch (err) {
+                    onError(err);
+                }
+            });
+        };
+
         // Security: only sockets that were admitted to the room (join accepted, lobby included) may use
         // room events. Rejected/unjoined sockets can still be bound to a room id by 'createRoom'.
         socket.use((packet, next) => {
