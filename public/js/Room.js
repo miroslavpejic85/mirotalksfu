@@ -7446,7 +7446,25 @@ function setupQuickDeviceSwitchDropdowns() {
         appendMenuHeader(videoMenu, 'fas fa-video', 'Cameras');
         appendSelectOptions(videoMenu, videoSelect, 'No cameras found', buildVideoMenu);
 
-        appendMenuDivider(videoMenu);
+        if (isVideoEffectsAvailable() && !rc.getModerator().video_cant_unhide) {
+            appendMenuDivider(videoMenu);
+            // Quick switch, also in Settings > Visual effects
+            appendMenuToggle(
+                videoMenu,
+                'deviceMenuAutoFraming',
+                'Auto framing',
+                !!videoEffects.autoFraming,
+                async (enabled) => {
+                    await getVideoEffectsPanel()?.setAutoFraming(enabled);
+                    const menuSwitch = getId('deviceMenuAutoFraming');
+                    if (menuSwitch) menuSwitch.checked = !!videoEffects.autoFraming;
+                },
+                'fas fa-expand'
+            );
+            appendMenuDivider(videoMenu);
+        } else {
+            appendMenuDivider(videoMenu);
+        }
 
         const visualEffectsMerged = isVisualEffectsMerged() && isVideoEffectsAvailable();
 
@@ -7475,20 +7493,6 @@ function setupQuickDeviceSwitchDropdowns() {
         }
 
         if (isVideoEffectsAvailable() && !rc.getModerator().video_cant_unhide) {
-            // Quick switch, also in Settings > Visual effects
-            appendMenuToggle(
-                videoMenu,
-                'deviceMenuAutoFraming',
-                'Auto framing',
-                !!videoEffects.autoFraming,
-                async (enabled) => {
-                    await getVideoEffectsPanel()?.setAutoFraming(enabled);
-                    const menuSwitch = getId('deviceMenuAutoFraming');
-                    if (menuSwitch) menuSwitch.checked = !!videoEffects.autoFraming;
-                },
-                'fas fa-expand'
-            );
-
             const effectsBtn = document.createElement('button');
             effectsBtn.type = 'button';
             effectsBtn.className = 'device-menu-action-btn';
