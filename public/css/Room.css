@@ -7062,7 +7062,8 @@ body.room-bg-active #videoMediaContainer.mouse-light {
 
 .room-emoji-tab-container {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     gap: 2px;
     margin: 8px 0;
     padding: 3px;
@@ -7104,9 +7105,13 @@ body.room-bg-active #videoMediaContainer.mouse-light {
 }
 
 .room-emoji-mart {
-    display: block;
+    display: none;
     max-width: 100%;
     overflow: hidden;
+}
+
+.room-emoji-mart.visible {
+    display: block;
 }
 
 .room-emoji-mart > * {
@@ -7155,6 +7160,103 @@ body.room-bg-active #videoMediaContainer.mouse-light {
 @container room-emoji (max-width: 320px) {
     .room-emoji-grid.visible {
         grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+/* GIF tab (reuses the chat KLIPY picker styles from GroupChat.css) */
+.room-emoji-gif {
+    --chat-accent: var(--room-emoji-accent);
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    height: min(420px, calc(100dvh - 150px));
+    min-height: 220px;
+    padding: 2px;
+    box-sizing: border-box;
+}
+
+.room-emoji-gif.visible {
+    display: flex;
+}
+
+/* GIF reaction overlaid on the sender video tile */
+.room-gif-reaction {
+    pointer-events: none;
+}
+
+.room-gif-reaction--tile {
+    z-index: 3;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: roomGifReaction 5s ease forwards;
+}
+
+.room-gif-reaction--tile .room-gif-reaction__img {
+    max-width: 60%;
+    max-height: 60%;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.room-gif-reaction--floating {
+    position: absolute;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    color: #fff;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.22);
+    animation: roomEmojiFloat 4.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.room-gif-reaction--floating .room-gif-reaction__img {
+    width: clamp(110px, 18vw, 180px);
+    max-height: 180px;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+.room-gif-reaction__name {
+    max-width: 180px;
+    overflow: hidden;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@keyframes roomGifReaction {
+    0% {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    8% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    14%,
+    88% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .room-gif-reaction--tile,
+    .room-gif-reaction--floating {
+        animation: none;
     }
 }
 

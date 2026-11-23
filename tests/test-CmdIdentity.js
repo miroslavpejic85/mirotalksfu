@@ -6,6 +6,7 @@ const path = require('path');
 const vm = require('vm');
 const sinon = require('sinon');
 
+const Validator = require('../app/src/Validator');
 const serverSource = fs.readFileSync(path.join(__dirname, '..', 'app', 'src', 'Server.js'), 'utf8');
 const cmdSource = serverSource.slice(
     serverSource.indexOf("        socket.on('cmd',"),
@@ -13,7 +14,7 @@ const cmdSource = serverSource.slice(
 );
 
 describe('Socket.IO cmd sender identity', () => {
-    function setup() {
+    function setup({ gifSearchClientConfig = false } = {}) {
         const handlers = {};
         const room = { broadCast: sinon.spy(), sendTo: sinon.spy() };
         const peer = { peer_name: 'Bob', peer_avatar: 'https://example.com/bob.png' };
@@ -29,8 +30,12 @@ describe('Socket.IO cmd sender identity', () => {
             getRoom: () => room,
             getPeer: () => peer,
             checkXSS: (data) => data,
-            Validator: { isValidData: (data) => Boolean(data && typeof data === 'object') },
+            Validator: {
+                isValidData: (data) => Boolean(data && typeof data === 'object'),
+                isValidRoomGifUrl: Validator.isValidRoomGifUrl,
+            },
             config: {},
+            gifSearchClientConfig,
             log: { debug: sinon.spy(), warn: sinon.spy() },
         });
 
@@ -38,6 +43,38 @@ describe('Socket.IO cmd sender identity', () => {
 
         return { handlers, room };
     }
+
+    it('binds roomGif reactions to the sender and broadcasts them', async () => {
+        const { handlers, room } = setup({ gifSearchClientConfig: { enabled: true } });
+
+        await handlers.cmd({
+            type: 'roomGif',
+            peer_id: 'alice-id',
+            peer_name: 'Alice',
+            gif: 'https://static.klipy.com/ii/abc/md.webp',
+            broadcast: false,
+        });
+
+        assert.equal(room.sendTo.callCount, 0);
+        assert.equal(room.broadCast.callCount, 1);
+        const [from, action, data] = room.broadCast.firstCall.args;
+        assert.equal(from, 'bob-id');
+        assert.equal(action, 'cmd');
+        assert.equal(data.peer_id, 'bob-id');
+        assert.equal(data.peer_name, 'Bob');
+        assert.equal(data.gif, 'https://static.klipy.com/ii/abc/md.webp');
+    });
+
+    it('drops roomGif reactions when GIF search is disabled or the URL is unsafe', async () => {
+        const disabled = setup();
+        await disabled.handlers.cmd({ type: 'roomGif', gif: 'https://static.klipy.com/ii/abc/md.webp' });
+        assert.equal(disabled.room.broadCast.callCount, 0);
+
+        const { handlers, room } = setup({ gifSearchClientConfig: { enabled: true } });
+        await handlers.cmd({ type: 'roomGif', gif: 'javascript:alert(1)' });
+        assert.equal(room.broadCast.callCount, 0);
+        assert.equal(room.sendTo.callCount, 0);
+    });
 
     it('overrides forged transcript author with the real peer', async () => {
         const { handlers, room } = setup();

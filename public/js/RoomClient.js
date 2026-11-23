@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.66
+ * @version 2.8.67
  *
  */
 
@@ -442,6 +442,7 @@ class RoomClient {
         this.isChatGifOpen = false;
         this.gifSearch = null; // KLIPY client config from joinRoom
         this.chatGifSearch = null; // GifSearch instance
+        this.roomGifSearch = null; // GifSearch instance for the Room Reactions GIF tab
         this.chatTranslation = null; // chat translation config (capability flag, limits, languages)
         this.chatTranslateLang = ''; // language picked for my outgoing messages ('' = off)
         this.isChatTranslating = false;
@@ -8304,6 +8305,7 @@ class RoomClient {
             this.gifSearch = null;
         }
         this.initChatGif();
+        this.initRoomGif();
     }
 
     // Idempotent: called once the config arrives and again when the room UI is ready (whichever is last wins).
@@ -8349,6 +8351,52 @@ class RoomClient {
             this.chatGifSearch.open();
             if (!this.isMobileDevice) this.getId('chatGifSearchInput')?.focus();
         }
+    }
+
+    // Idempotent: called once the config arrives and again when the Room Reactions picker is built.
+    initRoomGif() {
+        const gifTab = this.getId('roomEmojiGifTab');
+        if (!gifTab || this.roomGifSearch) return;
+        if (!this.gifSearch || typeof GifSearch === 'undefined') {
+            hide(gifTab);
+            return;
+        }
+        try {
+            this.roomGifSearch = new GifSearch({
+                apiKey: this.gifSearch.apiKey,
+                contentFilter: this.gifSearch.contentFilter,
+                container: this.getId('roomEmojiGif'),
+                input: this.getId('roomGifSearchInput'),
+                results: this.getId('roomGifResults'),
+                status: this.getId('roomGifStatus'),
+                onSelect: (url) => this.sendRoomGif(url),
+            });
+            show(gifTab);
+        } catch (err) {
+            console.warn('Room GIF search init failed', err?.message || err);
+            hide(gifTab);
+        }
+    }
+
+    openRoomGif() {
+        if (!this.roomGifSearch) return;
+        this.roomGifSearch.open();
+        if (!this.isMobileDevice) this.getId('roomGifSearchInput')?.focus();
+    }
+
+    sendRoomGif(url) {
+        if (!this.isValidRoomGifUrl(url)) return;
+        const cmd = {
+            type: 'roomGif',
+            peer_id: this.peer_id,
+            peer_name: this.peer_name,
+            gif: url,
+            broadcast: true,
+        };
+        if (this.thereAreParticipants()) {
+            this.emitCmd(cmd);
+        }
+        this.handleCmd(cmd);
     }
 
     toggleChatTranslate() {
@@ -14474,6 +14522,9 @@ class RoomClient {
             case 'roomEmoji':
                 this.handleRoomEmoji(cmd);
                 break;
+            case 'roomGif':
+                this.handleRoomGif(cmd);
+                break;
             case 'transcriptionAll':
                 this.transcription.handleTranscriptionAll(cmd);
                 break;
@@ -14644,6 +14695,73 @@ class RoomClient {
 
             this.handleEmojiSound(cmd);
         }
+    }
+
+    isValidRoomGifUrl(url) {
+        if (typeof url !== 'string' || !url || url.length > 2048 || /[\s"'<>`]/.test(url)) return false;
+        try {
+            return new URL(url).protocol === 'https:';
+        } catch {
+            return false;
+        }
+    }
+
+    // Prefer the camera tile, then the camera-off tile, then a screen share; hidden tiles (e.g. Hide me) are skipped.
+    getRoomGifTile(peerId) {
+        if (!peerId) return null;
+        const rank = (tile) => {
+            if (tile.dataset.cameraOff === 'true') return 1;
+            return tile.dataset.mediaType === 'screen' ? 2 : 0;
+        };
+        const tiles = [...document.querySelectorAll('.Camera[data-peer-id]')].filter(
+            (tile) =>
+                tile.dataset.peerId === peerId && !tile.classList.contains('hidden') && tile.style.display !== 'none'
+        );
+        tiles.sort((a, b) => rank(a) - rank(b));
+        return tiles[0] || null;
+    }
+
+    handleRoomGif(cmd, duration = 5000) {
+        const url = cmd?.gif;
+        if (!this.isValidRoomGifUrl(url)) return;
+
+        const overlay = document.createElement('div');
+        const img = document.createElement('img');
+
+        img.className = 'room-gif-reaction__img';
+        img.alt = 'GIF';
+        img.decoding = 'async';
+        img.draggable = false;
+        img.referrerPolicy = 'no-referrer';
+        img.addEventListener('error', () => overlay.remove());
+        img.src = url;
+
+        overlay.appendChild(img);
+
+        const tile = this.getRoomGifTile(cmd.peer_id);
+        if (tile) {
+            // One GIF per tile: a new reaction replaces the previous one
+            tile.querySelectorAll('.room-gif-reaction').forEach((el) => el.remove());
+            overlay.className = 'room-gif-reaction room-gif-reaction--tile';
+            tile.appendChild(overlay);
+        } else {
+            const userEmoji = this.getId('userEmoji');
+            if (!userEmoji) return;
+            const placement = this.getRoomEmojiPlacement();
+            const name = document.createElement('span');
+            name.className = 'room-gif-reaction__name';
+            name.textContent = cmd.peer_name || 'Guest';
+            overlay.appendChild(name);
+            overlay.className = 'room-gif-reaction room-gif-reaction--floating';
+            overlay.style.left = `${placement.left}px`;
+            overlay.style.top = `${placement.top}px`;
+            overlay.style.setProperty('--emoji-drift', placement.drift);
+            overlay.style.setProperty('--emoji-rise', placement.rise);
+            overlay.style.setProperty('--emoji-rotation', placement.rotation);
+            userEmoji.appendChild(overlay);
+        }
+
+        setTimeout(() => overlay.remove(), duration);
     }
 
     handleEmojiSound(cmd) {

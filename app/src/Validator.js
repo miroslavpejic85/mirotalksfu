@@ -274,6 +274,24 @@ function isSafeImageSrc(src) {
     return !isPrivateOrLoopbackHost(host);
 }
 
+const ROOM_GIF_URL_MAX_LENGTH = 2048;
+
+/**
+ * Validate a Room Reactions GIF URL before it is relayed to the room.
+ * Only bounded https URLs without whitespace, quotes or angle brackets are accepted.
+ * @param {string} url
+ * @returns {boolean}
+ */
+function isValidRoomGifUrl(url) {
+    if (typeof url !== 'string' || !url || url.length > ROOM_GIF_URL_MAX_LENGTH) return false;
+    if (/[\s"'<>`]/.test(url)) return false;
+    try {
+        return new URL(url).protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
 /**
  * Filter fabric.js canvas JSON in place: drop any `image` objects whose `src`
  * fails `isSafeImageSrc`. Accepts either a JSON string or an object and
@@ -331,5 +349,6 @@ module.exports = {
     isPublicHttpUrl,
     safeDnsLookup,
     isSafeImageSrc,
+    isValidRoomGifUrl,
     sanitizeWbCanvasJson,
 };
