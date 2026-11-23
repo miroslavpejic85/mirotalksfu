@@ -21,6 +21,7 @@ class LocalStorage {
             transcript_show_on_msg: true, // show transcript on new message
             transcript_send_to_all: true, // send transcript to all participants
             speech_in_msg: false, // speech incoming message
+            chat_time_12h: null, // null = server default (CHAT_TIME_FORMAT), true = 12-hour AM/PM, false = 24-hour
             moderator_video_start_privacy: false, // Everyone starts video in privacy mode
             moderator_audio_start_muted: false, // Everyone starts muted in the room
             moderator_video_start_hidden: false, // Everyone starts hidden in the room

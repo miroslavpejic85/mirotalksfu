@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.8.64 - Configuration File
+ * MiroTalk SFU v2.8.65 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1834,6 +1834,7 @@ module.exports = {
                 chatGPT: process.env.ENABLE_CHAT_GPT !== 'false',
                 deepSeek: process.env.ENABLE_DEEP_SEEK !== 'false',
                 chatTyping: process.env.ENABLE_CHAT_TYPING !== 'false',
+                chatTimeFormat: process.env.CHAT_TIME_FORMAT === '12h' ? '12h' : '24h', // Default, users can override it
             },
 
             // Poll interface controls

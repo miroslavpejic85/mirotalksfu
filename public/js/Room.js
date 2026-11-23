@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.64
+ * @version 2.8.65
  *
  */
 
@@ -746,6 +746,7 @@ async function initClient() {
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('showChatOnMsg', 'Show chat on new message comes', 'bottom');
         setTippy('speechIncomingMsg', 'Speech the incoming messages', 'bottom');
+        setTippy('chatTime12h', 'Show message time in 12-hour AM/PM format', 'bottom');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
@@ -5071,6 +5072,12 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+    chatTime12h.onchange = (e) => {
+        rc.setChatTime12h(e.currentTarget.checked);
+        localStorageSettings.chat_time_12h = rc.chatTime12h;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
     transcriptShowOnMsg.onchange = (e) => {
         transcription.showOnMessage = e.currentTarget.checked;
         rc.roomMessage('transcriptShowOnMsg', transcription.showOnMessage);
@@ -5850,6 +5857,11 @@ function loadSettingsFromLocalStorage() {
     transcription.sendToAll =
         localStorageSettings.transcript_send_to_all !== undefined ? localStorageSettings.transcript_send_to_all : true;
     rc.speechInMessages = localStorageSettings.speech_in_msg;
+    rc.setChatTime12h(
+        typeof localStorageSettings.chat_time_12h === 'boolean'
+            ? localStorageSettings.chat_time_12h
+            : BUTTONS.chat?.chatTimeFormat === '12h'
+    );
     isPitchBarEnabled = localStorageSettings.pitch_bar;
     isSoundEnabled = localStorageSettings.sounds;
     isKeepButtonsVisible = localStorageSettings.keep_buttons_visible;
@@ -5860,6 +5872,7 @@ function loadSettingsFromLocalStorage() {
     transcriptShowOnMsg.checked = transcription.showOnMessage;
     transcriptSendToAll.checked = transcription.sendToAll;
     speechIncomingMsg.checked = rc.speechInMessages;
+    chatTime12h.checked = rc.chatTime12h;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
     switchShowCameraOffParticipants.checked = showCameraOffParticipants;
@@ -11778,7 +11791,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.64',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.65',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

@@ -130,6 +130,7 @@ let BUTTONS = {
         chatGPT: true,
         deepSeek: true,
         chatTyping: true,
+        chatTimeFormat: '24h', // 12h | 24h
     },
     poll: {
         pollPinButton: true,

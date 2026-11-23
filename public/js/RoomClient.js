@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.64
+ * @version 2.8.65
  *
  */
 
@@ -385,6 +385,7 @@ class RoomClient {
 
         // Chat typing indicator
         this.chatTypingIndicator = typeof BUTTONS !== 'undefined' ? BUTTONS.chat?.chatTyping !== false : true;
+        this.chatTime12h = typeof BUTTONS !== 'undefined' && BUTTONS.chat?.chatTimeFormat === '12h';
         this.chatTypingEmitInterval = 2000; // ms
         this.chatTypingIdleTimeout = 3000; // ms
         this.chatTypingExpire = 5000; // ms
@@ -6496,8 +6497,24 @@ class RoomClient {
         return _EVENTS;
     }
 
-    getTimeNow() {
-        return new Date().toTimeString().split(' ')[0];
+    getTimeNow(date = new Date()) {
+        if (this.chatTime12h) {
+            return date.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+            });
+        }
+        return date.toTimeString().split(' ')[0];
+    }
+
+    setChatTime12h(enabled) {
+        this.chatTime12h = !!enabled;
+        document.querySelectorAll('.msg-time[data-ts]').forEach((el) => {
+            const ts = Number(el.dataset.ts);
+            if (Number.isFinite(ts)) el.textContent = this.getTimeNow(new Date(ts));
+        });
     }
 
     getId(id) {
@@ -8925,7 +8942,9 @@ class RoomClient {
         const getToId = filterXSS(toId);
         const getToName = filterXSS(toName);
         const getMsgId = filterXSS(msgId || '');
-        const time = this.getTimeNow();
+        const now = new Date();
+        const time = this.getTimeNow(now);
+        const timeSpan = `<span class="msg-time" data-ts="${now.getTime()}">${time}</span>`;
 
         // Caller side convention is: left = local user, right = remote/assistant.
         // UI convention is: local user on the right, remote on the left.
@@ -8934,8 +8953,8 @@ class RoomClient {
         const messageData = myMessage ? 'text-end' : 'text-start';
         const safeFromName = this.sanitizeHtml(getFromName);
         const timeAndName = myMessage
-            ? `<span class="message-data-time">${time}, ${safeFromName} ( me ) </span>`
-            : `<span class="message-data-time">${time}, ${safeFromName} </span>`;
+            ? `<span class="message-data-time">${timeSpan}, ${safeFromName} ( me ) </span>`
+            : `<span class="message-data-time">${timeSpan}, ${safeFromName} </span>`;
 
         const formatMessage = this.formatMsg(getMsg);
         const speechButton = this.isSpeechSynthesisSupported
