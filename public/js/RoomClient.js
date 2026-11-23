@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.65
+ * @version 2.8.66
  *
  */
 
@@ -8957,17 +8957,20 @@ class RoomClient {
             : `<span class="message-data-time">${timeSpan}, ${safeFromName} </span>`;
 
         const formatMessage = this.formatMsg(getMsg);
-        const speechButton = this.isSpeechSynthesisSupported
-            ? `<button 
+        // Image/GIF-only messages have no text to read or edit; Copy copies the image URL instead.
+        const isImageOnly = !!this.getChatImageOnlyUrl(getMsg);
+        const speechButton =
+            this.isSpeechSynthesisSupported && !isImageOnly
+                ? `<button 
                     id="msg-speech-${chatMessagesId}" 
                     class="mr5" 
                     onclick="rc.speechElementText('message-${chatMessagesId}')">
                     ${icons.speech}
                 </button>`
-            : '';
+                : '';
 
         const editButton =
-            myMessage && this.isOwnRelayedChatMessage(getFromId, getToId, getMsgId)
+            myMessage && !isImageOnly && this.isOwnRelayedChatMessage(getFromId, getToId, getMsgId)
                 ? `<button 
                     id="msg-edit-${chatMessagesId}" 
                     class="mr5" 
@@ -9540,6 +9543,10 @@ class RoomClient {
         textEl.innerHTML = this.processMessage(getMsg);
         hljs.highlightAll();
 
+        // An edit can turn text into an image URL (or back): keep Speech in sync with the content.
+        const speechBtn = msgEl.querySelector('button[id^="msg-speech-"]');
+        if (speechBtn) speechBtn.style.display = this.getChatImageOnlyUrl(textEl) ? 'none' : '';
+
         const msgId = msgEl.getAttribute('data-msg-id') || '';
         const entry = msgId ? this.chatMessages.find((m) => m.msgId === msgId) : null;
         if (entry) {
@@ -9585,11 +9592,30 @@ class RoomClient {
     };
 
     copyToClipboard(id) {
-        copyTextToClipboard(this.getId(id).innerText).then((copied) =>
+        const el = this.getId(id);
+        if (!el) return;
+        const text = this.getChatImageOnlyUrl(el) || el.innerText;
+        copyTextToClipboard(text).then((copied) =>
             copied
                 ? this.userLog('success', 'Message copied!', 'top-end', 1000)
                 : this.userLog('error', 'Unable to copy to clipboard', 'top-end', 6000)
         );
+    }
+
+    // Returns the image URL when a chat message (HTML string or element) is just an image/GIF, otherwise ''.
+    getChatImageOnlyUrl(source) {
+        let root = source;
+        if (typeof source === 'string') {
+            // <template> content is inert, so images are not fetched while inspecting.
+            root = document.createElement('template');
+            root.innerHTML = source;
+            root = root.content;
+        }
+        if (!root || (root.textContent || '').trim()) return '';
+        const images = root.querySelectorAll('img');
+        if (images.length !== 1) return '';
+        const src = images[0].getAttribute('src') || '';
+        return this.isValidHttpURL(src) ? src : '';
     }
 
     formatMsg(msg) {
@@ -9761,7 +9787,9 @@ class RoomClient {
 
     speechElementText(elemId) {
         const element = this.getId(elemId);
-        this.speechText(element.innerText);
+        const text = element ? element.innerText.trim() : '';
+        if (!text) return;
+        this.speechText(text);
     }
 
     speechText(msg) {

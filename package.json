@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.8.65",
+    "version": "2.8.66",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -90,7 +90,7 @@
         "helmet": "^8.3.0",
         "httpolyglot": "0.1.2",
         "ical-generator": "^11.1.4",
-        "ioredis": "^6.0.0",
+        "ioredis": "^6.1.0",
         "js-yaml": "^5.5.0",
         "jsdom": "^31.0.1",
         "jsonwebtoken": "^9.0.3",
