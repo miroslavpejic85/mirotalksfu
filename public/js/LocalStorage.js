@@ -50,7 +50,7 @@ class LocalStorage {
             pitch_bar: true, // volume indicator
             sounds: true, // room notify sounds
             show_camera_off_participants: true, // show participants with the camera off in the grid
-            keep_buttons_visible: false, // Keep buttons always visible
+            keep_buttons_visible: true, // Keep buttons always visible
             chat_pin: true, // Auto pin chat on open
             keyboard_shortcuts: false, // keyboard shortcuts
             host_only_recording: false, // presenter

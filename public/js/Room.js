@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.70
+ * @version 2.8.71
  *
  */
 
@@ -128,9 +128,8 @@ const lS = new LocalStorage();
 
 const storedSettings = lS.getLocalStorageSettings();
 const localStorageSettings = storedSettings || lS.SFU_SETTINGS;
-// On mobile the buttons bar is visible by default (no mouse to reveal it), unless the user chose otherwise
-if (isMobileDevice && storedSettings?.keep_buttons_visible === undefined)
-    localStorageSettings.keep_buttons_visible = true;
+// Buttons bar visible by default on every device, unless the user chose otherwise (older saved settings lack the key)
+if (storedSettings?.keep_buttons_visible === undefined) localStorageSettings.keep_buttons_visible = true;
 
 const locallyHiddenPeerIds = new Set();
 
@@ -11855,7 +11854,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.70',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.71',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
