@@ -439,6 +439,7 @@ class RoomClient {
         this.isZoomCenterMode = false;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
+        this.isChatEmojiLocked = false;
         this.isChatGifOpen = false;
         this.gifSearch = null; // KLIPY client config from joinRoom
         this.chatGifSearch = null; // GifSearch instance
@@ -8295,6 +8296,13 @@ class RoomClient {
         const chatEmojiButton = this.getId('chatEmojiButton');
         chatEmojiButton.style.color = isOpen ? '#FFFF00' : '#FFFFFF';
         chatEmojiButton.setAttribute('aria-expanded', String(isOpen));
+        if (!isOpen) this.setChatEmojiLocked(false);
+    }
+
+    // A mouse click locks the hover picker open (shown like an active toolbar button) until clicked again or outside
+    setChatEmojiLocked(isLocked) {
+        this.isChatEmojiLocked = isLocked;
+        this.getId('chatEmojiButton')?.classList.toggle('is-active', isLocked);
     }
 
     toggleChatGif() {

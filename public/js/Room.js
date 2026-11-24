@@ -3980,7 +3980,16 @@ function handleButtons() {
         rc.sendMessage();
     };
     chatEmojiButton.onclick = (event) => {
-        if (!isMobileDevice && event.detail > 0) return;
+        if (!isMobileDevice && event.detail > 0) {
+            // Mouse: hover already opens the picker, the click locks it open (click again to close)
+            if (rc.isChatEmojiLocked) {
+                rc.setChatEmojiOpen(false);
+            } else {
+                rc.setChatEmojiOpen(true);
+                rc.setChatEmojiLocked(true);
+            }
+            return;
+        }
         rc.toggleChatEmoji();
     };
     chatMarkdownButton.onclick = () => {
@@ -5560,7 +5569,7 @@ function handleChatEmojiPicker() {
 
     function addEmojiToMsg(data) {
         chatMessage.value += data.native;
-        rc.setChatEmojiOpen(false);
+        if (!rc.isChatEmojiLocked) rc.setChatEmojiOpen(false);
     }
 
     const chatEmojiButton = getId('chatEmojiButton');
@@ -5571,11 +5580,13 @@ function handleChatEmojiPicker() {
         const cancelClose = () => clearTimeout(closeTimer);
         const openPicker = () => {
             cancelClose();
-            rc.setChatEmojiOpen(true);
+            if (!rc.isChatEmojiOpen) rc.setChatEmojiOpen(true);
         };
         const scheduleClose = () => {
             cancelClose();
-            closeTimer = setTimeout(() => rc.setChatEmojiOpen(false), 300);
+            closeTimer = setTimeout(() => {
+                if (!rc.isChatEmojiLocked) rc.setChatEmojiOpen(false);
+            }, 300);
         };
 
         chatEmojiButton.addEventListener('mouseenter', openPicker);
