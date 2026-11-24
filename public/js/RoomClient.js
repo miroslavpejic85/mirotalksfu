@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.69
+ * @version 2.8.70
  *
  */
 
@@ -12610,6 +12610,9 @@ class RoomClient {
                 this.userLog('info', `${peer_name} ${icons.youtube} closed the video`, 'top-end');
                 this.closeVideo();
                 break;
+            case 'sync':
+                this.applyShareMediaSync(data);
+                break;
             default:
                 break;
         }
@@ -12627,6 +12630,7 @@ class RoomClient {
                 : data.video_url;
         let video_type = this.getVideoType(video_url);
         const is_audio_share = video_type === 'audio/mpeg';
+        const playback = !is_youtube && data.playback ? data.playback : null;
         this.closeVideo();
         show(videoCloseBtn);
         d = document.createElement('div');
@@ -12674,35 +12678,27 @@ class RoomClient {
                 });
             }
         } else {
+            // Audio files also use <video>: the poster fills the tile and the native controls stay on top of it
+            video = document.createElement('video');
+            video.type = video_type;
+            video.autoplay = !playback?.paused;
+            video.controls = true;
+            video.playsInline = true;
+            video.setAttribute('playsinline', 'true');
+            video.setAttribute('webkit-playsinline', 'true');
             if (is_audio_share) {
-                const audioPoster = document.createElement('img');
-                audioPoster.setAttribute('src', image.audio);
-                audioPoster.setAttribute('alt', 'Shared audio');
-                audioPoster.setAttribute('width', '100%');
-                audioPoster.setAttribute('height', '100%');
-                d.appendChild(audioPoster);
-
-                video = document.createElement('audio');
-                video.type = video_type;
-                video.controls = true;
-                video.autoplay = true;
                 video.preload = 'metadata';
-            } else {
-                video = document.createElement('video');
-                video.type = video_type;
-                video.autoplay = true;
-                video.controls = true;
-                video.playsInline = true;
-                video.setAttribute('playsinline', 'true');
-                video.setAttribute('webkit-playsinline', 'true');
+                video.setAttribute('poster', image.audio);
+                // WebKit (Safari/iOS) hides the poster once audio-only playback starts, the background keeps the gif visible
+                video.style.background = `#000 url('${image.audio}') center / contain no-repeat`;
+                video.setAttribute('aria-label', 'Shared audio');
             }
         }
         video.setAttribute('id', '__videoShare');
         video.setAttribute('src', video_url);
-        if (!is_audio_share) {
-            video.setAttribute('width', '100%');
-            video.setAttribute('height', '100%');
-        }
+        video.setAttribute('width', '100%');
+        video.setAttribute('height', '100%');
+        if (!is_youtube) this.initShareMediaSync(video, data, playback);
         vb.appendChild(e);
         BUTTONS.videoShare.fullScreenButton && !is_audio_share && vb.appendChild(fsBtn);
         if (BUTTONS.videoShare.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
@@ -12710,7 +12706,7 @@ class RoomClient {
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
 
-        if (!is_youtube) {
+        if (!is_youtube && !playback?.paused) {
             const tryPlay = video.play?.();
             if (tryPlay && typeof tryPlay.catch === 'function') {
                 tryPlay.catch((err) => {
@@ -12726,6 +12722,12 @@ class RoomClient {
                         confirmButtonText: 'Play',
                     }).then((result) => {
                         if (result.isConfirmed) {
+                            // Join where the others are now, so this late play doesn't rewind everyone
+                            const expected = data.from_peer_id ? this.getShareMediaExpectedState() : null;
+                            if (expected && Math.abs(video.currentTime - expected.time) > 1) {
+                                video.currentTime = expected.time;
+                            }
+                            if (expected?.paused) return;
                             video.play().catch((playErr) => {
                                 console.warn('[openVideo] User-triggered media play failed', playErr);
                             });
@@ -12820,7 +12822,91 @@ class RoomClient {
         this.sound('joined');
     }
 
+    // Shared media playback sync: play/pause/seek on any player is mirrored to the share audience.
+    // `expected` is the last known shared state, used to skip events caused by applying a remote sync.
+    initShareMediaSync(video, data, playback) {
+        const target = data.peer_id === 'all' || !data.from_peer_id ? data.peer_id : data.from_peer_id;
+        const time = Number(playback?.time);
+        this.shareMediaSync = {
+            target,
+            expected: { paused: !!playback?.paused, time: Number.isFinite(time) ? time : 0, at: Date.now() },
+            timer: null,
+        };
+        if (playback && time > 0) {
+            video.addEventListener(
+                'loadedmetadata',
+                () => {
+                    const sync = this.shareMediaSync;
+                    const expected = this.getShareMediaExpectedState();
+                    if (!sync || !expected) return;
+                    if (Number.isFinite(video.duration) && expected.time >= video.duration) {
+                        sync.expected = { paused: true, time: video.duration, at: Date.now() };
+                        video.pause();
+                        video.currentTime = video.duration;
+                        return;
+                    }
+                    video.currentTime = expected.time;
+                },
+                { once: true }
+            );
+        }
+        const onChange = () => this.scheduleShareMediaSync(video);
+        ['play', 'pause', 'seeked'].forEach((event) => video.addEventListener(event, onChange));
+    }
+
+    getShareMediaExpectedState() {
+        const expected = this.shareMediaSync?.expected;
+        if (!expected) return null;
+        const elapsed = expected.paused ? 0 : (Date.now() - expected.at) / 1000;
+        return { paused: expected.paused, time: expected.time + elapsed };
+    }
+
+    scheduleShareMediaSync(video) {
+        const sync = this.shareMediaSync;
+        if (!sync) return;
+        clearTimeout(sync.timer);
+        sync.timer = setTimeout(() => this.emitShareMediaSync(video), 250);
+    }
+
+    emitShareMediaSync(video) {
+        const sync = this.shareMediaSync;
+        if (!sync || !video.isConnected) return;
+        const paused = video.paused;
+        const time = video.currentTime;
+        if (!Number.isFinite(time)) return;
+        const expected = this.getShareMediaExpectedState();
+        if (expected && expected.paused === paused && Math.abs(expected.time - time) < 1) return;
+        sync.expected = { paused, time, at: Date.now() };
+        this.socket.emit('shareVideoAction', {
+            action: 'sync',
+            peer_id: sync.target,
+            peer_name: this.peer_name,
+            paused,
+            time,
+        });
+    }
+
+    applyShareMediaSync(data) {
+        const sync = this.shareMediaSync;
+        const video = this.getId('__videoShare');
+        if (!sync || !video || video.tagName !== 'VIDEO') return;
+        const time = Number(data.time);
+        if (!Number.isFinite(time) || time < 0) return;
+        const paused = data.paused === true;
+        sync.expected = { paused, time, at: Date.now() };
+        if (Math.abs(video.currentTime - time) > 0.5) video.currentTime = time;
+        if (paused) {
+            if (!video.paused) video.pause();
+        } else if (video.paused) {
+            video.play().catch((err) => console.warn('[shareMediaSync] Remote play blocked', err));
+        }
+    }
+
     closeVideo(emit = false, peer_id = 'all') {
+        if (this.shareMediaSync) {
+            clearTimeout(this.shareMediaSync.timer);
+            this.shareMediaSync = null;
+        }
         if (emit) {
             let data = {
                 peer_id: peer_id,

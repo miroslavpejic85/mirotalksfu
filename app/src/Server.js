@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.69
+ * @version 2.8.70
  *
  */
 
@@ -4913,11 +4913,18 @@ function startServer() {
             log.debug('Share video: ', data);
 
             const room = getRoom(socket);
+            const peer = getPeer(socket);
+
+            if (!room || !peer) return;
+
+            // Identity comes from server state: never trust or relay client-sent name/uuid
+            delete data.peer_uuid;
+            data.peer_name = peer.peer_name;
 
             // Enforce the moderator "everyone can't share media" rule server-side.
             // The presenter is exempt because they own/toggle the rule.
             if (room._moderator && room._moderator.media_cant_sharing) {
-                const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+                const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer.peer_name, peer.peer_uuid);
                 if (!isPresenter) {
                     log.debug('shareVideoAction blocked by moderator rule (media_cant_sharing)', {
                         peer_name: data.peer_name,
@@ -4926,11 +4933,28 @@ function startServer() {
                 }
             }
 
-            room.updateShareMedia(data);
+            // Lets receivers of a private share route their playback sync back to the sharer
+            data.from_peer_id = socket.id;
 
-            data.peer_id == 'all'
-                ? room.broadCast(socket.id, 'shareVideoAction', data)
-                : room.sendTo(data.peer_id, 'shareVideoAction', data);
+            let payload = data;
+
+            if (data.action == 'sync') {
+                if (!room.updateShareMediaPlayback(data)) return;
+                payload = {
+                    action: 'sync',
+                    peer_id: data.peer_id,
+                    peer_name: data.peer_name,
+                    from_peer_id: socket.id,
+                    paused: data.paused,
+                    time: data.time,
+                };
+            } else {
+                room.updateShareMedia(data);
+            }
+
+            payload.peer_id == 'all'
+                ? room.broadCast(socket.id, 'shareVideoAction', payload)
+                : room.sendTo(payload.peer_id, 'shareVideoAction', payload);
         });
 
         socket.on('wbCanvasToJson', (dataObject) => {

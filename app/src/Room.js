@@ -219,7 +219,7 @@ module.exports = class Room {
             whisperEnabled: config?.integrations?.whisper?.enabled || false,
             whisperSegmentSeconds: config?.integrations?.whisper?.segmentSeconds || 5,
             thereIsPolls: this.thereIsPolls(),
-            shareMediaData: this.shareMediaData,
+            shareMediaData: this.getShareMediaData(),
             dominantSpeaker: this.activeSpeakerObserverEnabled,
             peers: JSON.stringify([...this.peers]),
             peersCount: this.getPeersCount(),
@@ -312,7 +312,29 @@ module.exports = class Room {
     // ##############################################
 
     updateShareMedia(data) {
-        this.shareMediaData = data;
+        this.shareMediaData =
+            data && data.action === 'open' && !data.is_youtube
+                ? { ...data, playback: { paused: false, time: 0, updated_at: Date.now() } }
+                : data;
+    }
+
+    updateShareMediaPlayback(data) {
+        const share = this.shareMediaData;
+        if (!share || share.action !== 'open' || share.is_youtube) return false;
+        if (!data || typeof data.paused !== 'boolean') return false;
+        const time = data.time;
+        if (typeof time !== 'number' || !Number.isFinite(time) || time < 0 || time > 86400) return false;
+        share.playback = { paused: data.paused, time, updated_at: Date.now() };
+        return true;
+    }
+
+    // Shared media snapshot for late joiners, with the playback position advanced to now
+    getShareMediaData() {
+        const share = this.shareMediaData;
+        if (!share || !share.playback) return share;
+        const { paused, time, updated_at } = share.playback;
+        const elapsed = paused ? 0 : Math.max(0, (Date.now() - updated_at) / 1000);
+        return { ...share, playback: { paused, time: time + elapsed } };
     }
 
     // ##############################################
