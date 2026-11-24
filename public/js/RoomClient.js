@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.67
+ * @version 2.8.68
  *
  */
 
@@ -7280,9 +7280,21 @@ class RoomClient {
         let btnPn = this.getId(pnId);
         let cam = this.getId(camId);
         if (btnPn && videoPlayer && cam) {
+            const restoreToGrid = () => {
+                if (!isScreen && !isBroadcastingEnabled) videoPlayer.style.objectFit = 'var(--videoObjFit)';
+                if (cam.parentNode === this.videoPinMediaContainer) this.videoPinMediaContainer.removeChild(cam);
+                cam.className = 'Camera';
+                this.videoMediaContainer.appendChild(cam);
+                setColor(btnPn, 'white');
+            };
             btnPn.addEventListener('click', () => {
                 if (this.isMobileDevice) return;
                 this.sound('click');
+                // Switch pin: move the currently pinned tile back to the grid and pin this one instead
+                if (this.isVideoPinned && this.pinnedVideoPlayerId && this.pinnedVideoPlayerId !== videoPlayer.id) {
+                    if (typeof this.restorePinnedVideoToGrid === 'function') this.restorePinnedVideoToGrid();
+                    this.isVideoPinned = false;
+                }
                 this.isVideoPinned = !this.isVideoPinned;
                 if (this.isVideoPinned) {
                     if (!videoPlayer.classList.contains('videoCircle')) {
@@ -7295,19 +7307,11 @@ class RoomClient {
                     this.videoPinMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'block';
                     this.pinnedVideoPlayerId = elemId;
+                    this.restorePinnedVideoToGrid = restoreToGrid;
                     setColor(btnPn, 'lime');
                 } else {
-                    if (this.pinnedVideoPlayerId != videoPlayer.id) {
-                        this.isVideoPinned = true;
-                        if (this.isScreenAllowed) return;
-                        return this.msgPopup('toast', 'Another video seems pinned, unpin it before to pin this one');
-                    }
-                    if (!isScreen && !isBroadcastingEnabled) videoPlayer.style.objectFit = 'var(--videoObjFit)';
-                    this.videoPinMediaContainer.removeChild(cam);
-                    cam.className = 'Camera';
-                    this.videoMediaContainer.appendChild(cam);
+                    restoreToGrid();
                     this.removeVideoPinMediaContainer();
-                    setColor(btnPn, 'white');
                     if (!this.isApplyingParticipantViewMode && typeof setParticipantViewMode === 'function') {
                         clearTimeout(this.participantViewRestoreTimer);
                         this.participantViewRestoreTimer = null;
@@ -7694,6 +7698,7 @@ class RoomClient {
         this.videoPinMediaContainer.style.display = 'none';
         this.videoMediaContainerUnpin();
         this.pinnedVideoPlayerId = null;
+        this.restorePinnedVideoToGrid = null;
         this.isVideoPinned = false;
         if (this.isChatPinned) {
             this.chatPin();
@@ -15916,12 +15921,6 @@ class RoomClient {
 
         if (!btnPn) {
             return this.userLog('info', 'No video available to pin for this participant', 'top-end');
-        }
-
-        // Unpin the currently pinned video, otherwise pinning another one is rejected
-        if (this.isVideoPinned && this.pinnedVideoPlayerId !== videoEl.id) {
-            const pinnedBtn = this.getId(`${this.pinnedVideoPlayerId}__pin`);
-            if (pinnedBtn) pinnedBtn.click();
         }
 
         btnPn.click();
