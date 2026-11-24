@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.72
+ * @version 2.8.73
  *
  */
 
@@ -8455,7 +8455,16 @@ class RoomClient {
         this.isChatTranslateOpen = isOpen;
         chatTranslate.classList.toggle('show', isOpen);
         chatTranslateButton.setAttribute('aria-expanded', String(isOpen));
+        this.syncChatTranslateButton();
         if (isOpen) chatTranslate.querySelector('.chat-translate-item.active')?.scrollIntoView({ block: 'nearest' });
+    }
+
+    // Highlighted like the other chat toolbar buttons while the picker is open or a language is set
+    syncChatTranslateButton() {
+        const chatTranslateButton = this.getId('chatTranslateButton');
+        if (!chatTranslateButton) return;
+        chatTranslateButton.classList.toggle('is-active', !!this.isChatTranslateOpen || !!this.chatTranslateLang);
+        chatTranslateButton.classList.toggle('has-lang', !!this.chatTranslateLang);
     }
 
     /**
@@ -8464,8 +8473,7 @@ class RoomClient {
      */
     selectChatTranslateLang(code) {
         this.chatTranslateLang = code || '';
-        const chatTranslateButton = this.getId('chatTranslateButton');
-        chatTranslateButton?.classList.toggle('is-active', !!this.chatTranslateLang);
+        this.syncChatTranslateButton();
         const badge = this.getId('chatTranslateBadge');
         if (badge) badge.textContent = this.chatTranslateLang.split('-')[0].toUpperCase();
         this.getId('chatTranslateList')

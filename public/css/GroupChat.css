@@ -1054,7 +1054,7 @@
     border-radius: 5px;
 }
 
-#chatTranslateButton.is-active .chat-translate-badge {
+#chatTranslateButton.has-lang .chat-translate-badge {
     display: block;
 }
 
