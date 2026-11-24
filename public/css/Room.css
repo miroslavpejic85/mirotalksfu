@@ -1519,6 +1519,11 @@ img.vb-video-thumb {
     border-left-color: var(--room-border-strong) !important;
 }
 
+/* Split button whose chevron is hidden (e.g. Raise Hand on mobile or with Room Reactions disabled). */
+#bottomButtons .split-btn.no-toggle > button:not(.device-dropdown-toggle) {
+    border-radius: 12px;
+}
+
 /* Keep the group visually together when hovering. */
 #bottomButtons .split-btn button:hover {
     transform: none;
@@ -2142,6 +2147,9 @@ img.vb-video-thumb {
     #bottomButtons .split-btn > button:not(.device-dropdown-toggle) {
         border-radius: 10px 0 0 10px;
     }
+    #bottomButtons .split-btn.no-toggle > button:not(.device-dropdown-toggle) {
+        border-radius: 10px;
+    }
     #bottomButtons .split-btn .device-dropdown-toggle {
         width: 22px;
         height: 40px;
@@ -2263,6 +2271,14 @@ img.vb-video-thumb {
 #bottomButtons #chatButton.is-active:hover,
 #bottomButtons #participantsButton.is-active:hover {
     background: color-mix(in srgb, var(--dd-color, #4678f9) 22%, transparent) !important;
+}
+
+/* Raise Hand chevron while the Room Reactions picker is open */
+#bottomButtons #raiseHandReactionsButton.is-active {
+    background: var(--room-accent-soft) !important;
+}
+#bottomButtons #raiseHandReactionsButton.is-active i {
+    color: var(--room-accent) !important;
 }
 
 /*--------------------------------------------------------------

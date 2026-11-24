@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.68
+ * @version 2.8.69
  *
  */
 
@@ -250,6 +250,8 @@ const noExtraButtons = getId('noExtraButtons');
 const openNetworkSettingsButton = getId('openNetworkSettingsButton');
 const copyRoomUrlBtn = getId('copyRoomUrlBtn');
 const participantsSplit = getId('participantsSplit');
+const raiseHandSplit = getId('raiseHandSplit');
+const raiseHandReactionsButton = getId('raiseHandReactionsButton');
 const participantsInviteBtn = getId('participantsInviteBtn');
 const participantsCopyInviteLinkBtn = getId('participantsCopyInviteLinkBtn');
 const participantsEmailInviteBtn = getId('participantsEmailInviteBtn');
@@ -838,6 +840,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('stopScreenButton', 'Stop screen share', bPlacement);
         setTippy('raiseHandButton', 'Raise your hand', bPlacement);
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
+        setTippy('raiseHandReactionsButton', 'Room Reactions', bPlacement);
         setTippy('chatButton', 'Toggle the chat', bPlacement);
         setTippy('participantsButton', 'Toggle participants list', bPlacement);
         setTippy('participantViewButton', 'Change participant view', bPlacement);
@@ -2911,8 +2914,15 @@ function roomIsReady() {
     BUTTONS.main.participantsButton && show(participantsSplit);
     BUTTONS.main.pollButton && show(pollButton);
     BUTTONS.main.editorButton && show(editorButton);
-    BUTTONS.main.raiseHandButton && show(raiseHandButton);
+    if (BUTTONS.main.raiseHandButton) {
+        show(raiseHandSplit);
+        show(raiseHandButton);
+    }
     BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
+    // Desktop only: on mobile the chevron is too small to tap and the picker covers the screen
+    const showHandReactions = isDesktopDevice && BUTTONS.main.raiseHandButton && BUTTONS.main.emojiRoomButton;
+    raiseHandReactionsButton.classList.toggle('hidden', !showHandReactions);
+    raiseHandSplit.classList.toggle('no-toggle', !showHandReactions);
     show(fileShareExtraButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
@@ -5804,6 +5814,9 @@ function handleRoomEmojiPicker() {
     emojiRoomButton.onclick = () => {
         toggleEmojiPicker();
     };
+    raiseHandReactionsButton.onclick = () => {
+        toggleEmojiPicker();
+    };
     closeBtn.addEventListener('click', (e) => {
         toggleEmojiPicker();
     });
@@ -5830,6 +5843,8 @@ function handleRoomEmojiPicker() {
         emojiPickerContainer.style.display = isOpen ? 'block' : 'none';
         emojiRoomButton.classList.toggle('is-active', isOpen);
         emojiRoomButton.setAttribute('aria-pressed', String(isOpen));
+        raiseHandReactionsButton.classList.toggle('is-active', isOpen);
+        raiseHandReactionsButton.setAttribute('aria-pressed', String(isOpen));
         setColor(emojiRoomIcon, isOpen ? '#FFD600' : 'white');
     }
 }
@@ -6008,6 +6023,7 @@ function handleRoomClientEvents() {
         console.log('Room event: Client raise hand');
         hide(raiseHandButton);
         show(lowerHandButton);
+        show(raiseHandSplit);
         setColor(lowerHandIcon, '#FFD700');
         hand = true;
     });
@@ -11839,7 +11855,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.68',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.69',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
