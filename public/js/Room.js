@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.84
+ * @version 2.8.85
  *
  */
 
@@ -252,6 +252,8 @@ const participantsSplit = getId('participantsSplit');
 const raiseHandSplit = getId('raiseHandSplit');
 const raiseHandReactionsDropdown = getId('raiseHandReactionsDropdown');
 const raiseHandRoomReactionsBtn = getId('raiseHandRoomReactionsBtn');
+const raiseHandGestureRow = getId('raiseHandGestureRow');
+const raiseHandGestureSwitch = getId('raiseHandGestureSwitch');
 const participantsInviteBtn = getId('participantsInviteBtn');
 const participantsCopyInviteLinkBtn = getId('participantsCopyInviteLinkBtn');
 const participantsEmailInviteBtn = getId('participantsEmailInviteBtn');
@@ -459,6 +461,9 @@ let screen = false;
 let hand = false;
 let camera = 'user';
 let sessionVideoMirror = true;
+
+let gestureHandRaiseEnabled = false;
+let handGestureManager = null;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -2921,9 +2926,13 @@ function roomIsReady() {
     }
     BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
     // Desktop only: on mobile the chevron is too small to tap and the picker covers the screen
-    const showHandReactions = isDesktopDevice && BUTTONS.main.raiseHandButton && BUTTONS.main.emojiRoomButton;
-    raiseHandReactionsDropdown.classList.toggle('hidden', !showHandReactions);
-    raiseHandSplit.classList.toggle('no-toggle', !showHandReactions);
+    const showRoomReactions = BUTTONS.main.raiseHandButton && BUTTONS.main.emojiRoomButton;
+    const showGestureHandRaise = isGestureHandRaiseAvailable();
+    const showHandMenu = isDesktopDevice && (showRoomReactions || showGestureHandRaise);
+    raiseHandRoomReactionsBtn.classList.toggle('hidden', !showRoomReactions);
+    raiseHandGestureRow.classList.toggle('hidden', !showGestureHandRaise);
+    raiseHandReactionsDropdown.classList.toggle('hidden', !showHandMenu);
+    raiseHandSplit.classList.toggle('no-toggle', !showHandMenu);
     show(shareMediaExtraButton);
     show(fileShareExtraButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
@@ -4999,6 +5008,14 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+    switchGestureHandRaise.onchange = (e) => {
+        setGestureHandRaise(e.currentTarget.checked);
+        e.target.blur();
+    };
+    raiseHandGestureSwitch.onchange = (e) => {
+        setGestureHandRaise(e.currentTarget.checked);
+        e.target.blur();
+    };
     switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
         rc.roomMessage('sounds', isSoundEnabled);
@@ -5893,6 +5910,8 @@ function handleRoomEmojiPicker() {
         toggleEmojiPicker();
     };
     raiseHandRoomReactionsBtn.onclick = () => {
+        // The menu stays open for its switch (auto-close outside), so close it when opening the picker
+        bootstrap.Dropdown.getInstance(getId('raiseHandReactionsButton'))?.hide();
         toggleEmojiPicker();
     };
     closeBtn.addEventListener('click', (e) => {
@@ -6014,6 +6033,9 @@ function loadSettingsFromLocalStorage() {
     chatTime12h.checked = rc.chatTime12h;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSpeakingHighlight.checked = isSpeakingHighlightEnabled;
+    gestureHandRaiseEnabled = localStorageSettings.gesture_hand_raise === true;
+    refreshGestureHandRaiseSwitches();
+    syncGestureHandRaise();
     switchSounds.checked = isSoundEnabled;
     switchShowCameraOffParticipants.checked = showCameraOffParticipants;
     switchShare.checked = notify;
@@ -6161,6 +6183,7 @@ function handleRoomClientEvents() {
         // if (isParticipantsListOpen) getRoomParticipants();
         video = true;
         syncWakeLockDebounced();
+        syncGestureHandRaise();
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room event: Client pause video');
@@ -6171,6 +6194,7 @@ function handleRoomClientEvents() {
         hideClassElements('videoMenuBar');
         video = false;
         syncWakeLockDebounced();
+        syncGestureHandRaise();
     });
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
         console.log('Room event: Client resume video');
@@ -6181,6 +6205,7 @@ function handleRoomClientEvents() {
         hideClassElements('videoMenuBar');
         video = true;
         syncWakeLockDebounced();
+        syncGestureHandRaise();
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
         console.log('Room event: Client stop video');
@@ -6192,6 +6217,7 @@ function handleRoomClientEvents() {
         // if (isParticipantsListOpen) getRoomParticipants();
         video = false;
         syncWakeLockDebounced();
+        syncGestureHandRaise();
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room event: Client start screen');
@@ -6332,8 +6358,108 @@ function handleRoomClientEvents() {
 
         console.log('Room event: Client leave room');
 
+        handGestureManager?.dispose();
         leaveRoom(false); // Don't touch :)
     });
+}
+
+// ####################################################
+// HAND GESTURE (open palm held for 2s raises/lowers the hand)
+// ####################################################
+
+function createGestureHandProgress(parentWrap) {
+    if (!parentWrap) return null;
+    const existing = parentWrap.querySelector('.gesture-hand-progress');
+    if (existing) return { container: existing, fillCircle: existing.querySelector('.gesture-hand-circle-fill') };
+
+    const container = document.createElement('div');
+    container.className = 'gesture-hand-progress';
+    container.setAttribute('hidden', '');
+    container.setAttribute('aria-hidden', 'true');
+
+    const icon = document.createElement('div');
+    icon.className = 'gesture-hand-icon';
+    icon.innerText = '✋';
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'gesture-hand-svg');
+    svg.setAttribute('viewBox', '0 0 36 36');
+
+    const createCircle = (className) => {
+        const circle = document.createElementNS(svgNS, 'circle');
+        circle.setAttribute('class', className);
+        circle.setAttribute('cx', '18');
+        circle.setAttribute('cy', '18');
+        circle.setAttribute('r', '15.9155');
+        svg.appendChild(circle);
+        return circle;
+    };
+    createCircle('gesture-hand-circle-bg');
+    const fillCircle = createCircle('gesture-hand-circle-fill');
+
+    container.appendChild(icon);
+    container.appendChild(svg);
+    parentWrap.appendChild(container);
+
+    return { container, fillCircle };
+}
+
+function setGestureHandRaise(enabled) {
+    gestureHandRaiseEnabled = Boolean(enabled);
+    localStorageSettings.gesture_hand_raise = gestureHandRaiseEnabled;
+    lS.setSettings(localStorageSettings);
+    refreshGestureHandRaiseSwitches();
+    syncGestureHandRaise();
+}
+
+// Quick switches in the raise hand and camera menus (desktop), the setting itself lives in Settings > Video
+function isGestureHandRaiseAvailable() {
+    return typeof HandGesture !== 'undefined' && !!BUTTONS.main.raiseHandButton;
+}
+
+function refreshGestureHandRaiseSwitches() {
+    switchGestureHandRaise.checked = gestureHandRaiseEnabled;
+    document.querySelectorAll('.gesture-hand-raise-switch').forEach((el) => (el.checked = gestureHandRaiseEnabled));
+}
+
+function onGestureHandRaiseTrigger() {
+    if (isRulesActive && !isPresenter && !BUTTONS.main.raiseHandButton) {
+        userLog('warning', 'The presenter has disabled your ability to raise your hand', 'top-end');
+        return;
+    }
+    hand ? lowerHandButton.click() : raiseHandButton.click();
+}
+
+function syncGestureHandRaise() {
+    if (typeof HandGesture === 'undefined') return;
+
+    if (!gestureHandRaiseEnabled) {
+        // Setting turned off: also free the worker and the model
+        handGestureManager?.dispose();
+        return;
+    }
+
+    const myVideoEl = rc?.localVideoElement;
+    if (!video || !myVideoEl || !myVideoEl.isConnected) {
+        handGestureManager?.stop();
+        return;
+    }
+
+    if (!handGestureManager) {
+        handGestureManager = new HandGesture.HandGestureManager();
+    }
+
+    // The camera tile is rebuilt on every (re)produce, so bind to the current one
+    const progressUI = createGestureHandProgress(myVideoEl.parentElement);
+    handGestureManager.attachElements({
+        video: myVideoEl,
+        progressContainer: progressUI?.container || null,
+        progressFill: progressUI?.fillCircle || null,
+        onTrigger: onGestureHandRaiseTrigger,
+    });
+
+    handGestureManager.start();
 }
 
 // ####################################################
@@ -7587,10 +7713,12 @@ function setupQuickDeviceSwitchDropdowns() {
 
         appendMenuHeader(videoMenu, 'fas fa-video', 'Cameras');
         appendSelectOptions(videoMenu, videoSelect, 'No cameras found', buildVideoMenu);
+        appendMenuDivider(videoMenu);
 
-        if (isVideoEffectsAvailable() && !rc.getModerator().video_cant_unhide) {
-            appendMenuDivider(videoMenu);
-            // Quick switch, also in Settings > Visual effects
+        // Quick switches, also in Settings (Visual effects / Video)
+        const showAutoFraming = isVideoEffectsAvailable() && !rc.getModerator().video_cant_unhide;
+        const showGestureHandRaise = isGestureHandRaiseAvailable();
+        if (showAutoFraming) {
             appendMenuToggle(
                 videoMenu,
                 'deviceMenuAutoFraming',
@@ -7603,10 +7731,19 @@ function setupQuickDeviceSwitchDropdowns() {
                 },
                 'fas fa-expand'
             );
-            appendMenuDivider(videoMenu);
-        } else {
-            appendMenuDivider(videoMenu);
         }
+        if (showGestureHandRaise) {
+            appendMenuToggle(
+                videoMenu,
+                'deviceMenuGestureHandRaise',
+                'Raise hand by gesture',
+                gestureHandRaiseEnabled,
+                (enabled) => setGestureHandRaise(enabled),
+                'fas fa-hand-paper'
+            );
+            getId('deviceMenuGestureHandRaise')?.classList.add('gesture-hand-raise-switch');
+        }
+        if (showAutoFraming || showGestureHandRaise) appendMenuDivider(videoMenu);
 
         const visualEffectsMerged = isVisualEffectsMerged() && isVideoEffectsAvailable();
 
@@ -11939,7 +12076,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.84',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.85',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

@@ -283,6 +283,7 @@ describe('mobile wake-lock lifecycle', () => {
             setVideoButtonsDisabled() {},
             stopMicrophoneProcessing() {},
             hideClassElements() {},
+            syncGestureHandRaise() {},
             startAudioButton: {},
             stopAudioButton: {},
             startVideoButton: {},

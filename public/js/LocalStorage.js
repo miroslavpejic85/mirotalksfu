@@ -66,6 +66,7 @@ class LocalStorage {
             participant_view: 'grid',
             screen_cam_layout: 'separate', // camera while screen sharing: separate | pip | split
             peer_avatar: '', // persisted avatar URL
+            gesture_hand_raise: false, // raise hand by holding up open palm for 2s
         };
 
         this.DEVICES_COUNT = {

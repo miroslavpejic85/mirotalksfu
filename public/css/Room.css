@@ -1770,6 +1770,23 @@ img.vb-video-thumb {
     text-align: center;
 }
 
+/* Raise hand by gesture quick switch, separated from Room Reactions when both are shown */
+#bottomButtons #raiseHandReactionsMenu .device-menu-toggle-row {
+    padding: 6px 12px 6px 17px;
+    font-size: 0.8em;
+}
+
+/* Line the label up with the Room Reactions button text */
+#bottomButtons #raiseHandReactionsMenu .device-menu-toggle-row label {
+    gap: 18px;
+}
+
+#bottomButtons #raiseHandRoomReactionsBtn:not(.hidden) + .device-menu-toggle-row {
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 #bottomButtons #settingsExtraMenu .extra-menu-group {
     font-size: 0.7rem;
     font-weight: 700;
@@ -1921,6 +1938,7 @@ img.vb-video-thumb {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
     padding: 6px 12px;
     margin: 0;
     color: #fff;

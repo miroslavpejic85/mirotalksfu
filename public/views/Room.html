@@ -148,6 +148,7 @@
         <script defer src="../js/ScreenTouchZoom.js"></script>
         <script defer src="../js/VirtualBackgroundEffects.js"></script>
         <script defer src="../js/VirtualBackground.js"></script>
+        <script defer src="../js/HandGesture.js"></script>
         <script defer src="../video-effects/utils.js"></script>
         <script defer src="../video-effects/camera.js"></script>
         <script defer src="../video-effects/stream-manager.js"></script>
@@ -438,8 +439,9 @@
                         class="dropdown-toggle device-dropdown-toggle"
                         type="button"
                         data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside"
                         aria-expanded="false"
-                        aria-label="Room Reactions"
+                        aria-label="Raise hand options"
                     >
                         <i class="fas fa-chevron-up" aria-hidden="true"></i>
                     </button>
@@ -448,9 +450,21 @@
                         class="dropdown-menu text-start"
                         aria-labelledby="raiseHandReactionsButton"
                     >
-                        <button id="raiseHandRoomReactionsBtn" type="button" aria-pressed="false">
+                        <button id="raiseHandRoomReactionsBtn" class="hidden" type="button" aria-pressed="false">
                             <i class="fas fa-face-smile" aria-hidden="true"></i> Room Reactions
                         </button>
+                        <div id="raiseHandGestureRow" class="device-menu-toggle-row hidden">
+                            <label class="title" for="raiseHandGestureSwitch">
+                                <i class="fas fa-hand-paper" aria-hidden="true"></i>Raise hand by gesture
+                            </label>
+                            <div class="form-check form-switch form-switch-md title">
+                                <input
+                                    id="raiseHandGestureSwitch"
+                                    class="form-check-input gesture-hand-raise-switch"
+                                    type="checkbox"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1153,6 +1167,33 @@
                                     <option value="15">15 fps</option>
                                     <option value="5">5 fps</option>
                                 </select>
+                            </div>
+                            <div id="gestureHandRaiseDiv" class="settings-field">
+                                <table class="settingsTable">
+                                    <tr id="gestureHandRaiseButton">
+                                        <td>
+                                            <div class="title">
+                                                <i class="fas fa-hand-paper"></i>
+                                                <span class="settings-option-copy">
+                                                    <strong>Raise hand by gesture</strong>
+                                                    <small
+                                                        >Hold up your open palm for 2 seconds to raise or lower your
+                                                        hand.</small
+                                                    >
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchGestureHandRaise"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
 
