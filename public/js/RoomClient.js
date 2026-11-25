@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.79
+ * @version 2.8.80
  *
  */
 
@@ -91,6 +91,7 @@ const icons = {
     lock: '<i class="fa-solid fa-lock"></i>',
     unlock: '<i class="fa-solid fa-lock-open"></i>',
     pitchBar: '<i class="fas fa-microphone-lines"></i>',
+    speakingHighlight: '<i class="fas fa-user-check"></i>',
     mirror: '<i class="fas fa-arrow-right-arrow-left"></i>',
     sounds: '<i class="fas fa-music"></i>',
     fileSend: '<i class="fa-solid fa-file-export"></i>',
@@ -13108,6 +13109,9 @@ class RoomClient {
             case 'pitchBar':
                 notifySwitch(`${icons.pitchBar} Audio pitch bar ${status}`);
                 break;
+            case 'speakingHighlight':
+                notifySwitch(`${icons.speakingHighlight} Active speaker highlight ${status}`);
+                break;
             case 'sounds':
                 notifySwitch(`${icons.sounds} Sounds notification ${status}`);
                 break;
@@ -13708,6 +13712,8 @@ class RoomClient {
         const audioVolumeTmp = audioVolume * 10; //10-100
         const audioColorTmp = this.getAudioVolumeColor(audioVolumeTmp);
 
+        if (isSpeakingHighlightEnabled) this.handleSpeakingTile(peer_id);
+
         if (!isPitchBarEnabled) {
             const peerVideo = this.getName(peer_id);
             const peerAvatarImg = this.getId(peer_id + '__img');
@@ -13744,6 +13750,38 @@ class RoomClient {
                 this._audioVolumeTimers.delete(peer_id);
             }, 200)
         );
+    }
+
+    // Camera tiles of a peer: grid (.Camera), pinned (.pinned-video-container) or screen-share overlay; screen tiles skipped
+    getSpeakingTiles(peerId) {
+        const tiles = [];
+        [this.videoMediaContainer, this.videoPinMediaContainer].forEach((container) => {
+            container?.querySelectorAll('[data-peer-id]').forEach((tile) => {
+                if (tile.dataset.peerId === peerId && tile.dataset.mediaType !== mediaType.screen) tiles.push(tile);
+            });
+        });
+        return tiles;
+    }
+
+    // audioVolume arrives every ~100ms while a peer talks: hold the border briefly so short pauses don't flicker it
+    handleSpeakingTile(peerId, holdMs = 600) {
+        if (!peerId) return;
+        if (!this._speakingTileTimers) this._speakingTileTimers = new Map();
+        this.getSpeakingTiles(peerId).forEach((tile) => tile.classList.add('speaking'));
+        clearTimeout(this._speakingTileTimers.get(peerId));
+        this._speakingTileTimers.set(
+            peerId,
+            setTimeout(() => {
+                this.getSpeakingTiles(peerId).forEach((tile) => tile.classList.remove('speaking'));
+                this._speakingTileTimers.delete(peerId);
+            }, holdMs)
+        );
+    }
+
+    clearSpeakingTiles() {
+        this._speakingTileTimers?.forEach((timer) => clearTimeout(timer));
+        this._speakingTileTimers?.clear();
+        document.querySelectorAll('[data-peer-id].speaking').forEach((tile) => tile.classList.remove('speaking'));
     }
 
     applyBoxShadowEffect(element, color, delay = 200) {

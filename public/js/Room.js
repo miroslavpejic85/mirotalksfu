@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.79
+ * @version 2.8.80
  *
  */
 
@@ -423,6 +423,7 @@ let isPushToTalkActive = false;
 let isPushToTalkPressed = false;
 let pushToTalkAudioContext = null;
 let isPitchBarEnabled = true;
+let isSpeakingHighlightEnabled = true;
 let isSoundEnabled = true;
 let isKeepButtonsVisible = false;
 let isChatPinEnabled = true;
@@ -713,6 +714,7 @@ async function initClient() {
             true
         );
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
+        setTippy('switchSpeakingHighlight', 'Toggle the active speaker highlight', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('switchShowCameraOffParticipants', 'Show participants with the camera off in the grid', 'right');
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
@@ -4989,6 +4991,14 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+    switchSpeakingHighlight.onchange = (e) => {
+        isSpeakingHighlightEnabled = e.currentTarget.checked;
+        if (!isSpeakingHighlightEnabled) rc.clearSpeakingTiles();
+        rc.roomMessage('speakingHighlight', isSpeakingHighlightEnabled);
+        localStorageSettings.speaking_highlight = isSpeakingHighlightEnabled;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
     switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
         rc.roomMessage('sounds', isSoundEnabled);
@@ -5978,6 +5988,7 @@ function loadSettingsFromLocalStorage() {
             : BUTTONS.chat?.chatTimeFormat === '12h'
     );
     isPitchBarEnabled = localStorageSettings.pitch_bar;
+    isSpeakingHighlightEnabled = localStorageSettings.speaking_highlight !== false;
     isSoundEnabled = localStorageSettings.sounds;
     isKeepButtonsVisible = localStorageSettings.keep_buttons_visible;
     isChatPinEnabled = localStorageSettings.chat_pin !== undefined ? localStorageSettings.chat_pin : true;
@@ -5989,6 +6000,7 @@ function loadSettingsFromLocalStorage() {
     speechIncomingMsg.checked = rc.speechInMessages;
     chatTime12h.checked = rc.chatTime12h;
     switchPitchBar.checked = isPitchBarEnabled;
+    switchSpeakingHighlight.checked = isSpeakingHighlightEnabled;
     switchSounds.checked = isSoundEnabled;
     switchShowCameraOffParticipants.checked = showCameraOffParticipants;
     switchShare.checked = notify;
@@ -11913,7 +11925,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.79',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.80',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

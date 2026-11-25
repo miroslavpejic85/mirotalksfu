@@ -48,6 +48,7 @@ class LocalStorage {
             broadcasting: false, // default false (one to many a/v streaming)
             lobby: false, // default false
             pitch_bar: true, // volume indicator
+            speaking_highlight: true, // border around the active speaker's tile
             sounds: true, // room notify sounds
             show_camera_off_participants: true, // show participants with the camera off in the grid
             keep_buttons_visible: true, // Keep buttons always visible

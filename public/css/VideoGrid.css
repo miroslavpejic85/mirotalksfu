@@ -92,6 +92,8 @@
     overflow: hidden;
     container-type: inline-size;
     container-name: camera;
+    /* Drop the inline grid margin (VideoGrid.js) kept from the grid, so the 100% tile is not clipped right/bottom */
+    margin: 0 !important;
 }
 
 .pinned-video-container .user-hand {
@@ -101,6 +103,32 @@
     left: 0;
     margin: 10px !important;
     font-size: 1.5rem !important;
+}
+
+/* Speaking indicator (handleSpeakingTile in RoomClient.js): a ring drawn inside the tile edge, so it is never clipped */
+.Camera[data-peer-id]::after,
+.pinned-video-container[data-peer-id]::after,
+.screen-cam-overlay[data-peer-id]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2; /* Above video and name, below the menu dropdowns */
+    border-radius: inherit;
+    box-shadow:
+        inset 0 0 0 3px #3ddc84,
+        inset 0 0 16px rgb(61 220 132 / 45%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+}
+
+[data-peer-id].speaking::after {
+    opacity: 1;
+}
+
+/* Pinned tiles lose the .Camera radius: follow the #videoPinMediaContainer corners */
+.pinned-video-container[data-peer-id]::after {
+    border-radius: 10px;
 }
 
 #videoMediaContainer i {
