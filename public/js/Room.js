@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.81
+ * @version 2.8.82
  *
  */
 
@@ -3986,7 +3986,7 @@ function handleButtons() {
     };
     chatEmojiButton.onclick = (event) => {
         if (!isMobileDevice && event.detail > 0) {
-            // Mouse: hover already opens the picker, the click locks it open (click again to close)
+            // Mouse: hover already opens the picker, the click pins it against mouseleave (click again to close)
             if (rc.isChatEmojiLocked) {
                 rc.setChatEmojiOpen(false);
             } else {
@@ -5619,13 +5619,25 @@ function handleChatEmojiPicker() {
     const emojiPicker = new EmojiMart.Picker(pickerOptions);
     rc.getId('chatEmoji').appendChild(emojiPicker);
 
-    function addEmojiToMsg(data) {
+    // One pick closes the picker (Zoom/Teams style); Shift+click keeps it open to add several
+    function addEmojiToMsg(data, event) {
         chatMessage.value += data.native;
-        if (!rc.isChatEmojiLocked) rc.setChatEmojiOpen(false);
+        if (event?.shiftKey) return;
+        rc.setChatEmojiOpen(false);
+        if (!isMobileDevice) chatMessage.focus();
     }
 
     const chatEmojiButton = getId('chatEmojiButton');
     const chatEmoji = getId('chatEmoji');
+
+    const closeOnEscape = (e) => {
+        if (e.key !== 'Escape' || !rc.isChatEmojiOpen) return;
+        e.stopPropagation();
+        rc.setChatEmojiOpen(false);
+        chatEmojiButton.focus();
+    };
+    chatEmoji.addEventListener('keydown', closeOnEscape);
+    chatMessage.addEventListener('keydown', closeOnEscape);
 
     if (!isMobileDevice) {
         let closeTimer;
@@ -11926,7 +11938,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.81',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.82',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
