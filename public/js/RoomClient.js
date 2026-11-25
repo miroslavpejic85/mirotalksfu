@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.82
+ * @version 2.8.83
  *
  */
 
@@ -12677,7 +12677,7 @@ class RoomClient {
                 });
             }
         } else {
-            // Audio files also use <video>: the poster fills the tile and the native controls stay on top of it
+            // Audio files also use <video>, with the waveform visual layered above its native controls
             video = document.createElement('video');
             video.type = video_type;
             video.autoplay = !playback?.paused;
@@ -12687,9 +12687,7 @@ class RoomClient {
             video.setAttribute('webkit-playsinline', 'true');
             if (is_audio_share) {
                 video.preload = 'metadata';
-                video.setAttribute('poster', image.audio);
-                // WebKit (Safari/iOS) hides the poster once audio-only playback starts, the background keeps the gif visible
-                video.style.background = `#000 url('${image.audio}') center / contain no-repeat`;
+                video.style.background = '#000';
                 video.setAttribute('aria-label', 'Shared audio');
             }
         }
@@ -12702,6 +12700,7 @@ class RoomClient {
         BUTTONS.videoShare.fullScreenButton && !is_audio_share && vb.appendChild(fsBtn);
         if (BUTTONS.videoShare.pinVideoButton) this.appendPinButton(vb, pn);
         d.appendChild(video);
+        if (is_audio_share) d.appendChild(this.createShareAudioVisual(video));
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
 
@@ -12819,6 +12818,47 @@ class RoomClient {
         handleAspectRatio();
         console.log('[openVideo] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
+    }
+
+    // Chromium ignores clicks on an audio-only <video> and a GIF can't be paused, so shared audio gets
+    // its own waveform layer: clicking it toggles playback like a shared video, and while paused the
+    // GIF is swapped for a canvas snapshot of its current frame.
+    createShareAudioVisual(video) {
+        const visual = document.createElement('div');
+        visual.className = 'shareAudioVisual';
+        const gif = document.createElement('img');
+        gif.src = image.audio;
+        gif.alt = '';
+        gif.draggable = false;
+        const frame = document.createElement('canvas');
+        visual.append(gif, frame);
+
+        let frozen = false;
+        const update = () => {
+            const playing = !video.paused && !video.ended;
+            if (playing) {
+                frozen = false;
+            } else if (!frozen && gif.complete && gif.naturalWidth) {
+                frame.width = gif.naturalWidth;
+                frame.height = gif.naturalHeight;
+                frame.getContext('2d').drawImage(gif, 0, 0);
+                frozen = true;
+            }
+            visual.classList.toggle('paused', frozen);
+        };
+        ['play', 'pause', 'ended'].forEach((event) => video.addEventListener(event, update));
+        gif.addEventListener('load', update);
+        update();
+
+        visual.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (video.paused || video.ended) {
+                video.play().catch((err) => console.warn('[shareAudioVisual] Play failed', err));
+            } else {
+                video.pause();
+            }
+        });
+        return visual;
     }
 
     // Shared media playback sync: play/pause/seek on any player is mirrored to the share audience.

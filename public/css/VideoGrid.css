@@ -322,6 +322,33 @@
     background: var(--btns-bg-color);
 }
 
+/* Shared audio waveform: covers the tile above the native controls bar, so those stay clickable */
+.shareAudioVisual {
+    position: absolute;
+    inset: 0 0 56px 0;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.shareAudioVisual img,
+.shareAudioVisual canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.shareAudioVisual canvas,
+.shareAudioVisual.paused img {
+    display: none;
+}
+
+.shareAudioVisual.paused canvas {
+    display: block;
+}
+
 /* Touch-friendly sizing for buttons within menu bar */
 .videoMenuBar button {
     min-width: 32px;
