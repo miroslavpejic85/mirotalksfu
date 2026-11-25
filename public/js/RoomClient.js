@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.73
+ * @version 2.8.74
  *
  */
 
@@ -8057,6 +8057,7 @@ class RoomClient {
         const chat = this.getId('chat');
         plist.classList.toggle('hidden');
         const isParticipantsListHidden = !this.isPlistOpen();
+        this.syncParticipantsListButton();
 
         // Chat was opened only to show participants: close everything instead of leaving the chat visible.
         if (fromUser && isParticipantsListHidden && this.isChatOpenedByParticipantsBtn) {
@@ -8124,6 +8125,12 @@ class RoomClient {
             pBtn.classList.toggle('is-active', participantsActive);
             pBtn.setAttribute('aria-pressed', participantsActive ? 'true' : 'false');
         }
+        this.syncParticipantsListButton();
+    }
+
+    syncParticipantsListButton() {
+        const btn = document.getElementById('chatShowParticipantsListBtn');
+        if (btn) btn.setAttribute('aria-pressed', this.isPlistOpen() ? 'true' : 'false');
     }
 
     toggleChatHistorySize(max = true) {
@@ -8556,7 +8563,10 @@ class RoomClient {
         chatMessage.value = '';
         chatMessage.setAttribute('rows', '1');
         const charCount = this.getId('chatCharCount');
-        if (charCount) charCount.textContent = '0 / 4000';
+        if (charCount) {
+            charCount.textContent = '';
+            charCount.classList.remove('is-limit');
+        }
     }
 
     pasteMessage() {

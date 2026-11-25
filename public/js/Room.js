@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.73
+ * @version 2.8.74
  *
  */
 
@@ -3304,8 +3304,11 @@ function updateChatConversationsCount() {
 function updateChatCharCount() {
     const el = getId('chatCharCount');
     if (!el) return;
+    const max = rc?.chatMessageLength || 4000;
     const len = chatMessage ? chatMessage.value.length : 0;
-    el.textContent = `${len} / 4000`;
+    // Only surface the counter when approaching the limit, to keep the composer compact
+    el.textContent = len >= max * 0.8 ? `${len} / ${max}` : '';
+    el.classList.toggle('is-limit', len >= max);
 }
 
 function updateChatEmptyNotice() {
@@ -11869,7 +11872,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.73',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.74',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

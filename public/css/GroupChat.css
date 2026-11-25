@@ -420,7 +420,7 @@
 .chat .chat-header .chat-option-buttons {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     min-width: 0;
     flex: 0 0 auto;
     margin-left: auto;
@@ -479,7 +479,8 @@
 }
 
 #chatTogglePin.is-active,
-#chatTogglePin[aria-pressed='true'] {
+#chatTogglePin[aria-pressed='true'],
+#chatShowParticipantsListBtn[aria-pressed='true'] {
     background: color-mix(in srgb, var(--chat-accent) 18%, transparent);
     color: var(--chat-accent) !important;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--chat-accent) 40%, transparent);
@@ -512,21 +513,6 @@
         height: 30px;
         flex-basis: 30px;
     }
-}
-
-/* Participants toggle button */
-.chat-header-participants-btn {
-    background: #1e3a8a !important;
-    color: #fff !important;
-}
-
-.chat-header-participants-btn:hover {
-    color: #fff !important;
-    background: #1d4ed8 !important;
-}
-
-.chat-header-participants-btn:active {
-    transform: scale(0.92);
 }
 
 /* Chat history */
@@ -669,32 +655,22 @@
     gap: 8px;
 }
 
+/* Shown only near the message length limit (see updateChatCharCount) */
 .chat-char-count {
+    align-self: flex-end;
+    margin: -4px 4px 0;
     font-size: 11px;
     color: rgba(255, 255, 255, 0.62);
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
-/* Show the hint and counter only while composing; keep their space to avoid layout shift. */
-.chat-toolbar-hint > * {
-    transition: opacity var(--motion-base) var(--ease-standard);
+.chat-char-count:empty {
+    display: none;
 }
 
-.chat-input-wrapper:not(:focus-within):has(.chat-input-textarea:placeholder-shown) .chat-toolbar-hint > * {
-    opacity: 0;
-}
-
-/* Input hint text */
-.chat-toolbar-hint {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4px;
-}
-
-.chat-input-hint {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.62);
+.chat-char-count.is-limit {
+    color: #fca5a5;
 }
 
 /* Chat header category label */
@@ -708,12 +684,12 @@
     margin-bottom: 1px;
 }
 
-/* Input container with textarea + send button */
+/* Input container with textarea */
 .chat-input-container {
     display: flex;
     align-items: stretch;
     gap: 0;
-    padding: 0 0 0 12px;
+    padding: 0 12px;
     border-radius: 16px;
     overflow: hidden;
     background: color-mix(in srgb, var(--select-bg) 80%, transparent);
@@ -752,26 +728,28 @@
     color: rgba(255, 255, 255, 0.4);
 }
 
-/* Send button */
+/* Send button (matches the toolbar group height) */
 .chat-send-btn {
     flex-shrink: 0;
-    align-self: stretch;
-    width: 44px;
-    border-radius: 0;
-    background: transparent;
-    color: var(--dd-color);
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: var(--dd-color);
+    color: #111;
     border: none;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 15px;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--dd-color) 30%, transparent);
     transition:
         background 0.2s ease,
         color 0.2s ease,
+        box-shadow 0.2s ease,
         filter 0.2s ease,
-        opacity 0.2s ease;
+        opacity 0.2s ease,
+        transform 0.15s ease;
     animation: sendBtnIn 0.2s ease-out;
 }
 
@@ -784,15 +762,30 @@
     }
 }
 
-.chat-send-btn:hover {
+.chat-send-btn:hover,
+.chat-send-btn:focus,
+.chat-send-btn:focus-visible {
     background: var(--dd-color);
     color: #111;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    border-radius: 8px;
+    filter: brightness(1.1);
 }
 
 .chat-send-btn:active {
-    filter: brightness(0.9);
+    background: var(--dd-color);
+    color: #111;
+    border-radius: 8px;
+    transform: scale(0.92);
+}
+
+/* Muted until there is something to send */
+.chat-input-wrapper:has(.chat-input-textarea:placeholder-shown) .chat-send-btn {
+    background: var(--chat-control-surface);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.55);
+    box-shadow: none;
+    filter: none;
+    pointer-events: none;
 }
 
 .chat-send-btn:disabled {
@@ -800,11 +793,6 @@
     cursor: not-allowed;
     filter: grayscale(0.5);
     pointer-events: none;
-}
-
-.chat-send-btn:disabled:hover {
-    background: transparent;
-    color: var(--dd-color);
 }
 
 /* Toolbar */
@@ -848,8 +836,16 @@
 .chat-toolbar-right {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
+    flex-shrink: 0;
     margin-left: auto;
+}
+
+@media (pointer: coarse) {
+    .chat-send-btn {
+        width: 44px;
+        height: 44px;
+    }
 }
 
 /* Toolbar buttons */
@@ -916,9 +912,14 @@
     .chat .chat-message {
         padding: 10px 10px 12px;
     }
+}
 
-    .chat-input-hint {
-        display: none;
+/* Narrow panel with a mouse: slightly smaller tools so they all fit next to Send */
+@media (pointer: fine) {
+    @container chat-panel (max-width: 420px) {
+        .chat-toolbar-btn {
+            width: 30px;
+        }
     }
 }
 

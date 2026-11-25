@@ -3587,7 +3587,7 @@
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                         >
-                            <i class="fas fa-bars"></i>
+                            <i class="fas fa-ellipsis-vertical"></i>
                         </button>
                         <div class="dropdown-menu text-start" aria-labelledby="whiteboardDropDownMenu">
                             <label id="whiteboardParticipantNamesControl" class="whiteboard-menu-switch hidden">
@@ -3812,6 +3812,15 @@
                             <div class="chat-option-buttons">
                                 <div class="chat-tool-group chat-layout-tools" aria-label="Panel layout">
                                     <button
+                                        id="chatShowParticipantsListBtn"
+                                        class="hidden"
+                                        type="button"
+                                        aria-label="Show participants"
+                                        aria-pressed="false"
+                                    >
+                                        <i class="fas fa-users"></i>
+                                    </button>
+                                    <button
                                         id="chatTogglePin"
                                         class="hidden"
                                         aria-label="Pin chat"
@@ -3837,7 +3846,7 @@
                                             aria-expanded="false"
                                             aria-label="Chat menu"
                                         >
-                                            <i class="fas fa-bars"></i>
+                                            <i class="fas fa-ellipsis-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu text-start" aria-labelledby="chatDropDownMenu">
                                             <li>
@@ -3988,19 +3997,8 @@
                                     placeholder="Type a message..."
                                     rows="1"
                                 ></textarea>
-                                <button
-                                    id="chatSendButton"
-                                    class="chat-send-btn hidden"
-                                    type="button"
-                                    aria-label="Send message"
-                                >
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
                             </div>
-                            <div class="chat-toolbar-hint">
-                                <span class="chat-input-hint">Enter sends. Shift+Enter adds a line break.</span>
-                                <span id="chatCharCount" class="chat-char-count">0 / 4000</span>
-                            </div>
+                            <span id="chatCharCount" class="chat-char-count" aria-live="polite"></span>
                             <div class="chat-toolbar">
                                 <div class="chat-toolbar-left">
                                     <div class="chat-compose-tool-group" aria-label="Message tools">
@@ -4091,12 +4089,12 @@
                                 </div>
                                 <div class="chat-toolbar-right">
                                     <button
-                                        id="chatShowParticipantsListBtn"
-                                        class="chat-toolbar-btn chat-header-participants-btn hidden"
+                                        id="chatSendButton"
+                                        class="chat-send-btn hidden"
                                         type="button"
-                                        aria-label="Show participants"
+                                        aria-label="Send message"
                                     >
-                                        <i class="fas fa-users"></i>
+                                        <i class="fas fa-paper-plane"></i>
                                     </button>
                                 </div>
                             </div>
@@ -4314,7 +4312,7 @@
                     </div>
                     <div class="dropdown editor-compact-menu">
                         <button
-                            class="dropdown-toggle fas fa-bars"
+                            class="dropdown-toggle fas fa-ellipsis-vertical"
                             type="button"
                             id="editorDropDownMenu"
                             data-bs-toggle="dropdown"
@@ -4382,7 +4380,7 @@
                                     aria-expanded="false"
                                     aria-label="Transcription menu"
                                 >
-                                    <i class="fas fa-bars"></i>
+                                    <i class="fas fa-ellipsis-vertical"></i>
                                 </button>
                                 <ul class="dropdown-menu text-start" aria-labelledby="transcriptionDropDownMenu">
                                     <li>
