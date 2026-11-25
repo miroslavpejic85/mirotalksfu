@@ -285,15 +285,13 @@
     border-radius: 50%;
 }
 
-/* Active speaker: same green as the speaking tile border (VideoGrid.css) */
+/* Active speaker: same palette as the speaking tile ring (VideoGrid.css) */
 .people-list .chat-list > li > img {
     transition: box-shadow 0.18s ease;
 }
 
 .people-list .chat-list > li.speaking > img {
-    box-shadow:
-        0 0 0 2px #3ddc84,
-        0 0 10px 2px rgb(61 220 132 / 55%);
+    box-shadow: 0 0 0 2px var(--speaking-accent);
 }
 
 .participant-action-icon.speaking > i {
@@ -318,7 +316,7 @@
     width: 0.14em;
     height: 100%;
     border-radius: 1px;
-    background: #3ddc84;
+    background: linear-gradient(to top, var(--speaking-accent), #5b8cff);
     transform-origin: bottom;
     animation: participant-speaking-bar 0.9s ease-in-out infinite;
 }
