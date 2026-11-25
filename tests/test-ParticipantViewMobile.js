@@ -195,7 +195,15 @@ describe('Participant view on mobile', () => {
 
         window.eval('isMobileDevice = false;');
         assert.equal(window.layoutPinnedStrip(grid, cameras, 800, 200, 5), true, 'desktop strips are supported too');
-        assert.equal(window.layoutPinnedStrip(grid, cameras, 300, 800, 5), false, 'packed columns keep the grid');
+        assert.ok(!grid.classList.contains('pinned-strip-vertical'));
+
+        assert.equal(window.layoutPinnedStrip(grid, cameras, 300, 800, 5), true, 'speaker left/right column');
+        assert.ok(grid.classList.contains('pinned-strip-vertical'));
+        assert.ok(grid.classList.contains('pinned-strip-overflow'), '5 column tiles do not fit, so it scrolls');
+        assert.ok(
+            cameras.every((c) => c.style.width === '290px' && c.style.height === '218px'),
+            'full column width'
+        );
 
         window.eval('rc.isVideoPinned = false;');
         assert.equal(window.layoutPinnedStrip(grid, cameras, 400, 200, 5), false);
