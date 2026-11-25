@@ -53,18 +53,27 @@ function setup(isMobile) {
         var participantViewMode = getId('participantViewMode');
         var pinVideoPosition = getId('pinVideoPosition');
         var pins = [];
+        var sounds = [];
         var rc = {
             isVideoPinned: false,
+            isPinSoundMuted: false,
             clearVideoFocusMode() {},
-            autoPinVideoForLayout() { this.isVideoPinned = true; },
+            // Mimics the tile pin button click, which plays its own sound unless muted
+            autoPinVideoForLayout() {
+                if (this.isVideoPinned) return true;
+                if (!this.isPinSoundMuted) this.sound('click');
+                this.isVideoPinned = true;
+            },
             toggleVideoPin(position) { pins.push(position); },
+            sound(name) { sounds.push(name); },
             userLog() {},
         };
         ${extractConst(roomSource, 'MOBILE_PARTICIPANT_VIEW_MODES')}
         ${extractFunction(roomSource, 'updateSelectValueIcon')}
         ${extractFunction(roomSource, 'removeUnsupportedMobileParticipantViews')}
         ${extractFunction(roomSource, 'setParticipantViewMode')}
-        window.api = { setParticipantViewMode, removeUnsupportedMobileParticipantViews, rc, pins: () => pins };
+        ${extractFunction(roomSource, 'applyParticipantViewMode')}
+        window.api = { setParticipantViewMode, removeUnsupportedMobileParticipantViews, rc, pins: () => pins, sounds: () => sounds };
     `);
     return { window, api: window.api, select: window.document.getElementById('participantViewMode') };
 }
@@ -118,6 +127,20 @@ describe('Participant view on mobile', () => {
         api.setParticipantViewMode('speaker-left', false, false);
         assert.equal(select.value, 'speaker-left');
         assert.equal(select.options.length, 7);
+    });
+
+    it('plays one click sound for every user-selected view, including speaker-to-speaker switches', () => {
+        const { api } = setup(false);
+
+        api.setParticipantViewMode('speaker-left', false);
+        assert.equal(api.sounds().length, 1, 'the auto-pin click is silenced, not doubled');
+        api.setParticipantViewMode('speaker-right', false);
+        api.setParticipantViewMode('speaker-bottom', false);
+        assert.equal(api.sounds().length, 3);
+        assert.equal(api.rc.isPinSoundMuted, false);
+
+        api.setParticipantViewMode('speaker-top', false, false);
+        assert.equal(api.sounds().length, 3, 'programmatic changes stay silent');
     });
 
     it('shows the layout icon of the selected participant view in the settings select', () => {

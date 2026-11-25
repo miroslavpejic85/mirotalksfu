@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.78
+ * @version 2.8.79
  *
  */
 
@@ -4684,6 +4684,7 @@ function setupParticipantViewDropdown() {
         e.stopPropagation();
         const camLayoutButton = e.target.closest('[data-screen-cam-layout]');
         if (camLayoutButton) {
+            rc.sound('click');
             setScreenCameraLayout(camLayoutButton.dataset.screenCamLayout);
             return;
         }
@@ -4723,6 +4724,19 @@ function removeUnsupportedMobileParticipantViews() {
 }
 
 function setParticipantViewMode(requestedMode, persist = true, notify = true) {
+    // User-initiated change: play one click for every view, silencing the incidental pin/unpin clicks
+    if (!notify) return applyParticipantViewMode(requestedMode, persist, notify);
+    rc.sound('click');
+    const wasPinSoundMuted = rc.isPinSoundMuted;
+    rc.isPinSoundMuted = true;
+    try {
+        applyParticipantViewMode(requestedMode, persist, notify);
+    } finally {
+        rc.isPinSoundMuted = wasPinSoundMuted;
+    }
+}
+
+function applyParticipantViewMode(requestedMode, persist, notify) {
     const supportedModes = new Set([
         'grid',
         'speaker-top',
@@ -5072,6 +5086,7 @@ function handleSelects() {
         setParticipantViewMode(participantViewMode.value);
     };
     screenCamLayoutSelect.onchange = () => {
+        rc.sound('click');
         setScreenCameraLayout(screenCamLayoutSelect.value);
     };
     BtnVideoObjectFit.onchange = () => {
@@ -11898,7 +11913,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.78',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.79',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

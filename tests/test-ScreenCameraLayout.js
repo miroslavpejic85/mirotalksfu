@@ -423,7 +423,11 @@ describe('screen share camera layout', () => {
             assert.match(html, new RegExp(`id="participantViewMenu"[\\s\\S]*data-screen-cam-layout="${mode}"`));
         }
         assert.match(roomSource, /function setScreenCameraLayout[\s\S]*?updateScreenCameraLayoutUI\(mode\);/);
-        assert.match(roomSource, /setScreenCameraLayout\(camLayoutButton\.dataset\.screenCamLayout\);/);
+        assert.match(
+            roomSource,
+            /rc\.sound\('click'\);\n\s+setScreenCameraLayout\(camLayoutButton\.dataset\.screenCamLayout\);/
+        );
+        assert.match(roomSource, /rc\.sound\('click'\);\n\s+setScreenCameraLayout\(screenCamLayoutSelect\.value\);/);
         assert.match(clientSource, /d\.dataset\.peerId = this\.peer_id;\n\s+d\.dataset\.mediaType = type;/);
         assert.match(clientSource, /d\.dataset\.peerId = remotePeerId;\n\s+d\.dataset\.mediaType = type;/);
         // Overlaid cameras are moved back to the grid before a screen tile is removed
