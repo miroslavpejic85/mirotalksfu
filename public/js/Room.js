@@ -6911,11 +6911,11 @@ function updateSettingsExtraGroups() {
 // ####################################################
 
 function restoreSplitButtonsBorderRadius() {
-    document.querySelectorAll('#bottomButtons .split-btn').forEach((group) => {
+    // On mobile the device chevrons are hidden, so round only the mic/camera splits.
+    // Other splits (participants, settings) keep their visible chevron and split shape.
+    document.querySelectorAll('#bottomButtons #startAudioSplit, #bottomButtons #startVideoSplit').forEach((group) => {
         group.querySelectorAll('button').forEach((button) => {
-            if (button.id != 'settingsExtraToggle' && button.id != 'settingsButton') {
-                button.style.setProperty('border-radius', '10px', 'important');
-            }
+            button.style.setProperty('border-radius', '10px', 'important');
         });
         const toggle = group.querySelector('.device-dropdown-toggle');
         if (toggle) toggle.style.setProperty('border-left', 'none', 'important');
