@@ -81,3 +81,66 @@ describe('Speaking tile border', () => {
         assert.deepEqual(speaking(), [], 'the hold timer still clears a new highlight');
     });
 });
+
+describe('Speaking participant in the participants list', () => {
+    let dom;
+    let rc;
+    let document;
+
+    const listHtml = `<li id="bob" class="clearfix">
+            <img src="bob.png" alt="avatar" />
+            <div class="about-buttons">
+                <button id="bob___pAudio"><span class="participant-action-icon"><i class="fas fa-microphone"></i></span></button>
+            </div>
+        </li>`;
+
+    beforeEach(() => {
+        dom = new JSDOM(`<ul id="participantsList">${listHtml}</ul>`, { runScripts: 'outside-only' });
+        document = dom.window.document;
+        dom.window.eval(`
+            window.Client = class {
+                getId(id) { return document.getElementById(id); }
+                ${[
+                    'handleSpeakingParticipant(peerId, holdMs = 600)',
+                    'setParticipantSpeaking(peerId, speaking)',
+                    'refreshSpeakingParticipants()',
+                ]
+                    .map(extractMethod)
+                    .join('\n')}
+            };
+        `);
+        rc = new dom.window.Client();
+    });
+
+    afterEach(() => dom.window.close());
+
+    const item = () => document.getElementById('bob');
+    const audioIcon = () => document.querySelector('#bob___pAudio .participant-action-icon');
+
+    it('rings the avatar and swaps the mic for mixer bars while speaking, then restores it', async () => {
+        rc.handleSpeakingParticipant('bob', 40);
+        assert.ok(item().classList.contains('speaking'));
+        assert.ok(audioIcon().classList.contains('speaking'));
+        assert.equal(audioIcon().querySelectorAll('.participant-speaking-bars > span').length, 4);
+        assert.ok(
+            document.getElementById('bob___pAudio').querySelector('i').classList.contains('fa-microphone'),
+            'the mic <i> stays first so mute handling can still read it'
+        );
+
+        rc.handleSpeakingParticipant('bob', 40);
+        assert.equal(audioIcon().querySelectorAll('.participant-speaking-bars').length, 1, 'bars are added once');
+
+        await sleep(60);
+        assert.ok(!item().classList.contains('speaking'));
+        assert.ok(!audioIcon().classList.contains('speaking'));
+    });
+
+    it('restores the speaking state after the list is re-rendered', () => {
+        rc.handleSpeakingParticipant('bob', 200);
+        document.getElementById('participantsList').innerHTML = listHtml;
+        assert.ok(!item().classList.contains('speaking'));
+        rc.refreshSpeakingParticipants();
+        assert.ok(item().classList.contains('speaking'));
+        assert.ok(audioIcon().classList.contains('speaking'));
+    });
+});

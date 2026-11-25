@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.80
+ * @version 2.8.81
  *
  */
 
@@ -13713,6 +13713,7 @@ class RoomClient {
         const audioColorTmp = this.getAudioVolumeColor(audioVolumeTmp);
 
         if (isSpeakingHighlightEnabled) this.handleSpeakingTile(peer_id);
+        this.handleSpeakingParticipant(peer_id);
 
         if (!isPitchBarEnabled) {
             const peerVideo = this.getName(peer_id);
@@ -13782,6 +13783,43 @@ class RoomClient {
         this._speakingTileTimers?.forEach((timer) => clearTimeout(timer));
         this._speakingTileTimers?.clear();
         document.querySelectorAll('[data-peer-id].speaking').forEach((tile) => tile.classList.remove('speaking'));
+    }
+
+    // Participants list: ring around the avatar and mixer bars in place of the mic icon, held like the tile border
+    handleSpeakingParticipant(peerId, holdMs = 600) {
+        if (!peerId) return;
+        if (!this._speakingParticipantTimers) this._speakingParticipantTimers = new Map();
+        this.setParticipantSpeaking(peerId, true);
+        clearTimeout(this._speakingParticipantTimers.get(peerId));
+        this._speakingParticipantTimers.set(
+            peerId,
+            setTimeout(() => {
+                this._speakingParticipantTimers.delete(peerId);
+                this.setParticipantSpeaking(peerId, false);
+            }, holdMs)
+        );
+    }
+
+    setParticipantSpeaking(peerId, speaking) {
+        const item = this.getId('participantsList')?.querySelector(`li[id="${CSS.escape(peerId)}"]`);
+        if (item) item.classList.toggle('speaking', speaking);
+
+        // Spans, not <i>: mute handling reads the mic state from the button's first <i>
+        const audioIcon = this.getId(peerId + '___pAudio')?.querySelector('.participant-action-icon');
+        if (!audioIcon) return;
+        audioIcon.classList.toggle('speaking', speaking);
+        if (speaking && !audioIcon.querySelector('.participant-speaking-bars')) {
+            const bars = document.createElement('span');
+            bars.className = 'participant-speaking-bars';
+            bars.setAttribute('aria-hidden', 'true');
+            for (let i = 0; i < 4; i++) bars.appendChild(document.createElement('span'));
+            audioIcon.appendChild(bars);
+        }
+    }
+
+    // The participants list is re-rendered via innerHTML: restore peers that are still speaking
+    refreshSpeakingParticipants() {
+        this._speakingParticipantTimers?.forEach((_, peerId) => this.setParticipantSpeaking(peerId, true));
     }
 
     applyBoxShadowEffect(element, color, delay = 200) {

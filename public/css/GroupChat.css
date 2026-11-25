@@ -285,6 +285,76 @@
     border-radius: 50%;
 }
 
+/* Active speaker: same green as the speaking tile border (VideoGrid.css) */
+.people-list .chat-list > li > img {
+    transition: box-shadow 0.18s ease;
+}
+
+.people-list .chat-list > li.speaking > img {
+    box-shadow:
+        0 0 0 2px #3ddc84,
+        0 0 10px 2px rgb(61 220 132 / 55%);
+}
+
+.participant-action-icon.speaking > i {
+    display: none;
+}
+
+/* Mixer bars sized like the mic glyph so the buttons don't shift */
+.participant-speaking-bars {
+    display: none;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 0.8em;
+    height: 0.9em;
+    vertical-align: -0.1em;
+}
+
+.participant-action-icon.speaking > .participant-speaking-bars {
+    display: inline-flex;
+}
+
+.participant-speaking-bars > span {
+    width: 0.14em;
+    height: 100%;
+    border-radius: 1px;
+    background: #3ddc84;
+    transform-origin: bottom;
+    animation: participant-speaking-bar 0.9s ease-in-out infinite;
+}
+
+.participant-speaking-bars > span:nth-child(2) {
+    animation-duration: 0.7s;
+    animation-delay: -0.3s;
+}
+
+.participant-speaking-bars > span:nth-child(3) {
+    animation-duration: 1s;
+    animation-delay: -0.5s;
+}
+
+.participant-speaking-bars > span:nth-child(4) {
+    animation-duration: 0.8s;
+    animation-delay: -0.15s;
+}
+
+@keyframes participant-speaking-bar {
+    0%,
+    100% {
+        transform: scaleY(0.3);
+    }
+    50% {
+        transform: scaleY(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .participant-speaking-bars > span {
+        animation: none;
+        transform: scaleY(0.7);
+    }
+}
+
 .people-list img {
     float: left;
     border-radius: 50%;
