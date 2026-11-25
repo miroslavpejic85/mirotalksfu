@@ -227,17 +227,6 @@
     -webkit-overflow-scrolling: touch;
 }
 
-/* Mobile floating menubar when appended to body */
-.videoMenuBar.mobile-floating {
-    z-index: 2;
-    position: fixed;
-    top: env(safe-area-inset-top, 0px);
-    left: 0;
-    right: 0;
-    width: 100vw;
-    border-radius: 0 0 10px 10px;
-}
-
 .videoAvatarMenuBar,
 .videoMenuBarShare {
     z-index: 2;

@@ -409,7 +409,6 @@ class Transcription {
         transcriptionRoom.style.transform = null;
         document.documentElement.style.setProperty('--transcription-width', '25%');
         document.documentElement.style.setProperty('--transcription-height', '100%');
-        rc.resizeVideoMenuBar();
         transcriptionRoom.classList.remove('panel-slide-in', 'chat-dock-in');
         void transcriptionRoom.offsetWidth;
         transcriptionRoom.classList.add('panel-slide-in');
@@ -426,7 +425,6 @@ class Transcription {
         this.isPinned = false;
         rc.refreshVideoPinLayout();
         this.setPinControlState(false);
-        rc.resizeVideoMenuBar();
         resizeVideoMedia();
         if (slideOut) {
             // keep the pinned look while the panel slides away, then finish (and hide it)

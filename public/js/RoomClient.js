@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.76
+ * @version 2.8.77
  *
  */
 
@@ -4478,14 +4478,8 @@ class RoomClient {
                     }
                 };
 
-                if (this.isMobileDevice) {
-                    vb.classList.add('mobile-floating');
-                    document.body.appendChild(vb);
-                } else {
-                    vb.classList.remove('mobile-floating');
-                    d.appendChild(vb);
-                    d.addEventListener('mouseleave', hideVideoMenu);
-                }
+                d.appendChild(vb);
+                if (!this.isMobileDevice) d.addEventListener('mouseleave', hideVideoMenu);
                 vb.addEventListener('click', (e) => e.stopPropagation());
 
                 this.videoMediaContainer.appendChild(d);
@@ -5360,13 +5354,7 @@ class RoomClient {
                 d.appendChild(p);
                 d.appendChild(pm);
 
-                if (this.isMobileDevice) {
-                    vb.classList.add('mobile-floating');
-                    document.body.appendChild(vb);
-                } else {
-                    vb.classList.remove('mobile-floating');
-                    d.appendChild(vb);
-                }
+                d.appendChild(vb);
                 vb.addEventListener('click', (e) => e.stopPropagation());
 
                 this.videoMediaContainer.appendChild(d);
@@ -5732,14 +5720,8 @@ class RoomClient {
             }
         };
 
-        if (this.isMobileDevice) {
-            vb.classList.add('mobile-floating');
-            document.body.appendChild(vb);
-        } else {
-            vb.classList.remove('mobile-floating');
-            d.appendChild(vb);
-            d.addEventListener('mouseleave', hideVideoMenu);
-        }
+        d.appendChild(vb);
+        if (!this.isMobileDevice) d.addEventListener('mouseleave', hideVideoMenu);
         vb.addEventListener('click', (e) => e.stopPropagation());
 
         this.videoMediaContainer.appendChild(d);
@@ -7326,7 +7308,6 @@ class RoomClient {
                         setParticipantViewMode('grid', true, false);
                     }
                 }
-                this.resizeVideoMenuBar();
                 handleAspectRatio();
                 if (this.isFollowMeActive && isPresenter && !this.isApplyingDominantSpeaker) {
                     if (this.isVideoPinned) {
@@ -7669,7 +7650,6 @@ class RoomClient {
             const eventType = this.isDesktopDevice ? 'mouseenter' : 'click';
             videoPlayer.addEventListener(eventType, async () => {
                 hideVideoMenuBar(videoBarId);
-                rc.resizeVideoMenuBar();
                 setCamerasBorderNone();
                 if (videoBar.classList.contains('hidden')) {
                     show(videoBar);
@@ -7689,26 +7669,6 @@ class RoomClient {
                     hideVideoMenuBar('ALL');
                 });
             }
-        }
-    }
-
-    resizeVideoMenuBar() {
-        const isPollDocked = this.isPollPinned && !this.isPollMaximized;
-        const somethingPinned =
-            this.isVideoPinned ||
-            this.isChatPinned ||
-            this.isEditorPinned ||
-            isPollDocked ||
-            this.isBreakoutPinned ||
-            transcription.isPin();
-        const menuBarWidth =
-            this.isVideoPinned || this.isChatPinned || isPollDocked || this.isBreakoutPinned || transcription.isPin()
-                ? '75%'
-                : '70%';
-        const videoMenuBar = rc.getEcN('videoMenuBar');
-        for (let i = 0; i < videoMenuBar.length; i++) {
-            const menuBar = videoMenuBar[i];
-            menuBar.style.width = this.isMobileDevice && somethingPinned ? menuBarWidth : '100%';
         }
     }
 
@@ -7743,7 +7703,6 @@ class RoomClient {
         this.videoMediaContainer.style.top = 0;
         this.videoMediaContainer.style.width = '75%';
         this.videoMediaContainer.style.height = '100%';
-        this.resizeVideoMenuBar();
     }
 
     videoMediaContainerUnpin() {
@@ -7755,7 +7714,6 @@ class RoomClient {
         this.videoMediaContainer.style.height = '100%';
         this.videoMediaContainer.classList.remove('no-bar-reserve');
         this.videoPinMediaContainer.classList.remove('no-bar-reserve');
-        this.resizeVideoMenuBar();
     }
 
     adaptVideoObjectFit(index) {
@@ -8231,7 +8189,6 @@ class RoomClient {
         this.isChatPinned = true;
         this.refreshVideoPinLayout();
         this.setChatControlState(chatTogglePin, true);
-        this.resizeVideoMenuBar();
         resizeVideoMedia();
         chatRoom.style.resize = 'none';
         if (!this.isMobileDevice) this.makeUnDraggable(chatRoom, chatHeader);
@@ -8246,7 +8203,6 @@ class RoomClient {
         this.isChatPinned = false;
         this.refreshVideoPinLayout();
         this.setChatControlState(chatTogglePin, false);
-        this.resizeVideoMenuBar();
         resizeVideoMedia();
         if (slideOut) {
             // keep the pinned look while the panel slides away, then finish (and hide it)
@@ -10058,7 +10014,6 @@ class RoomClient {
         this.isPollPinned = true;
         this.refreshVideoPinLayout();
         this.setPollControlState(pollTogglePin, true);
-        this.resizeVideoMenuBar();
         resizeVideoMedia();
         pollRoom.style.resize = 'none';
         if (!this.isMobileDevice) this.makeUnDraggable(pollRoom, pollHeader);
@@ -10078,7 +10033,6 @@ class RoomClient {
         this.isPollPinned = false;
         this.refreshVideoPinLayout();
         this.setPollControlState(pollTogglePin, false);
-        this.resizeVideoMenuBar();
         resizeVideoMedia();
         if (!this.isMobileDevice) this.makeDraggable(pollRoom, pollHeader);
     }
@@ -10171,7 +10125,6 @@ class RoomClient {
         this.isBreakoutPinned = true;
         this.refreshVideoPinLayout();
         this.setBreakoutControlState(breakoutTogglePin, true);
-        this.resizeVideoMenuBar();
         resizeVideoMedia();
     }
 
@@ -10185,7 +10138,6 @@ class RoomClient {
         this.isBreakoutPinned = false;
         this.refreshVideoPinLayout();
         this.setBreakoutControlState(breakoutTogglePin, false);
-        this.resizeVideoMenuBar();
         resizeVideoMedia();
         if (!this.isMobileDevice) this.makeDraggable(breakoutPanel, breakoutPanelHeader);
     }
@@ -10846,7 +10798,6 @@ class RoomClient {
         this.isEditorPinned = true;
         this.refreshVideoPinLayout();
         this.setEditorControlState(editorTogglePin, true);
-        this.resizeVideoMenuBar();
         resizeVideoMedia();
         document.documentElement.style.setProperty('--editor-height', '80vh');
         //if (!this.isMobileDevice) this.makeUnDraggable(editorRoom, editorHeader);
@@ -10864,7 +10815,6 @@ class RoomClient {
         this.refreshVideoPinLayout();
         editorRoom.classList.remove('panel-slide-in');
         this.setEditorControlState(editorTogglePin, false);
-        this.resizeVideoMenuBar();
         resizeVideoMedia();
         document.documentElement.style.setProperty('--editor-height', '85vh');
         //if (!this.isMobileDevice) this.makeDraggable(editorRoom, editorHeader);
