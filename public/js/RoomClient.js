@@ -7393,9 +7393,10 @@ class RoomClient {
         const contentWidth = 100 - pinnedPanelWidth;
         const speakerWidth = contentWidth * 0.75;
         const thumbnailWidth = contentWidth * 0.25;
-        // Phones are tall: a wider thumbnail strip keeps tiles readable next to the buttons bar
-        const speakerHeight = this.isMobileDevice ? 60 : 75;
-        const thumbnailHeight = 100 - speakerHeight;
+        // Fixed-size thumbnail strip: consistent tiles for any participant count on all devices,
+        // growing by the buttons bar reserve when the strip touches the bottom of the screen
+        const stripSize = 'var(--pinned-strip-size, 20vh)';
+        const stripWithBar = `calc(${stripSize} + var(--buttons-bar-reserve, 0px))`;
         this.videoPinMediaContainer.style.top = 0;
         this.videoPinMediaContainer.style.left = 0;
         this.videoPinMediaContainer.style.width = contentWidth + '%';
@@ -7412,10 +7413,10 @@ class RoomClient {
         switch (position) {
             case 'speaker-bottom':
             case 'top':
-                this.videoPinMediaContainer.style.top = thumbnailHeight + '%';
+                this.videoPinMediaContainer.style.top = stripSize;
                 this.videoPinMediaContainer.style.width = contentWidth + '%';
-                this.videoPinMediaContainer.style.height = speakerHeight + '%';
-                this.videoMediaContainer.style.height = thumbnailHeight + '%';
+                this.videoPinMediaContainer.style.height = `calc(100% - ${stripSize})`;
+                this.videoMediaContainer.style.height = stripSize;
                 this.videoMediaContainer.classList.add('no-bar-reserve');
                 break;
             case 'speaker-left':
@@ -7426,9 +7427,9 @@ class RoomClient {
                 break;
             case 'speaker-top':
             case 'horizontal':
-                this.videoPinMediaContainer.style.height = speakerHeight + '%';
-                this.videoMediaContainer.style.top = speakerHeight + '%';
-                this.videoMediaContainer.style.height = thumbnailHeight + '%';
+                this.videoPinMediaContainer.style.height = `calc(100% - ${stripWithBar})`;
+                this.videoMediaContainer.style.top = `calc(100% - ${stripWithBar})`;
+                this.videoMediaContainer.style.height = stripWithBar;
                 this.videoPinMediaContainer.classList.add('no-bar-reserve');
                 break;
             case 'speaker-right':

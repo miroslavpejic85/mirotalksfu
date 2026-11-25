@@ -597,8 +597,13 @@ input[type='range'] {
 }
 
 /*--------------------------------------------------------------
-# Mobile speaker view: other tiles in one swipeable row (layoutPinnedStrip in VideoGrid.js)
+# Speaker view: other tiles in one swipeable row (layoutPinnedStrip in VideoGrid.js)
 --------------------------------------------------------------*/
+
+:root {
+    /* Height of the speaker view thumbnails strip (tiles + margins), consistent for any participant count */
+    --pinned-strip-size: clamp(130px, 22vh, 220px);
+}
 
 #videoMediaContainer.pinned-strip {
     flex-wrap: nowrap;
@@ -626,6 +631,23 @@ input[type='range'] {
 
 #videoMediaContainer.pinned-strip > .Camera[data-camera-off='true'] {
     order: 1;
+}
+
+/* Desktop: keep a thin scrollbar so the overflow is discoverable with a mouse */
+@media (hover: hover) and (pointer: fine) {
+    #videoMediaContainer.pinned-strip-overflow {
+        scrollbar-width: thin;
+    }
+
+    #videoMediaContainer.pinned-strip-overflow::-webkit-scrollbar {
+        display: block;
+        height: 6px;
+    }
+
+    #videoMediaContainer.pinned-strip-overflow::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 3px;
+    }
 }
 
 /*--------------------------------------------------------------

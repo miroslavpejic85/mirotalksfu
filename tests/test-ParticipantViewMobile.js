@@ -131,24 +131,37 @@ describe('Participant view on mobile', () => {
         assert.ok(!desktopPn.classList.contains('hidden'));
     });
 
-    it('uses a taller thumbnail strip on mobile and maps side positions to speaker top', () => {
+    it('uses a fixed-size thumbnail strip on every device and maps side positions to speaker top on mobile', () => {
+        const stripSize = 'var(--pinned-strip-size, 20vh)';
+        const stripWithBar = `calc(${stripSize} + var(--buttons-bar-reserve, 0px))`;
+
         const { client } = makeClient(true);
         client.toggleVideoPin('speaker-top');
-        assert.equal(client.videoPinMediaContainer.style.height, '60%');
-        assert.equal(client.videoMediaContainer.style.top, '60%');
-        assert.equal(client.videoMediaContainer.style.height, '40%');
+        assert.equal(client.videoPinMediaContainer.style.height, `calc(100% - ${stripWithBar})`);
+        assert.equal(client.videoMediaContainer.style.top, `calc(100% - ${stripWithBar})`);
+        assert.equal(client.videoMediaContainer.style.height, stripWithBar);
 
         client.toggleVideoPin('speaker-left');
         assert.equal(client.videoPinMediaContainer.style.width, '100%');
-        assert.equal(client.videoMediaContainer.style.top, '60%');
+        assert.equal(client.videoMediaContainer.style.top, `calc(100% - ${stripWithBar})`, 'side maps to speaker-top');
 
         const desktop = makeClient(false).client;
         desktop.toggleVideoPin('speaker-top');
-        assert.equal(desktop.videoPinMediaContainer.style.height, '75%');
-        assert.equal(desktop.videoMediaContainer.style.height, '25%');
+        assert.equal(desktop.videoMediaContainer.style.height, stripWithBar, 'desktop strip has the same fixed size');
+
+        // Strip on top: the buttons bar reserve belongs to the speaker below it
+        desktop.toggleVideoPin('speaker-bottom');
+        assert.equal(desktop.videoMediaContainer.style.height, stripSize);
+        assert.equal(desktop.videoPinMediaContainer.style.top, stripSize);
+        assert.equal(desktop.videoPinMediaContainer.style.height, `calc(100% - ${stripSize})`);
+
+        // Desktop side views keep the packed column
+        desktop.toggleVideoPin('speaker-left');
+        assert.equal(desktop.videoPinMediaContainer.style.width, '75%');
+        assert.equal(desktop.videoMediaContainer.style.width, '25%');
     });
 
-    it('lays out the tiles next to the pinned speaker as one scrollable row on mobile', () => {
+    it('lays out the tiles next to the pinned speaker as one scrollable row', () => {
         const dom = new JSDOM(
             `<div id="grid" class="screen-stage">${[0, 1, 2, 3, 4]
                 .map((i) => `<div class="Camera" data-screen-stage="${i ? '' : 'main'}"></div>`)
@@ -171,11 +184,18 @@ describe('Participant view on mobile', () => {
         assert.ok(grid.classList.contains('pinned-strip'));
         assert.ok(grid.classList.contains('pinned-strip-overflow'), '5 tiles do not fit, so the row scrolls');
         assert.ok(!grid.classList.contains('screen-stage'));
-        assert.ok(cameras.every((c) => c.style.width === '156px' && c.style.height === '156px'));
+        assert.ok(
+            cameras.every((c) => c.style.width === '156px' && c.style.height === '117px'),
+            'fixed 4:3 tiles'
+        );
         assert.ok(cameras.every((c) => !c.hasAttribute('data-screen-stage')));
 
         window.layoutPinnedStrip(grid, cameras.slice(0, 2), 400, 200, 5);
         assert.ok(!grid.classList.contains('pinned-strip-overflow'), 'a row that fits stays centered');
+
+        window.eval('isMobileDevice = false;');
+        assert.equal(window.layoutPinnedStrip(grid, cameras, 800, 200, 5), true, 'desktop strips are supported too');
+        assert.equal(window.layoutPinnedStrip(grid, cameras, 300, 800, 5), false, 'packed columns keep the grid');
 
         window.eval('rc.isVideoPinned = false;');
         assert.equal(window.layoutPinnedStrip(grid, cameras, 400, 200, 5), false);

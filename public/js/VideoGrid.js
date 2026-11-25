@@ -111,13 +111,15 @@ function resizeVideoMedia() {
 }
 
 /**
- * Mobile speaker view: the tiles next to the pinned speaker stay in one swipeable row
- * (camera-on tiles first, see .pinned-strip in VideoGrid.css) instead of shrinking into a grid.
+ * Speaker view: the tiles next to the pinned speaker stay in one swipeable fixed-height row
+ * (camera-on tiles first, see .pinned-strip in VideoGrid.css) instead of shrinking with the
+ * participant count. Applies on every device when the thumbnails area is a horizontal strip
+ * (speaker top/bottom); the speaker left/right columns keep the grid packing.
  * @returns {boolean} true if the strip layout was applied
  */
 function layoutPinnedStrip(container, Cameras, Width, Height, Margin) {
-    const isMobile = typeof isMobileDevice !== 'undefined' && isMobileDevice;
-    const active = isMobile && typeof rc !== 'undefined' && !!rc?.isVideoPinned && Cameras.length > 0;
+    const pinned = typeof rc !== 'undefined' && !!rc?.isVideoPinned;
+    const active = pinned && Cameras.length > 0 && Width > Height;
 
     if (!active) {
         container.classList.remove('pinned-strip', 'pinned-strip-overflow');
@@ -129,7 +131,9 @@ function layoutPinnedStrip(container, Cameras, Width, Height, Margin) {
     Cameras.forEach((c) => c.removeAttribute('data-screen-stage'));
     container.classList.add('pinned-strip');
 
-    const tileRatio = customRatio ? 0.75 : ratio;
+    // Fixed 4:3 thumbnails: the adaptive aspect ratio depends on the participant count,
+    // and the strip tiles must keep the same size no matter how many people join
+    const tileRatio = 0.75;
     // Keep part of the next tile in view so it is clear the row scrolls
     const maxTileW = Math.floor(Width / 2.4) - Margin * 2;
     let tileH = Math.max(40, Height - Margin * 2);
@@ -147,6 +151,21 @@ function layoutPinnedStrip(container, Cameras, Width, Height, Margin) {
 
     const rowWidth = Cameras.length * (tileW + Margin * 2);
     container.classList.toggle('pinned-strip-overflow', rowWidth > Width + Margin * 2);
+
+    if (!container.dataset.pinnedStripWheel) {
+        container.dataset.pinnedStripWheel = '1';
+        container.addEventListener(
+            'wheel',
+            (e) => {
+                // Vertical wheel scrolls the strip; over a video the wheel keeps zooming the tile
+                if (!container.classList.contains('pinned-strip-overflow')) return;
+                if (e.target.closest('video') || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+                container.scrollLeft += e.deltaY;
+                e.preventDefault();
+            },
+            { passive: false }
+        );
+    }
 
     document.documentElement.style.setProperty('--vmi-wh', Math.max(32, tileW / 3) + 'px');
     return true;
