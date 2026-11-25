@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.86
+ * @version 2.8.87
  *
  */
 
@@ -7037,11 +7037,30 @@ class RoomClient {
             pipVideoContainer.className = 'pipVideoContainer';
 
             pipWindow.document.head.append(pipStylesheet);
-            pipWindow.document.body.append(pipVideoContainer);
+
+            const fontAwesome = document.querySelector('link[href*="font-awesome"]');
+            if (fontAwesome) {
+                const pipFontAwesome = document.createElement('link');
+                pipFontAwesome.rel = 'stylesheet';
+                pipFontAwesome.href = fontAwesome.href;
+                pipWindow.document.head.append(pipFontAwesome);
+            }
+
+            const pipControls = this.createDocumentPipControls(pipWindow);
+
+            pipWindow.document.body.append(pipVideoContainer, pipControls.element);
+
+            let videoElementObservers = [];
+
+            function disconnectVideoElementObservers() {
+                videoElementObservers.forEach((observer) => observer.disconnect());
+                videoElementObservers = [];
+            }
 
             function cloneVideoElements() {
                 let foundVideo = false;
 
+                disconnectVideoElementObservers();
                 pipVideoContainer.innerHTML = '';
 
                 [...document.querySelectorAll('video')].forEach((video) => {
@@ -7090,15 +7109,21 @@ class RoomClient {
 
                     // Start observing for new videos and class changes
                     videoElementObserver.observe(video, { attributes: true, attributeFilter: ['class'] });
+                    videoElementObservers.push(videoElementObserver);
                 });
+
+                // Keep the window open (the controls stay usable) and show a camera-off placeholder
+                if (!foundVideo) {
+                    const noVideo = document.createElement('div');
+                    noVideo.className = 'pipNoVideo';
+                    noVideo.innerHTML = '<i class="fas fa-video-slash" aria-hidden="true"></i>';
+                    pipVideoContainer.append(noVideo);
+                }
 
                 return foundVideo;
             }
 
-            if (!cloneVideoElements()) {
-                rc.documentPictureInPictureClose();
-                return userLog('warning', 'No video allowed for Document PIP', 'top-end', 6000);
-            }
+            cloneVideoElements();
 
             const videoObserver = new MutationObserver(() => {
                 cloneVideoElements();
@@ -7119,10 +7144,137 @@ class RoomClient {
             pipWindow.addEventListener('unload', () => {
                 videoObserver.disconnect();
                 documentObserver.disconnect();
+                disconnectVideoElementObservers();
+                pipControls.destroy();
             });
         } catch (err) {
             userLog('warning', err.message, 'top-end', 6000);
         }
+    }
+
+    createDocumentPipControls(pipWindow) {
+        const pipDocument = pipWindow.document;
+        const mainButtons = this.getId('bottomButtons');
+        const t = (s) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(s, 'tooltips') : s);
+
+        // Visible in the main toolbar (ignores the toolbar auto-hide on #bottomButtons itself)
+        const isShown = (el) => {
+            if (!el) return false;
+            for (let node = el; node && node !== mainButtons; node = node.parentElement) {
+                if (getComputedStyle(node).display === 'none') return false;
+            }
+            return true;
+        };
+
+        // Each PiP button proxies the matching main toolbar button, so all checks
+        // (moderator rules, push-to-talk, device errors) stay in one place.
+        const controls = [
+            {
+                id: 'pipAudioButton',
+                on: this.getId('stopAudioButton'),
+                off: this.getId('startAudioButton'),
+                onTitle: 'Stop the audio',
+                offTitle: 'Start the audio',
+                offClass: 'muted',
+                pushToTalk: true,
+            },
+            {
+                id: 'pipVideoButton',
+                on: this.getId('stopVideoButton'),
+                off: this.getId('startVideoButton'),
+                onTitle: 'Stop the video',
+                offTitle: 'Start the video',
+                offClass: 'muted',
+            },
+            {
+                id: 'pipHandButton',
+                on: this.getId('lowerHandButton'),
+                off: this.getId('raiseHandButton'),
+                onTitle: 'Lower your hand',
+                offTitle: 'Raise your hand',
+                onClass: 'raised',
+            },
+            {
+                id: 'pipLeaveButton',
+                on: this.getId('exitButton'),
+                onTitle: 'Leave room',
+                onClass: 'leave',
+                leave: true,
+            },
+        ];
+
+        const element = pipDocument.createElement('div');
+        element.className = 'pipControls';
+
+        const getTarget = (control) => {
+            if (isShown(control.on)) return control.on;
+            if (isShown(control.off)) return control.off;
+            return null;
+        };
+
+        controls.forEach((control) => {
+            const button = pipDocument.createElement('button');
+            button.id = control.id;
+            button.type = 'button';
+            button.className = 'pipControlButton';
+            button.append(pipDocument.createElement('i'));
+
+            button.addEventListener('click', () => {
+                if (control.leave) {
+                    pipWindow.close();
+                    window.focus();
+                    return leaveRoom();
+                }
+                const target = getTarget(control);
+                if (target && !target.disabled) target.click();
+            });
+
+            if (control.pushToTalk) {
+                button.addEventListener('pointerdown', (e) => {
+                    if (!isPushToTalkActive) return;
+                    button.setPointerCapture(e.pointerId);
+                    setPushToTalkPressed(true);
+                });
+                button.addEventListener('pointerup', () => setPushToTalkPressed(false));
+                button.addEventListener('pointercancel', () => setPushToTalkPressed(false));
+            }
+
+            control.button = button;
+            element.append(button);
+        });
+
+        const sync = () => {
+            controls.forEach((control) => {
+                const { button } = control;
+                const target = getTarget(control);
+                button.hidden = !target;
+                if (!target) return;
+
+                const isOn = target === control.on;
+                const icon = target.querySelector('i');
+                const title = t(isOn ? control.onTitle : control.offTitle);
+
+                button.firstChild.className = icon ? icon.className : '';
+                button.disabled = !!target.disabled;
+                button.title = title;
+                button.setAttribute('aria-label', title);
+                if (control.onClass) button.classList.toggle(control.onClass, isOn);
+                if (control.offClass) button.classList.toggle(control.offClass, !isOn);
+            });
+        };
+
+        sync();
+
+        const observer = new MutationObserver(sync);
+        if (mainButtons) {
+            observer.observe(mainButtons, {
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'style', 'disabled'],
+            });
+        }
+
+        return { element, destroy: () => observer.disconnect() };
     }
 
     // ####################################################
