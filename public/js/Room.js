@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.77
+ * @version 2.8.78
  *
  */
 
@@ -4705,6 +4705,17 @@ function updateParticipantViewButtonVisibility() {
 // Phones only get the stacked layouts: side-by-side and Livestream views don't fit a portrait screen
 const MOBILE_PARTICIPANT_VIEW_MODES = ['grid', 'speaker-top', 'speaker-bottom', 'speaker-1:1'];
 
+/**
+ * Show the selected option's layout icon (option data-icon -> pv-icon-<name>) next to a .select-with-icon select
+ * @param {HTMLSelectElement} select
+ */
+function updateSelectValueIcon(select) {
+    const icon = select?.parentElement?.querySelector(':scope > .select-value-icon');
+    if (!icon) return;
+    const name = select.selectedOptions[0]?.dataset.icon;
+    icon.className = `pv-icon select-value-icon${name ? ` pv-icon-${name}` : ''}`;
+}
+
 function removeUnsupportedMobileParticipantViews() {
     participantViewMode.querySelectorAll('option').forEach((option) => {
         if (!MOBILE_PARTICIPANT_VIEW_MODES.includes(option.value)) option.remove();
@@ -4756,6 +4767,8 @@ function setParticipantViewMode(requestedMode, persist = true, notify = true) {
         clearTimeout(rc.participantViewRestoreTimer);
         rc.participantViewRestoreTimer = null;
     }
+    updateSelectValueIcon(participantViewMode);
+    updateSelectValueIcon(pinVideoPosition);
 
     if (!isSpeakerView && rc.isVideoPinned && rc.pinnedVideoPlayerId) {
         const pinButton = getId(`${rc.pinnedVideoPlayerId}__pin`);
@@ -10589,6 +10602,7 @@ function syncScreenCameraLayout() {
  */
 function updateScreenCameraLayoutUI(mode) {
     if (screenCamLayoutSelect) screenCamLayoutSelect.value = mode;
+    updateSelectValueIcon(screenCamLayoutSelect);
     document.querySelectorAll('#participantViewMenu [data-screen-cam-layout]').forEach((button) => {
         const active = button.dataset.screenCamLayout === mode;
         button.classList.toggle('active', active);
@@ -11884,7 +11898,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.77',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.78',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

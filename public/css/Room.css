@@ -5167,6 +5167,34 @@ img.vb-video-thumb {
     margin-top: 10px;
 }
 
+/* Layout selects: the selected option's layout icon sits inside the select, on its leading edge */
+#mySettings .settings-field > .select-with-icon {
+    position: relative;
+    margin-top: 10px;
+}
+
+#mySettings .select-with-icon > select {
+    width: 100%;
+    max-width: none;
+    margin-top: 0;
+    padding-inline-start: 44px;
+}
+
+#mySettings .select-with-icon > .select-value-icon {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 14px;
+    display: block;
+    width: 20px;
+    height: 20px;
+    color: #fff;
+    /* `#mySettings i` clears icon backgrounds; the mask needs it painted */
+    background-color: currentColor;
+    opacity: 0.9;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
 #mySettings .settings-field > .speaker-select-row,
 #mySettings .settings-field > .volume-container,
 #mySettings .settings-field > .output-volume-row {
