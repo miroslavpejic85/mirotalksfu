@@ -1423,6 +1423,7 @@ img.vb-video-thumb {
 #bottomButtons #startAudioDeviceDropdown,
 #bottomButtons #startVideoDeviceDropdown,
 #bottomButtons #participantsActionsDropdown,
+#bottomButtons #raiseHandReactionsDropdown,
 #bottomButtons #settingsExtraDropdown {
     position: static;
 }
@@ -1744,14 +1745,16 @@ img.vb-video-thumb {
     padding: 8px 6px;
 }
 
-#bottomButtons #participantsActionsMenu {
+#bottomButtons #participantsActionsMenu,
+#bottomButtons #raiseHandReactionsMenu {
     min-width: 210px !important;
     width: max-content !important;
     max-width: calc(100vw - 24px) !important;
     padding: 8px 6px;
 }
 
-#bottomButtons #participantsActionsMenu button {
+#bottomButtons #participantsActionsMenu button,
+#bottomButtons #raiseHandReactionsMenu button {
     display: flex;
     width: 100%;
     height: 35px;
@@ -1761,7 +1764,8 @@ img.vb-video-thumb {
     white-space: nowrap;
 }
 
-#bottomButtons #participantsActionsMenu button i {
+#bottomButtons #participantsActionsMenu button i,
+#bottomButtons #raiseHandReactionsMenu button i {
     width: 18px;
     text-align: center;
 }
@@ -2322,14 +2326,6 @@ img.vb-video-thumb {
 #bottomButtons #chatButton.is-active:hover,
 #bottomButtons #participantsButton.is-active:hover {
     background: color-mix(in srgb, var(--dd-color, #4678f9) 22%, transparent) !important;
-}
-
-/* Raise Hand chevron while the Room Reactions picker is open */
-#bottomButtons #raiseHandReactionsButton.is-active {
-    background: var(--room-accent-soft) !important;
-}
-#bottomButtons #raiseHandReactionsButton.is-active i {
-    color: var(--room-accent) !important;
 }
 
 /*--------------------------------------------------------------

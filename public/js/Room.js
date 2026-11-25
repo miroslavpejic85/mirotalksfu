@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.83
+ * @version 2.8.84
  *
  */
 
@@ -250,7 +250,8 @@ const openNetworkSettingsButton = getId('openNetworkSettingsButton');
 const copyRoomUrlBtn = getId('copyRoomUrlBtn');
 const participantsSplit = getId('participantsSplit');
 const raiseHandSplit = getId('raiseHandSplit');
-const raiseHandReactionsButton = getId('raiseHandReactionsButton');
+const raiseHandReactionsDropdown = getId('raiseHandReactionsDropdown');
+const raiseHandRoomReactionsBtn = getId('raiseHandRoomReactionsBtn');
 const participantsInviteBtn = getId('participantsInviteBtn');
 const participantsCopyInviteLinkBtn = getId('participantsCopyInviteLinkBtn');
 const participantsEmailInviteBtn = getId('participantsEmailInviteBtn');
@@ -841,7 +842,6 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('stopScreenButton', 'Stop screen share', bPlacement);
         setTippy('raiseHandButton', 'Raise your hand', bPlacement);
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
-        setTippy('raiseHandReactionsButton', 'Room Reactions', bPlacement);
         setTippy('chatButton', 'Toggle the chat', bPlacement);
         setTippy('participantsButton', 'Toggle participants list', bPlacement);
         setTippy('participantViewButton', 'Change participant view', bPlacement);
@@ -2922,7 +2922,7 @@ function roomIsReady() {
     BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
     // Desktop only: on mobile the chevron is too small to tap and the picker covers the screen
     const showHandReactions = isDesktopDevice && BUTTONS.main.raiseHandButton && BUTTONS.main.emojiRoomButton;
-    raiseHandReactionsButton.classList.toggle('hidden', !showHandReactions);
+    raiseHandReactionsDropdown.classList.toggle('hidden', !showHandReactions);
     raiseHandSplit.classList.toggle('no-toggle', !showHandReactions);
     show(shareMediaExtraButton);
     show(fileShareExtraButton);
@@ -5892,7 +5892,7 @@ function handleRoomEmojiPicker() {
     emojiRoomButton.onclick = () => {
         toggleEmojiPicker();
     };
-    raiseHandReactionsButton.onclick = () => {
+    raiseHandRoomReactionsBtn.onclick = () => {
         toggleEmojiPicker();
     };
     closeBtn.addEventListener('click', (e) => {
@@ -5921,9 +5921,10 @@ function handleRoomEmojiPicker() {
         emojiPickerContainer.style.display = isOpen ? 'block' : 'none';
         emojiRoomButton.classList.toggle('is-active', isOpen);
         emojiRoomButton.setAttribute('aria-pressed', String(isOpen));
-        raiseHandReactionsButton.classList.toggle('is-active', isOpen);
-        raiseHandReactionsButton.setAttribute('aria-pressed', String(isOpen));
+        raiseHandRoomReactionsBtn.classList.toggle('is-active', isOpen);
+        raiseHandRoomReactionsBtn.setAttribute('aria-pressed', String(isOpen));
         setColor(emojiRoomIcon, isOpen ? '#FFD600' : 'white');
+        setColor(raiseHandRoomReactionsBtn.querySelector('i'), isOpen ? '#FFD600' : '');
     }
 }
 
@@ -11938,7 +11939,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.83',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.84',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

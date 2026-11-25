@@ -432,15 +432,27 @@
                 <button id="lowerHandButton" class="hidden">
                     <i id="lowerHandIcon" class="fas fa-hand-paper"></i>
                 </button>
-                <button
-                    id="raiseHandReactionsButton"
-                    class="device-dropdown-toggle hidden"
-                    type="button"
-                    aria-label="Room Reactions"
-                    aria-pressed="false"
-                >
-                    <i class="fas fa-chevron-up" aria-hidden="true"></i>
-                </button>
+                <div id="raiseHandReactionsDropdown" class="dropdown dropup hidden">
+                    <button
+                        id="raiseHandReactionsButton"
+                        class="dropdown-toggle device-dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Room Reactions"
+                    >
+                        <i class="fas fa-chevron-up" aria-hidden="true"></i>
+                    </button>
+                    <div
+                        id="raiseHandReactionsMenu"
+                        class="dropdown-menu text-start"
+                        aria-labelledby="raiseHandReactionsButton"
+                    >
+                        <button id="raiseHandRoomReactionsBtn" type="button" aria-pressed="false">
+                            <i class="fas fa-face-smile" aria-hidden="true"></i> Room Reactions
+                        </button>
+                    </div>
+                </div>
             </div>
             <button id="chatButton" class="hidden" aria-label="Chat" aria-pressed="false">
                 <i class="fas fa-comments" aria-hidden="true"></i>
