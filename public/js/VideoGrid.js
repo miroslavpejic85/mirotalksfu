@@ -70,7 +70,10 @@ function resizeVideoMedia() {
 
     resetZoom();
 
-    if (layoutScreenStage(videoMediaContainer, Cameras, Width, Height, Margin)) {
+    if (
+        layoutPinnedStrip(videoMediaContainer, Cameras, Width, Height, Margin) ||
+        layoutScreenStage(videoMediaContainer, Cameras, Width, Height, Margin)
+    ) {
         if (typeof VideoDrawingOverlay !== 'undefined') VideoDrawingOverlay.resizeAll();
         return;
     }
@@ -105,6 +108,48 @@ function resizeVideoMedia() {
     if (typeof VideoDrawingOverlay !== 'undefined') {
         VideoDrawingOverlay.resizeAll();
     }
+}
+
+/**
+ * Mobile speaker view: the tiles next to the pinned speaker stay in one swipeable row
+ * (camera-on tiles first, see .pinned-strip in VideoGrid.css) instead of shrinking into a grid.
+ * @returns {boolean} true if the strip layout was applied
+ */
+function layoutPinnedStrip(container, Cameras, Width, Height, Margin) {
+    const isMobile = typeof isMobileDevice !== 'undefined' && isMobileDevice;
+    const active = isMobile && typeof rc !== 'undefined' && !!rc?.isVideoPinned && Cameras.length > 0;
+
+    if (!active) {
+        container.classList.remove('pinned-strip', 'pinned-strip-overflow');
+        return false;
+    }
+
+    // The screen stage would turn a strip tile into a full-size stage
+    container.classList.remove('screen-stage', 'screen-stage-landscape');
+    Cameras.forEach((c) => c.removeAttribute('data-screen-stage'));
+    container.classList.add('pinned-strip');
+
+    const tileRatio = customRatio ? 0.75 : ratio;
+    // Keep part of the next tile in view so it is clear the row scrolls
+    const maxTileW = Math.floor(Width / 2.4) - Margin * 2;
+    let tileH = Math.max(40, Height - Margin * 2);
+    let tileW = Math.round(tileH / tileRatio);
+    if (tileW > maxTileW) {
+        tileW = Math.max(40, maxTileW);
+        tileH = Math.round(tileW * tileRatio);
+    }
+
+    Cameras.forEach((c) => {
+        c.style.width = tileW + 'px';
+        c.style.height = tileH + 'px';
+        c.style.margin = Margin + 'px';
+    });
+
+    const rowWidth = Cameras.length * (tileW + Margin * 2);
+    container.classList.toggle('pinned-strip-overflow', rowWidth > Width + Margin * 2);
+
+    document.documentElement.style.setProperty('--vmi-wh', Math.max(32, tileW / 3) + 'px');
+    return true;
 }
 
 /**

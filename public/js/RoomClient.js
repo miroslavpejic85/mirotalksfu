@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.74
+ * @version 2.8.75
  *
  */
 
@@ -4461,7 +4461,7 @@ class RoomClient {
                 BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
                 isScreen && vb.appendChild(cl);
                 BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
-                if (BUTTONS.producerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
+                if (BUTTONS.producerVideo.pinVideoButton) this.appendPinButton(vb, pn);
 
                 vb.appendChild(st);
 
@@ -5352,7 +5352,7 @@ class RoomClient {
                 remoteIsScreen && vb.appendChild(cl);
                 BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
 
-                if (BUTTONS.consumerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
+                if (BUTTONS.consumerVideo.pinVideoButton) this.appendPinButton(vb, pn);
 
                 d.appendChild(elem);
                 d.appendChild(remoteVideoLoader);
@@ -5539,6 +5539,7 @@ class RoomClient {
                 //alert(this.pinnedVideoPlayerId + '==' + consumer_id);
                 if (this.isVideoPinned && this.pinnedVideoPlayerId == consumer_id) {
                     this.removeVideoPinMediaContainer();
+                    this.scheduleParticipantViewRestore();
                     console.log('Remove pin container due the Consumer close', {
                         consumer_id: consumer_id,
                         consumer_kind: consumer_kind,
@@ -5716,7 +5717,7 @@ class RoomClient {
         vb.appendChild(eDiv);
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
         BUTTONS.videoOff.muteAudioButton && canInteract && vb.appendChild(au);
-        if (BUTTONS.videoOff.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
+        if (BUTTONS.videoOff.pinVideoButton) this.appendPinButton(vb, pn);
         if (!remotePeer) vb.appendChild(st);
 
         d.appendChild(i);
@@ -5804,7 +5805,14 @@ class RoomClient {
 
         if (pvOff?.hasAttribute('focus-mode')) this.toggleFocusMode(pvOff.id);
         if (this.isVideoPinned && this.pinnedVideoPlayerId === peer_id + '__img') {
-            this.getId(peer_id + '__img__pin')?.click();
+            // Programmatic unpin (e.g. the camera turned back on): don't persist 'grid', re-pin for the saved view
+            this.isApplyingParticipantViewMode = true;
+            try {
+                this.getId(peer_id + '__img__pin')?.click();
+            } finally {
+                this.isApplyingParticipantViewMode = false;
+            }
+            this.scheduleParticipantViewRestore();
         }
 
         if (vb) {
@@ -7289,7 +7297,6 @@ class RoomClient {
                 setColor(btnPn, 'white');
             };
             btnPn.addEventListener('click', () => {
-                if (this.isMobileDevice) return;
                 this.sound('click');
                 // Switch pin: move the currently pinned tile back to the grid and pin this one instead
                 if (this.isVideoPinned && this.pinnedVideoPlayerId && this.pinnedVideoPlayerId !== videoPlayer.id) {
@@ -7356,8 +7363,14 @@ class RoomClient {
         return this.isVideoPinned && this.pinnedVideoPlayerId === screenElement.id;
     }
 
+    // Mobile has no per-tile pin UI, but the hidden button lets the participant view (speaker top/bottom/1:1) pin tiles
+    appendPinButton(vb, pn) {
+        if (this.isMobileDevice) pn.classList.add('hidden');
+        vb.appendChild(pn);
+    }
+
     scheduleParticipantViewRestore() {
-        if (this.isMobileDevice || this.isVideoPinned) return;
+        if (this.isVideoPinned) return;
         const mode = localStorageSettings?.participant_view;
         if (!mode?.startsWith('speaker-') && mode !== 'livestream') return;
 
@@ -7372,10 +7385,17 @@ class RoomClient {
 
     toggleVideoPin(position) {
         if (!this.isVideoPinned) return;
+        // Side-by-side layouts are too narrow on phones
+        if (this.isMobileDevice && ['speaker-left', 'speaker-right', 'vertical'].includes(position)) {
+            position = 'speaker-top';
+        }
         const pinnedPanelWidth = this.getPinnedSidePanelWidth();
         const contentWidth = 100 - pinnedPanelWidth;
         const speakerWidth = contentWidth * 0.75;
         const thumbnailWidth = contentWidth * 0.25;
+        // Phones are tall: a wider thumbnail strip keeps tiles readable next to the buttons bar
+        const speakerHeight = this.isMobileDevice ? 60 : 75;
+        const thumbnailHeight = 100 - speakerHeight;
         this.videoPinMediaContainer.style.top = 0;
         this.videoPinMediaContainer.style.left = 0;
         this.videoPinMediaContainer.style.width = contentWidth + '%';
@@ -7392,10 +7412,10 @@ class RoomClient {
         switch (position) {
             case 'speaker-bottom':
             case 'top':
-                this.videoPinMediaContainer.style.top = '25%';
+                this.videoPinMediaContainer.style.top = thumbnailHeight + '%';
                 this.videoPinMediaContainer.style.width = contentWidth + '%';
-                this.videoPinMediaContainer.style.height = '75%';
-                this.videoMediaContainer.style.height = '25%';
+                this.videoPinMediaContainer.style.height = speakerHeight + '%';
+                this.videoMediaContainer.style.height = thumbnailHeight + '%';
                 this.videoMediaContainer.classList.add('no-bar-reserve');
                 break;
             case 'speaker-left':
@@ -7406,9 +7426,9 @@ class RoomClient {
                 break;
             case 'speaker-top':
             case 'horizontal':
-                this.videoPinMediaContainer.style.height = '75%';
-                this.videoMediaContainer.style.top = '75%';
-                this.videoMediaContainer.style.height = '25%';
+                this.videoPinMediaContainer.style.height = speakerHeight + '%';
+                this.videoMediaContainer.style.top = speakerHeight + '%';
+                this.videoMediaContainer.style.height = thumbnailHeight + '%';
                 this.videoPinMediaContainer.classList.add('no-bar-reserve');
                 break;
             case 'speaker-right':
@@ -12727,7 +12747,7 @@ class RoomClient {
         if (!is_youtube) this.initShareMediaSync(video, data, playback);
         vb.appendChild(e);
         BUTTONS.videoShare.fullScreenButton && !is_audio_share && vb.appendChild(fsBtn);
-        if (BUTTONS.videoShare.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
+        if (BUTTONS.videoShare.pinVideoButton) this.appendPinButton(vb, pn);
         d.appendChild(video);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);

@@ -597,6 +597,38 @@ input[type='range'] {
 }
 
 /*--------------------------------------------------------------
+# Mobile speaker view: other tiles in one swipeable row (layoutPinnedStrip in VideoGrid.js)
+--------------------------------------------------------------*/
+
+#videoMediaContainer.pinned-strip {
+    flex-wrap: nowrap;
+    align-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+}
+
+#videoMediaContainer.pinned-strip::-webkit-scrollbar {
+    display: none;
+}
+
+/* Centered while the row fits; start-aligned once it scrolls, so the first tiles are not cut off */
+#videoMediaContainer.pinned-strip-overflow {
+    justify-content: flex-start;
+}
+
+#videoMediaContainer.pinned-strip > .Camera {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+}
+
+#videoMediaContainer.pinned-strip > .Camera[data-camera-off='true'] {
+    order: 1;
+}
+
+/*--------------------------------------------------------------
 # Mobile: screen share on stage, other tiles in a strip (layoutScreenStage in VideoGrid.js)
 --------------------------------------------------------------*/
 

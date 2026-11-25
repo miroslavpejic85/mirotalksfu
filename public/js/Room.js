@@ -9,7 +9,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.74
+ * @version 2.8.75
  *
  */
 
@@ -4702,6 +4702,15 @@ function updateParticipantViewButtonVisibility() {
     !isMobileDevice && !isBroadcastingEnabled ? show(participantViewDropdown) : hide(participantViewDropdown);
 }
 
+// Phones only get the stacked layouts: side-by-side and Livestream views don't fit a portrait screen
+const MOBILE_PARTICIPANT_VIEW_MODES = ['grid', 'speaker-top', 'speaker-bottom', 'speaker-1:1'];
+
+function removeUnsupportedMobileParticipantViews() {
+    participantViewMode.querySelectorAll('option').forEach((option) => {
+        if (!MOBILE_PARTICIPANT_VIEW_MODES.includes(option.value)) option.remove();
+    });
+}
+
 function setParticipantViewMode(requestedMode, persist = true, notify = true) {
     const supportedModes = new Set([
         'grid',
@@ -4714,6 +4723,8 @@ function setParticipantViewMode(requestedMode, persist = true, notify = true) {
     ]);
     const migratedMode = requestedMode === 'default' ? 'grid' : requestedMode;
     let mode = supportedModes.has(migratedMode) ? migratedMode : 'grid';
+
+    if (isMobileDevice && !MOBILE_PARTICIPANT_VIEW_MODES.includes(mode)) mode = 'grid';
 
     if (mode === 'livestream' && !isBroadcastingEnabled) {
         if (notify) rc.userLog('info', 'Enable broadcasting before using Livestream view', 'top-end');
@@ -5979,6 +5990,7 @@ function loadSettingsFromLocalStorage() {
     BtnVideoControls.selectedIndex = localStorageSettings.video_controls;
     BtnsBarPosition.selectedIndex = localStorageSettings.buttons_bar;
     pinVideoPosition.selectedIndex = localStorageSettings.pin_grid;
+    if (isMobileDevice) removeUnsupportedMobileParticipantViews();
     participantViewMode.value = localStorageSettings.participant_view || 'grid';
     if (isMobileDevice) screenCamLayoutSelect.querySelector('option[value="split"]')?.remove();
     ScreenCameraLayout.setSnapToCorners(isMobileDevice);
@@ -11872,7 +11884,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.74',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.8.75',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
