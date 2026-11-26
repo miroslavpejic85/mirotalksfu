@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.87
+ * @version 2.8.88
  *
  */
 
@@ -9200,7 +9200,7 @@ class RoomClient {
         const reactionButtons = reactionEmojis
             .map(
                 (e) =>
-                    `<span class="reaction-emoji-btn" onclick="rc.sendChatReaction('msg-${chatMessagesId}', '${e}')" role="button">${e}</span>`
+                    `<button type="button" class="reaction-emoji-btn" aria-label="React with ${e}" onclick="rc.sendChatReaction('msg-${chatMessagesId}', '${e}')">${e}</button>`
             )
             .join('');
 
@@ -9307,7 +9307,29 @@ class RoomClient {
         if (!picker) return;
         const isVisible = picker.style.display !== 'none';
         document.querySelectorAll('.reaction-picker').forEach((p) => (p.style.display = 'none'));
-        if (!isVisible) picker.style.display = 'flex';
+        if (isVisible) return;
+        picker.style.display = 'flex';
+        if (!picker.dataset.keys) {
+            picker.dataset.keys = '1';
+            picker.addEventListener('keydown', (e) => this.handleReactionPickerKeys(e, picker, id));
+        }
+        picker.querySelector('.reaction-emoji-btn')?.focus();
+    }
+
+    // Arrow keys move between emojis, Esc closes the picker and returns focus to the React button
+    handleReactionPickerKeys(e, picker, id) {
+        const buttons = [...picker.querySelectorAll('.reaction-emoji-btn')];
+        const index = buttons.indexOf(document.activeElement);
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            picker.style.display = 'none';
+            document.getElementById('msg-react-' + id)?.focus();
+        } else if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key) && index !== -1) {
+            e.preventDefault();
+            const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+            buttons[(index + step + buttons.length) % buttons.length].focus();
+        }
     }
 
     sendChatReaction(msgListId, emoji) {
