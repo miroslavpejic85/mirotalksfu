@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.91
+ * @version 2.8.95
  *
  */
 
@@ -508,6 +508,7 @@ class RoomClient {
         this.videoEffectsQueue = Promise.resolve();
         this.localAudioStream = null;
         this.localScreenStream = null;
+        this.localFileShare = null;
         this.whipIngestEnabled = false;
 
         // Room Password
@@ -1758,6 +1759,9 @@ class RoomClient {
             }
         }
 
+        // A finished shared file has no live video to re-send: end that share cleanly
+        if (this.localFileShare && !this.producerLabel.has(mediaType.screen)) this.stopLocalFileShare();
+
         // The chat DataProducer lived on the dead transport too
         if (!this.chatDataProducer || this.chatDataProducer.closed) {
             await this.initChatDataProducer();
@@ -2950,8 +2954,8 @@ class RoomClient {
         if (audio) audioRequest = ++this.microphoneRequest;
         try {
             if (recovery?.track || recovery?.stream) {
-                // Transport recovery: reuse the existing local stream/track (already processed
-                // by virtual background / noise suppression), never re-prompt the devices
+                // Transport recovery or a local file share: reuse the provided stream/track (already
+                // processed by virtual background / noise suppression), never re-prompt the devices
                 stream =
                     recovery.stream && recovery.stream.active ? recovery.stream : new MediaStream([recovery.track]);
             } else if (init) {
@@ -3030,7 +3034,7 @@ class RoomClient {
                 if ('contentHint' in track) {
                     show(ScreenOptimizationDiv);
 
-                    const contentHint = screenOptimization.value;
+                    const contentHint = this.localFileShare ? 'motion' : screenOptimization.value;
                     if (contentHint !== 'None') {
                         track.contentHint = contentHint;
                         console.info(`Optimized video track for screen sharing: ${contentHint}`);
@@ -3140,6 +3144,7 @@ class RoomClient {
                     if (elem.classList.contains('mirror')) {
                         elem.classList.remove('mirror');
                     }
+                    if (this.localFileShare) this.attachLocalFileShareControls(elem);
                 }
             } else {
                 this.localAudioStream = stream;
@@ -3156,6 +3161,8 @@ class RoomClient {
             }
 
             producer.on('trackended', () => {
+                // A shared file ends its tracks when it finishes; replaying swaps in new ones
+                if (type === mediaType.screen && this.localFileShare) return;
                 this.closeProducer(type, 'trackended');
             });
 
@@ -4721,6 +4728,7 @@ class RoomClient {
                 if (this.producerLabel.has(mediaType.audioTab)) {
                     this.closeProducer(mediaType.audioTab, event);
                 }
+                this.cleanupLocalFileShare();
                 break;
             default:
                 break;
@@ -4756,6 +4764,7 @@ class RoomClient {
             await this.handleProducer(producerSa.id, mediaType.audioTab, stream);
 
             producerSa.on('trackended', () => {
+                if (this.localFileShare) return;
                 this.closeProducer(mediaType.audioTab, 'trackended');
             });
 
@@ -12744,6 +12753,8 @@ class RoomClient {
 
         this.sound('open');
 
+        const canShareFile = peer_id === 'all' && this.isLocalFileShareSupported();
+
         Swal.fire({
             background: swalBackground,
             position: 'center',
@@ -12752,10 +12763,13 @@ class RoomClient {
             text: 'Paste a Video or Audio URL',
             input: 'text',
             showCancelButton: true,
+            showDenyButton: canShareFile,
             confirmButtonText: `Share`,
+            denyButtonText: 'Local file',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
+            if (result.isDenied) return this.selectLocalMediaFile();
             if (result.value) {
                 this.shareVideoUrl(result.value, peer_id, peer_name);
             }
@@ -13226,6 +13240,280 @@ class RoomClient {
             console.log('[closeVideo] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
         }
+    }
+
+    // ####################################################
+    // SHARE A VIDEO OR AUDIO FILE FROM THE DEVICE
+    // ####################################################
+
+    // The file plays in a detached <video> owned by the sharer; its captured stream is published as
+    // the sharer's screen share (video + audioTab), so nobody else needs access to the file.
+
+    isLocalFileShareSupported() {
+        const proto = window.HTMLMediaElement?.prototype;
+        return !!(BUTTONS.main.startScreenButton && proto && (proto.captureStream || proto.mozCaptureStream));
+    }
+
+    canShareLocalMediaFile() {
+        if (!this.isLocalFileShareSupported()) {
+            userLog('warning', 'Sharing a file from your device is not supported by this browser', 'top-end', 6000);
+            return false;
+        }
+        if (this._moderator.media_cant_sharing) {
+            userLog('warning', 'The moderator does not allow you to share any media', 'top-end', 6000);
+            return false;
+        }
+        if (this._moderator.screen_cant_share) {
+            userLog('warning', 'The moderator does not allow you to share the screen', 'top-end', 6000);
+            return false;
+        }
+        if (this.producerLabel.has(mediaType.screen) && !this.localFileShare) {
+            userLog('warning', 'Stop sharing your screen before sharing a file', 'top-end', 6000);
+            return false;
+        }
+        return true;
+    }
+
+    selectLocalMediaFile() {
+        if (!this.canShareLocalMediaFile()) return;
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'video/*,audio/*';
+        input.addEventListener('change', () => {
+            const file = input.files?.[0];
+            if (file) this.shareLocalMediaFile(file);
+        });
+        input.click();
+    }
+
+    async shareLocalMediaFile(file) {
+        if (!this.canShareLocalMediaFile()) return false;
+        if (file.type && !/^(video|audio)\//.test(file.type)) {
+            userLog('warning', 'Please select a video or audio file', 'top-end', 6000);
+            return false;
+        }
+
+        if (this.localFileShare) this.stopLocalFileShare();
+
+        const url = URL.createObjectURL(file);
+        const source = document.createElement('video');
+        source.playsInline = true;
+        source.preload = 'auto';
+        source.src = url;
+        const share = { file, url, source, captured: null, canvas: null, canvasTrack: null, ui: null };
+        this.localFileShare = share;
+
+        try {
+            await source.play();
+            if (this.localFileShare !== share) return false;
+
+            const captured = source.captureStream ? source.captureStream() : source.mozCaptureStream();
+            share.captured = captured;
+            // Tracks end when the file finishes and new ones appear when it plays again
+            captured.addEventListener('addtrack', ({ track }) => this.replaceLocalFileShareTrack(track));
+
+            let stream = captured;
+            if (!captured.getVideoTracks().length) {
+                if (!captured.getAudioTracks().length) throw new Error('No playable tracks');
+                // Audio-only file: viewers get an animated waveform as the video track
+                share.canvasTrack = this.createLocalFileAudioVisual(share);
+                stream = new MediaStream([share.canvasTrack, ...captured.getAudioTracks()]);
+            }
+
+            share.syncControls = () => this.updateLocalFileShareControls();
+            ['play', 'pause', 'ended', 'timeupdate', 'durationchange', 'volumechange'].forEach((event) =>
+                source.addEventListener(event, share.syncControls)
+            );
+            source.addEventListener('error', () => {
+                if (this.localFileShare !== share) return;
+                userLog('error', 'Unable to play this file', 'top-end', 6000);
+                this.stopLocalFileShare();
+            });
+
+            const producer = await this.produce(mediaType.screen, null, false, false, { stream });
+            if (this.localFileShare !== share) {
+                // Stopped while publishing
+                if (producer && this.producerLabel.get(mediaType.screen) === producer.id) {
+                    this.closeProducer(mediaType.screen, 'stopLocalFileShare');
+                }
+                return false;
+            }
+            if (!producer) {
+                this.cleanupLocalFileShare();
+                return false;
+            }
+            console.log('[shareLocalMediaFile] Sharing file', { name: file.name, type: file.type, size: file.size });
+            return true;
+        } catch (err) {
+            console.error('[shareLocalMediaFile] Unable to share file', err);
+            if (this.localFileShare === share) this.cleanupLocalFileShare();
+            userLog('error', 'This file format is not supported by your browser', 'top-end', 6000);
+            return false;
+        }
+    }
+
+    createLocalFileAudioVisual(share) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 360;
+        const ctx = canvas.getContext('2d');
+        const gif = new Image();
+        gif.src = image.audio;
+        const name = share.file.name;
+        const draw = () => {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (gif.complete && gif.naturalWidth) {
+                const scale = Math.min(canvas.width / gif.naturalWidth, (canvas.height - 60) / gif.naturalHeight);
+                const w = gif.naturalWidth * scale;
+                const h = gif.naturalHeight * scale;
+                ctx.drawImage(gif, (canvas.width - w) / 2, (canvas.height - 60 - h) / 2, w, h);
+            }
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(name.length > 50 ? name.slice(0, 47) + '...' : name, canvas.width / 2, canvas.height - 25);
+        };
+        draw();
+        share.canvas = canvas;
+        share.drawTimer = setInterval(draw, 100);
+        return canvas.captureStream(10).getVideoTracks()[0];
+    }
+
+    replaceLocalFileShareTrack(track) {
+        const share = this.localFileShare;
+        if (!share) return;
+        if (track.kind === 'video' && share.canvasTrack) return;
+        const type = track.kind === 'video' ? mediaType.screen : mediaType.audioTab;
+        const producer = this.producers.get(this.producerLabel.get(type));
+        if (!producer || producer.closed) {
+            // Tab audio dropped while the file had ended (e.g. transport recovery): publish it again
+            if (type === mediaType.audioTab && this.producerLabel.has(mediaType.screen)) {
+                this.produceScreenAudio(new MediaStream([track]));
+            }
+            return;
+        }
+        if (type === mediaType.screen && 'contentHint' in track) track.contentHint = 'motion';
+        producer
+            .replaceTrack({ track })
+            .then(() => {
+                // Local preview / recording monitor hold their own single-track stream
+                const elem = this.getId(producer.id);
+                if (elem) elem.srcObject = new MediaStream([track]);
+            })
+            .catch((err) => console.warn('[localFileShare] replaceTrack failed', err));
+    }
+
+    attachLocalFileShareControls(elem) {
+        const share = this.localFileShare;
+        const tile = elem?.parentNode;
+        if (!share || !tile) return;
+        this.removeLocalFileShareControls(share);
+
+        const bar = document.createElement('div');
+        bar.className = 'fileShareControls';
+        const play = this.createButton(elem.id + '__fileSharePlay', '');
+        const seek = document.createElement('input');
+        seek.type = 'range';
+        seek.min = 0;
+        seek.step = 0.1;
+        seek.value = 0;
+        seek.setAttribute('aria-label', 'Seek');
+        const time = this.createElement(elem.id + '__fileShareTime', 'span', 'fileShareTime notranslate');
+        const mute = this.createButton(elem.id + '__fileShareMute', '');
+        const stop = this.createButton(elem.id + '__fileShareStop', 'fas fa-stop');
+        bar.append(play, seek, time, mute, stop);
+
+        const { source } = share;
+        play.addEventListener('click', () => {
+            if (source.paused || source.ended) {
+                source.play().catch((err) => console.warn('[localFileShare] Play failed', err));
+            } else {
+                source.pause();
+            }
+        });
+        seek.addEventListener('input', () => {
+            share.seeking = true;
+            source.currentTime = Number(seek.value);
+        });
+        seek.addEventListener('change', () => (share.seeking = false));
+        mute.addEventListener('click', () => (source.muted = !source.muted));
+        stop.addEventListener('click', () => this.stopLocalFileShare());
+        // Keep tile gestures (zoom, menus, pin) away from the player controls
+        ['click', 'dblclick', 'wheel', 'pointerdown', 'mousedown', 'touchstart'].forEach((event) =>
+            bar.addEventListener(event, (e) => e.stopPropagation(), { passive: true })
+        );
+
+        tile.appendChild(bar);
+        share.ui = { bar, play, seek, time, mute };
+        this.updateLocalFileShareControls();
+
+        if (!this.isMobileDevice) {
+            this.setTippy(play.id, 'Play / Pause', 'top');
+            this.setTippy(mute.id, 'Mute local playback (viewers still hear it)', 'top');
+            this.setTippy(stop.id, 'Stop sharing file', 'top');
+        }
+    }
+
+    // Tooltips are destroyed too, or they would linger after the tile is gone
+    removeLocalFileShareControls(share) {
+        if (!share?.ui) return;
+        share.ui.bar.querySelectorAll('button').forEach((btn) => btn._tippy?.destroy());
+        share.ui.bar.remove();
+        share.ui = null;
+    }
+
+    updateLocalFileShareControls() {
+        const share = this.localFileShare;
+        const ui = share?.ui;
+        if (!ui) return;
+        const { source } = share;
+        const playing = !source.paused && !source.ended;
+        ui.play.className = playing ? 'fas fa-pause' : 'fas fa-play';
+        ui.mute.className = source.muted ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
+        const duration = Number.isFinite(source.duration) ? source.duration : 0;
+        ui.seek.max = duration;
+        if (!share.seeking) ui.seek.value = source.currentTime;
+        ui.time.textContent = `${this.formatMediaTime(source.currentTime)} / ${this.formatMediaTime(duration)}`;
+    }
+
+    formatMediaTime(seconds) {
+        const total = Math.max(0, Math.floor(seconds || 0));
+        const h = Math.floor(total / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const s = String(total % 60).padStart(2, '0');
+        return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+    }
+
+    stopLocalFileShare() {
+        if (!this.localFileShare) return;
+        if (this.producerLabel.has(mediaType.screen)) {
+            // closeProducer() releases the file share too
+            this.closeProducer(mediaType.screen, 'stopLocalFileShare');
+        } else {
+            if (this.producerLabel.has(mediaType.audioTab)) {
+                this.closeProducer(mediaType.audioTab, 'stopLocalFileShare');
+            }
+            this.cleanupLocalFileShare();
+            if (this.peer_info.peer_screen) {
+                this.setIsScreen(false);
+                this.event(_EVENTS.stopScreen);
+            }
+        }
+    }
+
+    cleanupLocalFileShare() {
+        const share = this.localFileShare;
+        if (!share) return;
+        this.localFileShare = null;
+        clearInterval(share.drawTimer);
+        this.removeLocalFileShareControls(share);
+        share.canvasTrack?.stop();
+        share.captured?.getTracks().forEach((track) => track.stop());
+        share.source.pause();
+        share.source.removeAttribute('src');
+        share.source.load();
+        URL.revokeObjectURL(share.url);
     }
 
     // ####################################################
