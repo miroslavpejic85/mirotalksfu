@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.88
+ * @version 2.8.89
  *
  */
 
@@ -467,6 +467,8 @@ class RoomClient {
         this.isParticipantsOpen = false;
         this.isChatOpenedByParticipantsBtn = false;
         this.speechInMessages = false;
+        this.speechUtterances = new Set(); // queued TTS, the mic stays silenced while not empty
+        this.speechWatchdog = null;
         this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
         this.isVideoPinned = false;
@@ -10011,10 +10013,38 @@ class RoomClient {
     }
 
     speechMessage(newMsg = true, from, msg) {
-        const speech = new SpeechSynthesisUtterance();
-        speech.text = (newMsg ? 'New' : '') + ' message from:' + from + '. The message is:' + msg;
+        this.speak((newMsg ? 'New' : '') + ' message from:' + from + '. The message is:' + msg);
+    }
+
+    // Speak text locally with the outgoing mic silenced, so speakers never leak it (e.g. private messages) into the call
+    speak(text) {
+        const speech = new SpeechSynthesisUtterance(text);
         speech.rate = 0.9;
+        speech.onend = speech.onerror = () => this.onSpeechDone(speech);
+        // Strong reference: Chrome may garbage-collect queued utterances and never fire onend
+        this.speechUtterances.add(speech);
+        this.setMicSilenced(true);
         window.speechSynthesis.speak(speech);
+    }
+
+    onSpeechDone(speech) {
+        this.speechUtterances.delete(speech);
+        if (!this.speechUtterances.size) this.setMicSilenced(false);
+    }
+
+    // Local only: peers see no mute state change, the sent track just carries silence
+    setMicSilenced(silenced) {
+        clearInterval(this.speechWatchdog);
+        if (silenced) {
+            // onend is unreliable on some browsers; don't leave the mic silenced once the queue is empty
+            this.speechWatchdog = setInterval(() => {
+                if (window.speechSynthesis.speaking || window.speechSynthesis.pending) return;
+                this.speechUtterances.clear();
+                this.setMicSilenced(false);
+            }, 1000);
+        }
+        const producer = this.producers.get(this.producerLabel.get(mediaType.audio));
+        if (producer?.track) producer.track.enabled = !silenced && !producer.paused;
     }
 
     speechElementText(elemId) {
@@ -10028,10 +10058,7 @@ class RoomClient {
         if (VideoAI.active) {
             this.streamingTask(msg);
         } else {
-            const speech = new SpeechSynthesisUtterance();
-            speech.text = msg;
-            speech.rate = 0.9;
-            window.speechSynthesis.speak(speech);
+            this.speak(msg);
         }
     }
 
