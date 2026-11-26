@@ -336,6 +336,16 @@
     background: var(--btns-bg-color);
 }
 
+/* Screen share audio volume: desktop icon + slider, kept apart from the mic volume */
+.videoMenuBar .screen-audio-volume {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    color: #fff;
+    font-size: clamp(0.9rem, 1vw, 1.05rem);
+}
+
 /* Shared audio waveform: covers the tile above the native controls bar, so those stay clickable */
 .shareAudioVisual {
     position: absolute;
@@ -455,6 +465,10 @@
 
 .navbar-dropdown-item:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-dropdown-item.hidden {
+    display: none !important;
 }
 
 .navbar-dropdown-item button,
@@ -839,6 +853,10 @@ input[type='range'] {
     .videoMenuBar input[type='range'] {
         width: clamp(40px, 20%, 80px);
     }
+    /* Nested in a wrapper: % would resolve against it, so size against the tile like the mic slider */
+    .videoMenuBar .screen-audio-volume input[type='range'] {
+        width: clamp(40px, 20cqw, 80px);
+    }
 }
 
 @container camera (min-width: 641px) {
@@ -855,6 +873,9 @@ input[type='range'] {
     }
     .videoMenuBar input[type='range'] {
         width: clamp(50px, 20%, 100px);
+    }
+    .videoMenuBar .screen-audio-volume input[type='range'] {
+        width: clamp(50px, 20cqw, 100px);
     }
 }
 

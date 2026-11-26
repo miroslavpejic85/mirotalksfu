@@ -7,7 +7,7 @@
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.90
+ * @version 2.8.91
  *
  */
 
@@ -4555,6 +4555,21 @@ class RoomClient {
 
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
                 break;
+            case mediaType.audioTab:
+                // Local monitor of the shared tab/system audio: always muted (no echo), kept for recording
+                elem = document.createElement('audio');
+                elem.setAttribute('id', id);
+                elem.setAttribute('name', 'LOCAL-AUDIO');
+                elem.controls = false;
+                elem.autoplay = true;
+                elem.muted = true;
+                elem.volume = 0;
+                this.localAudioEl.appendChild(elem);
+
+                await this.attachMediaStream(elem, stream, type, 'Producer');
+
+                console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
+                break;
             default:
                 break;
         }
@@ -4724,7 +4739,8 @@ class RoomClient {
                 track,
                 stopTracks: false, // see produce()
                 appData: {
-                    mediaType: mediaType.audio,
+                    // Kept apart from the mic so receivers can control its volume separately
+                    mediaType: mediaType.audioTab,
                 },
             };
 
@@ -4737,7 +4753,7 @@ class RoomClient {
 
             console.log('[produceScreenAudio] - PRODUCER LABEL', this.producerLabel);
 
-            await this.handleProducer(producerSa.id, mediaType.audio, stream);
+            await this.handleProducer(producerSa.id, mediaType.audioTab, stream);
 
             producerSa.on('trackended', () => {
                 this.closeProducer(mediaType.audioTab, 'trackended');
@@ -5125,7 +5141,8 @@ class RoomClient {
 
         const { id, kind, rtpParameters } = data;
         const codecOptions = {};
-        const streamId = peer_id + (type == mediaType.screen ? '-screen-sharing' : '-mic-webcam');
+        const isScreenMedia = type == mediaType.screen || type == mediaType.audioTab;
+        const streamId = peer_id + (isScreenMedia ? '-screen-sharing' : '-mic-webcam');
         const consumer = await transport.consume({
             id,
             producerId,
@@ -5280,6 +5297,17 @@ class RoomClient {
                 pv.max = 100;
                 pv.value = 100;
 
+                // Independent volume for the shared tab/system audio, shown only while it is consumed
+                const sav =
+                    remoteIsScreen && BUTTONS.consumerVideo.audioVolumeInput ? document.createElement('input') : null;
+                if (sav) {
+                    sav.id = remotePeerId + '___sVolume';
+                    sav.type = 'range';
+                    sav.min = 0;
+                    sav.max = 100;
+                    sav.value = 100;
+                }
+
                 // Build dropdown items
                 BUTTONS.consumerVideo.pinVideoButton &&
                     !this.isMobileDevice &&
@@ -5297,6 +5325,11 @@ class RoomClient {
                 remoteIsScreen && eVc.appendChild(this.createResponsiveDropdownItem(cl, 'Camera Layout'));
                 BUTTONS.consumerVideo.audioVolumeInput &&
                     eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
+                if (sav) {
+                    sav._dropdownItem = eVc.appendChild(
+                        this.createResponsiveDropdownRangeItem(sav, 'Screen audio volume', 'fa-desktop')
+                    );
+                }
                 BUTTONS.consumerVideo.presenterRoleButton &&
                     canInteract &&
                     eVc.appendChild(
@@ -5341,6 +5374,15 @@ class RoomClient {
                 vb.appendChild(eDiv);
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
                 BUTTONS.consumerVideo.muteAudioButton && canInteract && vb.appendChild(au);
+                if (sav) {
+                    // Icon tells it apart from the mic slider; the bar is row-reverse so this lands left of the mic
+                    const savIcon = document.createElement('i');
+                    savIcon.className = 'fas fa-desktop';
+                    sav._barItem = document.createElement('span');
+                    sav._barItem.className = 'screen-audio-volume navbar-secondary-action';
+                    sav._barItem.append(savIcon, sav);
+                    vb.appendChild(sav._barItem);
+                }
                 BUTTONS.consumerVideo.muteVideoButton && canInteract && vb.appendChild(cm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
@@ -5382,6 +5424,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.muteVideoButton && canInteract && this.handleCM(cm.id, remotePeerId);
                 BUTTONS.consumerVideo.muteAudioButton && canInteract && this.handleAU(au.id, remotePeerId);
                 this.handleCV(pv.id);
+                sav && this.handleScreenAudioVolume(sav);
                 this.handleGL(gl.id, remotePeerId);
                 this.handleRC(rcb.id, remotePeerId);
                 this.handleBAN(ban.id, remotePeerId);
@@ -5422,6 +5465,7 @@ class RoomClient {
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, 'Volume', 'bottom');
+                    sav && this.setTippy(sav.id, 'Screen audio volume', 'bottom');
                 }
 
                 // Use helper function to set audio volume
@@ -5440,9 +5484,14 @@ class RoomClient {
                 this.sound('joined');
                 break;
             case mediaType.audio:
+            case mediaType.audioTab:
+                const isScreenAudio = type === mediaType.audioTab;
+                // Mic and shared screen audio get distinct keys, so each keeps its own volume control
+                const audioConsumerId = remotePeerId + (isScreenAudio ? '___sVolume' : '___pVolume');
+
                 elem = document.createElement('audio');
                 elem.setAttribute('id', id);
-                elem.setAttribute('volumeBar', remotePeerId + '___pVolume');
+                elem.setAttribute('volumeBar', audioConsumerId);
                 elem.autoplay = true;
                 elem.volume = 1.0;
 
@@ -5455,14 +5504,17 @@ class RoomClient {
                 await this.attachMediaStream(elem, stream, type, 'Consumer');
 
                 // Store audio consumer and set volume
-                const audioConsumerId = remotePeerId + '___pVolume';
                 this.audioConsumers.set(audioConsumerId, id);
 
-                // Use helper function to set audio volume
-                this.setAV(id, audioConsumerId, remotePeerAudioVolume, true);
-                this.handleCV(audioConsumerId);
+                if (isScreenAudio) {
+                    this.syncScreenAudioVolume(audioConsumerId);
+                } else {
+                    // Use helper function to set audio volume
+                    this.setAV(id, audioConsumerId, remotePeerAudioVolume, true);
+                    this.handleCV(audioConsumerId);
 
-                this.setPeerAudio(remotePeerId, remotePeerAudio);
+                    this.setPeerAudio(remotePeerId, remotePeerAudio);
+                }
 
                 if (sinkId && speakerSelect.value) {
                     this.changeAudioDestination(elem, false);
@@ -5549,9 +5601,13 @@ class RoomClient {
         if (consumer_kind === 'audio') {
             const audioConsumerPlayerId = this.getMapKeyByValue(this.audioConsumers, consumer_id);
             if (audioConsumerPlayerId) {
-                const inputPv = this.getId(audioConsumerPlayerId);
-                if (inputPv) inputPv.style.display = 'none';
                 this.audioConsumers.delete(audioConsumerPlayerId);
+                if (audioConsumerPlayerId.endsWith('___sVolume')) {
+                    this.syncScreenAudioVolume(audioConsumerPlayerId);
+                } else {
+                    const inputPv = this.getId(audioConsumerPlayerId);
+                    if (inputPv) inputPv.style.display = 'none';
+                }
                 console.log('Remove audio Consumer', {
                     consumer_id: consumer_id,
                     audioConsumerPlayerId: audioConsumerPlayerId,
@@ -5966,8 +6022,10 @@ class RoomClient {
 
     async attachMediaStream(elem, stream, type, who) {
         let track;
+        const isAudio = type === mediaType.audio || type === mediaType.audioTab;
         switch (type) {
             case mediaType.audio:
+            case mediaType.audioTab:
                 track = stream.getAudioTracks()[0];
                 break;
             case mediaType.video:
@@ -5980,7 +6038,7 @@ class RoomClient {
         const consumerStream = new MediaStream();
         consumerStream.addTrack(track);
         elem.srcObject = consumerStream;
-        if (type !== mediaType.audio) {
+        if (!isAudio) {
             this.hideVideoLoaderOnPlay(elem);
         } else {
             this.syncRecordingAudio();
@@ -14082,6 +14140,26 @@ class RoomClient {
 
     handlePV(audioElementId, volumeInputId) {
         this.handleVolumeControl(audioElementId, volumeInputId, false); // Producer
+    }
+
+    // Local-only volume for a peer's shared tab/system audio (not broadcast, unlike the mic volume)
+    handleScreenAudioVolume(volumeInput) {
+        const updateVolume = () => {
+            const audioPlayer = this.getId(this.audioConsumers.get(volumeInput.id));
+            if (audioPlayer) this.setAudioVolume(audioPlayer, volumeInput.value / 100);
+        };
+        this.addVolumeEventListeners(volumeInput, updateVolume);
+        this.syncScreenAudioVolume(volumeInput.id);
+    }
+
+    // The screen video and its audio are separate consumers that can arrive or leave in any order
+    syncScreenAudioVolume(volumeInputId) {
+        const volumeInput = this.getId(volumeInputId);
+        if (!volumeInput) return;
+        const audioPlayer = this.getId(this.audioConsumers.get(volumeInputId));
+        const toggle = audioPlayer ? show : hide;
+        [volumeInput, volumeInput._barItem, volumeInput._dropdownItem].forEach((elem) => elem && toggle(elem));
+        if (audioPlayer) this.setAudioVolume(audioPlayer, volumeInput.value / 100);
     }
 
     setAV(audioElementId, volumeElementId, volumeValue, isConsumer = false) {
