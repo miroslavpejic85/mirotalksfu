@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.8.89 - Configuration File
+ * MiroTalk SFU v2.8.90 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1449,10 +1449,32 @@ module.exports = {
             site: {
                 title: process.env.SITE_TITLE || 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
                 icon: process.env.SITE_ICON_PATH || '../images/logo.svg',
-                appleTouchIcon: process.env.APPLE_TOUCH_ICON_PATH || '../images/logo.svg',
+                appleTouchIcon: process.env.APPLE_TOUCH_ICON_PATH || '../images/pwa/apple-touch-icon.png',
                 newRoomTitle: process.env.NEW_ROOM_TITLE || 'Pick name. <br />Share URL. <br />Start conference.',
                 newRoomDescription:
                     process.env.NEW_ROOM_DESC || 'Each room has its disposable URL. Just pick a name and share.',
+            },
+
+            /**
+             * Installable App (PWA)
+             * ---------------------
+             * Serves a web app manifest (/manifest.webmanifest) and a small service worker (/sw.js) so the
+             * app can be installed on desktop and phones (own window, dock / home screen icon), without app stores.
+             * The app name and description come from app.name / app.description.
+             *
+             * - enabled: Offer "Install app" in supported browsers (set PWA_ENABLED=false to disable)
+             * - shortName: Label under the home screen icon (defaults to app.name)
+             * - themeColor / backgroundColor: App window title bar and splash screen colors
+             * - icon192 / icon512 / iconMaskable: PNG icons (maskable = full-bleed, logo inside the center 80%)
+             */
+            pwa: {
+                enabled: process.env.PWA_ENABLED !== 'false',
+                shortName: process.env.PWA_SHORT_NAME || '',
+                themeColor: process.env.PWA_THEME_COLOR || '#11151b',
+                backgroundColor: process.env.PWA_BACKGROUND_COLOR || '#11151b',
+                icon192: process.env.PWA_ICON_192_PATH || '/images/pwa/icon-192.png',
+                icon512: process.env.PWA_ICON_512_PATH || '/images/pwa/icon-512.png',
+                iconMaskable: process.env.PWA_ICON_MASKABLE_PATH || '/images/pwa/icon-maskable-512.png',
             },
 
             /**

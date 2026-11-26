@@ -6,6 +6,7 @@ const packageJson = require('../../package.json');
 
 const Logger = require('./Logger');
 const { buildJsonLd, normalizeBaseUrl } = require('./Seo');
+const { isPwaEnabled } = require('./Pwa');
 
 const log = new Logger('HtmlInjector');
 
@@ -80,11 +81,18 @@ class HtmlInjector {
         );
     }
 
+    // Installable app (manifest link + service worker registration), independent of brand htmlInjection
+    replacePwaSection(html) {
+        return html.replace(/<!-- PWA_START -->([\s\S]*?)<!-- PWA_END -->/g, (_, content) =>
+            isPwaEnabled(this.config) ? content : ''
+        );
+    }
+
     // Function to load a file into the cache
     loadFileToCache(filePath) {
         try {
             const content = fs.readFileSync(filePath, 'utf-8');
-            this.cache[filePath] = this.replaceLandingSections(content); // Store the content in cache
+            this.cache[filePath] = this.replacePwaSection(this.replaceLandingSections(content)); // Store the content in cache
         } catch (err) {
             log.error(`Error reading file: ${filePath}`, err);
         }

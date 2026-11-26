@@ -62,7 +62,7 @@ dev dependencies: {
  * @link    Official Live demo: https://sfu.mirotalk.com
  * @license Open source: AGPLv3 | Commercial/closed source (official channel): https://docs.mirotalk.com/sites/sfu/
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.8.89
+ * @version 2.8.90
  *
  */
 
@@ -109,6 +109,7 @@ const RoomPassword = require('./RoomPassword');
 const RoomQuizzes = require('./RoomQuizzes');
 const HtmlInjector = require('./HtmlInjector');
 const { buildRobotsTxt, buildSitemapXml } = require('./Seo');
+const { isPwaEnabled, buildWebManifest, buildServiceWorker } = require('./Pwa');
 const log = new Logger('Server');
 
 // Pending batched quiz answer broadcasts: quiz id -> timeout
@@ -820,6 +821,16 @@ function startServer() {
     app.get('/sitemap.xml', (req, res) => {
         if (OIDC.enabled || hostCfg.protected) return res.status(404).sendFile(views.notFound);
         res.type('application/xml').send(buildSitemapXml(seoBaseUrl));
+    });
+    // Installable app (PWA): public like other static assets, browsers fetch the manifest without credentials
+    app.get('/manifest.webmanifest', (req, res) => {
+        if (!isPwaEnabled(config?.ui?.brand)) return res.status(404).sendFile(views.notFound);
+        res.setHeader('Cache-Control', 'no-cache');
+        res.type('application/manifest+json').send(JSON.stringify(buildWebManifest(config?.ui?.brand)));
+    });
+    app.get('/sw.js', (req, res) => {
+        res.setHeader('Cache-Control', 'no-cache');
+        res.type('application/javascript').send(buildServiceWorker(config?.ui?.brand));
     });
     // Use all static files from the public folder
     app.use(

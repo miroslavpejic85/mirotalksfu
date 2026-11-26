@@ -63,7 +63,7 @@ let BRAND = {
     site: {
         title: 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
         icon: '../images/logo.svg',
-        appleTouchIcon: '../images/logo.svg',
+        appleTouchIcon: '../images/pwa/apple-touch-icon.png',
         newRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
         newRoomDescription:
             "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
@@ -117,7 +117,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.8.89</strong>',
+        title: '<strong>WebRTC SFU v2.8.90</strong>',
         html: `
             <div class="about-content">
                 <p class="about-description">
